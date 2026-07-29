@@ -1,0 +1,35 @@
+/* App chrome: nav + page + footer as a column so the footer sits at the bottom
+ * on short pages. */
+.chrome {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+.main {
+  flex: 1 1 auto;
+}
+/* Programmatic focus target for the skip link — no visible outline unless the
+ * user is on the keyboard (global :focus-visible still applies). */
+.main:focus {
+  outline: none;
+}
+
+/* Skip link: first focusable element, hidden until focused. */
+.skipLink {
+  position: absolute;
+  left: var(--space-4);
+  top: -120px;
+  z-index: var(--z-toast);
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-4);
+  background: var(--primary);
+  color: var(--noir-900);
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  transition: top var(--dur-fast) var(--ease-out);
+}
+.skipLink:focus {
+  top: var(--space-2);
+}

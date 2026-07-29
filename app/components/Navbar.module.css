@@ -1,0 +1,166 @@
+/* Site chrome. Non-sticky by design (see Navbar.tsx) so it never collides with
+ * the game's own sticky TopBar. Dark-native, brass agency accent. */
+.header {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: 56px;
+  padding-block: var(--space-2);
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  font-size: 1.0625rem;
+  color: var(--primary);
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.brand:hover {
+  color: var(--primary-hover);
+}
+
+/* ---------- Desktop links + actions (hidden on small screens) ---------- */
+.links,
+.actions {
+  display: none;
+}
+
+.links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-inline: var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  box-shadow: inset 0 -2px 0 transparent;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+}
+.link:hover {
+  color: var(--text);
+  background: var(--surface-raised);
+}
+.linkActive {
+  color: var(--primary);
+  box-shadow: inset 0 -2px 0 var(--primary);
+}
+.linkActive:hover {
+  color: var(--primary);
+}
+
+.actions {
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+
+.signin {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding-inline: var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  border: 1px solid var(--border-strong);
+}
+.signin:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+/* ---------- Mobile toggle + panel ---------- */
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-left: auto;
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.toggle:hover {
+  background: var(--surface-raised);
+}
+
+.mobile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+/* Author styles beat the UA [hidden] rule — restate it so the panel truly hides. */
+.mobile[hidden] {
+  display: none;
+}
+
+.mobileLinks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.mobileLink {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding-inline: var(--space-2);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-weight: 600;
+  font-size: 1.0625rem;
+}
+.mobileLink:hover {
+  background: var(--surface-raised);
+}
+
+.mobileActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding-top: var(--space-3);
+  margin-top: var(--space-2);
+  border-top: 1px solid var(--border);
+}
+
+@media (min-width: 768px) {
+  .links,
+  .actions {
+    display: flex;
+  }
+  .toggle,
+  .mobile {
+    display: none;
+  }
+}
