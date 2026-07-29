@@ -1,0 +1,102 @@
+import { fileURLToPath } from 'node:url'
+import { afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { evaluate, toWinContext } from '@/lib/engine/winEvaluator'
+import { createSqlEngine, type SqlEngine } from '@/lib/engine/levelSession'
+import { loginLevelFixture, searchLevelFixture } from '@/lib/engine/__fixtures__/levels'
+
+const wasmPath = fileURLToPath(new URL('../../public/sql-wasm.wasm', import.meta.url))
+
+let engine: SqlEngine
+
+beforeAll(async () => {
+  engine = createSqlEngine({ locateFile: () => wasmPath })
+  await engine.init()
+})
+
+describe('SqlEngine / LevelSession — fresh DB per level', () => {
+  it('rejects openLevel before init()', async () => {
+    const cold = createSqlEngine({ locateFile: () => wasmPath })
+    await expect(cold.openLevel(loginLevelFixture())).rejects.toThrow()
+  })
+
+  it('exposes the level visibleSchema for the recon panel', async () => {
+    const session = await engine.openLevel(loginLevelFixture())
+    expect(session.visibleSchema).toEqual([{ table: 'users', columns: ['id', 'username', 'is_admin'] }])
+    session.dispose()
+  })
+
+  it('run() composes + execs: benign login returns 0 rows, injection returns the admin row', async () => {
+    const session = await engine.openLevel(loginLevelFixture())
+    const benign = session.run({ username: 'admin', password: 'wrong' })
+    expect(benign.rowCount).toBe(0)
+
+    const inject = session.run({ username: "' OR '1'='1' -- ", password: 'x' })
+    expect(inject.rowCount).toBeGreaterThanOrEqual(1)
+    expect(inject.composedSql).toContain("OR '1'='1'")
+    session.dispose()
+  })
+})
+
+describe('LevelSession — solvability + anti-trivial via the win evaluator (fixtures)', () => {
+  it('login fixture: expectedSolution wins, benign input loses', async () => {
+    const level = loginLevelFixture()
+    const session = await engine.openLevel(level)
+
+    const solvedInputs = level.expectedSolution.inputs
+    const solved = session.run(solvedInputs)
+    expect(evaluate(level.winCondition, toWinContext(solved, solvedInputs)).won).toBe(true)
+
+    const benignInputs = { username: 'nobody', password: 'nope' }
+    const benign = session.run(benignInputs)
+    expect(evaluate(level.winCondition, toWinContext(benign, benignInputs)).won).toBe(false)
+    session.dispose()
+  })
+
+  it('search fixture: UNION extraction surfaces the flag; benign search does not', async () => {
+    const level = searchLevelFixture()
+    const session = await engine.openLevel(level)
+
+    const solvedInputs = level.expectedSolution.inputs
+    const solved = session.run(solvedInputs)
+    expect(evaluate(level.winCondition, toWinContext(solved, solvedInputs)).won).toBe(true)
+
+    const benignInputs = { q: 'Widget' }
+    const benign = session.run(benignInputs)
+    expect(evaluate(level.winCondition, toWinContext(benign, benignInputs)).won).toBe(false)
+    session.dispose()
+  })
+})
+
+describe('LevelSession.reset — destructive payload does not leak into the next attempt', () => {
+  it('rebuilds a clean seeded DB after a DROP/DELETE payload', async () => {
+    const level = loginLevelFixture()
+    const session = await engine.openLevel(level)
+
+    // Stacked destructive payload wipes the users table on THIS db.
+    session.run({ username: "x'; DELETE FROM users; -- ", password: '' })
+    const afterWipe = session.run({ username: "' OR '1'='1' -- ", password: 'x' })
+    expect(afterWipe.rowCount).toBe(0) // data is gone on the tainted db
+
+    session.reset()
+
+    const winInputs = { username: "' OR '1'='1' -- ", password: 'x' }
+    const afterReset = session.run(winInputs)
+    expect(afterReset.rowCount).toBeGreaterThanOrEqual(1) // seed restored
+    expect(evaluate(level.winCondition, toWinContext(afterReset, winInputs)).won).toBe(true)
+    session.dispose()
+  })
+})
+
+describe('LevelSession.dispose — lifecycle', () => {
+  let disposedSession: Awaited<ReturnType<SqlEngine['openLevel']>>
+
+  afterEach(() => {
+    disposedSession?.dispose() // idempotent double-dispose must not throw
+  })
+
+  it('throws on run() after dispose', async () => {
+    disposedSession = await engine.openLevel(loginLevelFixture())
+    disposedSession.dispose()
+    expect(() => disposedSession.run({ username: 'a', password: 'b' })).toThrow()
+  })
+})

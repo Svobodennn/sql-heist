@@ -1,8 +1,9 @@
 import initSqlJs, { type SqlJsStatic } from 'sql.js'
 
-// STUB (P0): proves the SQLite WASM boots under static export. P1/kraken owns the
-// full engine (composer/runner/evaluator/session) and may reshape this — kept
-// deliberately small and side-effect-light so it stays cheap to replace.
+// WASM boot singleton (docs/01-architecture.md §2.1). This is the engine's only
+// entry point for compiling the SQLite WASM; SqlEngine.init() (levelSession.ts)
+// consumes it and owns the fresh-DB-per-level lifecycle on top. Kept side-effect
+// -light and lazy so the landing page ships no WASM.
 
 // The WASM ships as a static asset from `public/` (docs/01-architecture.md §2.1).
 // A fixed absolute path means the browser fetches it the same way from any route
