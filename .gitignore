@@ -11,6 +11,11 @@
 # testing / coverage
 /coverage
 
+# playwright e2e
+/test-results/
+/playwright-report/
+/playwright/.cache/
+
 # misc
 .DS_Store
 *.pem
