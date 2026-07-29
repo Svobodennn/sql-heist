@@ -1,9 +1,11 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import Link from 'next/link'
 import type { Level } from '@/lib/schema/level'
 import { compose } from '@/lib/engine/queryComposer'
 import { cx } from '../lib/cx'
+import { DEBRIEF_INTRO, getJobNarrative } from '../lib/narrative'
 import { Button } from './Button'
 import { CodeCompare } from './CodeCompare'
 import { SqlPreview } from './SqlPreview'
@@ -36,6 +38,7 @@ export function DebriefPanel({
     () => compose(level.query.template, winningInputs),
     [level.query.template, winningInputs],
   )
+  const narrative = getJobNarrative(level.id)
   const totalBeats = 4
   const [revealed, setRevealed] = useState(isReplay ? totalBeats : 1)
   const allRevealed = revealed >= totalBeats
@@ -46,6 +49,11 @@ export function DebriefPanel({
         <Stamp>Debrief — Attack → Defense</Stamp>
         <h1 className={styles.title}>{level.title}</h1>
       </header>
+
+      <p className={styles.fixerIntro}>
+        <span className={styles.fixerTag}>The Fixer</span>
+        {DEBRIEF_INTRO}
+      </p>
 
       <ol className={styles.beats} aria-live="polite">
         {revealed >= 1 && (
@@ -59,6 +67,9 @@ export function DebriefPanel({
         {revealed >= 2 && (
           <li className={styles.beat}>
             <p className={styles.beatHead}>② Why it worked</p>
+            {narrative && (
+              <p className={cx('prose', styles.transition)}>{narrative.debrief.transition}</p>
+            )}
             <p className={cx('prose', styles.beatText)}>{level.debrief.explanation}</p>
           </li>
         )}
@@ -96,12 +107,17 @@ export function DebriefPanel({
         ) : (
           <>
             <Button variant="ghost" onClick={onReplay}>
-              Run it back
+              Run it cleaner
             </Button>
-            {hasNextJob && (
+            {hasNextJob ? (
               <Button variant="success" onClick={onNext} iconRight={<IconArrowRight size={18} />}>
-                Next job
+                Next job&apos;s waiting
               </Button>
+            ) : (
+              <Link href="/jobs" className="btn btn--success">
+                <span>Walk away a ghost</span>
+                <IconArrowRight size={18} />
+              </Link>
             )}
           </>
         )}

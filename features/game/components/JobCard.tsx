@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { starsForScore } from '@/lib/engine/scoring'
 import type { JobMeta } from '../levels'
 import { cx } from '../lib/cx'
+import { STAR_TIER_LABELS, type StarTier } from '../lib/narrative'
 import { IconArrowRight, IconCheck, IconLock, IconStar } from './icons'
 import styles from './JobCard.module.css'
 
@@ -44,14 +45,18 @@ export function JobCard({
 
       {state === 'completed' ? (
         <div className={styles.foot}>
-          <span className={styles.stars} aria-label={`${stars} of 3 stars`}>
+          <span
+            className={styles.stars}
+            aria-label={`${stars} of 3 stars — ${STAR_TIER_LABELS[stars as StarTier]}`}
+          >
             {[1, 2, 3].map((n) => (
               <IconStar key={n} size={15} filled={n <= stars} />
             ))}
           </span>
+          <span className={styles.tierWord}>{STAR_TIER_LABELS[stars as StarTier]}</span>
           <span className={cx('mono', styles.score)}>{bestScore}</span>
           <span className={styles.cta}>
-            Run it back <IconArrowRight size={15} />
+            Run it cleaner <IconArrowRight size={15} />
           </span>
         </div>
       ) : state === 'active' ? (

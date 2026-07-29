@@ -8,8 +8,8 @@
   "difficulty": "hard",
   "brief": {
     "handler": "The Fixer",
-    "text": "The plans for Meridian's vault door are filed in a room that is not on any map. The press archive search still reaches it - first make the clerk read you the building's own index, then ask for the room by name.",
-    "objective": "Extract the vault blueprint payload from a registry that recon never shows you."
+    "text": "This is why we came.\n\nThe plans aren't on any list they gave us. No map, no table of contents. And no guessing — guessing's for amateurs and dead men.\n\nBut every building keeps a directory in the lobby. Lists every room, even the ones nobody mentions. This place keeps a catalog of everything it's holding. Read it. Find the room that isn't on our map. Walk out with the blueprint.",
+    "objective": "Find the unlisted room. Take the blueprint."
   },
   "debrief": {
     "explanation": "Same concatenation flaw as the search box. Because you do not know the table name, you read the database's own catalog - sqlite_master - through a UNION to reveal the hidden schema (its CREATE statements list the columns), then UNION the discovered table to pull its rows. This job returns 2 columns, so every UNION must supply exactly 2 values.",
@@ -21,7 +21,7 @@
       "language": "js",
       "code": "// SECURE - the pattern is BOUND; UNION / sqlite_master become 'text to search for'\nconst rows = db\n  .prepare(\"SELECT title, body FROM articles WHERE title LIKE ?\")\n  .all('%' + q + '%');\n// Defense in depth: least privilege - the app account should reach only the tables it needs."
     },
-    "takeaway": "A concatenation flaw can leak the whole schema. Bind, and narrow access."
+    "takeaway": "Least privilege and bound parameters: a search box should only ever search."
   },
   "target": {
     "appName": "Meridian Press",
@@ -53,7 +53,7 @@
   "hints": [
     {
       "id": "h1",
-      "text": "You cannot ask for a room you cannot name. But the building keeps its own floor plan.",
+      "text": "You've got the trick from the Vault. What you don't have is the room number. Stop guessing — the building keeps a list of its own rooms. Ask it for that list first.",
       "cost": 50
     },
     {

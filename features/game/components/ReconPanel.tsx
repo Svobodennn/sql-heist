@@ -62,7 +62,7 @@ export function ReconPanel({ level, onMoveIn }: { level: Level; onMoveIn: () => 
 
       <div className={styles.actions}>
         <Button variant="primary" onClick={onMoveIn} iconRight={<IconArrowRight size={18} />}>
-          Move in
+          Make your move
         </Button>
       </div>
     </section>

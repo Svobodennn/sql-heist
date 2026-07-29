@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from 'framer-motion'
 import type { Level } from '@/lib/schema/level'
 import type { ExecutionResult } from '@/lib/engine/sqlRunner'
 import { cx } from '../lib/cx'
+import { getJobNarrative } from '../lib/narrative'
 import { Button } from './Button'
 import { ResultGrid } from './ResultGrid'
 import { ScoreBreakdown } from './ScoreBreakdown'
@@ -39,6 +40,9 @@ export function LootBanner({
 }: LootBannerProps) {
   const reduce = useReducedMotion()
   const payloadEntries = Object.entries(winningInputs).filter(([, v]) => v.trim().length > 0)
+  const narrative = getJobNarrative(level.id)
+  const headline = narrative?.loot.headline ?? 'Loot secured'
+  const starFlavor = narrative?.loot.stars[stars]
 
   return (
     <section className={cx('container', styles.wrap)}>
@@ -50,8 +54,10 @@ export function LootBanner({
       >
         <p className={styles.secured}>
           <IconLock size={22} />
-          <span>Loot Secured</span>
+          <span>{headline}</span>
         </p>
+
+        {narrative && <p className={cx('prose', styles.fixerLine)}>{narrative.loot.fixer}</p>}
 
         <div className={styles.block}>
           <Stamp>Winning payload</Stamp>
@@ -78,9 +84,16 @@ export function LootBanner({
           stars={stars}
         />
 
+        {starFlavor && (
+          <p className={styles.starFlavor}>
+            <span className={styles.fixerTag}>The Fixer</span>
+            {starFlavor}
+          </p>
+        )}
+
         <div className={styles.actions}>
           <Button variant="primary" onClick={onDebrief} iconRight={<IconArrowRight size={18} />}>
-            Debrief
+            See how they slipped
           </Button>
         </div>
       </motion.div>

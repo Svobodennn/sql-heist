@@ -8,8 +8,8 @@
   "difficulty": "intro",
   "brief": {
     "handler": "The Fixer",
-    "text": "Meridian locks its staff portal, but the doorman only checks what you hand him. Say the right thing at the door and he waves you through. Bring me back an admin badge.",
-    "objective": "Get past the login as an administrator."
+    "text": "Meridian keeps its people behind a staff login. One box for a name, one for a password. That's the whole door.\n\nHere's the thing about that door — it trusts whatever you hand it. Writes it straight into the question it asks the back room, word for word.\n\nSo don't knock. Hand it something it wasn't built to read.",
+    "objective": "Get inside — as someone who runs the place."
   },
   "debrief": {
     "explanation": "Your input is concatenated straight into the SQL string, so a closing quote stops being data and becomes code: it ends the username string early, and the trailing -- comments out the rest of the statement, including the password check. The always-true OR '1'='1' then matches every row.",
@@ -21,7 +21,7 @@
       "language": "js",
       "code": "// SECURE - values are BOUND as parameters, never parsed as SQL\nconst row = db\n  .prepare(\"SELECT id, username, is_admin FROM users WHERE username = ? AND password = ?\")\n  .get(username, password);\n// Defense in depth: never store plaintext passwords - hash (bcrypt/argon2), compare in constant time."
     },
-    "takeaway": "Stop concatenating input into SQL - bind it."
+    "takeaway": "Stop gluing what people type onto your questions. Bind it — and \"or one equals one\" is just a bad username again."
   },
   "target": {
     "appName": "Meridian Staff Portal",
@@ -49,7 +49,7 @@
   "hints": [
     {
       "id": "h1",
-      "text": "The door reads your input as if it were part of a sentence. What if you could end that sentence early?",
+      "text": "The lock only checks what you hand it. What if what you hand it isn't just a name — what if it closes the quote and changes the question?",
       "cost": 50
     },
     {

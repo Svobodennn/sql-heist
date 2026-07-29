@@ -24,8 +24,9 @@ const mono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'SQL Heist',
-  description: 'Learn SQL injection by pulling off three jobs — entirely in your browser.',
+  title: 'SQL Heist — Learn SQL Injection by Pulling It Off',
+  description:
+    'A noir heist game that teaches SQL injection against a real in-browser SQLite engine — then teaches you to defend it. Three jobs. No setup.',
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {

@@ -2,6 +2,7 @@
 
 import { DEFAULT_SCORING, hintPenalty } from '@/lib/engine/scoring'
 import { cx } from '../lib/cx'
+import { STAR_TIER_LABELS } from '../lib/narrative'
 import { IconStar } from './icons'
 import styles from './ScoreBreakdown.module.css'
 
@@ -56,10 +57,21 @@ export function ScoreBreakdown({
         </li>
       </ol>
 
-      <div className={styles.stars} aria-label={`${stars} of 3 stars`}>
-        {[1, 2, 3].map((n) => (
-          <IconStar key={n} size={22} filled={n <= stars} className={n <= stars ? styles.starOn : styles.starOff} />
-        ))}
+      <div className={styles.rating}>
+        <div
+          className={styles.stars}
+          aria-label={`${stars} of 3 stars — ${STAR_TIER_LABELS[stars]}`}
+        >
+          {[1, 2, 3].map((n) => (
+            <IconStar
+              key={n}
+              size={22}
+              filled={n <= stars}
+              className={n <= stars ? styles.starOn : styles.starOff}
+            />
+          ))}
+        </div>
+        <span className={styles.tierLabel}>{STAR_TIER_LABELS[stars]}</span>
       </div>
     </div>
   )

@@ -23,6 +23,14 @@
   letter-spacing: -0.02em;
   color: var(--text);
 }
+.tagline {
+  font-family: var(--font-display);
+  font-size: clamp(1.125rem, 3.5vw, 1.5rem);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  max-width: 24ch;
+}
 .lede {
   color: var(--text-secondary);
   font-size: 1.0625rem;

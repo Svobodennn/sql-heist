@@ -2,16 +2,18 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Hint } from '@/lib/schema/level'
-import { DEFAULT_SCORING } from '@/lib/engine/scoring'
+import { DEFAULT_SCORING, canOpenHint } from '@/lib/engine/scoring'
 import { cx } from '../lib/cx'
+import { HINT_TIER_LABELS } from '../lib/narrative'
 import { Button } from './Button'
 import { Stamp } from './Stamp'
 import { IconBulb } from './icons'
 import styles from './HintTray.module.css'
 
-// Handler intel (docs/04-frontend-ux.md §5.5). 3 slots, unlocked strictly in
-// order, each behind a cost-confirm modal. The soft trigger (after N fails)
-// gently SUGGESTS tier 1 but never auto-opens — the player keeps agency.
+// Call the Fixer (docs/04-frontend-ux.md §5.5, docs/06-narrative.md §7). 3 tiers
+// — A word / The method / The play — unlocked strictly in order via the frozen
+// engine's canOpenHint, each behind a cost-confirm modal. The soft trigger (after
+// N fails) gently SUGGESTS tier 1 but never auto-opens — the player keeps agency.
 export function HintTray({
   hints,
   openedTiers,
@@ -55,7 +57,7 @@ export function HintTray({
     <div className={cx('panel', styles.tray)}>
       <div className={styles.head}>
         <Stamp>
-          <IconBulb size={13} /> Handler intel
+          <IconBulb size={13} /> Call the Fixer
         </Stamp>
         <span className={styles.count}>
           {openedTiers}/{hints.length} unlocked
@@ -64,15 +66,16 @@ export function HintTray({
 
       {suggest && openedTiers === 0 && (
         <p className={styles.suggest} aria-live="polite">
-          Stuck? The handler has intel — it&apos;ll cost you, but it&apos;s there.
+          Stuck? The Fixer&apos;s on the line.
         </p>
       )}
 
       <ol className={styles.slots}>
         {hints.map((hint, i) => {
           const tier = i + 1
+          const tierLabel = HINT_TIER_LABELS[i] ?? `Tier ${tier}`
           const isOpen = tier <= openedTiers
-          const isNext = tier === openedTiers + 1
+          const isNext = canOpenHint(openedTiers, tier, hints.length)
           return (
             <li
               key={hint.id}
@@ -83,14 +86,14 @@ export function HintTray({
               )}
             >
               <div className={styles.slotHead}>
-                <span className={styles.tier}>Tier {tier}</span>
+                <span className={styles.tier}>{tierLabel}</span>
                 <span className={styles.cost}>−{cost(tier)}</span>
               </div>
               {isOpen ? (
                 <p className={cx(styles.hintText, tier === 3 && 'mono')}>{hint.text}</p>
               ) : isNext ? (
                 <Button variant="ghost" onClick={() => openModal(tier)}>
-                  Unlock intel
+                  Call the Fixer
                 </Button>
               ) : (
                 <p className={styles.lockedText}>Unlock the previous tier first.</p>
@@ -110,18 +113,18 @@ export function HintTray({
             onClick={(e) => e.stopPropagation()}
           >
             <h2 id="hint-modal-title" className={styles.modalTitle}>
-              Unlock Tier {pendingTier} intel?
+              Costs you {cost(pendingTier)}. Still want it?
             </h2>
             <p className={styles.modalBody}>
-              This costs <strong>{cost(pendingTier)}</strong> points from your final score. It
-              cannot be undone for this run.
+              <strong>{HINT_TIER_LABELS[pendingTier - 1] ?? `Tier ${pendingTier}`}</strong> comes
+              straight off your final score for this job — no refunds this run.
             </p>
             <div className={styles.modalActions}>
               <Button variant="ghost" onClick={closeModal}>
-                Cancel
+                Not yet
               </Button>
               <Button autoFocus variant="primary" onClick={confirm}>
-                Unlock (−{cost(pendingTier)})
+                Make the call (−{cost(pendingTier)})
               </Button>
             </div>
           </div>

@@ -55,7 +55,7 @@ export function JobPlayer({ level, nextJobId }: { level: Level; nextJobId?: stri
     if (evaluation.won) {
       push('success', 'Loot secured — moving to the score.')
     } else if (result.error) {
-      push('error', 'SQLite rejected that statement — read the error readout.')
+      push('error', 'The mark choked on that — read what it spat back.')
     } else {
       push('info', evaluation.reason)
     }

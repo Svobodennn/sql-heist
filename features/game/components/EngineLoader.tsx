@@ -33,12 +33,12 @@ export function EngineLoader({
     return (
       <div className={styles.error} role="alert">
         <IconAlert size={20} />
-        <p className={styles.errorTitle}>The gear jammed</p>
+        <p className={styles.errorTitle}>Line&apos;s dead.</p>
         <p className={styles.errorBody}>
-          The SQLite engine failed to load. Check your connection and try again.
+          Couldn&apos;t reach the job — check your connection and try the line again.
         </p>
         <Button variant="ghost" onClick={onRetry}>
-          Retry
+          Try the line again
         </Button>
       </div>
     )

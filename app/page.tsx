@@ -10,14 +10,15 @@ export default function HomePage() {
   return (
     <main className={styles.hero}>
       <div className={styles.inner}>
-        <Stamp>Browser-based · sandboxed · no install</Stamp>
+        <Stamp>MERIDIAN HOLDINGS · after hours</Stamp>
 
         <h1 className={styles.title}>SQL Heist</h1>
 
+        <p className={styles.tagline}>Every system has a door somebody forgot to lock.</p>
+
         <p className={styles.lede}>
-          Learn SQL injection the way attackers actually think — by pulling off three jobs against a
-          real SQLite database running entirely in your browser. See the exact query your input
-          builds, break it, then learn the fix.
+          You find them. A real database is on the other side — no simulation, no safety net but the
+          sandbox. Pull three jobs. Then learn how they should&apos;ve stopped you.
         </p>
 
         <pre className={styles.teaser} aria-hidden="true">
@@ -30,7 +31,7 @@ export default function HomePage() {
         </pre>
 
         <Link href="/jobs" className="btn btn--primary">
-          <span>Start the heist</span>
+          <span>Take the first job</span>
           <IconArrowRight size={18} />
         </Link>
       </div>

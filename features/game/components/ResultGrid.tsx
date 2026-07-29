@@ -95,7 +95,7 @@ export function ResultGrid({ result, winCondition, loading, className }: ResultG
         </p>
         <pre className={cx('mono', styles.errorMsg)}>{result.error}</pre>
         <p className={styles.errorGloss}>
-          SQLite rejected the statement. Read it closely — the error is a clue, not a wall.
+          The mark choked on that. Read what it spat back — it&apos;s telling you where you slipped.
         </p>
       </div>
     )
@@ -104,7 +104,9 @@ export function ResultGrid({ result, winCondition, loading, className }: ResultG
   if (result.rowCount === 0) {
     return (
       <div className={cx(styles.wrap, styles.empty, className)}>
-        <p className={styles.emptyText}>Query ran — 0 rows. Nothing here yet; adjust the payload.</p>
+        <p className={styles.emptyText}>
+          Nothing worth taking. It ran clean — you&apos;re reaching into the wrong drawer.
+        </p>
       </div>
     )
   }

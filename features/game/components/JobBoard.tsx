@@ -1,6 +1,8 @@
 'use client'
 
 import type { JobMeta } from '../levels'
+import { cx } from '../lib/cx'
+import { rankForScore } from '../lib/narrative'
 import { isUnlocked, useProgress } from '../lib/useProgress'
 import { Stamp } from './Stamp'
 import { JobCard, type JobCardState } from './JobCard'
@@ -27,8 +29,8 @@ export function JobBoard({ jobs }: { jobs: JobMeta[] }) {
     <section className={styles.wrap}>
       <header className={styles.header}>
         <div>
-          <Stamp>The Crew — Jobs</Stamp>
-          <h1 className={styles.title}>Three jobs. One crew.</h1>
+          <Stamp>THE BOARD</Stamp>
+          <h1 className={styles.title}>Three jobs. One score.</h1>
           <p className={styles.sub}>
             Pull each one off with a SQL injection, then learn the fix. Progress stays on this
             device.
@@ -36,8 +38,9 @@ export function JobBoard({ jobs }: { jobs: JobMeta[] }) {
         </div>
         {totalScore > 0 && (
           <div className={styles.rank}>
-            <Stamp>Total score</Stamp>
-            <p className="mono">{totalScore}</p>
+            <Stamp>Rank</Stamp>
+            <p className={styles.rankName}>{rankForScore(totalScore).name}</p>
+            <span className={cx('mono', styles.rankScore)}>Σ {totalScore}</span>
           </div>
         )}
       </header>

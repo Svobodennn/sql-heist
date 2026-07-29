@@ -8,8 +8,8 @@
   "difficulty": "medium",
   "brief": {
     "handler": "The Fixer",
-    "text": "Behind Meridian's storefront sits a ledger the customers never see. The search desk talks to the same clerk who can read it - phrase your question so the clerk pulls from the wrong book and hands you the account.",
-    "objective": "Surface the offshore account reference hidden behind the product search."
+    "text": "You're inside. Good. Now the money.\n\nTheir storefront's got a search box — type a product, it hands you back rows. Looks harmless. But that search and the account ledgers drink from the same well.\n\nAsk it for a product and it answers polite. Ask it for a product and the ledger in the same breath — and it hands you both. Long as you match the shape it expects. Pull me the vault.",
+    "objective": "Pull a hidden account off a shopping page."
   },
   "debrief": {
     "explanation": "The search term is concatenated into the LIKE pattern, so a closing quote ends the search string and lets you append UNION SELECT. UNION staples a second query - from an unrelated table - onto the same result set; the only requirement is a matching column count, which is why the recon step is discovering that the query returns 3 columns.",
@@ -21,7 +21,7 @@
       "language": "js",
       "code": "// SECURE - the % wildcards are added in code; q is BOUND as a literal value\nconst rows = db\n  .prepare(\"SELECT id, name, price FROM products WHERE name LIKE ?\")\n  .all('%' + q + '%');"
     },
-    "takeaway": "Even in search, input is data - bind it, don't concatenate."
+    "takeaway": "If the query's shape can't change, no second question rides in on it."
   },
   "target": {
     "appName": "Meridian Market",
@@ -59,7 +59,7 @@
   "hints": [
     {
       "id": "h1",
-      "text": "The results grid has a fixed number of columns. Anything you bolt on has to match it.",
+      "text": "The search only knows how to hand back one shape of answer. Learn that shape first — how wide it is — then a second question can ride out on the same tray.",
       "cost": 50
     },
     {
