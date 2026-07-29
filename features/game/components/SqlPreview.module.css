@@ -1,0 +1,69 @@
+.wire {
+  margin: 0;
+  padding: var(--space-4);
+  background: var(--noir-900);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-x: auto;
+  color: var(--text-secondary); /* static SQL = neutral ink (§5.2 layer 1) */
+  min-height: 5.5rem;
+}
+
+/* Syntax layer (cosmetic) */
+.keyword {
+  color: var(--sql-keyword);
+}
+.string {
+  color: var(--sql-string);
+}
+.number {
+  color: var(--sql-number);
+}
+.punct {
+  color: var(--text-secondary);
+}
+.plain {
+  color: var(--text);
+}
+/* Commented-out tail: dim + italic + strike — the password check, visibly inert. */
+.comment {
+  color: var(--sql-comment);
+  font-style: italic;
+  opacity: 0.6;
+  text-decoration: line-through;
+}
+
+/* INJECTED = crimson band + brackets + dashed underline (§5.2 layer 2). */
+.injected {
+  position: relative;
+  background: var(--injected-bg);
+  border-radius: 3px;
+  padding: 1px 1px;
+  text-decoration: underline dashed var(--crimson-500);
+  text-underline-offset: 3px;
+}
+/* Double-coding: structural tokens the player typed keep their syntax color,
+   while their plain text / operators read crimson — "my data became code". */
+.injected .plain,
+.injected .punct {
+  color: var(--injected-fg);
+}
+.brk {
+  color: var(--crimson-400);
+  opacity: 0.85;
+  padding-inline: 1px;
+}
+
+/* Empty injection point: a blinking crimson caret. */
+.injectedEmpty {
+  display: inline-block;
+  width: 0;
+  height: 1.1em;
+  vertical-align: text-bottom;
+  border-left: 2px solid var(--crimson-500);
+  animation: caret-blink 1.1s step-end infinite;
+}

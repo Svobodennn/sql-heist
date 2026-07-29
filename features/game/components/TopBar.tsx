@@ -1,0 +1,72 @@
+'use client'
+
+import type { Phase } from '../lib/phaseMachine'
+import { cx } from '../lib/cx'
+import { IconMute, IconStar, IconTimer, IconVolume } from './icons'
+import { PhaseStepper } from './PhaseStepper'
+import styles from './TopBar.module.css'
+
+function formatTime(sec: number): string {
+  const m = Math.floor(sec / 60)
+  const s = sec % 60
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+}
+
+interface TopBarProps {
+  jobTitle: string
+  phase: Phase
+  elapsedSec: number
+  score: number | null
+  muted: boolean
+  onToggleMute: () => void
+}
+
+// Sticky global chrome (docs/04-frontend-ux.md §2). Timer only "runs" (brass)
+// during exploit — reading the brief is never penalized.
+export function TopBar({ jobTitle, phase, elapsedSec, score, muted, onToggleMute }: TopBarProps) {
+  const timerActive = phase === 'exploit'
+
+  return (
+    <header className={styles.bar}>
+      <div className={cx('container', styles.inner)}>
+        <div className={styles.left}>
+          <span className={styles.logo}>SQL HEIST</span>
+          <span className={styles.crumb}>
+            {jobTitle} · <span className={styles.phaseName}>{phase}</span>
+          </span>
+        </div>
+
+        <div className={styles.center}>
+          <PhaseStepper phase={phase} />
+        </div>
+
+        <div className={styles.right}>
+          <span
+            className={cx(styles.timer, timerActive && styles.timerActive)}
+            aria-label={`Time on target ${formatTime(elapsedSec)}`}
+          >
+            <IconTimer size={15} />
+            <span className="mono">{formatTime(elapsedSec)}</span>
+          </span>
+
+          {score != null && (
+            <span className={styles.score} aria-label={`Score ${score}`}>
+              <IconStar size={15} filled />
+              <span className="mono">{score}</span>
+            </span>
+          )}
+
+          <button
+            type="button"
+            className={styles.iconBtn}
+            aria-pressed={muted}
+            aria-label={muted ? 'Unmute' : 'Mute'}
+            onClick={onToggleMute}
+          >
+            {muted ? <IconMute size={18} /> : <IconVolume size={18} />}
+          </button>
+        </div>
+      </div>
+    </header>
+  )
+}

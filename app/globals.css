@@ -1,0 +1,335 @@
+/*
+ * SQL Heist — noir design system (docs/04-frontend-ux.md §1).
+ * Token architecture is 3-layer: primitive -> semantic -> component.
+ * Components reference the SEMANTIC/COMPONENT layer only, never primitives.
+ * MVP is dark-only by design (noir mood; "less, but better").
+ */
+
+/* ---------- Primitive layer: surfaces, ink, accents (§1.3) ---------- */
+:root {
+  --noir-900: #0b0d10; /* app background (not pure black) */
+  --noir-850: #121519; /* surface (panels, code) */
+  --noir-800: #1a1e24; /* raised (cards, inputs, modals) */
+  --noir-700: #2a2f37; /* border / hairline */
+  --noir-600: #3a414b; /* strong border, divider */
+
+  --ink-50: #eceef2; /* primary text */
+  --ink-300: #9aa3ad; /* secondary text */
+  --ink-500: #7b8492; /* muted / meta */
+
+  --brass-400: #e2a950; /* AGENCY primary */
+  --brass-500: #c7912f; /* hover / active */
+
+  --crimson-400: #f06565; /* ATTACK text */
+  --crimson-500: #d6453f; /* solid */
+  --crimson-950: #2a1113; /* tint bg */
+
+  --jade-400: #4fb783; /* DEFENSE text */
+  --jade-500: #2e9c68; /* solid */
+  --jade-950: #0e211a; /* tint bg */
+
+  --steel-400: #86b3d6; /* INFO / keyword */
+  --steel-950: #0e1b24; /* tint bg */
+
+  --sql-string: #c9b072;
+  --sql-number: #c99a6b;
+
+  /* ---------- Semantic layer (components use these) ---------- */
+  --bg: var(--noir-900);
+  --surface: var(--noir-850);
+  --surface-raised: var(--noir-800);
+  --border: var(--noir-700);
+  --border-strong: var(--noir-600);
+
+  --text: var(--ink-50);
+  --text-secondary: var(--ink-300);
+  --text-muted: var(--ink-500);
+
+  --primary: var(--brass-400);
+  --primary-hover: var(--brass-500);
+  --focus-ring: var(--brass-400);
+
+  --danger: var(--crimson-400);
+  --danger-solid: var(--crimson-500);
+  --danger-subtle: var(--crimson-950);
+
+  --success: var(--jade-400);
+  --success-solid: var(--jade-500);
+  --success-subtle: var(--jade-950);
+
+  --info: var(--steel-400);
+  --info-subtle: var(--steel-950);
+
+  /* ---------- Component tokens (derive from semantic) ---------- */
+  --btn-primary-bg: var(--primary);
+  --btn-primary-fg: var(--noir-900); /* dark ink on amber = AA */
+  --injected-fg: var(--crimson-400);
+  --injected-bg: var(--crimson-950);
+  --sql-keyword: var(--steel-400);
+  --sql-comment: var(--ink-500);
+
+  /* ---------- Spacing (4px grid), radius, z, timing ---------- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+
+  --radius-sm: 6px; /* input / button */
+  --radius-md: 10px; /* card / panel */
+  --radius-lg: 16px; /* modal / loot */
+  --radius-full: 9999px;
+
+  --z-dropdown: 10;
+  --z-modal: 50;
+  --z-toast: 100;
+
+  --dur-fast: 130ms;
+  --dur-normal: 240ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --shell-max: 1200px;
+
+  /* font stacks wired from next/font (app/layout.tsx) */
+  --font-display: var(--font-display-src), 'Space Grotesk', system-ui, sans-serif;
+  --font-sans: var(--font-sans-src), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono-src), ui-monospace, 'SFMono-Regular', monospace;
+}
+
+/* ---------- Base ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 16px; /* body-font min on mobile */
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+}
+a:hover {
+  color: var(--primary-hover);
+}
+
+button {
+  font: inherit;
+}
+
+/* Keyboard-only focus ring (brass outline, not box-shadow — a11y §11). */
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ---------- Monospace code surface — LIGATURES OFF (§1.4) ---------- */
+/* `--`, `!=`, `<>` must stay visible as literal characters (pedagogy). */
+.mono,
+code,
+pre,
+input.mono,
+textarea.mono {
+  font-family: var(--font-mono);
+  font-variant-ligatures: none;
+  font-feature-settings:
+    'liga' 0,
+    'calt' 0,
+    'dlig' 0;
+}
+
+/* ---------- Shared primitives ---------- */
+.container {
+  width: 100%;
+  max-width: var(--shell-max);
+  margin-inline: auto;
+  padding-inline: var(--space-4);
+}
+@media (min-width: 640px) {
+  .container {
+    padding-inline: var(--space-6);
+  }
+}
+
+.prose {
+  max-width: 65ch;
+  color: var(--text-secondary);
+  line-height: 1.625;
+}
+
+.stamp {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.hairline {
+  border: 1px solid var(--border);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Buttons — brass primary, ghost, danger; all states (§10). 44px touch target. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+.btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.btn--primary {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-fg);
+}
+.btn--primary:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+.btn--ghost {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+.btn--ghost:hover:not(:disabled) {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.btn--success {
+  background: var(--success-solid);
+  color: var(--noir-900);
+}
+.btn--success:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+.btn--danger {
+  background: transparent;
+  color: var(--danger);
+  border-color: var(--danger-solid);
+}
+.btn--full {
+  width: 100%;
+}
+
+.kbd {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 1px 6px;
+  border: 1px solid var(--border-strong);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  color: var(--text-secondary);
+  background: var(--surface);
+}
+
+/* Panel: elevation via border + inner highlight (noir — shadows read poorly). */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* ---------- Keyframes (GPU-only: opacity/transform) ---------- */
+@keyframes shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+@keyframes caret-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+@keyframes loot-pulse {
+  0% {
+    background-color: color-mix(in srgb, var(--success) 8%, transparent);
+  }
+  50% {
+    background-color: color-mix(in srgb, var(--success) 26%, transparent);
+  }
+  100% {
+    background-color: color-mix(in srgb, var(--success) 8%, transparent);
+  }
+}
+
+/* ---------- Reduced motion: kill entrances, keep state ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

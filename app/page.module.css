@@ -1,0 +1,68 @@
+.hero {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-4);
+  background:
+    radial-gradient(120% 80% at 50% -10%, color-mix(in srgb, var(--primary) 8%, transparent), transparent 60%),
+    var(--bg);
+}
+.inner {
+  width: 100%;
+  max-width: 42rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  text-align: center;
+  align-items: center;
+}
+.title {
+  font-size: clamp(2.75rem, 9vw, 4.5rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+.lede {
+  color: var(--text-secondary);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  max-width: 55ch;
+}
+
+.teaser {
+  width: 100%;
+  margin: 0;
+  padding: var(--space-4);
+  overflow-x: auto;
+  background: var(--noir-850);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-variant-ligatures: none;
+  font-feature-settings:
+    'liga' 0,
+    'calt' 0;
+  font-size: 0.875rem;
+  text-align: left;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.kw {
+  color: var(--sql-keyword);
+}
+.inj {
+  background: var(--injected-bg);
+  color: var(--injected-fg);
+  border-radius: 3px;
+  padding: 1px 3px;
+  text-decoration: underline dashed var(--crimson-500);
+  text-underline-offset: 3px;
+}
+.dim {
+  color: var(--sql-comment);
+  font-style: italic;
+  opacity: 0.6;
+  text-decoration: line-through;
+}

@@ -1,19 +1,13 @@
-import Link from 'next/link'
+import { getJobMetas } from '@/features/game/levels'
+import { JobBoard } from '@/features/game/components/JobBoard'
 
-// Job board (Server Component, static). Real cards + lock/progress state land in P3.
-const JOB_IDS = ['front-door', 'vault', 'blueprint'] as const
-
+// Job board (Server Component, static). Loads validated level metadata and hands
+// it to the client <JobBoard>, which derives completed/active/locked from
+// localStorage progress.
 export default function JobBoardPage() {
   return (
-    <main>
-      <h1>Job Board</h1>
-      <ul>
-        {JOB_IDS.map((id) => (
-          <li key={id}>
-            <Link href={`/jobs/${id}`}>{id}</Link>
-          </li>
-        ))}
-      </ul>
-    </main>
+    <div className="container">
+      <JobBoard jobs={getJobMetas()} />
+    </div>
   )
 }

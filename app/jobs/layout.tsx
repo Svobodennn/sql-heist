@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 
-// Heist-arc frame (Server Component). Crew/handler framing + progress bar land in P3.
+// Heist-arc frame (Server Component). Kept width-agnostic: the Job Board manages
+// its own container, and <JobPlayer> renders a full-bleed sticky shell.
 export default function JobsLayout({ children }: { children: ReactNode }) {
-  return <section>{children}</section>
+  return <>{children}</>
 }

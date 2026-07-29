@@ -1,0 +1,110 @@
+.tray {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.head :global(.stamp) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.count {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+.suggest {
+  font-size: 0.8125rem;
+  color: var(--info);
+  border-left: 2px solid var(--info);
+  padding-left: var(--space-3);
+}
+
+.slots {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.slot {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.slotOpen {
+  border-color: color-mix(in srgb, var(--info) 40%, var(--border));
+  background: var(--info-subtle);
+}
+.slotLocked {
+  opacity: 0.55;
+}
+.slotHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.tier {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.cost {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--primary);
+}
+.hintText {
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--text);
+}
+.lockedText {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+/* Confirm modal (z-modal) */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  background: rgba(0, 0, 0, 0.6);
+}
+.modal {
+  width: min(28rem, 100%);
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.modalTitle {
+  font-size: 1.125rem;
+}
+.modalBody {
+  color: var(--text-secondary);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+}
