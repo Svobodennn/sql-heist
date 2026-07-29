@@ -68,9 +68,13 @@ export function computeJobScore(
   )
 }
 
+// Star cutoffs (game-design §6.3): 3★ at >=three, 2★ at >=two, else 1★
+// (completion). Named so the curve lives in one place instead of magic literals.
+export const STAR_THRESHOLDS = { three: 900, two: 600 } as const
+
 export function starsForScore(score: number): 1 | 2 | 3 {
-  if (score >= 900) return 3
-  if (score >= 600) return 2
+  if (score >= STAR_THRESHOLDS.three) return 3
+  if (score >= STAR_THRESHOLDS.two) return 2
   return 1
 }
 

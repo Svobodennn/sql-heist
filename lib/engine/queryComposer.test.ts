@@ -92,3 +92,69 @@ describe('queryComposer.compose — segment exposure (composer-correct, not rege
     expect(result.unresolved).toEqual([])
   })
 })
+
+describe('queryComposer.compose — WS3 input filter (WAF)', () => {
+  it('absent filter => zero behavior change (no rejected/filterMessage keys)', () => {
+    const result = compose("q='{{input:q}}'", { q: "' OR 1=1" })
+    expect(result.sql).toBe("q='' OR 1=1'") // raw injection unchanged
+    expect('rejected' in result).toBe(false)
+    expect('filterMessage' in result).toBe(false)
+  })
+
+  type FilterCase = {
+    name: string
+    inputs: Record<string, string>
+    filter: Parameters<typeof compose>[2]
+    expect: (r: ReturnType<typeof compose>) => void
+  }
+
+  const cases: FilterCase[] = [
+    {
+      name: 'strip: removes the blocked keyword before substitution',
+      inputs: { q: 'UNION SELECT a,b --' },
+      filter: { blocklist: ['UNION'], mode: 'strip' },
+      expect: (r) => {
+        expect(r.sql).toBe("q=' SELECT a,b --'") // UNION excised, leaving a leading space
+        expect(r.rejected).toBe(false)
+      },
+    },
+    {
+      name: 'strip: is case-insensitive (UnIoN also stripped)',
+      inputs: { q: "' UnIoN SELECT x --" },
+      filter: { blocklist: ['union'], mode: 'strip' },
+      expect: (r) => {
+        expect(r.sql.toLowerCase()).not.toContain('union')
+        expect(r.rejected).toBe(false)
+      },
+    },
+    {
+      name: 'reject: blocks the run and carries the custom message',
+      inputs: { q: "' UNION SELECT x --" },
+      filter: { blocklist: ['UNION'], mode: 'reject', message: 'WAF blocked UNION' },
+      expect: (r) => {
+        expect(r.rejected).toBe(true)
+        expect(r.filterMessage).toBe('WAF blocked UNION')
+      },
+    },
+    {
+      name: 'reject: benign input passes through (not rejected)',
+      inputs: { q: 'Widget' },
+      filter: { blocklist: ['UNION'], mode: 'reject' },
+      expect: (r) => {
+        expect(r.rejected).toBe(false)
+        expect(r.sql).toBe("q='Widget'")
+      },
+    },
+  ]
+
+  it.each(cases)('$name', ({ inputs, filter, expect: assert }) => {
+    assert(compose("q='{{input:q}}'", inputs, filter))
+  })
+
+  it('does not mutate the original inputs (strip clones)', () => {
+    const inputs = Object.freeze({ q: "' UNION SELECT 1 --" })
+    const result = compose("q='{{input:q}}'", inputs, { blocklist: ['UNION'], mode: 'strip' })
+    expect(inputs.q).toBe("' UNION SELECT 1 --") // original untouched
+    expect(result.inputs).toEqual({ q: "' UNION SELECT 1 --" }) // echo = what player typed
+  })
+})

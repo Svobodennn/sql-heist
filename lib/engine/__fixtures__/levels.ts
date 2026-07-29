@@ -100,3 +100,25 @@ export function searchLevelFixture(): Level {
     },
   }
 }
+
+// WS3 shape: stacked-queries. The payload appends a SECOND row-producing
+// statement; the win requires >=2 result sets. NOTE sql.js only emits a result
+// set for a row-PRODUCING statement, so the leading statement must return a row
+// too — the payload matches a real username (admin) and comments out the rest,
+// then stacks a SELECT. A single valid login yields 1 set and loses. NOT real content.
+export function stackedQueriesLevelFixture(): Level {
+  const base = loginLevelFixture()
+  return {
+    ...base,
+    id: 'fixture-stacked',
+    order: 3,
+    job: 'Fixture: Stacked',
+    title: 'Fixture Stacked Queries',
+    technique: 'stacked-queries',
+    difficulty: 'hard',
+    winCondition: { type: 'stacked-queries', minResultSets: 2 },
+    expectedSolution: {
+      inputs: { username: "admin'; SELECT 'PWNED' AS pwn; -- ", password: 'x' },
+    },
+  }
+}

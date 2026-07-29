@@ -226,14 +226,22 @@ WHERE username = '' OR '1'='1' --' AND password = '…'
 
 // (a) Ham enjeksiyon — SAF, yan etkisiz. Oyunun zafiyeti burada YAŞAR.
 interface QueryComposer {
-  compose(template: string, inputs: Readonly<Record<string, string>>): ComposedQuery
+  // inputFilter (WS3, opsiyonel): ham input'a substitution ÖNCESİ uygulanan WAF;
+  // yoksa davranış aynen korunur.
+  compose(template: string, inputs: Readonly<Record<string, string>>, inputFilter?: InputFilter): ComposedQuery
 }
 interface ComposedQuery {
   sql: string                              // ham enjeksiyondan sonraki GERÇEK SQL
   template: string                         // orijinal template (debrief diff için)
   inputs: Readonly<Record<string, string>> // kullanılan girdiler (debrief/telemetri)
   unresolved: string[]                     // değer verilmeyen token adları (validasyon)
+  segments: ComposedSegment[]              // static/injected ayrımı (<SqlPreview> için)
+  rejected?: boolean                       // WS3 WAF reddetti (yalnızca filter çalışınca)
+  filterMessage?: string                   // WS3 WAF mesajı (rejected ise)
 }
+type ComposedSegment =
+  | { kind: 'static'; text: string }
+  | { kind: 'injected'; field: string; value: string }
 
 // (b) Yürütme — DB üzerinde yan etkili; SQLite hatasını yakalar.
 interface SqlRunner {
@@ -246,6 +254,7 @@ interface ExecutionResult {
   rowCount: number
   error?: string                              // SQLite mesajı (error-based teknikleri için)
   durationMs: number                          // time-based teknikleri (v1) + UX
+  resultSetCount?: number                     // WS3 stacked-queries: satır üreten sonuç kümesi sayısı
 }
 type SqlCell = string | number | Uint8Array | null
 
@@ -353,7 +362,9 @@ interface Level {
 type TechniqueId =
   | 'auth-bypass' | 'comment-injection' | 'column-count'
   | 'union-extraction' | 'schema-discovery'
-  // v1: 'error-based' | 'blind-boolean' | 'blind-time' | 'stacked' | 'second-order' | 'waf-bypass'
+  // WS3 post-MVP (frozen):
+  | 'error-based' | 'blind-boolean' | 'blind-timing' | 'stacked-queries' | 'waf-bypass'
+  // v1 (rezerve): 'second-order'
 
 type SurfaceKind = 'login-form' | 'search-box' | 'url-param' | 'profile-lookup'
 
@@ -408,6 +419,7 @@ interface WinContext {              // exec sonucundan türetilir (§3.2)
   rows: ReadonlyArray<ReadonlyArray<SqlCell>>
   rowCount: number
   error?: string
+  resultSetCount?: number           // WS3 stacked-queries için (exec'ten taşınır)
 }
 interface WinEvaluation {
   won: boolean
@@ -436,8 +448,17 @@ type WinCondition =
   // (3) row-match — HEDEF SATIR: sonuç, beklenen satır(lar)ı içeriyor mu?
   | { type: 'row-match'; expect: Array<Record<string, SqlCell>>; mode: 'subset' | 'exact'; reason?: string }
 
-  // v1 (rezerve): error-based / blind için — ve bileşik operatörler
-  // | { type: 'error-contains'; substring: string }
+  // ---- WS3 post-MVP (frozen; SAF + deterministik + golden-testable) ----
+  // (4) error-based — HEDEFLİ HATA kazançtır (anti-trivial guard'dan ÖNCE, yalnız bu tip)
+  | { type: 'error-based'; errorContains?: string; reason?: string }
+  // (5) blind-boolean — boolean oracle TRUE dalı (satır döndü)
+  | { type: 'blind-boolean'; reason?: string }
+  // (6) blind-timing — timing oracle SEMBOLİK modellenir (wall-clock YOK; satır = TRUE)
+  | { type: 'blind-timing'; reason?: string }
+  // (7) stacked-queries — çok-ifadeli yan etki gözlemlenebilir (>=minResultSets sonuç kümesi)
+  | { type: 'stacked-queries'; minResultSets?: number; reason?: string }
+
+  // v1 (rezerve): bileşik operatörler
   // | { type: 'all-of' | 'any-of'; conditions: WinCondition[] }
 ```
 

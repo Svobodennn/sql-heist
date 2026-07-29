@@ -45,13 +45,31 @@ class LevelSessionImpl implements LevelSession {
     if (this.disposed) throw new Error('LevelSession has been disposed')
   }
 
+  // Copy-on-read: the recon panel may sort/mutate its own copy, so hand out a
+  // fresh array (and fresh columns arrays) each read — the level stays canonical.
   get visibleSchema(): VisibleTable[] {
-    return this.level.database.visibleSchema
+    return this.level.database.visibleSchema.map((t) => ({
+      table: t.table,
+      columns: [...t.columns],
+    }))
   }
 
   run(inputs: Record<string, string>): ExecutionResult {
     this.assertLive()
-    const composed = compose(this.level.query.template, inputs)
+    const composed = compose(this.level.query.template, inputs, this.level.query.inputFilter)
+    if (composed.rejected) {
+      // WS3 WAF: the filter blocked the payload — never touch the DB. Surface it
+      // as an error result so the win evaluator's anti-trivial guard loses it.
+      return {
+        composedSql: composed.sql,
+        columns: [],
+        rows: [],
+        rowCount: 0,
+        resultSetCount: 0,
+        error: composed.filterMessage ?? 'Input rejected by the filter.',
+        durationMs: 0,
+      }
+    }
     return exec(this.db, composed.sql)
   }
 
