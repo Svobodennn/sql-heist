@@ -28,6 +28,10 @@ export function BriefPanel({
         <Stamp className={styles.difficulty}>Difficulty · {level.difficulty}</Stamp>
       </div>
 
+      <h1 className={styles.screenHeading} data-phase-heading tabIndex={-1}>
+        {level.title}
+      </h1>
+
       <div className={styles.grid}>
         <HandlerCard handler={level.brief.handler} text={level.brief.text} />
 

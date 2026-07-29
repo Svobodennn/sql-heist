@@ -15,6 +15,17 @@
   color: var(--text-secondary);
 }
 
+/* Per-screen <h1> + focus target for phase changes. tabIndex=-1 (not tab-order),
+   so suppressing the ring on programmatic focus is fine (WCAG 2.4.7 n/a). */
+.screenHeading {
+  font-size: 1.875rem;
+  color: var(--text);
+  margin-top: calc(-1 * var(--space-2));
+}
+.screenHeading:focus {
+  outline: none;
+}
+
 .grid {
   display: grid;
   grid-template-columns: 1fr;

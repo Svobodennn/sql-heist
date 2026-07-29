@@ -1,8 +1,9 @@
 'use client'
 
+import Link from 'next/link'
 import type { Phase } from '../lib/phaseMachine'
 import { cx } from '../lib/cx'
-import { IconMute, IconStar, IconTimer, IconVolume } from './icons'
+import { IconArrowLeft, IconBoard, IconMute, IconStar, IconTimer, IconVolume } from './icons'
 import { PhaseStepper } from './PhaseStepper'
 import styles from './TopBar.module.css'
 
@@ -19,17 +20,45 @@ interface TopBarProps {
   score: number | null
   muted: boolean
   onToggleMute: () => void
+  canBack: boolean
+  backLabel: string | null
+  onBack: () => void
 }
 
 // Sticky global chrome (docs/04-frontend-ux.md §2). Timer only "runs" (brass)
-// during exploit — reading the brief is never penalized.
-export function TopBar({ jobTitle, phase, elapsedSec, score, muted, onToggleMute }: TopBarProps) {
+// during exploit — reading the brief is never penalized. Hosts the two WS1
+// controls: leave to The Board (full exit) and step back a phase (session-
+// preserving — no engine reset).
+export function TopBar({
+  jobTitle,
+  phase,
+  elapsedSec,
+  score,
+  muted,
+  onToggleMute,
+  canBack,
+  backLabel,
+  onBack,
+}: TopBarProps) {
   const timerActive = phase === 'exploit'
 
   return (
     <header className={styles.bar}>
       <div className={cx('container', styles.inner)}>
         <div className={styles.left}>
+          <Link href="/jobs" className={styles.iconBtn} aria-label="Leave the job — back to The Board">
+            <IconBoard size={18} />
+          </Link>
+          {canBack && backLabel && (
+            <button
+              type="button"
+              className={styles.iconBtn}
+              aria-label={`Back to ${backLabel}`}
+              onClick={onBack}
+            >
+              <IconArrowLeft size={18} />
+            </button>
+          )}
           <span className={styles.logo}>SQL HEIST</span>
           <span className={styles.crumb}>
             {jobTitle} · <span className={styles.phaseName}>{phase}</span>

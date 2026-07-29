@@ -8,11 +8,16 @@
 .card:hover {
   transform: translateY(-2px);
 }
+/* Locked = muted title + dashed edge, NOT card-wide opacity (0.6 dropped the
+   title/body below the 4.5:1 AA floor). Other text already uses AA-safe tokens. */
 .locked {
-  opacity: 0.6;
+  border-style: dashed;
 }
 .locked:hover {
   transform: none;
+}
+.locked .title {
+  color: var(--text-secondary);
 }
 .activeCard {
   border-color: color-mix(in srgb, var(--primary) 45%, var(--border));

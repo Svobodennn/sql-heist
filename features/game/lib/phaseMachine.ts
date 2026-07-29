@@ -8,16 +8,27 @@ import { canOpenHint, computeJobScore, starsForScore } from '@/lib/engine/scorin
 // engine LevelSession lives imperatively in a useRef inside <JobPlayer>; this
 // reducer only tracks player-facing state and the win transition.
 //
-//   brief -> recon -> exploit  (won) -> loot -> debrief
-//                       ^__________ reset attempt ___________|
+//   brief <-> recon <-> exploit  (won) -> loot -> debrief
+//                         ^__________ reset attempt ___________|
+//
+// BACK walks exploit -> recon -> brief WITHOUT touching the engine session (no
+// reset()/openLevel()), so the DB, inputs, timer and hint spend all survive a
+// detour — only an explicit RESTART ("run it back") wipes the slate.
 
 export type Phase = 'brief' | 'recon' | 'exploit' | 'loot' | 'debrief'
+
+export const PHASE_LABELS: Record<Phase, string> = {
+  brief: 'Brief',
+  recon: 'Recon',
+  exploit: 'Exploit',
+  loot: 'Loot',
+  debrief: 'Debrief',
+}
 
 export interface GameState {
   phase: Phase
   inputs: Record<string, string>
   lastResult: ExecutionResult | null
-  lastEval: WinEvaluation | null
   failedRuns: number
   openedHintTiers: number
   elapsedSec: number
@@ -29,6 +40,7 @@ export interface GameState {
 
 export type GameAction =
   | { type: 'ADVANCE' } // brief -> recon -> exploit (linear forward)
+  | { type: 'BACK' } // exploit -> recon -> brief (session-preserving)
   | { type: 'SET_INPUT'; field: string; value: string }
   | { type: 'RUN'; result: ExecutionResult; evaluation: WinEvaluation }
   | { type: 'RESET_ATTEMPT' }
@@ -44,7 +56,6 @@ export function makeInitialState(level: Level): GameState {
     phase: 'brief',
     inputs,
     lastResult: null,
-    lastEval: null,
     failedRuns: 0,
     openedHintTiers: 0,
     elapsedSec: 0,
@@ -60,6 +71,21 @@ const NEXT_PHASE: Partial<Record<Phase, Phase>> = {
   recon: 'exploit',
 }
 
+// Backwards edges mirror the forward path — only the pre-win exploration phases
+// are revisitable (loot/debrief are post-win terminals).
+const PREV_PHASE: Partial<Record<Phase, Phase>> = {
+  recon: 'brief',
+  exploit: 'recon',
+}
+
+export function previousPhase(phase: Phase): Phase | null {
+  return PREV_PHASE[phase] ?? null
+}
+
+export function canGoBack(phase: Phase): boolean {
+  return PREV_PHASE[phase] != null
+}
+
 function emptyInputs(inputs: Record<string, string>): Record<string, string> {
   const cleared: Record<string, string> = {}
   for (const key of Object.keys(inputs)) cleared[key] = ''
@@ -73,13 +99,20 @@ export function reducer(state: GameState, action: GameAction): GameState {
       return next ? { ...state, phase: next } : state
     }
 
+    case 'BACK': {
+      // Phase-only change: no engine call, no counter reset. Revisiting Recon
+      // from Exploit and returning leaves every attempt/hint/second intact.
+      const prev = PREV_PHASE[state.phase]
+      return prev ? { ...state, phase: prev } : state
+    }
+
     case 'SET_INPUT': {
       if (state.phase !== 'exploit') return state
       return { ...state, inputs: { ...state.inputs, [action.field]: action.value } }
     }
 
     case 'RUN': {
-      const base = { ...state, lastResult: action.result, lastEval: action.evaluation }
+      const base = { ...state, lastResult: action.result }
       if (!action.evaluation.won) {
         return { ...base, failedRuns: state.failedRuns + 1 }
       }
@@ -101,7 +134,7 @@ export function reducer(state: GameState, action: GameAction): GameState {
     case 'RESET_ATTEMPT': {
       // DB reset is the session's job; here we only clear the surface. Cumulative
       // counters (attempts, hints, time) survive — they drive the eventual score.
-      return { ...state, inputs: emptyInputs(state.inputs), lastResult: null, lastEval: null }
+      return { ...state, inputs: emptyInputs(state.inputs), lastResult: null }
     }
 
     case 'RESTART': {
@@ -112,7 +145,6 @@ export function reducer(state: GameState, action: GameAction): GameState {
         phase: 'exploit',
         inputs: emptyInputs(state.inputs),
         lastResult: null,
-        lastEval: null,
         failedRuns: 0,
         openedHintTiers: 0,
         elapsedSec: 0,

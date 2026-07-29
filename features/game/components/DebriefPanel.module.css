@@ -12,6 +12,10 @@
 .title {
   font-size: 1.875rem;
 }
+/* Programmatic focus target on phase change (tabIndex=-1, not tab-order). */
+.title:focus {
+  outline: none;
+}
 
 .fixerIntro {
   display: flex;

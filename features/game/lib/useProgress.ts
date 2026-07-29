@@ -30,8 +30,8 @@ export function recordWin(jobId: string, score: number): void {
   try {
     const map = readProgress()
     const best = Math.max(map[jobId]?.bestScore ?? 0, score)
-    map[jobId] = { completed: true, bestScore: best }
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(map))
+    const next: ProgressMap = { ...map, [jobId]: { completed: true, bestScore: best } }
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
   } catch {
     // Storage disabled/full — progress simply won't persist; play continues.
   }
