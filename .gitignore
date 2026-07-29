@@ -35,3 +35,6 @@ pnpm-debug.log*
 # typescript (auto-generated)
 *.tsbuildinfo
 next-env.d.ts
+
+# claude code (worktrees, cache, session state)
+.claude/
