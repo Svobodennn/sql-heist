@@ -24,6 +24,10 @@
   letter-spacing: 0.02em;
   color: var(--success);
 }
+/* Programmatic focus target on phase change (tabIndex=-1, not tab-order). */
+.secured:focus {
+  outline: none;
+}
 @media (max-width: 639px) {
   .secured {
     font-size: 1.5rem;

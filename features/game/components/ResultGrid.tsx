@@ -117,6 +117,9 @@ export function ResultGrid({ result, winCondition, loading, className }: ResultG
     <div className={cx(styles.wrap, className)}>
       <div className={styles.scroll}>
         <table className={cx('mono', styles.table)}>
+          <caption className="sr-only">
+            Query result — {result.rowCount} row{result.rowCount === 1 ? '' : 's'} returned
+          </caption>
           <thead>
             <tr>
               {result.columns.map((col) => (

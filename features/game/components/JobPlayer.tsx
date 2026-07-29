@@ -1,12 +1,19 @@
 'use client'
 
-import { useCallback, useEffect, useReducer, useState } from 'react'
-import { AnimatePresence, motion, useReducedMotion, type Transition } from 'framer-motion'
+import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import {
+  AnimatePresence,
+  LazyMotion,
+  domAnimation,
+  m,
+  useReducedMotion,
+  type Transition,
+} from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import type { Level } from '@/lib/schema/level'
 import { evaluate, toWinContext } from '@/lib/engine/winEvaluator'
 import { shouldSuggestHint } from '@/lib/engine/scoring'
-import { makeInitialState, reducer, type Phase } from '../lib/phaseMachine'
+import { PHASE_LABELS, makeInitialState, previousPhase, reducer } from '../lib/phaseMachine'
 import { useEngine } from '../lib/useEngine'
 import { useToasts } from '../lib/useToasts'
 import { recordWin } from '../lib/useProgress'
@@ -23,6 +30,11 @@ import styles from './JobPlayer.module.css'
 // machine (useReducer), owns the imperative engine session (useEngine → useRef,
 // disposed on unmount), and swaps phase content under a persistent shell. All
 // engine calls — compose, exec, evaluate — go through the FROZEN lib/engine.
+//
+// LazyMotion (features={domAnimation}) keeps only the DOM-animation feature set
+// in the /jobs/[jobId] bundle: every animated child uses `m.*` instead of the
+// full `motion.*`, saving ~18-32kB gz off this route (web-perf P1). No `layout`
+// animations are used, so domAnimation (not domMax) is sufficient.
 export function JobPlayer({ level, nextJobId }: { level: Level; nextJobId?: string }) {
   const router = useRouter()
   const reduce = useReducedMotion()
@@ -31,6 +43,7 @@ export function JobPlayer({ level, nextJobId }: { level: Level; nextJobId?: stri
   const { toasts, push, dismiss } = useToasts()
   const [muted, setMuted] = useState(false)
   const [replays, setReplays] = useState(0)
+  const mainRef = useRef<HTMLElement>(null)
 
   // Timer only ticks during exploit (§2 — reading the brief is free).
   useEffect(() => {
@@ -45,6 +58,22 @@ export function JobPlayer({ level, nextJobId }: { level: Level; nextJobId?: stri
       recordWin(level.id, state.score)
     }
   }, [state.phase, state.score, level.id])
+
+  // A11y: AnimatePresence mode="wait" tears the old screen out and mounts the new
+  // one AFTER exit, which silently drops keyboard focus. On every phase swap we
+  // move focus to the new screen's heading ([data-phase-heading], tabIndex=-1) so
+  // keyboard + screen-reader users land at the top of the new content. Fired from
+  // onExitComplete (so it never steals focus on the initial mount) and retried
+  // across a few frames because the new node commits just after that callback.
+  const focusPhaseHeading = useCallback(() => {
+    let tries = 0
+    const attempt = () => {
+      const heading = mainRef.current?.querySelector<HTMLElement>('[data-phase-heading]')
+      if (heading) heading.focus()
+      else if (tries++ < 3) requestAnimationFrame(attempt)
+    }
+    requestAnimationFrame(attempt)
+  }, [])
 
   const handleRun = useCallback(() => {
     const result = run(state.inputs)
@@ -72,94 +101,119 @@ export function JobPlayer({ level, nextJobId }: { level: Level; nextJobId?: stri
     dispatch({ type: 'RESTART' })
   }, [reset])
 
+  // Session-preserving step back (WS1): phase-only, so the engine LevelSession,
+  // the composed DB, inputs, timer and hint spend all survive the detour. NOT a
+  // replay — no reset()/openLevel() here (only handleReplay does that).
+  const handleBack = useCallback(() => {
+    dispatch({ type: 'BACK' })
+  }, [])
+
   const handleNext = useCallback(() => {
     if (nextJobId) router.push(`/jobs/${nextJobId}`)
   }, [nextJobId, router])
 
   const suggestHint = shouldSuggestHint(state.failedRuns, state.elapsedSec)
+  const backTarget = previousPhase(state.phase)
 
   const transition: Transition = reduce
     ? { duration: 0 }
     : { duration: 0.22, ease: [0.16, 1, 0.3, 1] }
 
   return (
-    <div className={styles.shell}>
-      <TopBar
-        jobTitle={level.job}
-        phase={state.phase}
-        elapsedSec={state.elapsedSec}
-        score={state.score}
-        muted={muted}
-        onToggleMute={() => setMuted((m) => !m)}
-      />
+    <LazyMotion features={domAnimation}>
+      <div className={styles.shell}>
+        <TopBar
+          jobTitle={level.job}
+          phase={state.phase}
+          elapsedSec={state.elapsedSec}
+          score={state.score}
+          muted={muted}
+          onToggleMute={() => setMuted((prev) => !prev)}
+          canBack={backTarget != null}
+          backLabel={backTarget ? PHASE_LABELS[backTarget] : null}
+          onBack={handleBack}
+        />
 
-      <main className={styles.main}>
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={state.phase as Phase}
-            initial={{ opacity: 0, x: reduce ? 0 : -6 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: reduce ? 0 : 6 }}
-            transition={transition}
-          >
-            {state.phase === 'brief' && (
-              <BriefPanel
-                level={level}
-                engineStatus={status}
-                onTakeJob={() => dispatch({ type: 'ADVANCE' })}
-              />
-            )}
+        {/* Persistent, terse live region: announces the stage on every swap. The
+            swapping region below is NOT a live region (it would re-read the whole
+            screen and nest the SqlPreview/beat live regions — §11 double-speak). */}
+        <p className="sr-only" role="status" aria-live="polite">
+          {`${PHASE_LABELS[state.phase]} stage`}
+        </p>
 
-            {state.phase === 'recon' && (
-              <ReconPanel level={level} onMoveIn={() => dispatch({ type: 'ADVANCE' })} />
-            )}
+        <main className={styles.main} ref={mainRef}>
+          <AnimatePresence mode="wait" onExitComplete={focusPhaseHeading}>
+            <m.div
+              key={state.phase}
+              role="region"
+              aria-label={`${PHASE_LABELS[state.phase]} stage`}
+              initial={{ opacity: 0, x: reduce ? 0 : -6 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: reduce ? 0 : 6 }}
+              transition={transition}
+            >
+              {state.phase === 'brief' && (
+                <BriefPanel
+                  level={level}
+                  engineStatus={status}
+                  onTakeJob={() => dispatch({ type: 'ADVANCE' })}
+                />
+              )}
 
-            {state.phase === 'exploit' && (
-              <ExploitConsole
-                level={level}
-                inputs={state.inputs}
-                lastResult={state.lastResult}
-                engineStatus={status}
-                hints={level.hints}
-                openedTiers={state.openedHintTiers}
-                suggestHint={suggestHint}
-                onChange={(field, value) => dispatch({ type: 'SET_INPUT', field, value })}
-                onRun={handleRun}
-                onReset={handleReset}
-                onRetry={retry}
-                onOpenHint={(tier) => dispatch({ type: 'OPEN_HINT', tier })}
-              />
-            )}
+              {state.phase === 'recon' && (
+                <ReconPanel level={level} onMoveIn={() => dispatch({ type: 'ADVANCE' })} />
+              )}
 
-            {state.phase === 'loot' && state.winningInputs && state.score != null && state.stars && (
-              <LootBanner
-                level={level}
-                winningInputs={state.winningInputs}
-                result={state.lastResult}
-                failedRuns={state.failedRuns}
-                openedTiers={state.openedHintTiers}
-                elapsedSec={state.elapsedSec}
-                score={state.score}
-                stars={state.stars}
-                onDebrief={() => dispatch({ type: 'GOTO', phase: 'debrief' })}
-              />
-            )}
+              {state.phase === 'exploit' && (
+                <ExploitConsole
+                  level={level}
+                  inputs={state.inputs}
+                  lastResult={state.lastResult}
+                  engineStatus={status}
+                  hints={level.hints}
+                  openedTiers={state.openedHintTiers}
+                  suggestHint={suggestHint}
+                  onChange={(field, value) => dispatch({ type: 'SET_INPUT', field, value })}
+                  onRun={handleRun}
+                  onReset={handleReset}
+                  onRetry={retry}
+                  onOpenHint={(tier) => dispatch({ type: 'OPEN_HINT', tier })}
+                />
+              )}
 
-            {state.phase === 'debrief' && state.winningInputs && (
-              <DebriefPanel
-                level={level}
-                winningInputs={state.winningInputs}
-                isReplay={replays > 0}
-                hasNextJob={Boolean(nextJobId)}
-                onNext={handleNext}
-                onReplay={handleReplay}
-              />
-            )}
-          </motion.div>
-        </AnimatePresence>
-      </main>
+              {state.phase === 'loot' &&
+                state.winningInputs &&
+                state.score != null &&
+                state.stars && (
+                  <LootBanner
+                    level={level}
+                    winningInputs={state.winningInputs}
+                    result={state.lastResult}
+                    failedRuns={state.failedRuns}
+                    openedTiers={state.openedHintTiers}
+                    elapsedSec={state.elapsedSec}
+                    score={state.score}
+                    stars={state.stars}
+                    onDebrief={() => dispatch({ type: 'GOTO', phase: 'debrief' })}
+                  />
+                )}
 
-      <ToastStack toasts={toasts} onDismiss={dismiss} />
-    </div>
+              {state.phase === 'debrief' && state.winningInputs && (
+                <DebriefPanel
+                  level={level}
+                  winningInputs={state.winningInputs}
+                  isReplay={replays > 0}
+                  hasNextJob={Boolean(nextJobId)}
+                  onNext={handleNext}
+                  onReplay={handleReplay}
+                />
+              )}
+            </m.div>
+          </AnimatePresence>
+        </main>
+
+        <ToastStack toasts={toasts} onDismiss={dismiss} />
+      </div>
+    </LazyMotion>
   )
 }

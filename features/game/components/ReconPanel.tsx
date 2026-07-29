@@ -23,6 +23,13 @@ export function ReconPanel({ level, onMoveIn }: { level: Level; onMoveIn: () => 
 
   return (
     <section className={cx('container', styles.wrap)}>
+      <div className={styles.head}>
+        <Stamp>Recon</Stamp>
+        <h1 className={styles.screenHeading} data-phase-heading tabIndex={-1}>
+          Case the joint — {level.target.appName}
+        </h1>
+      </div>
+
       <div className={styles.grid}>
         <BrowserChrome url={url}>
           <MimicSurface

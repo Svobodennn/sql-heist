@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import type { Hint } from '@/lib/schema/level'
 import { DEFAULT_SCORING, canOpenHint } from '@/lib/engine/scoring'
 import { cx } from '../lib/cx'
@@ -27,6 +27,7 @@ export function HintTray({
 }) {
   const [pendingTier, setPendingTier] = useState<number | null>(null)
   const restoreRef = useRef<HTMLElement | null>(null)
+  const dialogRef = useRef<HTMLDivElement | null>(null)
 
   const cost = (tier: number) => hints[tier - 1]?.cost ?? DEFAULT_SCORING.hintCosts[tier - 1] ?? 0
 
@@ -46,12 +47,32 @@ export function HintTray({
 
   useEffect(() => {
     if (pendingTier == null) return
-    const onKey = (e: KeyboardEvent) => {
+    const onKey = (e: globalThis.KeyboardEvent) => {
       if (e.key === 'Escape') closeModal()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [pendingTier, closeModal])
+
+  // Focus trap: keep Tab / Shift+Tab cycling inside the modal (aria-modal alone
+  // does not stop focus escaping to the page behind it — WCAG 2.4.3 / 2.1.2).
+  const trapTab = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key !== 'Tab') return
+    const focusables = dialogRef.current?.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+    )
+    if (!focusables || focusables.length === 0) return
+    const first = focusables[0]
+    const last = focusables[focusables.length - 1]
+    const active = document.activeElement
+    if (e.shiftKey && active === first) {
+      e.preventDefault()
+      last.focus()
+    } else if (!e.shiftKey && active === last) {
+      e.preventDefault()
+      first.focus()
+    }
+  }
 
   return (
     <div className={cx('panel', styles.tray)}>
@@ -106,11 +127,13 @@ export function HintTray({
       {pendingTier != null && (
         <div className={styles.overlay} onClick={closeModal}>
           <div
+            ref={dialogRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby="hint-modal-title"
             className={cx('panel', styles.modal)}
             onClick={(e) => e.stopPropagation()}
+            onKeyDown={trapTab}
           >
             <h2 id="hint-modal-title" className={styles.modalTitle}>
               Costs you {cost(pendingTier)}. Still want it?

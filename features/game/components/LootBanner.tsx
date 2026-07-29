@@ -1,6 +1,6 @@
 'use client'
 
-import { motion, useReducedMotion } from 'framer-motion'
+import { m, useReducedMotion } from 'framer-motion'
 import type { Level } from '@/lib/schema/level'
 import type { ExecutionResult } from '@/lib/engine/sqlRunner'
 import { cx } from '../lib/cx'
@@ -46,16 +46,16 @@ export function LootBanner({
 
   return (
     <section className={cx('container', styles.wrap)}>
-      <motion.div
+      <m.div
         className={cx('panel', styles.card)}
         initial={{ opacity: 0, scale: reduce ? 1 : 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
       >
-        <p className={styles.secured}>
+        <h1 className={styles.secured} data-phase-heading tabIndex={-1}>
           <IconLock size={22} />
           <span>{headline}</span>
-        </p>
+        </h1>
 
         {narrative && <p className={cx('prose', styles.fixerLine)}>{narrative.loot.fixer}</p>}
 
@@ -96,7 +96,7 @@ export function LootBanner({
             See how they slipped
           </Button>
         </div>
-      </motion.div>
+      </m.div>
     </section>
   )
 }

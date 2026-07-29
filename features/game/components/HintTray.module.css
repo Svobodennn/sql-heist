@@ -46,8 +46,10 @@
   border-color: color-mix(in srgb, var(--info) 40%, var(--border));
   background: var(--info-subtle);
 }
+/* Locked = dashed hairline, NOT reduced opacity (0.55 dropped the tier/cost
+   text below the 4.5:1 AA floor). Text keeps its AA-safe token colors. */
 .slotLocked {
-  opacity: 0.55;
+  border-style: dashed;
 }
 .slotHead {
   display: flex;

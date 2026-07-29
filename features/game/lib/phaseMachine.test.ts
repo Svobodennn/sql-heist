@@ -3,7 +3,13 @@ import type { ExecutionResult } from '@/lib/engine/sqlRunner'
 import type { WinEvaluation } from '@/lib/engine/winEvaluator'
 import { parseLevel } from '@/lib/schema/level'
 import frontDoorJson from '@/content/levels/front-door.json'
-import { makeInitialState, reducer, type GameState } from './phaseMachine'
+import {
+  canGoBack,
+  makeInitialState,
+  previousPhase,
+  reducer,
+  type GameState,
+} from './phaseMachine'
 
 const level = parseLevel(frontDoorJson)
 const result = (over: Partial<ExecutionResult> = {}): ExecutionResult => ({
@@ -35,6 +41,48 @@ describe('phaseMachine.reducer', () => {
     expect(s.phase).toBe('exploit')
     s = reducer(s, { type: 'ADVANCE' })
     expect(s.phase).toBe('exploit') // no forward from exploit via ADVANCE
+  })
+
+  it('BACK walks exploit -> recon -> brief and then stops', () => {
+    let s: GameState = { ...init(), phase: 'exploit' }
+    s = reducer(s, { type: 'BACK' })
+    expect(s.phase).toBe('recon')
+    s = reducer(s, { type: 'BACK' })
+    expect(s.phase).toBe('brief')
+    s = reducer(s, { type: 'BACK' })
+    expect(s.phase).toBe('brief') // no back past brief
+  })
+
+  it('BACK preserves the session: inputs, attempts, hints and time survive', () => {
+    let s: GameState = {
+      ...init(),
+      phase: 'exploit',
+      failedRuns: 3,
+      openedHintTiers: 2,
+      elapsedSec: 42,
+    }
+    s = reducer(s, { type: 'SET_INPUT', field: 'username', value: "' OR 1=1 --" })
+    const back = reducer(s, { type: 'BACK' })
+    expect(back.phase).toBe('recon')
+    expect(back.inputs.username).toBe("' OR 1=1 --")
+    expect(back.failedRuns).toBe(3)
+    expect(back.openedHintTiers).toBe(2)
+    expect(back.elapsedSec).toBe(42)
+    // ...and returning forward keeps everything, ready to resume the attempt.
+    const forward = reducer(back, { type: 'ADVANCE' })
+    expect(forward.phase).toBe('exploit')
+    expect(forward.inputs.username).toBe("' OR 1=1 --")
+    expect(forward.failedRuns).toBe(3)
+  })
+
+  it('BACK is a no-op from loot/debrief (post-win terminals)', () => {
+    const loot: GameState = { ...init(), phase: 'loot' }
+    expect(reducer(loot, { type: 'BACK' }).phase).toBe('loot')
+    expect(canGoBack('loot')).toBe(false)
+    expect(canGoBack('debrief')).toBe(false)
+    expect(canGoBack('exploit')).toBe(true)
+    expect(previousPhase('exploit')).toBe('recon')
+    expect(previousPhase('brief')).toBeNull()
   })
 
   it('SET_INPUT only mutates during exploit', () => {

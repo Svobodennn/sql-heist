@@ -83,6 +83,21 @@ export const IconArrowRight = (p: IconProps) => (
   </Base>
 )
 
+export const IconArrowLeft = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M19 12H5M11 18l-6-6 6-6" />
+  </Base>
+)
+
+export const IconBoard = (p: IconProps) => (
+  <Base {...p}>
+    <rect x="4" y="4" width="7" height="7" rx="1.5" />
+    <rect x="13" y="4" width="7" height="7" rx="1.5" />
+    <rect x="4" y="13" width="7" height="7" rx="1.5" />
+    <rect x="13" y="13" width="7" height="7" rx="1.5" />
+  </Base>
+)
+
 export const IconChevronDown = (p: IconProps) => (
   <Base {...p}>
     <path d="m6 9 6 6 6-6" />

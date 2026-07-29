@@ -6,6 +6,7 @@ import type { Level } from '@/lib/schema/level'
 import { compose } from '@/lib/engine/queryComposer'
 import { cx } from '../lib/cx'
 import { DEBRIEF_INTRO, getJobNarrative } from '../lib/narrative'
+import { selectSecureSnippets } from '../lib/secureCode'
 import { Button } from './Button'
 import { CodeCompare } from './CodeCompare'
 import { SqlPreview } from './SqlPreview'
@@ -26,6 +27,9 @@ interface DebriefPanelProps {
   onReplay: () => void
 }
 
+// move -> why -> fix -> takeaway (docs/04-frontend-ux.md §7).
+const TOTAL_BEATS = 4
+
 export function DebriefPanel({
   level,
   winningInputs,
@@ -39,15 +43,17 @@ export function DebriefPanel({
     [level.query.template, winningInputs],
   )
   const narrative = getJobNarrative(level.id)
-  const totalBeats = 4
-  const [revealed, setRevealed] = useState(isReplay ? totalBeats : 1)
-  const allRevealed = revealed >= totalBeats
+  const secureTabs = selectSecureSnippets(level.debrief)
+  const [revealed, setRevealed] = useState(isReplay ? TOTAL_BEATS : 1)
+  const allRevealed = revealed >= TOTAL_BEATS
 
   return (
     <section className={cx('container', styles.wrap)}>
       <header className={styles.header}>
         <Stamp>Debrief — Attack → Defense</Stamp>
-        <h1 className={styles.title}>{level.title}</h1>
+        <h1 className={styles.title} data-phase-heading tabIndex={-1}>
+          {level.title}
+        </h1>
       </header>
 
       <p className={styles.fixerIntro}>
@@ -55,10 +61,13 @@ export function DebriefPanel({
         {DEBRIEF_INTRO}
       </p>
 
-      <ol className={styles.beats} aria-live="polite">
+      {/* No aria-live here: each SqlPreview owns its own (debounced) live region,
+          so a wrapper live region would double-speak. Beats are user-revealed and
+          navigable by their <h2> headings. */}
+      <ol className={styles.beats}>
         {revealed >= 1 && (
           <li className={styles.beat}>
-            <p className={styles.beatHead}>① The move</p>
+            <h2 className={styles.beatHead}>① The move</h2>
             <p className={styles.beatText}>The payload you handed the front, on the wire:</p>
             <SqlPreview segments={composed.segments} />
           </li>
@@ -66,7 +75,7 @@ export function DebriefPanel({
 
         {revealed >= 2 && (
           <li className={styles.beat}>
-            <p className={styles.beatHead}>② Why it worked</p>
+            <h2 className={styles.beatHead}>② Why it worked</h2>
             {narrative && (
               <p className={cx('prose', styles.transition)}>{narrative.debrief.transition}</p>
             )}
@@ -76,17 +85,14 @@ export function DebriefPanel({
 
         {revealed >= 3 && (
           <li className={styles.beat}>
-            <p className={styles.beatHead}>③ The fix</p>
-            <CodeCompare
-              vulnerable={level.debrief.vulnerableCode}
-              secure={level.debrief.secureCode}
-            />
+            <h2 className={styles.beatHead}>③ The fix</h2>
+            <CodeCompare vulnerable={level.debrief.vulnerableCode} secureTabs={secureTabs} />
           </li>
         )}
 
         {revealed >= 4 && (
           <li className={cx(styles.beat, styles.takeawayBeat)}>
-            <p className={styles.beatHead}>④ Takeaway</p>
+            <h2 className={styles.beatHead}>④ Takeaway</h2>
             <p className={styles.takeaway}>
               <IconCheck size={18} />
               <span>{level.debrief.takeaway}</span>
@@ -99,7 +105,7 @@ export function DebriefPanel({
         {!allRevealed ? (
           <Button
             variant="primary"
-            onClick={() => setRevealed((r) => Math.min(totalBeats, r + 1))}
+            onClick={() => setRevealed((r) => Math.min(TOTAL_BEATS, r + 1))}
             iconRight={<IconArrowRight size={18} />}
           >
             Continue

@@ -1,6 +1,6 @@
 'use client'
 
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { AnimatePresence, m, useReducedMotion } from 'framer-motion'
 import type { ToastItem } from '../lib/useToasts'
 import { cx } from '../lib/cx'
 import { IconAlert, IconCheck, IconTarget } from './icons'
@@ -21,15 +21,18 @@ export function ToastStack({
 }) {
   const reduce = useReducedMotion()
 
+  // No aria-live on the container: each toast is its OWN live region (role
+  // alert = assertive for errors, status = polite otherwise). A live region
+  // nested in another live region double-announces (§11), so the stack is a
+  // plain positioned container.
   return (
-    <div className={styles.stack} aria-live="polite">
+    <div className={styles.stack}>
       <AnimatePresence>
         {toasts.map((toast) => {
           const Icon = ICON[toast.kind]
           return (
-            <motion.div
+            <m.div
               key={toast.id}
-              layout
               initial={{ opacity: 0, y: reduce ? 0 : 12 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: reduce ? 0 : 8 }}
@@ -47,7 +50,7 @@ export function ToastStack({
               >
                 ×
               </button>
-            </motion.div>
+            </m.div>
           )
         })}
       </AnimatePresence>
