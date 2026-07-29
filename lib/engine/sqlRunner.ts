@@ -20,6 +20,11 @@ export interface ExecutionResult {
   rowCount: number
   error?: string // SQLite message (error-based techniques + UI feedback)
   durationMs: number // time-based techniques (v1) + UX
+  // Number of row-producing result sets sql.js returned (one per SELECT). A
+  // single statement => 1; a stacked payload that appends a read => >=2. This is
+  // the observable signal for the WS3 stacked-queries win. Optional so existing
+  // hand-built ExecutionResult literals stay valid.
+  resultSetCount?: number
 }
 
 function now(): number {
@@ -40,6 +45,7 @@ export function exec(db: SqlDatabase, sql: string): ExecutionResult {
       columns,
       rows,
       rowCount: rows.length,
+      resultSetCount: results.length,
       durationMs: now() - start,
     }
   } catch (error) {

@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import {
   levelSchema,
+  normalizeSecureCode,
   parseLevel,
   safeParseLevel,
+  secureSnippetSchema,
   sqlCellSchema,
   winConditionSchema,
   type Level,
+  type SecureSnippet,
 } from '@/lib/schema/level'
 
 // A minimal-but-complete canonical Level (docs/01-architecture.md §4). Engine
@@ -124,10 +127,122 @@ describe('WinCondition DSL — discriminated union', () => {
   it('rejects row-match with a missing mode', () => {
     expect(winConditionSchema.safeParse({ type: 'row-match', expect: [{ a: 1 }] }).success).toBe(false)
   })
+
+  it('parses the WS3 win types (error-based / blind-boolean / blind-timing / stacked-queries)', () => {
+    expect(winConditionSchema.parse({ type: 'error-based', errorContains: 'no such' })).toMatchObject({
+      type: 'error-based',
+    })
+    expect(winConditionSchema.parse({ type: 'blind-boolean' })).toMatchObject({ type: 'blind-boolean' })
+    expect(winConditionSchema.parse({ type: 'blind-timing' })).toMatchObject({ type: 'blind-timing' })
+    expect(winConditionSchema.parse({ type: 'stacked-queries', minResultSets: 2 })).toMatchObject({
+      type: 'stacked-queries',
+      minResultSets: 2,
+    })
+  })
+})
+
+describe('WS3 techniqueId — extended vocabulary', () => {
+  it('accepts the five new post-MVP technique ids', () => {
+    for (const technique of [
+      'error-based',
+      'blind-boolean',
+      'blind-timing',
+      'stacked-queries',
+      'waf-bypass',
+    ] as const) {
+      expect(safeParseLevel({ ...validLevel(), technique }).success).toBe(true)
+    }
+  })
+})
+
+describe('WS3 inputFilter — optional WAF on query', () => {
+  it('is absent by default (existing levels unaffected)', () => {
+    expect(parseLevel(validLevel()).query.inputFilter).toBeUndefined()
+  })
+
+  it('accepts reject/strip filters with a blocklist', () => {
+    const level = validLevel()
+    for (const mode of ['reject', 'strip'] as const) {
+      const withFilter = {
+        ...level,
+        query: { ...level.query, inputFilter: { blocklist: ['UNION'], mode, message: 'blocked' } },
+      }
+      expect(safeParseLevel(withFilter).success).toBe(true)
+    }
+  })
+
+  it('rejects an empty blocklist and an unknown mode', () => {
+    const level = validLevel()
+    expect(
+      safeParseLevel({ ...level, query: { ...level.query, inputFilter: { blocklist: [], mode: 'reject' } } })
+        .success,
+    ).toBe(false)
+    expect(
+      safeParseLevel({
+        ...level,
+        query: { ...level.query, inputFilter: { blocklist: ['x'], mode: 'nuke' } },
+      }).success,
+    ).toBe(false)
+  })
 })
 
 describe('levelSchema is the exported Zod object', () => {
   it('exposes safeParse', () => {
     expect(typeof levelSchema.safeParse).toBe('function')
+  })
+})
+
+describe('WS2 secure-code — per-stack, back-compatible', () => {
+  it('accepts a level with no variants (legacy object form stays valid)', () => {
+    expect(safeParseLevel(validLevel()).success).toBe(true)
+  })
+
+  it('accepts an optional per-stack secureCodeVariants array', () => {
+    const level = validLevel()
+    const withVariants = {
+      ...level,
+      debrief: {
+        ...level.debrief,
+        secureCodeVariants: [
+          { id: 'node', label: 'Node (pg)', language: 'ts', code: 'client.query(q, [u])' },
+          { id: 'php', label: 'PHP (PDO)', language: 'php', code: '$stmt->execute([$u])' },
+        ],
+      },
+    }
+    expect(safeParseLevel(withVariants).success).toBe(true)
+  })
+
+  it('rejects an empty secureCodeVariants array (min 1)', () => {
+    const level = validLevel()
+    const bad = { ...level, debrief: { ...level.debrief, secureCodeVariants: [] } }
+    expect(safeParseLevel(bad).success).toBe(false)
+  })
+
+  it('secureSnippetSchema requires id/label/language/code', () => {
+    expect(secureSnippetSchema.safeParse({ id: 'x', label: 'X', language: 'ts', code: 'y' }).success).toBe(true)
+    expect(secureSnippetSchema.safeParse({ language: 'ts', code: 'y' }).success).toBe(false)
+  })
+})
+
+describe('normalizeSecureCode — collapses both forms to SecureSnippet[]', () => {
+  it('legacy object -> a single default snippet', () => {
+    const result = normalizeSecureCode({ language: 'ts', code: 'db.prepare(q).bind(x)' })
+    expect(result).toEqual([
+      { id: 'default', label: 'Secure', language: 'ts', code: 'db.prepare(q).bind(x)' },
+    ])
+  })
+
+  it('array -> passes through unchanged (as-is)', () => {
+    const variants: SecureSnippet[] = [
+      { id: 'node', label: 'Node', language: 'ts', code: 'a' },
+      { id: 'py', label: 'Python', language: 'py', code: 'b' },
+    ]
+    expect(normalizeSecureCode(variants)).toBe(variants)
+  })
+
+  it('models the call-site (secureCodeVariants ?? secureCode)', () => {
+    const secureCode = { language: 'ts', code: 'legacy' }
+    const secureCodeVariants: SecureSnippet[] | undefined = undefined
+    expect(normalizeSecureCode(secureCodeVariants ?? secureCode)).toHaveLength(1)
   })
 })

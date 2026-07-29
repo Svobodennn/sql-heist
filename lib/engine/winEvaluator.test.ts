@@ -12,6 +12,7 @@ function ctx(partial: Partial<WinContext> & { rows?: SqlCell[][] }): WinContext 
     rows,
     rowCount: partial.rowCount ?? rows.length,
     error: partial.error,
+    resultSetCount: partial.resultSetCount,
   }
 }
 
@@ -124,6 +125,85 @@ describe('evaluate — row-match (subset vs exact, K6)', () => {
         .won,
     ).toBe(true)
   })
+
+  // Pins the EXACT intent: the row's column set must equal the expected keys —
+  // no extra (else it is a subset match), no missing (else a pair is absent).
+  it('exact: requires the same column SET — extra OR missing columns lose', () => {
+    const cond: WinCondition = { type: 'row-match', expect: [{ id: 1, is_admin: 1 }], mode: 'exact' }
+    // same set, different column order -> still a win (order-independent)
+    expect(evaluate(cond, ctx({ columns: ['is_admin', 'id'], rows: [[1, 1]] })).won).toBe(true)
+    // a MISSING expected column (only id present) -> lose
+    expect(evaluate(cond, ctx({ columns: ['id'], rows: [[1]] })).won).toBe(false)
+    // an EXTRA column beyond the expected keys -> lose (this is the subset case)
+    expect(
+      evaluate(cond, ctx({ columns: ['id', 'is_admin', 'extra'], rows: [[1, 1, 9]] })).won,
+    ).toBe(false)
+  })
+})
+
+describe('evaluate — WS3 error-based (targeted error IS the win)', () => {
+  it('wins when the query errors and errorContains matches', () => {
+    const cond: WinCondition = { type: 'error-based', errorContains: 'no such table' }
+    expect(evaluate(cond, ctx({ error: 'no such table: ghost' })).won).toBe(true)
+  })
+
+  it('wins on any error when errorContains is omitted', () => {
+    const cond: WinCondition = { type: 'error-based' }
+    expect(evaluate(cond, ctx({ error: 'near ")": syntax error' })).won).toBe(true)
+  })
+
+  it('loses when the error does not contain the targeted substring', () => {
+    const cond: WinCondition = { type: 'error-based', errorContains: 'datatype mismatch' }
+    expect(evaluate(cond, ctx({ error: 'no such column: x' })).won).toBe(false)
+  })
+
+  it('loses when there is NO error (the guard is inverted only for this type)', () => {
+    const cond: WinCondition = { type: 'error-based' }
+    expect(evaluate(cond, ctx({ columns: ['a'], rows: [[1]] })).won).toBe(false)
+  })
+})
+
+describe('evaluate — WS3 blind-boolean / blind-timing (oracle TRUE = a row)', () => {
+  it('blind-boolean wins on a returned row, loses on zero rows', () => {
+    const cond: WinCondition = { type: 'blind-boolean' }
+    expect(evaluate(cond, ctx({ columns: ['x'], rows: [[1]] })).won).toBe(true)
+    expect(evaluate(cond, ctx({ rows: [] })).won).toBe(false)
+  })
+
+  it('blind-timing is modeled symbolically — row present wins, durationMs ignored', () => {
+    const cond: WinCondition = { type: 'blind-timing' }
+    // No durationMs in WinContext at all; the oracle TRUE branch is a returned row.
+    expect(evaluate(cond, ctx({ columns: ['x'], rows: [[1]] })).won).toBe(true)
+    expect(evaluate(cond, ctx({ rows: [] })).won).toBe(false)
+  })
+
+  it('both lose on a SQLite error (anti-trivial guard still applies)', () => {
+    expect(evaluate({ type: 'blind-boolean' }, ctx({ error: 'boom', rows: [] })).won).toBe(false)
+    expect(evaluate({ type: 'blind-timing' }, ctx({ error: 'boom', rows: [] })).won).toBe(false)
+  })
+})
+
+describe('evaluate — WS3 stacked-queries (extra result set = observable effect)', () => {
+  it('wins when resultSetCount >= 2 (default) with no error', () => {
+    const cond: WinCondition = { type: 'stacked-queries' }
+    expect(evaluate(cond, ctx({ columns: ['x'], rows: [[1]], resultSetCount: 2 })).won).toBe(true)
+  })
+
+  it('loses on a single result set (benign single statement)', () => {
+    const cond: WinCondition = { type: 'stacked-queries' }
+    expect(evaluate(cond, ctx({ columns: ['x'], rows: [[1]], resultSetCount: 1 })).won).toBe(false)
+  })
+
+  it('respects a custom minResultSets', () => {
+    const cond: WinCondition = { type: 'stacked-queries', minResultSets: 3 }
+    expect(evaluate(cond, ctx({ resultSetCount: 2, rows: [[1]] })).won).toBe(false)
+    expect(evaluate(cond, ctx({ resultSetCount: 3, rows: [[1]] })).won).toBe(true)
+  })
+
+  it('loses on a stacked payload that errored', () => {
+    const cond: WinCondition = { type: 'stacked-queries' }
+    expect(evaluate(cond, ctx({ error: 'syntax error', resultSetCount: 2 })).won).toBe(false)
+  })
 })
 
 describe('toWinContext — bridges ExecutionResult + inputs', () => {
@@ -157,6 +237,11 @@ describe('evaluate — anti-trivial guard (§5.3)', () => {
     expect(
       evaluate({ type: 'row-match', expect: [{ is_admin: 1 }], mode: 'subset' }, empty).won,
     ).toBe(false)
+    // WS3 oracle/stacked types are anti-trivial too (error-based is intentionally
+    // the exception — it is tested separately since an error IS its win).
+    expect(evaluate({ type: 'blind-boolean' }, empty).won).toBe(false)
+    expect(evaluate({ type: 'blind-timing' }, empty).won).toBe(false)
+    expect(evaluate({ type: 'stacked-queries' }, empty).won).toBe(false)
   })
 
   it('a SQLite error never counts as a win', () => {

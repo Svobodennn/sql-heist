@@ -22,13 +22,20 @@ export const sqlCellSchema = z.union([
 // assignable to the runner's SqlDatabase under TS's generic-typed-array lib.
 export type SqlCell = string | number | Uint8Array | null
 
-// MVP curriculum techniques (§4). v1 techniques stay commented in the doc.
+// Curriculum techniques (§4). First five are MVP; the WS3 block below extends the
+// vocabulary for post-MVP jobs (engine/QA classification only — additive).
 export const techniqueIdSchema = z.enum([
   'auth-bypass',
   'comment-injection',
   'column-count',
   'union-extraction',
   'schema-discovery',
+  // WS3 post-MVP:
+  'error-based',
+  'blind-boolean',
+  'blind-timing',
+  'stacked-queries',
+  'waf-bypass',
 ])
 export type TechniqueId = z.infer<typeof techniqueIdSchema>
 
@@ -61,6 +68,17 @@ export const codeSnippetSchema = z.object({
 })
 export type CodeSnippet = z.infer<typeof codeSnippetSchema>
 
+// WS2: per-stack secure fix. A level may ship ONE secure snippet (legacy object
+// form, below) or an ARRAY of stack-tagged snippets (id/label pick the tab).
+// `language`/`code` mirror CodeSnippet so a single element renders identically.
+export const secureSnippetSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  language: z.string(),
+  code: z.string(),
+})
+export type SecureSnippet = z.infer<typeof secureSnippetSchema>
+
 export const hintSchema = z.object({
   id: z.string(),
   text: z.string(),
@@ -68,6 +86,17 @@ export const hintSchema = z.object({
   revealAfterAttempts: z.number().optional(),
 })
 export type Hint = z.infer<typeof hintSchema>
+
+// WS3: optional WAF-style filter applied to RAW input at compose time, BEFORE
+// substitution. Absent => zero behavior change (the injection contract is
+// otherwise unchanged). 'reject' blocks the whole run; 'strip' removes the
+// blocked substrings and runs the neutered input. Matching is case-insensitive.
+export const inputFilterSchema = z.object({
+  blocklist: z.array(z.string()).min(1),
+  mode: z.enum(['reject', 'strip']),
+  message: z.string().optional(),
+})
+export type InputFilter = z.infer<typeof inputFilterSchema>
 
 // [C] planner-owned values; architect reserves the field/shape (§4, §6.4).
 export const scoringConfigSchema = z.object({
@@ -101,6 +130,37 @@ export const winConditionSchema = z.discriminatedUnion('type', [
     mode: z.enum(['subset', 'exact']),
     reason: z.string().optional(),
   }),
+  // ---- WS3 post-MVP win types (all PURE + deterministic + golden-testable) ----
+  // (4) error-based: a TARGETED SQLite error IS the win (data leaks through the
+  //     message). Evaluated BEFORE the anti-trivial error guard (§5.3), ONLY for
+  //     this type. errorContains scopes it to a specific error signature.
+  z.object({
+    type: z.literal('error-based'),
+    errorContains: z.string().optional(),
+    reason: z.string().optional(),
+  }),
+  // (5) blind-boolean: the TRUE branch of a boolean oracle fired (a row came
+  //     back). Differentiation TRUE↔FALSE is proven at the level (solve wins,
+  //     benign/false returns 0 rows -> anti-trivial loss).
+  z.object({
+    type: z.literal('blind-boolean'),
+    reason: z.string().optional(),
+  }),
+  // (6) blind-timing: timing oracle modeled SYMBOLICALLY. sql.js is synchronous,
+  //     so we do NOT measure wall-clock (durationMs is ignored); the oracle's
+  //     TRUE state is modeled as a returned row, same signal as blind-boolean.
+  z.object({
+    type: z.literal('blind-timing'),
+    reason: z.string().optional(),
+  }),
+  // (7) stacked-queries: a multi-statement payload's side effect is observable
+  //     as an EXTRA result set (the app query yields N sets; a stacked read/verify
+  //     yields more). minResultSets defaults to 2.
+  z.object({
+    type: z.literal('stacked-queries'),
+    minResultSets: z.number().optional(),
+    reason: z.string().optional(),
+  }),
 ])
 export type WinCondition = z.infer<typeof winConditionSchema>
 
@@ -123,7 +183,11 @@ export const levelSchema = z.object({
   debrief: z.object({
     explanation: z.string(),
     vulnerableCode: codeSnippetSchema,
+    // secureCode stays a single CodeSnippet (existing consumers + golden levels
+    // unchanged). WS2 per-stack fixes are ADDITIVE via optional secureCodeVariants
+    // below; normalizeSecureCode(secureCodeVariants ?? secureCode) collapses both.
     secureCode: codeSnippetSchema,
+    secureCodeVariants: z.array(secureSnippetSchema).min(1).optional(),
     takeaway: z.string(),
   }),
 
@@ -145,6 +209,7 @@ export const levelSchema = z.object({
   query: z.object({
     template: z.string(),
     description: z.string().optional(),
+    inputFilter: inputFilterSchema.optional(), // WS3 WAF (absent => no change)
   }),
 
   // ---- win condition (DSL, §5) ----
@@ -170,4 +235,15 @@ export function parseLevel(data: unknown): Level {
 
 export function safeParseLevel(data: unknown) {
   return levelSchema.safeParse(data)
+}
+
+// WS2 adapter: collapse either secure-fix form into a stable SecureSnippet[].
+// Legacy object (debrief.secureCode) -> a single 'default' snippet; the per-stack
+// array (debrief.secureCodeVariants) passes through as-is. Pure; the UI renders
+// one tab per element. Call as: normalizeSecureCode(secureCodeVariants ?? secureCode).
+export function normalizeSecureCode(
+  sc: CodeSnippet | SecureSnippet[],
+): SecureSnippet[] {
+  if (Array.isArray(sc)) return sc
+  return [{ id: 'default', label: 'Secure', language: sc.language, code: sc.code }]
 }

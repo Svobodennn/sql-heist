@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   DEFAULT_SCORING,
+  STAR_THRESHOLDS,
   canOpenHint,
   computeJobScore,
   hintPenalty,
@@ -54,6 +55,13 @@ describe('starsForScore (game-design §6.3)', () => {
   it('awards 1 star below 600 (completion)', () => {
     expect(starsForScore(599)).toBe(1)
     expect(starsForScore(100)).toBe(1)
+  })
+  it('reads its cutoffs from STAR_THRESHOLDS (single source of truth)', () => {
+    expect(STAR_THRESHOLDS).toEqual({ three: 900, two: 600 })
+    expect(starsForScore(STAR_THRESHOLDS.three)).toBe(3)
+    expect(starsForScore(STAR_THRESHOLDS.three - 1)).toBe(2)
+    expect(starsForScore(STAR_THRESHOLDS.two)).toBe(2)
+    expect(starsForScore(STAR_THRESHOLDS.two - 1)).toBe(1)
   })
 })
 
