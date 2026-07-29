@@ -21,6 +21,68 @@
       "language": "js",
       "code": "// SECURE - the % wildcards are added in code; q is BOUND as a literal value\nconst rows = db\n  .prepare(\"SELECT id, name, price FROM products WHERE name LIKE ?\")\n  .all('%' + q + '%');"
     },
+    "secureCodeVariants": [
+      {
+        "id": "node",
+        "label": "Node.js (pg / mysql2)",
+        "language": "js",
+        "code": "// pg — the % wildcards live in the bound VALUE, never in the SQL text\nconst { rows } = await client.query(\n  'SELECT id, name, price FROM products WHERE name LIKE $1',\n  ['%' + q + '%'],\n);\n// mysql2: conn.execute('... WHERE name LIKE ?', ['%' + q + '%'])"
+      },
+      {
+        "id": "python",
+        "label": "Python (sqlite3 / psycopg2)",
+        "language": "python",
+        "code": "# sqlite3 — the % wildcards belong to the bound value, not the SQL\ncur.execute(\n    \"SELECT id, name, price FROM products WHERE name LIKE ?\",\n    (f\"%{q}%\",),\n)\nrows = cur.fetchall()\n# psycopg2 uses %s: cur.execute(\"... WHERE name LIKE %s\", (f\"%{q}%\",))"
+      },
+      {
+        "id": "php-pdo",
+        "label": "PHP (PDO)",
+        "language": "php",
+        "code": "// PDO — the % wildcards are part of the bound value, not the SQL\n$stmt = $pdo->prepare(\n    'SELECT id, name, price FROM products WHERE name LIKE ?'\n);\n$stmt->execute(['%' . $q . '%']);\n$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);"
+      },
+      {
+        "id": "java-jdbc",
+        "label": "Java (JDBC)",
+        "language": "java",
+        "code": "// JDBC — bind the pattern; the % wildcards live in the value, not the SQL\nPreparedStatement ps = conn.prepareStatement(\n    \"SELECT id, name, price FROM products WHERE name LIKE ?\");\nps.setString(1, \"%\" + q + \"%\");\nResultSet rs = ps.executeQuery();"
+      },
+      {
+        "id": "dotnet",
+        "label": "C# / .NET (ADO.NET)",
+        "language": "csharp",
+        "code": "// ADO.NET — the % wildcards are part of the bound value, not the SQL\nusing var cmd = new SqlCommand(\n    \"SELECT id, name, price FROM products WHERE name LIKE @q\", conn);\ncmd.Parameters.Add(new SqlParameter(\"@q\", \"%\" + q + \"%\"));\nusing var reader = cmd.ExecuteReader();\n// EF Core: db.Products.Where(p => EF.Functions.Like(p.Name, \"%\" + q + \"%\"))"
+      },
+      {
+        "id": "go",
+        "label": "Go (database/sql)",
+        "language": "go",
+        "code": "// database/sql — the % wildcards live in the bound arg, not the SQL\nrows, err := db.Query(\n    \"SELECT id, name, price FROM products WHERE name LIKE $1\",\n    \"%\"+q+\"%\",\n)\n// MySQL / SQLite: db.Query(\"... WHERE name LIKE ?\", \"%\"+q+\"%\")"
+      },
+      {
+        "id": "rails",
+        "label": "Ruby on Rails (ActiveRecord)",
+        "language": "ruby",
+        "code": "# ActiveRecord — the % wildcards are part of the bound value, not the SQL\nrows = Product.where(\n  \"name LIKE ?\", \"%#{q}%\"\n)\n# Named form: Product.where(\"name LIKE :p\", p: \"%#{q}%\")"
+      },
+      {
+        "id": "laravel",
+        "label": "Laravel (Query Builder)",
+        "language": "php",
+        "code": "// Laravel — the % wildcards live in the bound value, not the SQL\n$rows = DB::table('products')\n    ->where('name', 'LIKE', '%' . $q . '%')\n    ->get();\n// Eloquent: Product::where('name', 'LIKE', \"%{$q}%\")->get();"
+      },
+      {
+        "id": "django",
+        "label": "Django (ORM)",
+        "language": "python",
+        "code": "# Django ORM — __contains binds the term as a parameter (never raw SQL)\nrows = Product.objects.filter(\n    name__contains=q\n)\n# Explicit .raw(): Product.objects.raw(\"... WHERE name LIKE %s\", [\"%\" + q + \"%\"])"
+      },
+      {
+        "id": "spring",
+        "label": "Spring Boot (JdbcTemplate)",
+        "language": "java",
+        "code": "// Spring JdbcTemplate — the % wildcards live in the bound arg, not the SQL\nList<Product> rows = jdbcTemplate.query(\n    \"SELECT id, name, price FROM products WHERE name LIKE ?\",\n    productRowMapper, \"%\" + q + \"%\");\n// JPA: @Query(\"... WHERE p.name LIKE :q\") with @Param(\"q\") \"%\"+q+\"%\""
+      }
+    ],
     "takeaway": "If the query's shape can't change, no second question rides in on it."
   },
   "target": {

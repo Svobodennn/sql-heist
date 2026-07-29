@@ -21,6 +21,68 @@
       "language": "js",
       "code": "// SECURE - the pattern is BOUND; UNION / sqlite_master become 'text to search for'\nconst rows = db\n  .prepare(\"SELECT title, body FROM articles WHERE title LIKE ?\")\n  .all('%' + q + '%');\n// Defense in depth: least privilege - the app account should reach only the tables it needs."
     },
+    "secureCodeVariants": [
+      {
+        "id": "node",
+        "label": "Node.js (pg / mysql2)",
+        "language": "js",
+        "code": "// pg — bind the pattern; UNION / sqlite_master become plain search text\nconst { rows } = await client.query(\n  'SELECT title, body FROM articles WHERE title LIKE $1',\n  ['%' + q + '%'],\n);\n// Defense in depth: grant the app role SELECT only on the tables it needs."
+      },
+      {
+        "id": "python",
+        "label": "Python (sqlite3 / psycopg2)",
+        "language": "python",
+        "code": "# sqlite3 — bind the pattern; UNION / sqlite_master become literal text\ncur.execute(\n    \"SELECT title, body FROM articles WHERE title LIKE ?\",\n    (f\"%{q}%\",),\n)\nrows = cur.fetchall()\n# Least privilege: the app's DB user should only SELECT the tables it needs."
+      },
+      {
+        "id": "php-pdo",
+        "label": "PHP (PDO)",
+        "language": "php",
+        "code": "// PDO — bind the pattern; UNION / sqlite_master become plain search text\n$stmt = $pdo->prepare(\n    'SELECT title, body FROM articles WHERE title LIKE ?'\n);\n$stmt->execute(['%' . $q . '%']);\n$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);\n// Least privilege: grant the app DB user SELECT only on the tables it needs."
+      },
+      {
+        "id": "java-jdbc",
+        "label": "Java (JDBC)",
+        "language": "java",
+        "code": "// JDBC — bind the pattern; UNION / sqlite_master become plain search text\nPreparedStatement ps = conn.prepareStatement(\n    \"SELECT title, body FROM articles WHERE title LIKE ?\");\nps.setString(1, \"%\" + q + \"%\");\nResultSet rs = ps.executeQuery();\n// Least privilege: the app DB user should hold SELECT only on needed tables."
+      },
+      {
+        "id": "dotnet",
+        "label": "C# / .NET (ADO.NET)",
+        "language": "csharp",
+        "code": "// ADO.NET — bind the pattern; UNION / catalog names become search text\nusing var cmd = new SqlCommand(\n    \"SELECT title, body FROM articles WHERE title LIKE @q\", conn);\ncmd.Parameters.Add(new SqlParameter(\"@q\", \"%\" + q + \"%\"));\nusing var reader = cmd.ExecuteReader();\n// Least privilege: grant the app login SELECT only on the tables it needs."
+      },
+      {
+        "id": "go",
+        "label": "Go (database/sql)",
+        "language": "go",
+        "code": "// database/sql — bind the pattern; UNION / sqlite_master become search text\nrows, err := db.Query(\n    \"SELECT title, body FROM articles WHERE title LIKE $1\",\n    \"%\"+q+\"%\",\n)\n// Least privilege: give the app's DB role SELECT only on needed tables."
+      },
+      {
+        "id": "rails",
+        "label": "Ruby on Rails (ActiveRecord)",
+        "language": "ruby",
+        "code": "# ActiveRecord — bind the pattern; UNION / sqlite_master become search text\nrows = Article.where(\n  \"title LIKE ?\", \"%#{q}%\"\n)\n# Least privilege: the app's DB role should SELECT only the tables it needs."
+      },
+      {
+        "id": "laravel",
+        "label": "Laravel (Query Builder)",
+        "language": "php",
+        "code": "// Laravel — bind the pattern; UNION / sqlite_master become search text\n$rows = DB::table('articles')\n    ->where('title', 'LIKE', '%' . $q . '%')\n    ->get();\n// Least privilege: the app DB user should SELECT only the tables it needs."
+      },
+      {
+        "id": "django",
+        "label": "Django (ORM)",
+        "language": "python",
+        "code": "# Django ORM — filter binds the term; UNION / sqlite_master can't ride in\nrows = Article.objects.filter(\n    title__contains=q\n)\n# Least privilege: the app's DB role should SELECT only the tables it needs."
+      },
+      {
+        "id": "spring",
+        "label": "Spring Boot (JdbcTemplate)",
+        "language": "java",
+        "code": "// Spring JdbcTemplate — bind the pattern; UNION / sqlite_master become text\nList<Article> rows = jdbcTemplate.query(\n    \"SELECT title, body FROM articles WHERE title LIKE ?\",\n    articleRowMapper, \"%\" + q + \"%\");\n// Least privilege: grant the app's DB user SELECT only on needed tables."
+      }
+    ],
     "takeaway": "Least privilege and bound parameters: a search box should only ever search."
   },
   "target": {

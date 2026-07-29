@@ -21,6 +21,68 @@
       "language": "js",
       "code": "// SECURE - values are BOUND as parameters, never parsed as SQL\nconst row = db\n  .prepare(\"SELECT id, username, is_admin FROM users WHERE username = ? AND password = ?\")\n  .get(username, password);\n// Defense in depth: never store plaintext passwords - hash (bcrypt/argon2), compare in constant time."
     },
+    "secureCodeVariants": [
+      {
+        "id": "node",
+        "label": "Node.js (pg / mysql2)",
+        "language": "js",
+        "code": "// pg — bind username/password as $1/$2; the driver never parses them as SQL\nconst { rows } = await client.query(\n  'SELECT id, username, is_admin FROM users WHERE username = $1 AND password = $2',\n  [username, password],\n);\nconst row = rows[0];\n// mysql2: conn.execute('... WHERE username = ? AND password = ?', [username, password])"
+      },
+      {
+        "id": "python",
+        "label": "Python (sqlite3 / psycopg2)",
+        "language": "python",
+        "code": "# sqlite3 — ? placeholders are bound; input is never parsed as SQL\ncur.execute(\n    \"SELECT id, username, is_admin FROM users WHERE username = ? AND password = ?\",\n    (username, password),\n)\nrow = cur.fetchone()\n# psycopg2 uses %s: cur.execute(\"... username = %s AND password = %s\", (username, password))"
+      },
+      {
+        "id": "php-pdo",
+        "label": "PHP (PDO)",
+        "language": "php",
+        "code": "// PDO — prepared statement; values are bound, never concatenated\n$stmt = $pdo->prepare(\n    'SELECT id, username, is_admin FROM users WHERE username = ? AND password = ?'\n);\n$stmt->execute([$username, $password]);\n$row = $stmt->fetch(PDO::FETCH_ASSOC);"
+      },
+      {
+        "id": "java-jdbc",
+        "label": "Java (JDBC)",
+        "language": "java",
+        "code": "// JDBC — PreparedStatement binds each value with setString\nPreparedStatement ps = conn.prepareStatement(\n    \"SELECT id, username, is_admin FROM users WHERE username = ? AND password = ?\");\nps.setString(1, username);\nps.setString(2, password);\nResultSet rs = ps.executeQuery();"
+      },
+      {
+        "id": "dotnet",
+        "label": "C# / .NET (ADO.NET)",
+        "language": "csharp",
+        "code": "// ADO.NET — bind via SqlParameter; input is never parsed as SQL\nusing var cmd = new SqlCommand(\n    \"SELECT id, username, is_admin FROM users WHERE username = @u AND password = @p\", conn);\ncmd.Parameters.Add(new SqlParameter(\"@u\", username));\ncmd.Parameters.Add(new SqlParameter(\"@p\", password));\nusing var reader = cmd.ExecuteReader();\n// EF Core: db.Users.FirstOrDefault(x => x.Username == username && x.Password == password)"
+      },
+      {
+        "id": "go",
+        "label": "Go (database/sql)",
+        "language": "go",
+        "code": "// database/sql — args bind to placeholders, never string-concatenated\nrow := db.QueryRow(\n    \"SELECT id, username, is_admin FROM users WHERE username = $1 AND password = $2\",\n    username, password,\n)\nerr := row.Scan(&id, &name, &isAdmin)\n// MySQL / SQLite drivers use ? placeholders instead of $1/$2."
+      },
+      {
+        "id": "rails",
+        "label": "Ruby on Rails (ActiveRecord)",
+        "language": "ruby",
+        "code": "# ActiveRecord — placeholders are bound; input is never parsed as SQL\nuser = User.where(\n  \"username = ? AND password = ?\", username, password\n).first\n# Hash form also binds: User.find_by(username: username, password: password)"
+      },
+      {
+        "id": "laravel",
+        "label": "Laravel (Query Builder)",
+        "language": "php",
+        "code": "// Laravel Query Builder — values are bound, sent apart from the SQL\n$user = DB::table('users')\n    ->where('username', $username)\n    ->where('password', $password)\n    ->first();\n// Raw still binds: ->whereRaw('username = ? AND password = ?', [$username, $password])"
+      },
+      {
+        "id": "django",
+        "label": "Django (ORM)",
+        "language": "python",
+        "code": "# Django ORM — every lookup value is parameterized automatically\nuser = User.objects.filter(\n    username=username, password=password\n).first()\n# .raw() still binds: User.objects.raw(\"... WHERE username = %s\", [username])"
+      },
+      {
+        "id": "spring",
+        "label": "Spring Boot (JdbcTemplate)",
+        "language": "java",
+        "code": "// Spring JdbcTemplate — args bind to ? placeholders positionally\nList<User> rows = jdbcTemplate.query(\n    \"SELECT id, username, is_admin FROM users WHERE username = ? AND password = ?\",\n    userRowMapper, username, password);\n// JPA: @Query(\"... WHERE u.username = :u AND u.password = :p\") + @Param bindings"
+      }
+    ],
     "takeaway": "Stop gluing what people type onto your questions. Bind it — and \"or one equals one\" is just a bad username again."
   },
   "target": {
