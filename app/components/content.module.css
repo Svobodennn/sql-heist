@@ -1,0 +1,145 @@
+/* Static content routes (Help, FAQ, Privacy, Terms, Contact). Readable noir
+ * prose column; element selectors are scoped under the module classes. */
+.page {
+  padding-block: var(--space-12);
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 65ch;
+  margin-bottom: var(--space-8);
+}
+.title {
+  font-family: var(--font-display);
+  font-size: clamp(1.875rem, 5vw, 2.25rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+.lead {
+  color: var(--text-secondary);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+}
+.updated {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ---------- Prose body ---------- */
+.body {
+  max-width: 65ch;
+}
+.body section {
+  margin-top: var(--space-8);
+}
+.body section:first-child {
+  margin-top: 0;
+}
+.body h2 {
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: var(--space-3);
+}
+.body p {
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+.body p + p {
+  margin-top: var(--space-3);
+}
+.body ul,
+.body ol {
+  color: var(--text-secondary);
+  line-height: 1.7;
+  padding-left: var(--space-6);
+  margin-top: var(--space-3);
+}
+.body li {
+  margin-top: var(--space-2);
+}
+.body li::marker {
+  color: var(--text-muted);
+}
+.body strong {
+  color: var(--text);
+  font-weight: 600;
+}
+.body a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: color-mix(in srgb, var(--primary) 45%, transparent);
+}
+.body a:hover {
+  color: var(--primary-hover);
+  text-decoration-color: currentColor;
+}
+.body code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.ctaRow {
+  margin-top: var(--space-6);
+}
+
+/* ---------- FAQ accordion (native <details>, no JS) ---------- */
+.faqList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.faq {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+.faqSummary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: 44px;
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  list-style: none;
+  font-weight: 600;
+  color: var(--text);
+}
+.faqSummary::-webkit-details-marker {
+  display: none;
+}
+.faqSummary::after {
+  content: '';
+  width: 9px;
+  height: 9px;
+  flex-shrink: 0;
+  border-right: 2px solid var(--text-muted);
+  border-bottom: 2px solid var(--text-muted);
+  transform: rotate(45deg);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.faq[open] .faqSummary::after {
+  transform: rotate(-135deg);
+}
+.faqAnswer {
+  padding: 0 var(--space-4) var(--space-4);
+}
+.faqAnswer p {
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
