@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "id": "front-door",
+  "order": 1,
+  "job": "The Front Door",
+  "title": "The Front Door",
+  "technique": "auth-bypass",
+  "difficulty": "intro",
+  "brief": {
+    "handler": "The Fixer",
+    "text": "Meridian locks its staff portal, but the doorman only checks what you hand him. Say the right thing at the door and he waves you through. Bring me back an admin badge.",
+    "objective": "Get past the login as an administrator."
+  },
+  "debrief": {
+    "explanation": "Your input is concatenated straight into the SQL string, so a closing quote stops being data and becomes code: it ends the username string early, and the trailing -- comments out the rest of the statement, including the password check. The always-true OR '1'='1' then matches every row.",
+    "vulnerableCode": {
+      "language": "js",
+      "code": "// VULNERABLE - input is concatenated straight into the SQL string\nconst sql =\n  \"SELECT id, username, is_admin FROM users \" +\n  \"WHERE username = '\" + username + \"' AND password = '\" + password + \"'\";\nconst row = db.prepare(sql).get(); // code + data in one string => injection"
+    },
+    "secureCode": {
+      "language": "js",
+      "code": "// SECURE - values are BOUND as parameters, never parsed as SQL\nconst row = db\n  .prepare(\"SELECT id, username, is_admin FROM users WHERE username = ? AND password = ?\")\n  .get(username, password);\n// Defense in depth: never store plaintext passwords - hash (bcrypt/argon2), compare in constant time."
+    },
+    "takeaway": "Stop concatenating input into SQL - bind it."
+  },
+  "target": {
+    "appName": "Meridian Staff Portal",
+    "surface": "login-form",
+    "fields": [
+      { "name": "username", "label": "Username", "type": "text", "placeholder": "e.g. j.marlow" },
+      { "name": "password", "label": "Password", "type": "password", "placeholder": "Password" }
+    ]
+  },
+  "database": {
+    "schemaSql": "CREATE TABLE users (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT, is_admin INTEGER);",
+    "seedSql": "INSERT INTO users (id,username,password,is_admin) VALUES (1,'admin','S3cr3t!Adm1n',1),(2,'j.marlow','hunter2',0),(3,'k.rivera','letmein123',0),(4,'svc_backup','b4ckup$vc',0);",
+    "visibleSchema": [{ "table": "users", "columns": ["id", "username", "password", "is_admin"] }]
+  },
+  "query": {
+    "template": "SELECT id, username, is_admin FROM users WHERE username = '{{input:username}}' AND password = '{{input:password}}'",
+    "description": "Staff portal login check"
+  },
+  "winCondition": {
+    "type": "row-match",
+    "expect": [{ "is_admin": 1 }],
+    "mode": "subset",
+    "reason": "Privileged account pulled - the front door is open, you're in."
+  },
+  "hints": [
+    {
+      "id": "h1",
+      "text": "The door reads your input as if it were part of a sentence. What if you could end that sentence early?",
+      "cost": 50
+    },
+    {
+      "id": "h2",
+      "text": "Two ideas: make the condition always true (OR plus an equality that is always true), or cut the line short with --. A quote can end the string early.",
+      "cost": 150,
+      "revealAfterAttempts": 2
+    },
+    {
+      "id": "h3",
+      "text": "In the username, try  admin' --   or  ' OR '1'='1' -- . The trailing -- comments out the password check.",
+      "cost": 300,
+      "revealAfterAttempts": 4
+    }
+  ],
+  "expectedSolution": {
+    "inputs": { "username": "' OR '1'='1' -- ", "password": "x" },
+    "note": "Alternative: username  admin' --   also wins; the trailing -- comments out the password check."
+  },
+  "tags": ["auth-bypass", "comment-injection", "tautology", "mvp"]
+}

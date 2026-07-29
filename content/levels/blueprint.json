@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "id": "blueprint",
+  "order": 3,
+  "job": "The Blueprint",
+  "title": "The Blueprint",
+  "technique": "schema-discovery",
+  "difficulty": "hard",
+  "brief": {
+    "handler": "The Fixer",
+    "text": "The plans for Meridian's vault door are filed in a room that is not on any map. The press archive search still reaches it - first make the clerk read you the building's own index, then ask for the room by name.",
+    "objective": "Extract the vault blueprint payload from a registry that recon never shows you."
+  },
+  "debrief": {
+    "explanation": "Same concatenation flaw as the search box. Because you do not know the table name, you read the database's own catalog - sqlite_master - through a UNION to reveal the hidden schema (its CREATE statements list the columns), then UNION the discovered table to pull its rows. This job returns 2 columns, so every UNION must supply exactly 2 values.",
+    "vulnerableCode": {
+      "language": "js",
+      "code": "// VULNERABLE - same pattern as the search box; the catalog (sqlite_master) is readable too\nconst sql = \"SELECT title, body FROM articles WHERE title LIKE '%\" + q + \"%'\";\nconst rows = db.prepare(sql).all();"
+    },
+    "secureCode": {
+      "language": "js",
+      "code": "// SECURE - the pattern is BOUND; UNION / sqlite_master become 'text to search for'\nconst rows = db\n  .prepare(\"SELECT title, body FROM articles WHERE title LIKE ?\")\n  .all('%' + q + '%');\n// Defense in depth: least privilege - the app account should reach only the tables it needs."
+    },
+    "takeaway": "A concatenation flaw can leak the whole schema. Bind, and narrow access."
+  },
+  "target": {
+    "appName": "Meridian Press",
+    "surface": "search-box",
+    "fields": [
+      {
+        "name": "q",
+        "label": "Search the archive",
+        "type": "search",
+        "placeholder": "Search articles"
+      }
+    ]
+  },
+  "database": {
+    "schemaSql": "CREATE TABLE articles (id INTEGER PRIMARY KEY, title TEXT, body TEXT); CREATE TABLE z_bp_registry_7f3a (id INTEGER PRIMARY KEY, schematic_id TEXT, payload TEXT);",
+    "seedSql": "INSERT INTO articles (id,title,body) VALUES (1,'Quarterly Security Review','Routine audit completed, no findings.'),(2,'New Badge System Rollout','All staff to re-enroll by Q3.'),(3,'Facilities Maintenance Notice','Elevator B out of service.'); INSERT INTO z_bp_registry_7f3a (id,schematic_id,payload) VALUES (1,'BP-VAULT-DOOR','LOOT-BLUEPRINT-3D1F8A22'),(2,'BP-HVAC-DUCT','duct-run-A3-to-B7');",
+    "visibleSchema": [{ "table": "articles", "columns": ["id", "title", "body"] }]
+  },
+  "query": {
+    "template": "SELECT title, body FROM articles WHERE title LIKE '%{{input:q}}%'",
+    "description": "Press archive search"
+  },
+  "winCondition": {
+    "type": "flag-in-result",
+    "flag": "LOOT-BLUEPRINT-3D1F8A22",
+    "caseSensitive": true,
+    "reason": "Blueprints in hand - pulled from a table recon never listed."
+  },
+  "hints": [
+    {
+      "id": "h1",
+      "text": "You cannot ask for a room you cannot name. But the building keeps its own floor plan.",
+      "cost": 50
+    },
+    {
+      "id": "h2",
+      "text": "Do not guess the table name - the database keeps its own catalog: sqlite_master. Pull name and sql; the sql column shows the columns. This job is 2 columns.",
+      "cost": 150,
+      "revealAfterAttempts": 2
+    },
+    {
+      "id": "h3",
+      "text": "First  ' UNION SELECT name, sql FROM sqlite_master --   to find the table and its columns, then  ' UNION SELECT schematic_id, payload FROM z_bp_registry_7f3a -- ",
+      "cost": 300,
+      "revealAfterAttempts": 4
+    }
+  ],
+  "expectedSolution": {
+    "inputs": { "q": "' UNION SELECT schematic_id, payload FROM z_bp_registry_7f3a -- " },
+    "note": "Step 1 (discovery, not a win):  ' UNION SELECT name, sql FROM sqlite_master --   reveals the hidden table and its columns. Step 2 is the inputs above."
+  },
+  "tags": ["schema-discovery", "union-extraction", "sqlite_master", "mvp"]
+}

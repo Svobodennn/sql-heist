@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "id": "vault",
+  "order": 2,
+  "job": "The Vault",
+  "title": "The Vault",
+  "technique": "union-extraction",
+  "difficulty": "medium",
+  "brief": {
+    "handler": "The Fixer",
+    "text": "Behind Meridian's storefront sits a ledger the customers never see. The search desk talks to the same clerk who can read it - phrase your question so the clerk pulls from the wrong book and hands you the account.",
+    "objective": "Surface the offshore account reference hidden behind the product search."
+  },
+  "debrief": {
+    "explanation": "The search term is concatenated into the LIKE pattern, so a closing quote ends the search string and lets you append UNION SELECT. UNION staples a second query - from an unrelated table - onto the same result set; the only requirement is a matching column count, which is why the recon step is discovering that the query returns 3 columns.",
+    "vulnerableCode": {
+      "language": "js",
+      "code": "// VULNERABLE - the search term is concatenated into the LIKE pattern\nconst sql = \"SELECT id, name, price FROM products WHERE name LIKE '%\" + q + \"%'\";\nconst rows = db.prepare(sql).all();"
+    },
+    "secureCode": {
+      "language": "js",
+      "code": "// SECURE - the % wildcards are added in code; q is BOUND as a literal value\nconst rows = db\n  .prepare(\"SELECT id, name, price FROM products WHERE name LIKE ?\")\n  .all('%' + q + '%');"
+    },
+    "takeaway": "Even in search, input is data - bind it, don't concatenate."
+  },
+  "target": {
+    "appName": "Meridian Market",
+    "surface": "search-box",
+    "fields": [
+      {
+        "name": "q",
+        "label": "Search products",
+        "type": "search",
+        "placeholder": "Search the catalog"
+      }
+    ]
+  },
+  "database": {
+    "schemaSql": "CREATE TABLE products (id INTEGER PRIMARY KEY, name TEXT, price REAL); CREATE TABLE offshore_accounts (id INTEGER PRIMARY KEY, holder_name TEXT, account_ref TEXT, balance_usd INTEGER);",
+    "seedSql": "INSERT INTO products (id,name,price) VALUES (1,'Titanium Briefcase',1200.00),(2,'Carbon Lockpick Set',340.00),(3,'Signal Jammer X2',890.00),(4,'Thermal Drill',2100.00); INSERT INTO offshore_accounts (id,holder_name,account_ref,balance_usd) VALUES (1,'Halcyon Holdings','AC-1002-CH',250000),(2,'Meridian Trust','AC-1055-KY',780000),(3,'Blacklane LLC','LOOT-VAULT-9F2C4471',4500000),(4,'Orion Offshore','AC-1099-VG',1200000);",
+    "visibleSchema": [
+      { "table": "products", "columns": ["id", "name", "price"] },
+      {
+        "table": "offshore_accounts",
+        "columns": ["id", "holder_name", "account_ref", "balance_usd"]
+      }
+    ]
+  },
+  "query": {
+    "template": "SELECT id, name, price FROM products WHERE name LIKE '%{{input:q}}%'",
+    "description": "Product catalog search"
+  },
+  "winCondition": {
+    "type": "flag-in-result",
+    "flag": "LOOT-VAULT-9F2C4471",
+    "caseSensitive": true,
+    "reason": "Vault manifest surfaced in the result grid - the cross-table UNION held."
+  },
+  "hints": [
+    {
+      "id": "h1",
+      "text": "The results grid has a fixed number of columns. Anything you bolt on has to match it.",
+      "cost": 50
+    },
+    {
+      "id": "h2",
+      "text": "First find how many columns come back: ORDER BY 1, 2, 3 ... until it breaks; the last one that works is the count. Then UNION SELECT that many values - the second query must match the column count.",
+      "cost": 150,
+      "revealAfterAttempts": 2
+    },
+    {
+      "id": "h3",
+      "text": "It is 3 columns. Try  ' UNION SELECT holder_name, account_ref, balance_usd FROM offshore_accounts -- ",
+      "cost": 300,
+      "revealAfterAttempts": 4
+    }
+  ],
+  "expectedSolution": {
+    "inputs": {
+      "q": "' UNION SELECT holder_name, account_ref, balance_usd FROM offshore_accounts -- "
+    },
+    "note": "First the column count:  ' ORDER BY 3 --   is OK,  ' ORDER BY 4 --   errors => 3 columns."
+  },
+  "tags": ["union-extraction", "column-count", "mvp"]
+}
