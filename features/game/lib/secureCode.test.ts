@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { CodeSnippet, SecureSnippet } from '@/lib/schema/level'
 import {
   selectSecureSnippets,
+  selectVulnerableSnippets,
   nextTabIndex,
   groupSecureSnippets,
   shortFrameworkLabel,
@@ -30,6 +31,21 @@ describe('selectSecureSnippets (merge-order independent)', () => {
     const tabs = selectSecureSnippets({ secureCode: legacy })
     expect(tabs).toHaveLength(1)
     expect(tabs[0].stack).toBe('Secure')
+    expect(tabs[0].snippet).toEqual(legacy)
+  })
+})
+
+describe('selectVulnerableSnippets (mirrors the secure side)', () => {
+  it('prefers vulnerableCodeVariants when present, preserving order and labels', () => {
+    const tabs = selectVulnerableSnippets({ vulnerableCode: legacy, vulnerableCodeVariants: variants })
+    expect(tabs.map((t) => t.stack)).toEqual(['Node.js', 'Python', 'PHP'])
+    expect(tabs[2].snippet).toEqual({ language: 'php', code: '$stmt->execute([$u, $p]);' })
+  })
+
+  it('falls back to the single vulnerableCode when variants are absent (1 tab)', () => {
+    const tabs = selectVulnerableSnippets({ vulnerableCode: legacy })
+    expect(tabs).toHaveLength(1)
+    // The fold label ('Secure') is unused for a lone snippet — no tabs render.
     expect(tabs[0].snippet).toEqual(legacy)
   })
 })

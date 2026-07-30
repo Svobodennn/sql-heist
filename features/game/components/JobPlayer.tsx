@@ -34,7 +34,14 @@ import styles from './JobPlayer.module.css'
 // LazyMotion (features={domAnimation}) keeps only the DOM-animation feature set
 // in the /jobs/[jobId] bundle: every animated child uses `m.*` instead of the
 // full `motion.*`, saving ~18-32kB gz off this route (web-perf P1). No `layout`
-// animations are used, so domAnimation (not domMax) is sufficient.
+// animations are used, so domAnimation (not domMax) is sufficient. `strict` makes
+// a stray `motion.*` (which would silently no-op without loaded features) throw a
+// visible dev error, so the m.*-only contract can't rot. The provider wraps this
+// component's ENTIRE render output — TopBar, the phase content, AND the toast
+// stack — so every motion child is covered even if a toast is later portalled.
+// NOTE: if a motion consumer OUTSIDE JobPlayer (e.g. a board-level animation) ever
+// appears, this provider must move up to the app root so it still wraps it —
+// LazyMotion only governs its own subtree.
 export function JobPlayer({ level, nextJobId }: { level: Level; nextJobId?: string }) {
   const router = useRouter()
   const reduce = useReducedMotion()
@@ -120,7 +127,7 @@ export function JobPlayer({ level, nextJobId }: { level: Level; nextJobId?: stri
     : { duration: 0.22, ease: [0.16, 1, 0.3, 1] }
 
   return (
-    <LazyMotion features={domAnimation}>
+    <LazyMotion features={domAnimation} strict>
       <div className={styles.shell}>
         <TopBar
           jobTitle={level.job}

@@ -10,17 +10,22 @@ import styles from './CodeCompare.module.css'
 
 // Debrief beat ③ (docs/04-frontend-ux.md §7.2). Vulnerable ↔ secure side by side
 // (stacked on mobile — NOT tabs between vuln/secure, because the CONTRAST lesson
-// needs both visible at once). Only the SECURE side is a selector, and it is now
-// TWO-LEVEL, derived entirely from the data:
+// needs both visible at once). A SINGLE two-level selector now drives BOTH panels:
 //   Level 1 — LANGUAGE: icon-led categories (JavaScript / Python / PHP / …) in a
 //             single row that scrolls horizontally on overflow (never wraps down),
 //             with momentum + a right/left fade affordance.
 //   Level 2 — FRAMEWORK: a segmented chip row shown ONLY when the chosen language
 //             ships more than one driver (PHP → PDO / Laravel, …).
-// Both levels are ARIA tablists with roving tabindex + arrow-key navigation and
-// share the code tabpanel below. Each panel is labeled by icon + word + color,
-// never color alone (§11). Code is read-only, monospace, plain TEXT (React-escaped,
-// K7/XSS). A single legacy snippet renders as a plain panel (no tabs).
+// Picking "PHP → Laravel" shows Laravel's vulnerable code ↔ Laravel's secure code.
+// The selector follows whichever side ships the richer stack list so no stack is
+// unreachable (identical in the normal 1:1 pairing). Each panel resolves its OWN
+// snippet at the selected (lang, fw) and falls back to its single snippet when it
+// lacks a variant for that stack — a legacy single-snippet side, or a vuln/secure
+// count mismatch. Both levels are ARIA tablists with roving tabindex + arrow-key
+// navigation and jointly control the two code panels (aria-controls lists both).
+// Each panel is labeled by icon + word + color, never color alone (§11). Code is
+// read-only, monospace, plain TEXT (React-escaped, K7/XSS). A pair of lone legacy
+// snippets renders as two plain panels (no tabs).
 
 const NAV_KEYS = ['ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown', 'Home', 'End']
 
@@ -42,11 +47,22 @@ function CodeBlock({ code }: { code: string }) {
   )
 }
 
+const optionCount = (groups: LanguageGroup[]) => groups.reduce((n, g) => n + g.options.length, 0)
+
+// Resolve a side's snippet at the selected (lang, fw), guarding both indices: a
+// side with fewer languages/drivers than the selector (a legacy single snippet, or
+// a count mismatch) falls back to its first group / first option — its single fix.
+function snippetAt(groups: LanguageGroup[], lang: number, fw: number): CodeSnippet | undefined {
+  const group = groups[lang] ?? groups[0]
+  const option = group?.options[fw] ?? group?.options[0]
+  return option?.snippet
+}
+
 export function CodeCompare({
-  vulnerable,
+  vulnerableGroups,
   secureGroups,
 }: {
-  vulnerable: CodeSnippet
+  vulnerableGroups: LanguageGroup[]
   secureGroups: LanguageGroup[]
 }) {
   const baseId = useId()
@@ -58,12 +74,20 @@ export function CodeCompare({
   const scrollerRef = useRef<HTMLDivElement>(null)
   const [edges, setEdges] = useState({ start: false, end: false })
 
-  const group = secureGroups[lang] ?? secureGroups[0]
-  const options = group?.options ?? []
-  const activeSnippet = (options[fw] ?? options[0])?.snippet
+  // One selector drives both panels; it follows whichever side is richer so every
+  // stack stays reachable (in the normal 1:1 pairing the two are identical, so a
+  // tie resolves to the secure side — the historical selector source).
+  const selectorGroups =
+    optionCount(vulnerableGroups) > optionCount(secureGroups) ? vulnerableGroups : secureGroups
 
-  const multiLang = secureGroups.length > 1
+  const group = selectorGroups[lang] ?? selectorGroups[0]
+  const options = group?.options ?? []
+
+  const multiLang = selectorGroups.length > 1
   const multiFw = options.length > 1
+
+  const vulnSnippet = snippetAt(vulnerableGroups, lang, fw)
+  const secureSnippet = snippetAt(secureGroups, lang, fw)
 
   // Reveal the right/left scroll affordance only while there is more row to see.
   useEffect(() => {
@@ -82,7 +106,7 @@ export function CodeCompare({
       el.removeEventListener('scroll', update)
       ro?.disconnect()
     }
-  }, [secureGroups.length])
+  }, [selectorGroups.length])
 
   const selectLang = (i: number) => {
     setLang(i)
@@ -96,7 +120,7 @@ export function CodeCompare({
   const onLangKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (!NAV_KEYS.includes(e.key)) return
     e.preventDefault()
-    const next = nextTabIndex(lang, e.key, secureGroups.length)
+    const next = nextTabIndex(lang, e.key, selectorGroups.length)
     selectLang(next)
     const btn = langRefs.current[next]
     btn?.focus({ preventScroll: true })
@@ -113,116 +137,130 @@ export function CodeCompare({
 
   const langId = (i: number) => `${baseId}-lang-${i}`
   const fwId = (i: number) => `${baseId}-fw-${i}`
-  const panelId = `${baseId}-code`
-  // The code panel is labeled by the deepest active selector (framework if shown,
-  // else language); a lone legacy snippet has no selector, so it is a plain block.
+  const vulnPanelId = `${baseId}-vuln`
+  const securePanelId = `${baseId}-secure`
+  // Tabs are labeled by the deepest active selector (framework if shown, else
+  // language); a pair of lone legacy snippets has no selector, so plain panels.
   const activeLeafId = multiFw ? fwId(fw) : multiLang ? langId(lang) : undefined
+  // One tablist controls BOTH code panels — aria-controls accepts multiple ids.
+  const panelIds = `${vulnPanelId} ${securePanelId}`
 
   return (
-    <div className={styles.grid}>
-      <div className={cx(styles.panel, styles.vuln)}>
-        <p className={styles.head}>
-          <IconLockBroken size={16} />
-          <span>Vulnerable</span>
-          <span className={styles.lang}>{vulnerable.language}</span>
-        </p>
-        <CodeBlock code={vulnerable.code} />
-        <p className={styles.caption}>Input is concatenated into the query — data becomes code.</p>
-      </div>
-
-      <div className={cx(styles.panel, styles.secure)}>
-        <p className={styles.head}>
-          <IconLock size={16} />
-          <span>Secure</span>
-          {activeSnippet && <span className={styles.lang}>{activeSnippet.language}</span>}
-        </p>
-
-        {(multiLang || multiFw) && (
-          <div className={styles.selector}>
-            {multiLang && (
-              <div className={styles.langBar}>
-                <div
-                  ref={scrollerRef}
-                  role="tablist"
-                  aria-label="Secure fix — language"
-                  aria-orientation="horizontal"
-                  className={styles.langScroller}
-                  onKeyDown={onLangKeyDown}
-                >
-                  {secureGroups.map((g, i) => (
-                    <button
-                      key={g.language}
-                      ref={(el) => {
-                        langRefs.current[i] = el
-                      }}
-                      type="button"
-                      role="tab"
-                      id={langId(i)}
-                      aria-selected={i === lang}
-                      aria-controls={panelId}
-                      tabIndex={i === lang ? 0 : -1}
-                      className={cx(styles.langTab, i === lang && styles.langTabActive)}
-                      onClick={() => selectLang(i)}
-                    >
-                      <LangIcon code={g.language} size={20} className={styles.langGlyph} />
-                      <span>{g.name}</span>
-                    </button>
-                  ))}
-                </div>
-                <span
-                  aria-hidden="true"
-                  className={cx(styles.fade, styles.fadeStart, edges.start && styles.fadeOn)}
-                />
-                <span
-                  aria-hidden="true"
-                  className={cx(styles.fade, styles.fadeEnd, edges.end && styles.fadeOn)}
-                />
-              </div>
-            )}
-
-            {multiFw && (
+    <div className={styles.compare}>
+      {(multiLang || multiFw) && (
+        <div className={styles.selector}>
+          {multiLang && (
+            <div className={styles.langBar}>
               <div
+                ref={scrollerRef}
                 role="tablist"
-                aria-label={`Secure fix — ${group?.name ?? ''} framework`}
+                aria-label="Code stack — language"
                 aria-orientation="horizontal"
-                className={styles.fwBar}
-                onKeyDown={onFwKeyDown}
+                className={styles.langScroller}
+                onKeyDown={onLangKeyDown}
               >
-                {options.map((opt, i) => (
+                {selectorGroups.map((g, i) => (
                   <button
-                    key={opt.label}
+                    key={g.language}
                     ref={(el) => {
-                      fwRefs.current[i] = el
+                      langRefs.current[i] = el
                     }}
                     type="button"
                     role="tab"
-                    id={fwId(i)}
-                    aria-selected={i === fw}
-                    aria-controls={panelId}
-                    tabIndex={i === fw ? 0 : -1}
-                    className={cx(styles.fwChip, i === fw && styles.fwChipActive)}
-                    onClick={() => setFw(i)}
+                    id={langId(i)}
+                    aria-selected={i === lang}
+                    aria-controls={panelIds}
+                    tabIndex={i === lang ? 0 : -1}
+                    className={cx(styles.langTab, i === lang && styles.langTabActive)}
+                    onClick={() => selectLang(i)}
                   >
-                    {opt.shortLabel}
+                    <LangIcon code={g.language} size={20} className={styles.langGlyph} />
+                    <span>{g.name}</span>
                   </button>
                 ))}
               </div>
-            )}
-          </div>
-        )}
+              <span
+                aria-hidden="true"
+                className={cx(styles.fade, styles.fadeStart, edges.start && styles.fadeOn)}
+              />
+              <span
+                aria-hidden="true"
+                className={cx(styles.fade, styles.fadeEnd, edges.end && styles.fadeOn)}
+              />
+            </div>
+          )}
 
-        {activeSnippet && (
-          <div
-            role={activeLeafId ? 'tabpanel' : undefined}
-            id={panelId}
-            aria-labelledby={activeLeafId}
-            tabIndex={activeLeafId ? 0 : undefined}
-          >
-            <CodeBlock code={activeSnippet.code} />
-          </div>
-        )}
+          {multiFw && (
+            <div
+              role="tablist"
+              aria-label={`Code stack — ${group?.name ?? ''} framework`}
+              aria-orientation="horizontal"
+              className={styles.fwBar}
+              onKeyDown={onFwKeyDown}
+            >
+              {options.map((opt, i) => (
+                <button
+                  key={opt.label}
+                  ref={(el) => {
+                    fwRefs.current[i] = el
+                  }}
+                  type="button"
+                  role="tab"
+                  id={fwId(i)}
+                  aria-selected={i === fw}
+                  aria-controls={panelIds}
+                  tabIndex={i === fw ? 0 : -1}
+                  className={cx(styles.fwChip, i === fw && styles.fwChipActive)}
+                  onClick={() => setFw(i)}
+                >
+                  {opt.shortLabel}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
-        <p className={styles.caption}>Input is bound as a parameter — it stays data.</p>
+      <div className={styles.grid}>
+        <div className={cx(styles.panel, styles.vuln)}>
+          <p className={styles.head}>
+            <IconLockBroken size={16} />
+            <span>Vulnerable</span>
+            {vulnSnippet && <span className={styles.lang}>{vulnSnippet.language}</span>}
+          </p>
+          {vulnSnippet && (
+            <div
+              role={activeLeafId ? 'tabpanel' : undefined}
+              id={vulnPanelId}
+              aria-labelledby={activeLeafId}
+              tabIndex={activeLeafId ? 0 : undefined}
+            >
+              <CodeBlock code={vulnSnippet.code} />
+            </div>
+          )}
+          <p className={styles.caption}>
+            Input is concatenated into the query — data becomes code.
+          </p>
+        </div>
+
+        <div className={cx(styles.panel, styles.secure)}>
+          <p className={styles.head}>
+            <IconLock size={16} />
+            <span>Secure</span>
+            {secureSnippet && <span className={styles.lang}>{secureSnippet.language}</span>}
+          </p>
+          {secureSnippet && (
+            <div
+              role={activeLeafId ? 'tabpanel' : undefined}
+              id={securePanelId}
+              aria-labelledby={activeLeafId}
+              tabIndex={activeLeafId ? 0 : undefined}
+            >
+              <CodeBlock code={secureSnippet.code} />
+            </div>
+          )}
+          <p className={styles.caption}>Input is bound as a parameter — it stays data.</p>
+        </div>
       </div>
     </div>
   )

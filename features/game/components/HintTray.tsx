@@ -28,6 +28,12 @@ export function HintTray({
   const [pendingTier, setPendingTier] = useState<number | null>(null)
   const restoreRef = useRef<HTMLElement | null>(null)
   const dialogRef = useRef<HTMLDivElement | null>(null)
+  const hintTextRefs = useRef<(HTMLParagraphElement | null)[]>([])
+  // On CONFIRM the tier reveals and its "Call the Fixer" trigger unmounts, so
+  // restoring focus to that trigger would drop focus to <body> (WCAG 2.4.3). We
+  // record the confirmed tier here and, once the reveal commits, move focus to
+  // that tier's now-visible hint text instead (see the openedTiers effect below).
+  const revealFocusTier = useRef<number | null>(null)
 
   const cost = (tier: number) => hints[tier - 1]?.cost ?? DEFAULT_SCORING.hintCosts[tier - 1] ?? 0
 
@@ -35,15 +41,32 @@ export function HintTray({
     restoreRef.current = document.activeElement as HTMLElement
     setPendingTier(tier)
   }
+  // Cancel / Esc / overlay path: the trigger is still mounted, so restoring focus
+  // to it is correct. (CONFIRM deliberately does NOT go through here.)
   const closeModal = useCallback(() => {
     setPendingTier(null)
     restoreRef.current?.focus()
   }, [])
 
   const confirm = () => {
-    if (pendingTier != null) onOpen(pendingTier)
-    closeModal()
+    if (pendingTier == null) return
+    revealFocusTier.current = pendingTier
+    onOpen(pendingTier)
+    // Close WITHOUT closeModal(): closeModal restores focus to the trigger, which
+    // is exactly the element about to unmount. The reveal effect lands focus on
+    // the newly revealed hint instead.
+    setPendingTier(null)
   }
+
+  // Land focus on the just-revealed hint after a CONFIRM. Keyed on openedTiers so
+  // it runs only once the parent re-renders the tier as open; the ref guard means
+  // it never fires on mount or on a cancel/Esc/overlay close.
+  useEffect(() => {
+    const tier = revealFocusTier.current
+    if (tier == null) return
+    revealFocusTier.current = null
+    hintTextRefs.current[tier - 1]?.focus()
+  }, [openedTiers])
 
   useEffect(() => {
     if (pendingTier == null) return
@@ -111,7 +134,15 @@ export function HintTray({
                 <span className={styles.cost}>−{cost(tier)}</span>
               </div>
               {isOpen ? (
-                <p className={cx(styles.hintText, tier === 3 && 'mono')}>{hint.text}</p>
+                <p
+                  ref={(el) => {
+                    hintTextRefs.current[i] = el
+                  }}
+                  tabIndex={-1}
+                  className={cx(styles.hintText, tier === 3 && 'mono')}
+                >
+                  {hint.text}
+                </p>
               ) : isNext ? (
                 <Button variant="ghost" onClick={() => openModal(tier)}>
                   Call the Fixer

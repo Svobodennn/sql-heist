@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { z } from 'zod'
 
 // Job-over progress (docs/01-architecture.md §7.1): completed jobs + best score,
 // persisted to localStorage (no backend/account — progress stays on device).
@@ -15,12 +16,23 @@ export type ProgressMap = Record<string, JobRecord>
 
 const STORAGE_KEY = 'sql-heist:progress:v1'
 
+// localStorage is user-writable and outlives app versions, so a stored blob can be
+// corrupt, truncated, or a stale/legacy shape. Validate at the boundary (mirrors
+// JobRecord) instead of trusting `JSON.parse(raw) as ProgressMap`: a bad shape
+// yields {} (start fresh) rather than leaking a malformed record into game state.
+const progressMapSchema = z.record(
+  z.object({ completed: z.boolean(), bestScore: z.number() }),
+)
+
 export function readProgress(): ProgressMap {
   if (typeof window === 'undefined') return {}
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY)
-    return raw ? (JSON.parse(raw) as ProgressMap) : {}
+    if (!raw) return {}
+    const parsed = progressMapSchema.safeParse(JSON.parse(raw))
+    return parsed.success ? parsed.data : {}
   } catch {
+    // Non-JSON garbage (JSON.parse throws) or storage access denied — start fresh.
     return {}
   }
 }
