@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { Logo } from './Logo'
 import styles from './Footer.module.css'
 
 const COLUMNS = [
@@ -41,7 +42,10 @@ export function Footer() {
       <div className="container">
         <div className={styles.top}>
           <div className={styles.brandCol}>
-            <span className={styles.brand}>SQL&nbsp;HEIST</span>
+            <span className={styles.brand}>
+              <Logo size={20} />
+              SQL&nbsp;HEIST
+            </span>
             <p className={styles.tag}>
               The database is real. The crime isn&apos;t. Learn the break-in, then learn the lock.
             </p>

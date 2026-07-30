@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { cx } from './cx'
+import { Logo } from './Logo'
 import { IconMenu, IconClose, IconUser } from './icons'
 import { ShareButton } from './ShareButton'
 import { LanguageSwitcher } from './LanguageSwitcher'
@@ -45,8 +46,9 @@ export function Navbar() {
   return (
     <header className={styles.header}>
       <nav className={cx('container', styles.nav)} aria-label="Primary">
-        <Link href="/" className={styles.brand}>
-          SQL&nbsp;HEIST
+        <Link href="/" className={styles.brand} aria-label="SQL Heist — home">
+          <Logo size={26} />
+          <span>SQL&nbsp;HEIST</span>
         </Link>
 
         <ul className={styles.links}>
