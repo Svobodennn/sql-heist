@@ -11,7 +11,7 @@ const COLUMNS = [
     headingKey: 'footer.colPull',
     links: [
       { href: '/', key: 'footer.linkHome' },
-      { href: '/jobs', key: 'footer.linkBoard' },
+      { href: '/cases', key: 'footer.linkBoard' },
     ],
   },
   {
@@ -37,7 +37,7 @@ const COLUMNS = [
 export function Footer() {
   const pathname = usePathname()
   const { t } = useTranslation()
-  if (/^\/jobs\/[^/]+/.test(pathname)) return null
+  if (/^\/cases\/[^/]+/.test(pathname)) return null
 
   return (
     <footer className={styles.footer}>

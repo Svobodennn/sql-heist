@@ -145,7 +145,7 @@ export default function HelpPage() {
           break-in so you can build the lock.
         </p>
         <div className={styles.ctaRow}>
-          <Link href="/jobs" className="btn btn--primary">
+          <Link href="/cases" className="btn btn--primary">
             <span>{t('help.cta')}</span>
             <IconArrowRight size={18} />
           </Link>

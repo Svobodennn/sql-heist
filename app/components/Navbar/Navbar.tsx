@@ -15,7 +15,7 @@ import styles from './Navbar.module.css'
 // accessible label for each destination.
 const NAV_LINKS = [
   { href: '/', key: 'nav.home', Icon: IconHome },
-  { href: '/jobs', key: 'nav.jobs', Icon: IconBoard },
+  { href: '/cases', key: 'nav.jobs', Icon: IconBoard },
   { href: '/help', key: 'nav.help', Icon: IconHelpCircle },
 ] as const
 

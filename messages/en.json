@@ -1,7 +1,7 @@
 {
   "nav": {
     "home": "Home",
-    "jobs": "Jobs",
+    "jobs": "Cases",
     "help": "Help",
     "signIn": "Sign in",
     "signInTitle": "Accounts are coming soon",
@@ -43,8 +43,8 @@
       "eyebrow": "Meridian Holdings · after hours",
       "title": "SQL Heist",
       "tagline": "Every system has a door somebody forgot to lock.",
-      "lede": "You find them. A real database is on the other side — no simulation, no safety net but the sandbox. Pull three jobs. Then learn how they should have stopped you.",
-      "primaryCta": "Take the first job",
+      "lede": "You find them. A real database is on the other side — no simulation, no safety net but the sandbox. Pull three cases. Then learn how they should have stopped you.",
+      "primaryCta": "Take the first case",
       "secondaryCta": "How it works"
     },
     "what": {
@@ -71,9 +71,9 @@
     },
     "closer": {
       "fixerName": "The Fixer",
-      "fixerLine": "“Three jobs. You keep what you learn — Meridian keeps the bill.”",
+      "fixerLine": "“Three cases. You keep what you learn — Meridian keeps the bill.”",
       "title": "The door is open. Walk through it.",
-      "cta": "Take the first job"
+      "cta": "Take the first case"
     },
     "loop": {
       "0": { "title": "Brief", "blurb": "The Fixer names the mark and the take — never the method." },

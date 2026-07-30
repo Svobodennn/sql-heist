@@ -71,7 +71,7 @@ export default function HomePage() {
           </pre>
 
           <div className={styles.heroCtas}>
-            <Link href="/jobs" className="btn btn--primary">
+            <Link href="/cases" className="btn btn--primary">
               <span>{hero.primaryCta}</span>
               <IconArrowRight size={18} />
             </Link>
@@ -200,7 +200,7 @@ export default function HomePage() {
             <h2 id="closer-heading" className={styles.closerTitle}>
               {closer.title}
             </h2>
-            <Link href="/jobs" className="btn btn--primary">
+            <Link href="/cases" className="btn btn--primary">
               <span>{closer.cta}</span>
               <IconArrowRight size={18} />
             </Link>
