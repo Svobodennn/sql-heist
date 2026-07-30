@@ -149,8 +149,12 @@ export const winConditionSchema = z.discriminatedUnion('type', [
   // (6) blind-timing: timing oracle modeled SYMBOLICALLY. sql.js is synchronous,
   //     so we do NOT measure wall-clock (durationMs is ignored); the oracle's
   //     TRUE state is modeled as a returned row, same signal as blind-boolean.
+  //     thresholdMs/slowDelayMs tune ONLY the modeled timing SIGNAL (the meter in
+  //     deriveSignal); evaluation still ignores time. Optional — signal.ts defaults.
   z.object({
     type: z.literal('blind-timing'),
+    thresholdMs: z.number().optional(),
+    slowDelayMs: z.number().optional(),
     reason: z.string().optional(),
   }),
   // (7) stacked-queries: a multi-statement payload's side effect is observable

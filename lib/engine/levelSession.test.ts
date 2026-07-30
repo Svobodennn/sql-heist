@@ -151,6 +151,47 @@ describe('LevelSession — WS3 inputFilter (WAF) short-circuits before the DB', 
   })
 })
 
+describe('LevelSession — WS3 FilterOutcome surfaced on the run result', () => {
+  function wafLevel(mode: 'reject' | 'strip'): Level {
+    const base = searchLevelFixture()
+    return {
+      ...base,
+      technique: 'waf-bypass',
+      query: {
+        ...base.query,
+        inputFilter: { blocklist: ['UNION'], mode, message: 'The WAF dropped it.' },
+      },
+    }
+  }
+
+  it('reject: the run result carries filter { mode:reject, blocked:[UNION] }', async () => {
+    const session = await engine.openLevel(wafLevel('reject'))
+    const result = session.run({
+      q: "' UNION SELECT holder_name, account_ref, balance_usd FROM offshore_accounts -- ",
+    })
+    expect(result.filter).toEqual({ mode: 'reject', blocked: ['UNION'] })
+    expect(result.error).toBe('The WAF dropped it.')
+    session.dispose()
+  })
+
+  it('strip: the run result carries filter with the cleaned effectiveInput and still hits the DB', async () => {
+    const session = await engine.openLevel(wafLevel('strip'))
+    const result = session.run({ q: 'Widget UNION' })
+    expect(result.filter?.mode).toBe('strip')
+    expect(result.filter?.blocked).toEqual(['UNION'])
+    expect(result.filter?.effectiveInput).toBe('Widget ') // UNION stripped before substitution
+    expect(result.error).toBeUndefined() // not rejected -> the neutered query ran
+    session.dispose()
+  })
+
+  it('no inputFilter => no filter field on the run result', async () => {
+    const session = await engine.openLevel(searchLevelFixture())
+    const result = session.run({ q: 'Widget' })
+    expect(result.filter).toBeUndefined()
+    session.dispose()
+  })
+})
+
 describe('LevelSession.reset — destructive payload does not leak into the next attempt', () => {
   it('rebuilds a clean seeded DB after a DROP/DELETE payload', async () => {
     const level = loginLevelFixture()

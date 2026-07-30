@@ -158,3 +158,49 @@ describe('queryComposer.compose — WS3 input filter (WAF)', () => {
     expect(result.inputs).toEqual({ q: "' UNION SELECT 1 --" }) // echo = what player typed
   })
 })
+
+describe('queryComposer.compose — WS3 FilterOutcome (what the WAF did, for the UI)', () => {
+  it('is absent when there is no inputFilter', () => {
+    const result = compose("q='{{input:q}}'", { q: 'x' })
+    expect(result.filter).toBeUndefined()
+    expect('filter' in result).toBe(false)
+  })
+
+  it('reject: reports mode + the blocked blocklist term(s), no effectiveInput', () => {
+    const result = compose(
+      "q='{{input:q}}'",
+      { q: "' UNION SELECT x --" },
+      { blocklist: ['UNION'], mode: 'reject' },
+    )
+    expect(result.filter).toEqual({ mode: 'reject', blocked: ['UNION'] })
+  })
+
+  it('reject benign: filter present with an empty blocked list', () => {
+    const result = compose(
+      "q='{{input:q}}'",
+      { q: 'Widget' },
+      { blocklist: ['UNION'], mode: 'reject' },
+    )
+    expect(result.filter).toEqual({ mode: 'reject', blocked: [] })
+  })
+
+  it('strip: reports blocked term(s) + the effective (cleaned) input', () => {
+    const result = compose(
+      "q='{{input:q}}'",
+      { q: 'UNION SELECT a,b --' },
+      { blocklist: ['UNION'], mode: 'strip' },
+    )
+    expect(result.filter?.mode).toBe('strip')
+    expect(result.filter?.blocked).toEqual(['UNION'])
+    expect(result.filter?.effectiveInput).toBe(' SELECT a,b --') // UNION excised
+  })
+
+  it('reports blocked terms in blocklist order, deduped across fields (case-insensitive)', () => {
+    const result = compose(
+      "a='{{input:a}}' b='{{input:b}}'",
+      { a: 'UNION', b: 'union select' },
+      { blocklist: ['SELECT', 'UNION'], mode: 'reject' },
+    )
+    expect(result.filter?.blocked).toEqual(['SELECT', 'UNION'])
+  })
+})

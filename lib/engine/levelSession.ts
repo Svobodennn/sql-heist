@@ -1,7 +1,7 @@
 import type { Database, SqlJsStatic } from 'sql.js'
 import type { Level, VisibleTable } from '@/lib/schema/level'
 import { loadSqlJs, type LoadSqlJsOptions } from '@/lib/engine/sqlLoader'
-import { compose } from '@/lib/engine/queryComposer'
+import { compose, type FilterOutcome } from '@/lib/engine/queryComposer'
 import { exec, type ExecutionResult } from '@/lib/engine/sqlRunner'
 
 // Level lifecycle wrapper (docs/01-architecture.md §2.2, §3.2). Each level gets
@@ -9,8 +9,13 @@ import { exec, type ExecutionResult } from '@/lib/engine/sqlRunner'
 // from schema+seed so a destructive payload (DROP/DELETE) can't poison the next
 // attempt. run() = compose + exec; win evaluation stays a SEPARATE call (§5).
 
+// WS3: the run result IS the ExecutionResult plus (only when the level has an
+// inputFilter) what the WAF did, so the UI can render reject/strip feedback.
+// Additive + back-compatible: callers reading ExecutionResult fields are unchanged.
+export type RunResult = ExecutionResult & { filter?: FilterOutcome }
+
 export interface LevelSession {
-  run(inputs: Record<string, string>): ExecutionResult
+  run(inputs: Record<string, string>): RunResult
   reset(): void
   dispose(): void
   readonly visibleSchema: VisibleTable[]
@@ -54,23 +59,24 @@ class LevelSessionImpl implements LevelSession {
     }))
   }
 
-  run(inputs: Record<string, string>): ExecutionResult {
+  run(inputs: Record<string, string>): RunResult {
     this.assertLive()
     const composed = compose(this.level.query.template, inputs, this.level.query.inputFilter)
-    if (composed.rejected) {
-      // WS3 WAF: the filter blocked the payload — never touch the DB. Surface it
-      // as an error result so the win evaluator's anti-trivial guard loses it.
-      return {
-        composedSql: composed.sql,
-        columns: [],
-        rows: [],
-        rowCount: 0,
-        resultSetCount: 0,
-        error: composed.filterMessage ?? 'Input rejected by the filter.',
-        durationMs: 0,
-      }
-    }
-    return exec(this.db, composed.sql)
+    const base: ExecutionResult = composed.rejected
+      ? // WS3 WAF: the filter blocked the payload — never touch the DB. Surface it
+        // as an error result so the win evaluator's anti-trivial guard loses it.
+        {
+          composedSql: composed.sql,
+          columns: [],
+          rows: [],
+          rowCount: 0,
+          resultSetCount: 0,
+          error: composed.filterMessage ?? 'Input rejected by the filter.',
+          durationMs: 0,
+        }
+      : exec(this.db, composed.sql)
+    // Surface the WAF outcome only when the level actually ran a filter.
+    return composed.filter ? { ...base, filter: composed.filter } : base
   }
 
   reset(): void {
