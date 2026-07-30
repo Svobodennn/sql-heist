@@ -2,7 +2,8 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getLevel, getNextJobId, JOB_IDS } from '@/features/game/levels'
 import { JobPlayer } from '@/features/game/components/JobPlayer'
-import { SITE_NAME } from '@/app/siteConfig'
+import { JsonLd } from '@/app/components/JsonLd'
+import { SITE_NAME, SITE_URL } from '@/app/siteConfig'
 
 // Readable technique names for per-job SEO titles/descriptions.
 const TECHNIQUE_LABEL: Record<string, string> = {
@@ -53,5 +54,20 @@ export default async function JobPage({ params }: { params: Promise<{ jobId: str
   const level = getLevel(jobId)
   if (!level) notFound()
 
-  return <JobPlayer level={level} nextJobId={getNextJobId(jobId)} />
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Jobs', item: `${SITE_URL}/jobs` },
+      { '@type': 'ListItem', position: 3, name: level.title, item: `${SITE_URL}/jobs/${jobId}` },
+    ],
+  }
+
+  return (
+    <>
+      <JsonLd data={breadcrumbLd} />
+      <JobPlayer level={level} nextJobId={getNextJobId(jobId)} />
+    </>
+  )
 }
