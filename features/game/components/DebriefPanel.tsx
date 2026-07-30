@@ -6,7 +6,11 @@ import type { Level } from '@/lib/schema/level'
 import { compose } from '@/lib/engine/queryComposer'
 import { cx } from '../lib/cx'
 import { DEBRIEF_INTRO, getJobNarrative } from '../lib/narrative'
-import { groupSecureSnippets, selectSecureSnippets } from '../lib/secureCode'
+import {
+  groupSecureSnippets,
+  selectSecureSnippets,
+  selectVulnerableSnippets,
+} from '../lib/secureCode'
 import { Button } from './Button'
 import { CodeCompare } from './CodeCompare'
 import { SqlPreview } from './SqlPreview'
@@ -43,10 +47,17 @@ export function DebriefPanel({
     [level.query.template, winningInputs],
   )
   const narrative = getJobNarrative(level.id)
-  // Two-level secure selector: flat tabs -> language groups (each with its
-  // framework/driver options). Memoized on the (stable) debrief.
+  // Two-level stack selector: flat tabs -> language groups (each with its
+  // framework/driver options). Both sides use the SAME model so one selector can
+  // drive them together; the vulnerable side is per-stack when the level ships
+  // vulnerableCodeVariants, else its single vulnerableCode folded to one group.
+  // Memoized on the (stable) debrief.
   const secureGroups = useMemo(
     () => groupSecureSnippets(selectSecureSnippets(level.debrief)),
+    [level.debrief],
+  )
+  const vulnerableGroups = useMemo(
+    () => groupSecureSnippets(selectVulnerableSnippets(level.debrief)),
     [level.debrief],
   )
   const [revealed, setRevealed] = useState(isReplay ? TOTAL_BEATS : 1)
@@ -91,7 +102,7 @@ export function DebriefPanel({
         {revealed >= 3 && (
           <li className={styles.beat}>
             <h2 className={styles.beatHead}>③ The fix</h2>
-            <CodeCompare vulnerable={level.debrief.vulnerableCode} secureGroups={secureGroups} />
+            <CodeCompare vulnerableGroups={vulnerableGroups} secureGroups={secureGroups} />
           </li>
         )}
 

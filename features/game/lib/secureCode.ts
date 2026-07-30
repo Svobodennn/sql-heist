@@ -17,12 +17,34 @@ interface DebriefSecure {
   secureCodeVariants?: EngineSecureSnippet[]
 }
 
-// Fold a level's secure fix into UI tabs: prefer the per-stack variants, else the
-// single legacy snippet. `secureCodeVariants` is schema-guaranteed non-empty when
-// present (Zod .min(1)), so the debrief can never render zero tabs.
+interface DebriefVulnerable {
+  vulnerableCode: CodeSnippet
+  vulnerableCodeVariants?: EngineSecureSnippet[]
+}
+
+// Generic adapter shared by both sides of the debrief: fold either code form — a
+// legacy single CodeSnippet or a per-stack SecureSnippet[] — into UI tabs. The
+// caller passes the already-picked source (`variants ?? single`). Both variant
+// arrays are schema-guaranteed non-empty when present (Zod .min(1)), so the
+// debrief can never render zero tabs on either side.
+export function toSnippetTabs(source: CodeSnippet | EngineSecureSnippet[]): SecureSnippet[] {
+  return normalizeSecureCode(source).map((t) => ({
+    stack: t.label,
+    snippet: { language: t.language, code: t.code },
+  }))
+}
+
+// Fold a level's secure FIX into UI tabs: prefer the per-stack variants, else the
+// single legacy snippet.
 export function selectSecureSnippets(debrief: DebriefSecure): SecureSnippet[] {
-  const tabs = normalizeSecureCode(debrief.secureCodeVariants ?? debrief.secureCode)
-  return tabs.map((t) => ({ stack: t.label, snippet: { language: t.language, code: t.code } }))
+  return toSnippetTabs(debrief.secureCodeVariants ?? debrief.secureCode)
+}
+
+// Mirror of selectSecureSnippets for the vulnerable FLAW (docs/04-frontend-ux.md
+// §7.2): the debrief now teaches the flaw per-stack too, paired 1:1 with the fix.
+// Same adapter, different fields — the helper is not secure-only.
+export function selectVulnerableSnippets(debrief: DebriefVulnerable): SecureSnippet[] {
+  return toSnippetTabs(debrief.vulnerableCodeVariants ?? debrief.vulnerableCode)
 }
 
 // ── Two-level selector model (docs/04-frontend-ux.md §7.2) ──────────────────

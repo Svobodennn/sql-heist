@@ -1,3 +1,11 @@
+/* Outer stack: the shared stack selector sits above the vuln↔secure grid so one
+   control visibly governs both panels. */
+.compare {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
 .grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -52,12 +60,14 @@
   text-transform: none;
 }
 
-/* Secure selector zone: a subtly raised surface between the head and the code,
-   holding level 1 (language) and, when present, level 2 (framework). One divider
-   sits below the whole zone; level 2 is separated from level 1 by its own top rule. */
+/* Shared stack selector: a standalone raised card above BOTH panels, holding
+   level 1 (language) and, when present, level 2 (framework). Level 2 is separated
+   from level 1 by its own top rule (.fwBar). */
 .selector {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
   background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  overflow: hidden;
 }
 
 /* ── Level 1 — language: single row, scrolls horizontally on overflow ── */
