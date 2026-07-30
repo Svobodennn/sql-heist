@@ -183,6 +183,11 @@ export const levelSchema = z.object({
   debrief: z.object({
     explanation: z.string(),
     vulnerableCode: codeSnippetSchema,
+    // Mirrors secureCodeVariants below: optional per-stack vulnerable snippets.
+    // vulnerableCode stays the single canonical CodeSnippet (existing consumers +
+    // golden levels unchanged); normalizeSecureCode(vulnerableCodeVariants ?? vulnerableCode)
+    // reuses the same adapter for the vulnerable side — no new normalizer needed.
+    vulnerableCodeVariants: z.array(secureSnippetSchema).min(1).optional(),
     // secureCode stays a single CodeSnippet (existing consumers + golden levels
     // unchanged). WS2 per-stack fixes are ADDITIVE via optional secureCodeVariants
     // below; normalizeSecureCode(secureCodeVariants ?? secureCode) collapses both.

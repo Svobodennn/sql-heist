@@ -224,6 +224,33 @@ describe('WS2 secure-code — per-stack, back-compatible', () => {
   })
 })
 
+describe('WS2 vulnerable-code — per-stack, back-compatible (mirrors secure side)', () => {
+  it('accepts a level with no vulnerableCodeVariants (legacy single-snippet form stays valid)', () => {
+    expect(safeParseLevel(validLevel()).success).toBe(true)
+  })
+
+  it('accepts an optional per-stack vulnerableCodeVariants array', () => {
+    const level = validLevel()
+    const withVariants = {
+      ...level,
+      debrief: {
+        ...level.debrief,
+        vulnerableCodeVariants: [
+          { id: 'node', label: 'Node (pg)', language: 'ts', code: `query("... " + u)` },
+          { id: 'php', label: 'PHP (raw)', language: 'php', code: '"... " . $u' },
+        ],
+      },
+    }
+    expect(safeParseLevel(withVariants).success).toBe(true)
+  })
+
+  it('rejects an empty vulnerableCodeVariants array (min 1)', () => {
+    const level = validLevel()
+    const bad = { ...level, debrief: { ...level.debrief, vulnerableCodeVariants: [] } }
+    expect(safeParseLevel(bad).success).toBe(false)
+  })
+})
+
 describe('normalizeSecureCode — collapses both forms to SecureSnippet[]', () => {
   it('legacy object -> a single default snippet', () => {
     const result = normalizeSecureCode({ language: 'ts', code: 'db.prepare(q).bind(x)' })
