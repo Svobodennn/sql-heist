@@ -180,6 +180,22 @@ export const winConditionSchema = z.discriminatedUnion('type', [
 ])
 export type WinCondition = z.infer<typeof winConditionSchema>
 
+// Shared with the Case/Objective model (docs/cases-design.md) — extracted so Level
+// and Objective reuse one definition instead of duplicating the shape.
+export const difficultySchema = z.enum(['intro', 'easy', 'medium', 'hard'])
+export type Difficulty = z.infer<typeof difficultySchema>
+
+// The "fix" beat: the flaw + its parameterized rewrite, optionally per stack.
+export const debriefSchema = z.object({
+  explanation: z.string(),
+  vulnerableCode: codeSnippetSchema,
+  vulnerableCodeVariants: z.array(secureSnippetSchema).min(1).optional(),
+  secureCode: codeSnippetSchema,
+  secureCodeVariants: z.array(secureSnippetSchema).min(1).optional(),
+  takeaway: z.string(),
+})
+export type Debrief = z.infer<typeof debriefSchema>
+
 export const levelSchema = z.object({
   // ---- identity & meta ----
   schemaVersion: z.literal(1),
@@ -188,7 +204,7 @@ export const levelSchema = z.object({
   job: z.string(),
   title: z.string(),
   technique: techniqueIdSchema,
-  difficulty: z.enum(['intro', 'easy', 'medium', 'hard']),
+  difficulty: difficultySchema,
 
   // ---- narrative ----
   brief: z.object({
@@ -196,21 +212,7 @@ export const levelSchema = z.object({
     text: z.string(),
     objective: z.string(),
   }),
-  debrief: z.object({
-    explanation: z.string(),
-    vulnerableCode: codeSnippetSchema,
-    // Mirrors secureCodeVariants below: optional per-stack vulnerable snippets.
-    // vulnerableCode stays the single canonical CodeSnippet (existing consumers +
-    // golden levels unchanged); normalizeSecureCode(vulnerableCodeVariants ?? vulnerableCode)
-    // reuses the same adapter for the vulnerable side — no new normalizer needed.
-    vulnerableCodeVariants: z.array(secureSnippetSchema).min(1).optional(),
-    // secureCode stays a single CodeSnippet (existing consumers + golden levels
-    // unchanged). WS2 per-stack fixes are ADDITIVE via optional secureCodeVariants
-    // below; normalizeSecureCode(secureCodeVariants ?? secureCode) collapses both.
-    secureCode: codeSnippetSchema,
-    secureCodeVariants: z.array(secureSnippetSchema).min(1).optional(),
-    takeaway: z.string(),
-  }),
+  debrief: debriefSchema,
 
   // ---- target surface (recon + input) ----
   target: z.object({
