@@ -27,6 +27,9 @@ function Base({ size = 18, children, ...rest }: IconProps & { children: React.Re
   )
 }
 
+// Generic icons shared with the app shell live in the ui/ layer (one source).
+export { IconArrowRight, IconBoard, IconCheck, IconChevronDown, IconGlobe } from '@/ui/icons'
+
 export const IconLock = (p: IconProps) => (
   <Base {...p}>
     <rect x="5" y="11" width="14" height="9" rx="2" />
@@ -47,12 +50,6 @@ export const IconTimer = (p: IconProps) => (
   <Base {...p}>
     <circle cx="12" cy="13" r="7" />
     <path d="M12 13V9M9 3h6" />
-  </Base>
-)
-
-export const IconCheck = (p: IconProps) => (
-  <Base {...p}>
-    <path d="m4 12 5 5L20 6" />
   </Base>
 )
 
@@ -77,30 +74,9 @@ export const IconBulb = (p: IconProps) => (
   </Base>
 )
 
-export const IconArrowRight = (p: IconProps) => (
-  <Base {...p}>
-    <path d="M5 12h14M13 6l6 6-6 6" />
-  </Base>
-)
-
 export const IconArrowLeft = (p: IconProps) => (
   <Base {...p}>
     <path d="M19 12H5M11 18l-6-6 6-6" />
-  </Base>
-)
-
-export const IconBoard = (p: IconProps) => (
-  <Base {...p}>
-    <rect x="4" y="4" width="7" height="7" rx="1.5" />
-    <rect x="13" y="4" width="7" height="7" rx="1.5" />
-    <rect x="4" y="13" width="7" height="7" rx="1.5" />
-    <rect x="13" y="13" width="7" height="7" rx="1.5" />
-  </Base>
-)
-
-export const IconChevronDown = (p: IconProps) => (
-  <Base {...p}>
-    <path d="m6 9 6 6 6-6" />
   </Base>
 )
 
@@ -115,13 +91,6 @@ export const IconMute = (p: IconProps) => (
   <Base {...p}>
     <path d="M4 9v6h4l5 4V5L8 9H4Z" />
     <path d="m22 9-5 6M17 9l5 6" />
-  </Base>
-)
-
-export const IconGlobe = (p: IconProps) => (
-  <Base {...p}>
-    <circle cx="12" cy="12" r="8" />
-    <path d="M4 12h16M12 4c2.5 2.5 2.5 13 0 16M12 4c-2.5 2.5-2.5 13 0 16" />
   </Base>
 )
 

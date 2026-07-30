@@ -37,30 +37,8 @@ export const IconClose = (p: IconProps) => (
   </Base>
 )
 
-export const IconGlobe = (p: IconProps) => (
-  <Base {...p}>
-    <circle cx="12" cy="12" r="8" />
-    <path d="M4 12h16M12 4c2.5 2.5 2.5 13 0 16M12 4c-2.5 2.5-2.5 13 0 16" />
-  </Base>
-)
-
-export const IconChevronDown = (p: IconProps) => (
-  <Base {...p}>
-    <path d="m6 9 6 6 6-6" />
-  </Base>
-)
-
-export const IconArrowRight = (p: IconProps) => (
-  <Base {...p}>
-    <path d="M5 12h14M13 6l6 6-6 6" />
-  </Base>
-)
-
-export const IconCheck = (p: IconProps) => (
-  <Base {...p}>
-    <path d="m4 12 5 5L20 6" />
-  </Base>
-)
+// Generic icons shared with the game feature live in the ui/ layer (one source).
+export { IconArrowRight, IconBoard, IconCheck, IconChevronDown, IconGlobe } from '@/ui/icons'
 
 // Share = a link handed off (node + outgoing arc).
 export const IconShare = (p: IconProps) => (
@@ -103,16 +81,6 @@ export const IconHome = (p: IconProps) => (
     <path d="M3 10.75 12 4l9 6.75" />
     <path d="M5.5 9.5V19a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V9.5" />
     <path d="M9.75 20v-5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75v5" />
-  </Base>
-)
-
-// Jobs = "The Board": a 2×2 grid of job cards.
-export const IconBoard = (p: IconProps) => (
-  <Base {...p}>
-    <rect x="4" y="4" width="7" height="7" rx="1.5" />
-    <rect x="13" y="4" width="7" height="7" rx="1.5" />
-    <rect x="4" y="13" width="7" height="7" rx="1.5" />
-    <rect x="13" y="13" width="7" height="7" rx="1.5" />
   </Base>
 )
 
