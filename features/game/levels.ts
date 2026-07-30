@@ -2,13 +2,27 @@ import { parseLevel, type Level } from '@/lib/schema/level'
 import frontDoorJson from '@/content/levels/front-door.json'
 import vaultJson from '@/content/levels/vault.json'
 import blueprintJson from '@/content/levels/blueprint.json'
+import theTellJson from '@/content/levels/the-tell.json'
+import theStopwatchJson from '@/content/levels/the-stopwatch.json'
+import theConfessionJson from '@/content/levels/the-confession.json'
+import theDoubleTapJson from '@/content/levels/the-double-tap.json'
+import theDoormanJson from '@/content/levels/the-doorman.json'
 
 // Server-safe level registry (no 'use client', no engine/WASM). The 3 REAL levels
 // are validated through the FROZEN engine's parseLevel at import — a malformed
 // level fails the build (Zod gate, docs/01-architecture.md §4). This is the single
 // place the content is loaded; routes read metadata or a full Level from here.
 
-export const LEVELS: Level[] = [frontDoorJson, vaultJson, blueprintJson]
+export const LEVELS: Level[] = [
+  frontDoorJson,
+  vaultJson,
+  blueprintJson,
+  theTellJson,
+  theStopwatchJson,
+  theConfessionJson,
+  theDoubleTapJson,
+  theDoormanJson,
+]
   .map(parseLevel)
   .sort((a, b) => a.order - b.order)
 
