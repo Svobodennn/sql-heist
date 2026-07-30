@@ -1,0 +1,87 @@
+.payoff {
+  padding: var(--space-6);
+  border-left: 3px solid var(--success);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.badge {
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  padding: 3px 10px;
+}
+
+.headline {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  line-height: 1.15;
+  color: var(--text);
+}
+.headline svg {
+  flex-shrink: 0;
+  margin-top: 4px;
+  color: var(--success);
+}
+.headline:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 4px;
+  border-radius: var(--radius-sm);
+}
+
+.extracted {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.extractedLabel {
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.fixer {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  max-width: 65ch;
+}
+.fixerTag {
+  display: inline-block;
+  margin-right: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--success);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-top: var(--space-2);
+}
+.nextHint {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+}

@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import type { TechniqueId } from '@/lib/schema/level'
 import type { CaseMeta } from '../../cases'
 import { cx } from '@/ui/cx'
 import { techniqueLabel } from '../../lib/caseView'
@@ -46,9 +45,9 @@ export function CaseCard({ meta, done }: { meta: CaseMeta; done: number }) {
         </div>
 
         <ul className={styles.techniques} aria-label="Techniques in this case">
-          {meta.techniques.map((tech, i) => (
-            <li key={`${tech}-${i}`} className={cx('mono', styles.chip)}>
-              {techniqueLabel(tech as TechniqueId)}
+          {meta.objectives.map((objective) => (
+            <li key={objective.id} className={cx('mono', styles.chip)}>
+              {techniqueLabel(objective.technique)}
             </li>
           ))}
         </ul>

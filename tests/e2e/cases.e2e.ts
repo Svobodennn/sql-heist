@@ -70,7 +70,9 @@ for (const gameCase of CASES) {
       await page.goto(`/cases/${gameCase.id}`)
       await dismissCookie(page)
 
-      // Engine loads WASM off first paint — wait until the wire is armed.
+      // v2 flow: briefing gate first, then step through objectives.
+      await page.getByRole('button', { name: 'Take the case' }).click()
+      // Engine loads WASM during the briefing read — wait until the wire is armed.
       await expect(page.getByRole('button', { name: 'Send it' })).toBeEnabled({ timeout: 20000 })
 
       const total = gameCase.steps.length
@@ -78,9 +80,10 @@ for (const gameCase of CASES) {
         await test.step(`objective ${i + 1}/${total}`, async () => {
           await expect(page.getByText(`Objective ${i + 1}/${total}`)).toBeVisible()
           await fillAndSend(page, gameCase.steps[i])
-          if (i < total - 1) {
-            await expect(page.getByText(`Objective ${i + 2}/${total}`)).toBeVisible({ timeout: 15000 })
-          }
+          // A win lands on the payoff screen; Next advances (last Next → case closed).
+          const next = page.getByRole('button', { name: 'Next' })
+          await expect(next).toBeVisible({ timeout: 15000 })
+          await next.click()
         })
       }
 

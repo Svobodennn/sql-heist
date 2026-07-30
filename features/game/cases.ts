@@ -1,4 +1,5 @@
 import { parseCase, type Case } from '@/lib/schema/case'
+import type { TechniqueId } from '@/lib/schema/level'
 import frontDoorCase from '@/content/cases/the-front-door.json'
 import quietRoomCase from '@/content/cases/the-quiet-room.json'
 import vaultCase from '@/content/cases/the-vault.json'
@@ -12,13 +13,20 @@ export const CASES: Case[] = [frontDoorCase, quietRoomCase, vaultCase]
 
 export const CASE_IDS = CASES.map((c) => c.id)
 
+export interface CaseObjectiveMeta {
+  id: string
+  technique: TechniqueId
+}
+
 export interface CaseMeta {
   id: string
   number: string
   title: string
   appName: string
   objectiveCount: number
-  techniques: string[]
+  // Per-objective id + technique (ordered) — drives the board's technique chips and
+  // the mastery badge strip. Ids are not SQL, so the board bundle stays SQL-free.
+  objectives: CaseObjectiveMeta[]
 }
 
 // Board metadata only — omits schemaSql/seedSql so the Case Board bundle never
@@ -30,7 +38,7 @@ export function getCaseMetas(): CaseMeta[] {
     title: c.title,
     appName: c.target.appName,
     objectiveCount: c.objectives.length,
-    techniques: c.objectives.map((o) => o.technique),
+    objectives: c.objectives.map((o) => ({ id: o.id, technique: o.technique })),
   }))
 }
 

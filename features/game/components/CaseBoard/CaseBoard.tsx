@@ -3,6 +3,7 @@
 import type { CaseMeta } from '../../cases'
 import { useCaseProgress } from '../../lib/useCaseProgress'
 import { Stamp } from '../Stamp'
+import { CaseBadgeStrip } from '../CaseBadgeStrip'
 import { CaseCard } from '../CaseCard'
 import styles from './CaseBoard.module.css'
 
@@ -44,6 +45,8 @@ export function CaseBoard({ cases }: { cases: CaseMeta[] }) {
           </div>
         )}
       </header>
+
+      <CaseBadgeStrip cases={cases} records={records} />
 
       <ul className={styles.grid}>
         {cases.map((meta) => (

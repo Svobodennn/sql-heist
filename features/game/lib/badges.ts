@@ -58,3 +58,27 @@ export function computeBadges(
 export function badgeSummary(badges: BadgeState[]): { earned: number; total: number } {
   return { earned: badges.filter((b) => b.earned).length, total: badges.length }
 }
+
+// Case-native mastery (the case twin of computeBadges): a technique is mastered once
+// the objective teaching it is CLEARED. Reads the board's case→objective→technique
+// metadata + the per-case cleared-id map (localStorage progress), matching per case
+// so a shared objective id across cases can't cross-credit. Pure — unit-tests in the
+// node suite and needs no jobs registry.
+interface CaseTechniqueMeta {
+  id: string
+  objectives: ReadonlyArray<{ id: string; technique: string }>
+}
+
+export function computeCaseBadges(
+  cases: ReadonlyArray<CaseTechniqueMeta>,
+  clearedByCase: Readonly<Record<string, { objectives: string[] }>>,
+): BadgeState[] {
+  const earned = new Set<string>()
+  for (const gameCase of cases) {
+    const done = new Set(clearedByCase[gameCase.id]?.objectives ?? [])
+    for (const objective of gameCase.objectives) {
+      if (done.has(objective.id)) earned.add(objective.technique)
+    }
+  }
+  return BADGE_TECHNIQUES.map((b) => ({ ...b, earned: earned.has(b.id) }))
+}

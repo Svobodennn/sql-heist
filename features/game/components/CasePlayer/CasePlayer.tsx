@@ -28,26 +28,34 @@ import {
 import { useToasts } from '../../lib/useToasts'
 import { firstIncompleteIndex, objectiveAsLevel } from '../../lib/caseView'
 import { accrueDiscovered, initNotebook } from '../../lib/reconNotebook'
+import { BriefingGate } from '../BriefingGate'
 import { ObjectiveBanner } from '../ObjectiveBanner'
-import { ObjectivesChecklist } from '../ObjectivesChecklist'
+import { ObjectivePayoff } from '../ObjectivePayoff'
+import { ObjectivesProgress } from '../ObjectivesProgress'
 import { ReconNotebook } from '../ReconNotebook'
 import { Stamp } from '../Stamp'
 import { ToastStack } from '../Toast'
-import { IconArrowLeft, IconArrowRight, IconChevronDown } from '../icons'
+import { IconArrowLeft } from '../icons'
 import { ObjectiveConsole } from './ObjectiveConsole'
 import { CaseClosed } from './CaseClosed'
 import styles from './CasePlayer.module.css'
 
-// The case orchestrator (docs/cases-design.md §UI) — the case twin of JobPlayer.
-// One page: the briefing, a case-spanning objectives checklist + recon notebook,
-// the always-on ObjectiveBanner, and the active objective's exploit surface. Owns
-// the ONE persistent case-session (useCaseEngine → useRef, disposed on unmount)
-// and drives the per-objective loop: run → evaluate (frozen winEvaluator) → on a
-// win, commit the snapshot + persist progress + advance. After the final objective,
-// the case-closed payoff + per-objective defense debriefs. All engine calls go
-// through the FROZEN lib/engine. LazyMotion(domAnimation, strict) keeps only the
-// DOM-animation set in this bundle (every animated child uses `m.*`), matching
-// JobPlayer's web-perf budget; no `layout` animations are used.
+// The case orchestrator (docs/cases-design.md §UI) — reworked to a GUIDED, step-by-
+// step flow (v2). Entering a case no longer dumps brief + plan + objective + recon +
+// exploit on one screen; it walks four stages, one focus at a time:
+//   briefing → playing → payoff → closed
+// A compact objectives stepper rides the TOP (ObjectivesProgress, ex-sidebar) so the
+// exploit surface gets the full width. The recon notebook is case-spanning (accrues
+// discovered schema across objectives) so it lives here, not in the console. Owns the
+// ONE persistent case-session (useCaseEngine → useRef, disposed on unmount) and the
+// per-objective loop: run → evaluate (frozen winEvaluator) → on a win commit the
+// snapshot (Model A) + persist progress, then show the objective PAYOFF (what was
+// pulled + the Fixer's chain line) with a Next button — no silent auto-advance.
+// After the last objective's payoff, CaseClosed (final payoff + defense debriefs).
+// LazyMotion(domAnimation, strict) keeps only the DOM-animation set in this bundle
+// (every animated child uses `m.*`); no `layout` animations are used.
+
+type Stage = 'briefing' | 'playing' | 'payoff' | 'closed'
 
 // Per-objective UI slice (inputs / last run / hints / fails). Kept per objective —
 // not global — so switching between objectives preserves each one's surface.
@@ -88,14 +96,18 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
     initUi(objectives),
   )
   // The recon notebook spans the WHOLE case (accrues discovered schema across
-  // objectives), so its state lives here — not in the per-objective console.
+  // objectives), so its state lives here — not in the per-objective console — and
+  // the data pried loose in one objective stays visible in every later one.
   const [notebook, setNotebook] = useState(() => initNotebook(gameCase.database.visibleSchema))
-  const [stage, setStage] = useState<'playing' | 'closed'>('playing')
+  // Entering a case opens on the BRIEF alone (the guided gate), never the exploit
+  // surface — the fix for "everything dumped at once".
+  const [stage, setStage] = useState<Stage>('briefing')
   const [hydrated, setHydrated] = useState(false)
   const mainRef = useRef<HTMLElement>(null)
 
   // Reconcile persisted progress once localStorage is read (client-only): mark done
-  // objectives and drop the player on the first unsolved one. Runs once (guarded),
+  // objectives and point the player at the first unsolved one. Stays on the briefing
+  // gate; "Take the case" is what drops them onto that objective. Runs once (guarded)
   // so an in-session win is never clobbered by a re-read.
   useEffect(() => {
     if (!ready || hydrated) return
@@ -107,12 +119,11 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
 
   const objective = objectives[selectedIndex]
   const ui = uiByObjective[objective.id]
-  const active = firstIncompleteIndex(objectives, completedIds)
-  const allComplete = active >= objectives.length
   const suggestHint = shouldSuggestHint(ui.failedRuns, 0)
+  const allComplete = firstIncompleteIndex(objectives, completedIds) >= objectives.length
 
   // A11y: AnimatePresence mode="wait" mounts the new screen AFTER exit, dropping
-  // focus. On every objective/stage swap move focus to the new heading
+  // focus. On every stage/objective swap move focus to the new heading
   // ([data-objective-heading], tabIndex -1). Fired from onExitComplete so it never
   // steals focus on the initial mount (mirrors JobPlayer.focusPhaseHeading).
   const focusHeading = useCallback(() => {
@@ -166,10 +177,10 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
         const next = new Set(completedIds)
         next.add(obj.id)
         setCompletedIds(next)
-        const nextActive = firstIncompleteIndex(objectives, next)
-        if (nextActive >= objectives.length) setStage('closed')
-        else setSelectedIndex(nextActive)
       }
+      // No silent auto-advance: land on the payoff for THIS objective (selectedIndex
+      // stays put) — its winning run stays in uiByObjective for the "what we pulled".
+      setStage('payoff')
     } else if (result.filter?.mode === 'reject') {
       const terms = result.filter.blocked.join(', ') || t('game.toast.blockedFallback')
       push('error', t('game.toast.blocked', { terms }))
@@ -222,19 +233,59 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
     [objectives, selectedIndex],
   )
 
+  // Stepper click: jump to a cleared/active objective and put it in focus.
   const handleSelect = useCallback((index: number) => {
-    setStage('playing')
     setSelectedIndex(index)
+    setStage('playing')
   }, [])
+
+  // "Take the case" on the briefing gate → the first unsolved objective (or straight
+  // to the closed payoff if the player already cleared everything).
+  const handleStart = useCallback(() => {
+    const active = firstIncompleteIndex(objectives, completedIds)
+    if (active >= objectives.length) {
+      setStage('closed')
+      return
+    }
+    setSelectedIndex(active)
+    setStage('playing')
+  }, [objectives, completedIds])
+
+  // "Next" on a payoff → the next unsolved objective, or the case-closed screen once
+  // every objective is cleared.
+  const handleNext = useCallback(() => {
+    const active = firstIncompleteIndex(objectives, completedIds)
+    if (active >= objectives.length) {
+      setStage('closed')
+      return
+    }
+    setSelectedIndex(active)
+    setStage('playing')
+  }, [objectives, completedIds])
 
   const transition: Transition = reduce
     ? { duration: 0 }
     : { duration: 0.22, ease: [0.16, 1, 0.3, 1] }
-  const viewKey = stage === 'closed' ? 'closed' : `obj:${objective.id}`
+
+  const viewKey =
+    stage === 'briefing'
+      ? 'briefing'
+      : stage === 'closed'
+        ? 'closed'
+        : stage === 'payoff'
+          ? `payoff:${objective.id}`
+          : `obj:${objective.id}`
+
   const announce =
-    stage === 'closed'
-      ? 'Case closed'
-      : `Objective ${selectedIndex + 1} of ${objectives.length}: ${objective.goal}`
+    stage === 'briefing'
+      ? `Case briefing: ${gameCase.title}`
+      : stage === 'closed'
+        ? 'Case closed'
+        : stage === 'payoff'
+          ? `Objective ${selectedIndex + 1} cleared${objective.payoff ? `: ${objective.payoff.got}` : ''}`
+          : `Objective ${selectedIndex + 1} of ${objectives.length}: ${objective.goal}`
+
+  const showStepper = stage === 'playing' || stage === 'payoff'
 
   return (
     <LazyMotion features={domAnimation} strict>
@@ -254,94 +305,87 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
             </Link>
           </header>
 
-          <details className={styles.briefing} open>
-            <summary className={styles.briefingSummary}>
-              <IconChevronDown size={16} className={styles.briefingChevron} />
-              <span>
-                The brief · <span className="mono">{gameCase.briefing.handler}</span>
-              </span>
-            </summary>
-            <p className={cx('prose', styles.briefingText)}>{gameCase.briefing.text}</p>
-          </details>
+          {showStepper && (
+            <ObjectivesProgress
+              objectives={objectives}
+              completed={completedIds}
+              selectedIndex={selectedIndex}
+              onSelect={handleSelect}
+            />
+          )}
 
-          <div className={styles.layout}>
-            <aside className={styles.aside}>
-              <ObjectivesChecklist
-                objectives={objectives}
-                completed={completedIds}
-                selectedIndex={selectedIndex}
-                onSelect={handleSelect}
-              />
-              <ReconNotebook notebook={notebook} />
-            </aside>
+          <main className={styles.main} ref={mainRef}>
+            {/* Persistent, terse live region: announces the objective/stage on every
+                swap (the swapping region below is NOT a live region — it would re-read
+                the whole screen and nest child live regions). */}
+            <p className="sr-only" role="status" aria-live="polite">
+              {announce}
+            </p>
 
-            <main className={styles.main} ref={mainRef}>
-              {/* Persistent, terse live region: announces the objective/stage on
-                  every swap (the swapping region below is NOT a live region — it
-                  would re-read the whole screen and nest child live regions). */}
-              <p className="sr-only" role="status" aria-live="polite">
-                {announce}
-              </p>
+            <AnimatePresence mode="wait" onExitComplete={focusHeading}>
+              <m.div
+                key={viewKey}
+                role="region"
+                aria-label={announce}
+                initial={{ opacity: 0, x: reduce ? 0 : -6 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: reduce ? 0 : 6 }}
+                transition={transition}
+                className={styles.view}
+              >
+                {stage === 'briefing' ? (
+                  <BriefingGate
+                    briefing={gameCase.briefing}
+                    objectiveCount={objectives.length}
+                    onStart={handleStart}
+                  />
+                ) : stage === 'closed' ? (
+                  <CaseClosed gameCase={gameCase} />
+                ) : stage === 'payoff' ? (
+                  <ObjectivePayoff
+                    index={selectedIndex}
+                    total={objectives.length}
+                    objective={objective}
+                    result={ui.run?.result ?? null}
+                    signal={ui.run?.signal ?? null}
+                    handler={gameCase.briefing.handler}
+                    isLast={allComplete}
+                    onNext={handleNext}
+                  />
+                ) : (
+                  <>
+                    <ObjectiveBanner
+                      index={selectedIndex}
+                      total={objectives.length}
+                      goal={objective.goal}
+                      why={objective.why}
+                      doneWhen={objective.doneWhen}
+                      technique={objective.technique}
+                    />
 
-              <AnimatePresence mode="wait" onExitComplete={focusHeading}>
-                <m.div
-                  key={viewKey}
-                  role="region"
-                  aria-label={announce}
-                  initial={{ opacity: 0, x: reduce ? 0 : -6 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: reduce ? 0 : 6 }}
-                  transition={transition}
-                  className={styles.view}
-                >
-                  {stage === 'closed' ? (
-                    <CaseClosed gameCase={gameCase} />
-                  ) : (
-                    <>
-                      <ObjectiveBanner
-                        index={selectedIndex}
-                        total={objectives.length}
-                        goal={objective.goal}
-                        why={objective.why}
-                        doneWhen={objective.doneWhen}
-                        technique={objective.technique}
-                      />
+                    <ReconNotebook notebook={notebook} />
 
-                      {allComplete && (
-                        <div className={styles.payoffCta}>
-                          <button
-                            type="button"
-                            className="btn btn--success"
-                            onClick={() => setStage('closed')}
-                          >
-                            <span>Case cleared — see the payoff</span>
-                            <IconArrowRight size={18} />
-                          </button>
-                        </div>
-                      )}
-
-                      <ObjectiveConsole
-                        appName={gameCase.target.appName}
-                        objective={objective}
-                        visibleSchema={gameCase.database.visibleSchema}
-                        inputs={ui.inputs}
-                        lastResult={ui.run?.result ?? null}
-                        signal={ui.run?.signal ?? null}
-                        engineStatus={status}
-                        openedTiers={ui.openedTiers}
-                        suggestHint={suggestHint}
-                        onChange={handleChange}
-                        onRun={handleRun}
-                        onReset={handleReset}
-                        onRetry={retry}
-                        onOpenHint={handleOpenHint}
-                      />
-                    </>
-                  )}
-                </m.div>
-              </AnimatePresence>
-            </main>
-          </div>
+                    <ObjectiveConsole
+                      appName={gameCase.target.appName}
+                      objective={objective}
+                      visibleSchema={gameCase.database.visibleSchema}
+                      inputs={ui.inputs}
+                      lastResult={ui.run?.result ?? null}
+                      signal={ui.run?.signal ?? null}
+                      engineStatus={status}
+                      openedTiers={ui.openedTiers}
+                      suggestHint={suggestHint}
+                      onChange={handleChange}
+                      onRun={handleRun}
+                      onReset={handleReset}
+                      onRetry={retry}
+                      onOpenHint={handleOpenHint}
+                    />
+                  </>
+                )}
+              </m.div>
+            </AnimatePresence>
+          </main>
         </div>
 
         <ToastStack toasts={toasts} onDismiss={dismiss} />

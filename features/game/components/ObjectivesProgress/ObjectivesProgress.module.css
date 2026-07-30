@@ -1,38 +1,46 @@
 .wrap {
-  padding: var(--space-4);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
+  width: 100%;
 }
 
-.list {
+.steps {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-3);
+  align-items: stretch;
+  overflow-x: auto;
+  /* Keep the numbered order legible on narrow screens without a scrollbar jump. */
+  scrollbar-width: thin;
+}
+@media (max-width: 640px) {
+  .steps {
+    gap: var(--space-2);
+  }
 }
 
-.item {
-  border-radius: var(--radius-sm);
-  border: 1px solid transparent;
+.step {
+  flex: 1 1 0;
+  min-width: 148px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
 }
 .selected {
   border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
   background: color-mix(in srgb, var(--primary) 8%, transparent);
 }
 /* Locked = muted, dashed edge (never opacity — keeps text above the AA floor). */
-.item--locked {
+.step--locked {
   border-style: dashed;
-  border-color: var(--border);
 }
 
 .trigger {
   width: 100%;
+  height: 100%;
   display: flex;
   align-items: flex-start;
-  gap: var(--space-3);
+  gap: var(--space-2);
   padding: var(--space-3);
   min-height: 44px;
   text-align: left;
@@ -40,7 +48,7 @@
   border: 0;
   color: inherit;
   font: inherit;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
 }
 button.trigger {
   cursor: pointer;
@@ -82,15 +90,22 @@ button.trigger:focus-visible {
   gap: 2px;
   min-width: 0;
 }
-.goal {
-  font-size: 0.9375rem;
-  line-height: 1.35;
-  color: var(--text);
-}
-.item--locked .goal {
-  color: var(--text-secondary);
-}
-.technique {
-  font-size: 0.75rem;
+.order {
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--text-muted);
+}
+.goal {
+  font-size: 0.8125rem;
+  line-height: 1.3;
+  color: var(--text);
+  /* Two-line clamp keeps a long goal from stretching the strip's height. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.step--locked .goal {
+  color: var(--text-secondary);
 }

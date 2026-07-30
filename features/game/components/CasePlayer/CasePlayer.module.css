@@ -46,63 +46,8 @@
   color: var(--primary);
 }
 
-.briefing {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--surface);
-}
-.briefingSummary {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-4);
-  min-height: 44px;
-  cursor: pointer;
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  list-style: none;
-}
-.briefingSummary::-webkit-details-marker {
-  display: none;
-}
-.briefingChevron {
-  flex-shrink: 0;
-  color: var(--text-muted);
-  transition: transform var(--dur-fast) var(--ease-out);
-}
-.briefing[open] .briefingChevron {
-  transform: rotate(180deg);
-}
-.briefingText {
-  margin: 0;
-  padding: 0 var(--space-4) var(--space-4);
-}
-
-.layout {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-6);
-  align-items: start;
-}
-@media (min-width: 1024px) {
-  .layout {
-    grid-template-columns: 300px 1fr;
-  }
-}
-.aside {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  min-width: 0;
-}
-/* The plan + notebook track the page on desktop so they stay in view while the
-   exploit surface scrolls. */
-@media (min-width: 1024px) {
-  .aside {
-    position: sticky;
-    top: var(--space-4);
-  }
-}
+/* The exploit surface now spans the full page width — the objectives moved to the
+   top stepper (ObjectivesProgress), so there's no left sidebar to narrow it. */
 .main {
   min-width: 0;
 }
@@ -110,9 +55,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-}
-.payoffCta {
-  display: flex;
 }
 
 /* ============================================================================
