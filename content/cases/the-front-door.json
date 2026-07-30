@@ -1,0 +1,641 @@
+{
+  "schemaVersion": 1,
+  "id": "the-front-door",
+  "number": "001",
+  "title": "The Front Door",
+  "briefing": {
+    "handler": "The Fixer",
+    "text": "Meridian Holdings. We go in the front — the storefront admin. Get inside, map what's back there, and walk out with the first score. Three moves: the door, the floor plan, the manifest."
+  },
+  "target": {
+    "appName": "Meridian Holdings"
+  },
+  "database": {
+    "schemaSql": "CREATE TABLE users (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT, is_admin INTEGER);\nCREATE TABLE articles (id INTEGER PRIMARY KEY, title TEXT, body TEXT); CREATE TABLE z_bp_registry_7f3a (id INTEGER PRIMARY KEY, schematic_id TEXT, payload TEXT);\nCREATE TABLE products (id INTEGER PRIMARY KEY, name TEXT, price REAL); CREATE TABLE offshore_accounts (id INTEGER PRIMARY KEY, holder_name TEXT, account_ref TEXT, balance_usd INTEGER);",
+    "seedSql": "INSERT INTO users (id,username,password,is_admin) VALUES (1,'admin','S3cr3t!Adm1n',1),(2,'j.marlow','hunter2',0),(3,'k.rivera','letmein123',0),(4,'svc_backup','b4ckup$vc',0);\nINSERT INTO articles (id,title,body) VALUES (1,'Quarterly Security Review','Routine audit completed, no findings.'),(2,'New Badge System Rollout','All staff to re-enroll by Q3.'),(3,'Facilities Maintenance Notice','Elevator B out of service.'); INSERT INTO z_bp_registry_7f3a (id,schematic_id,payload) VALUES (1,'BP-VAULT-DOOR','LOOT-BLUEPRINT-3D1F8A22'),(2,'BP-HVAC-DUCT','duct-run-A3-to-B7');\nINSERT INTO products (id,name,price) VALUES (1,'Titanium Briefcase',1200.00),(2,'Carbon Lockpick Set',340.00),(3,'Signal Jammer X2',890.00),(4,'Thermal Drill',2100.00); INSERT INTO offshore_accounts (id,holder_name,account_ref,balance_usd) VALUES (1,'Halcyon Holdings','AC-1002-CH',250000),(2,'Meridian Trust','AC-1055-KY',780000),(3,'Blacklane LLC','LOOT-VAULT-9F2C4471',4500000),(4,'Orion Offshore','AC-1099-VG',1200000);",
+    "visibleSchema": [
+      {
+        "table": "users",
+        "columns": [
+          "id",
+          "username",
+          "password",
+          "is_admin"
+        ]
+      },
+      {
+        "table": "articles",
+        "columns": [
+          "id",
+          "title",
+          "body"
+        ]
+      },
+      {
+        "table": "products",
+        "columns": [
+          "id",
+          "name",
+          "price"
+        ]
+      },
+      {
+        "table": "offshore_accounts",
+        "columns": [
+          "id",
+          "holder_name",
+          "account_ref",
+          "balance_usd"
+        ]
+      }
+    ]
+  },
+  "objectives": [
+    {
+      "id": "front-door",
+      "order": 1,
+      "goal": "Get inside as an administrator.",
+      "why": "The admin console is the door to everything else in Meridian.",
+      "doneWhen": "A row with is_admin = 1 comes back — you're logged in as staff.",
+      "technique": "auth-bypass",
+      "difficulty": "intro",
+      "surface": "login-form",
+      "fields": [
+        {
+          "name": "username",
+          "label": "Username",
+          "type": "text",
+          "placeholder": "e.g. j.marlow"
+        },
+        {
+          "name": "password",
+          "label": "Password",
+          "type": "password",
+          "placeholder": "Password"
+        }
+      ],
+      "query": {
+        "template": "SELECT id, username, is_admin FROM users WHERE username = '{{input:username}}' AND password = '{{input:password}}'",
+        "description": "Staff portal login check"
+      },
+      "winCondition": {
+        "type": "row-match",
+        "expect": [
+          {
+            "is_admin": 1
+          }
+        ],
+        "mode": "subset",
+        "reason": "Privileged account pulled - the front door is open, you're in."
+      },
+      "hints": [
+        {
+          "id": "h1",
+          "text": "The lock only checks what you hand it. What if what you hand it isn't just a name — what if it closes the quote and changes the question?",
+          "cost": 50
+        },
+        {
+          "id": "h2",
+          "text": "Two ideas: make the condition always true (OR plus an equality that is always true), or cut the line short with --. A quote can end the string early.",
+          "cost": 150,
+          "revealAfterAttempts": 2
+        },
+        {
+          "id": "h3",
+          "text": "In the username, try  admin' --   or  ' OR '1'='1' -- . The trailing -- comments out the password check.",
+          "cost": 300,
+          "revealAfterAttempts": 4
+        }
+      ],
+      "expectedSolution": {
+        "inputs": {
+          "username": "' OR '1'='1' -- ",
+          "password": "x"
+        },
+        "note": "Alternative: username  admin' --   also wins; the trailing -- comments out the password check."
+      },
+      "debrief": {
+        "explanation": "Your input is concatenated straight into the SQL string, so a closing quote stops being data and becomes code: it ends the username string early, and the trailing -- comments out the rest of the statement, including the password check. The always-true OR '1'='1' then matches every row.",
+        "vulnerableCode": {
+          "language": "js",
+          "code": "// VULNERABLE - input is concatenated straight into the SQL string\nconst sql =\n  \"SELECT id, username, is_admin FROM users \" +\n  \"WHERE username = '\" + username + \"' AND password = '\" + password + \"'\";\nconst row = db.prepare(sql).get(); // code + data in one string => injection"
+        },
+        "vulnerableCodeVariants": [
+          {
+            "id": "node",
+            "label": "Node.js (pg / mysql2)",
+            "language": "js",
+            "code": "// VULNERABLE - username/password concatenated straight into the SQL text\nconst { rows } = await client.query(\n  \"SELECT id, username, is_admin FROM users \" +\n  \"WHERE username = '\" + username + \"' AND password = '\" + password + \"'\",\n);\nconst row = rows[0];\n// mysql2: conn.query(\"... username = '\" + username + \"'\") - same flaw"
+          },
+          {
+            "id": "python",
+            "label": "Python (sqlite3 / psycopg2)",
+            "language": "python",
+            "code": "# VULNERABLE - username/password interpolated straight into the SQL string\ncur.execute(\n    f\"SELECT id, username, is_admin FROM users \"\n    f\"WHERE username = '{username}' AND password = '{password}'\"\n)\nrow = cur.fetchone()\n# psycopg2 %-format is the same flaw: \"... username = '%s'\" % username"
+          },
+          {
+            "id": "php-pdo",
+            "label": "PHP (PDO)",
+            "language": "php",
+            "code": "// VULNERABLE - $username/$password interpolated straight into the SQL string\n$sql = \"SELECT id, username, is_admin FROM users \"\n     . \"WHERE username = '$username' AND password = '$password'\";\n$row = $pdo->query($sql)->fetch(PDO::FETCH_ASSOC);"
+          },
+          {
+            "id": "java-jdbc",
+            "label": "Java (JDBC)",
+            "language": "java",
+            "code": "// VULNERABLE - username/password concatenated straight into the SQL text\nStatement st = conn.createStatement();\nResultSet rs = st.executeQuery(\n    \"SELECT id, username, is_admin FROM users WHERE username = '\"\n    + username + \"' AND password = '\" + password + \"'\");"
+          },
+          {
+            "id": "dotnet",
+            "label": "C# / .NET (ADO.NET)",
+            "language": "csharp",
+            "code": "// VULNERABLE - username/password concatenated straight into the SQL text\nusing var cmd = new SqlCommand(\n    \"SELECT id, username, is_admin FROM users WHERE username = '\"\n    + username + \"' AND password = '\" + password + \"'\", conn);\nusing var reader = cmd.ExecuteReader();\n// String interpolation is just as unsafe: $\"... username = '{username}'\""
+          },
+          {
+            "id": "go",
+            "label": "Go (database/sql)",
+            "language": "go",
+            "code": "// VULNERABLE - username/password concatenated straight into the SQL text\nrow := db.QueryRow(\n    \"SELECT id, username, is_admin FROM users WHERE username = '\" +\n        username + \"' AND password = '\" + password + \"'\",\n)\nerr := row.Scan(&id, &name, &isAdmin)\n// fmt.Sprintf(\"... username = '%s'\", username) is the same flaw"
+          },
+          {
+            "id": "rails",
+            "label": "Ruby on Rails (ActiveRecord)",
+            "language": "ruby",
+            "code": "# VULNERABLE - username/password interpolated straight into the SQL string\nuser = User.where(\n  \"username = '#{username}' AND password = '#{password}'\"\n).first\n# find_by_sql is just as unsafe: User.find_by_sql(\"... username = '#{username}'\")"
+          },
+          {
+            "id": "laravel",
+            "label": "Laravel (Query Builder)",
+            "language": "php",
+            "code": "// VULNERABLE - $username/$password interpolated into a raw WHERE string\n$user = DB::table('users')\n    ->whereRaw(\"username = '$username' AND password = '$password'\")\n    ->first();\n// DB::select(\"... username = '$username'\") is just as unsafe"
+          },
+          {
+            "id": "django",
+            "label": "Django (ORM)",
+            "language": "python",
+            "code": "# VULNERABLE - input interpolated into raw SQL, bypassing the ORM's binding\nuser = User.objects.raw(\n    f\"SELECT id, username, is_admin FROM users \"\n    f\"WHERE username = '{username}' AND password = '{password}'\"\n)[0]\n# .extra(where=[f\"username = '{username}'\"]) is just as unsafe"
+          },
+          {
+            "id": "spring",
+            "label": "Spring Boot (JdbcTemplate)",
+            "language": "java",
+            "code": "// VULNERABLE - username/password concatenated straight into the SQL text\nList<User> rows = jdbcTemplate.query(\n    \"SELECT id, username, is_admin FROM users WHERE username = '\"\n    + username + \"' AND password = '\" + password + \"'\",\n    userRowMapper);\n// JPA: em.createNativeQuery(\"... username = '\" + username + \"'\") is just as unsafe"
+          }
+        ],
+        "secureCode": {
+          "language": "js",
+          "code": "// SECURE - values are BOUND as parameters, never parsed as SQL\nconst row = db\n  .prepare(\"SELECT id, username, is_admin FROM users WHERE username = ? AND password = ?\")\n  .get(username, password);\n// Defense in depth: never store plaintext passwords - hash (bcrypt/argon2), compare in constant time."
+        },
+        "secureCodeVariants": [
+          {
+            "id": "node",
+            "label": "Node.js (pg / mysql2)",
+            "language": "js",
+            "code": "// pg — bind username/password as $1/$2; the driver never parses them as SQL\nconst { rows } = await client.query(\n  'SELECT id, username, is_admin FROM users WHERE username = $1 AND password = $2',\n  [username, password],\n);\nconst row = rows[0];\n// mysql2: conn.execute('... WHERE username = ? AND password = ?', [username, password])"
+          },
+          {
+            "id": "python",
+            "label": "Python (sqlite3 / psycopg2)",
+            "language": "python",
+            "code": "# sqlite3 — ? placeholders are bound; input is never parsed as SQL\ncur.execute(\n    \"SELECT id, username, is_admin FROM users WHERE username = ? AND password = ?\",\n    (username, password),\n)\nrow = cur.fetchone()\n# psycopg2 uses %s: cur.execute(\"... username = %s AND password = %s\", (username, password))"
+          },
+          {
+            "id": "php-pdo",
+            "label": "PHP (PDO)",
+            "language": "php",
+            "code": "// PDO — prepared statement; values are bound, never concatenated\n$stmt = $pdo->prepare(\n    'SELECT id, username, is_admin FROM users WHERE username = ? AND password = ?'\n);\n$stmt->execute([$username, $password]);\n$row = $stmt->fetch(PDO::FETCH_ASSOC);"
+          },
+          {
+            "id": "java-jdbc",
+            "label": "Java (JDBC)",
+            "language": "java",
+            "code": "// JDBC — PreparedStatement binds each value with setString\nPreparedStatement ps = conn.prepareStatement(\n    \"SELECT id, username, is_admin FROM users WHERE username = ? AND password = ?\");\nps.setString(1, username);\nps.setString(2, password);\nResultSet rs = ps.executeQuery();"
+          },
+          {
+            "id": "dotnet",
+            "label": "C# / .NET (ADO.NET)",
+            "language": "csharp",
+            "code": "// ADO.NET — bind via SqlParameter; input is never parsed as SQL\nusing var cmd = new SqlCommand(\n    \"SELECT id, username, is_admin FROM users WHERE username = @u AND password = @p\", conn);\ncmd.Parameters.Add(new SqlParameter(\"@u\", username));\ncmd.Parameters.Add(new SqlParameter(\"@p\", password));\nusing var reader = cmd.ExecuteReader();\n// EF Core: db.Users.FirstOrDefault(x => x.Username == username && x.Password == password)"
+          },
+          {
+            "id": "go",
+            "label": "Go (database/sql)",
+            "language": "go",
+            "code": "// database/sql — args bind to placeholders, never string-concatenated\nrow := db.QueryRow(\n    \"SELECT id, username, is_admin FROM users WHERE username = $1 AND password = $2\",\n    username, password,\n)\nerr := row.Scan(&id, &name, &isAdmin)\n// MySQL / SQLite drivers use ? placeholders instead of $1/$2."
+          },
+          {
+            "id": "rails",
+            "label": "Ruby on Rails (ActiveRecord)",
+            "language": "ruby",
+            "code": "# ActiveRecord — placeholders are bound; input is never parsed as SQL\nuser = User.where(\n  \"username = ? AND password = ?\", username, password\n).first\n# Hash form also binds: User.find_by(username: username, password: password)"
+          },
+          {
+            "id": "laravel",
+            "label": "Laravel (Query Builder)",
+            "language": "php",
+            "code": "// Laravel Query Builder — values are bound, sent apart from the SQL\n$user = DB::table('users')\n    ->where('username', $username)\n    ->where('password', $password)\n    ->first();\n// Raw still binds: ->whereRaw('username = ? AND password = ?', [$username, $password])"
+          },
+          {
+            "id": "django",
+            "label": "Django (ORM)",
+            "language": "python",
+            "code": "# Django ORM — every lookup value is parameterized automatically\nuser = User.objects.filter(\n    username=username, password=password\n).first()\n# .raw() still binds: User.objects.raw(\"... WHERE username = %s\", [username])"
+          },
+          {
+            "id": "spring",
+            "label": "Spring Boot (JdbcTemplate)",
+            "language": "java",
+            "code": "// Spring JdbcTemplate — args bind to ? placeholders positionally\nList<User> rows = jdbcTemplate.query(\n    \"SELECT id, username, is_admin FROM users WHERE username = ? AND password = ?\",\n    userRowMapper, username, password);\n// JPA: @Query(\"... WHERE u.username = :u AND u.password = :p\") + @Param bindings"
+          }
+        ],
+        "takeaway": "Stop gluing what people type onto your questions. Bind it — and \"or one equals one\" is just a bad username again."
+      }
+    },
+    {
+      "id": "blueprint",
+      "order": 2,
+      "goal": "Make the app name a table it never lists.",
+      "why": "You can't take what you can't see — find the hidden room.",
+      "doneWhen": "The blueprint's loot tag surfaces in the results.",
+      "technique": "schema-discovery",
+      "difficulty": "hard",
+      "surface": "search-box",
+      "fields": [
+        {
+          "name": "q",
+          "label": "Search the archive",
+          "type": "search",
+          "placeholder": "Search articles"
+        }
+      ],
+      "query": {
+        "template": "SELECT title, body FROM articles WHERE title LIKE '%{{input:q}}%'",
+        "description": "Press archive search"
+      },
+      "winCondition": {
+        "type": "flag-in-result",
+        "flag": "LOOT-BLUEPRINT-3D1F8A22",
+        "caseSensitive": true,
+        "reason": "Blueprints in hand - pulled from a table recon never listed."
+      },
+      "hints": [
+        {
+          "id": "h1",
+          "text": "You've got the trick from the Vault. What you don't have is the room number. Stop guessing — the building keeps a list of its own rooms. Ask it for that list first.",
+          "cost": 50
+        },
+        {
+          "id": "h2",
+          "text": "Do not guess the table name - the database keeps its own catalog: sqlite_master. Pull name and sql; the sql column shows the columns. This job is 2 columns.",
+          "cost": 150,
+          "revealAfterAttempts": 2
+        },
+        {
+          "id": "h3",
+          "text": "First  ' UNION SELECT name, sql FROM sqlite_master --   to find the table and its columns, then  ' UNION SELECT schematic_id, payload FROM z_bp_registry_7f3a -- ",
+          "cost": 300,
+          "revealAfterAttempts": 4
+        }
+      ],
+      "expectedSolution": {
+        "inputs": {
+          "q": "' UNION SELECT schematic_id, payload FROM z_bp_registry_7f3a -- "
+        },
+        "note": "Step 1 (discovery, not a win):  ' UNION SELECT name, sql FROM sqlite_master --   reveals the hidden table and its columns. Step 2 is the inputs above."
+      },
+      "debrief": {
+        "explanation": "Same concatenation flaw as the search box. Because you do not know the table name, you read the database's own catalog - sqlite_master - through a UNION to reveal the hidden schema (its CREATE statements list the columns), then UNION the discovered table to pull its rows. This job returns 2 columns, so every UNION must supply exactly 2 values.",
+        "vulnerableCode": {
+          "language": "js",
+          "code": "// VULNERABLE - same pattern as the search box; the catalog (sqlite_master) is readable too\nconst sql = \"SELECT title, body FROM articles WHERE title LIKE '%\" + q + \"%'\";\nconst rows = db.prepare(sql).all();"
+        },
+        "vulnerableCodeVariants": [
+          {
+            "id": "node",
+            "label": "Node.js (pg / mysql2)",
+            "language": "js",
+            "code": "// VULNERABLE - the search term is concatenated into the LIKE pattern\nconst { rows } = await client.query(\n  \"SELECT title, body FROM articles WHERE title LIKE '%\" + q + \"%'\",\n);\n// UNION / sqlite_master ride straight in through the unclosed quote."
+          },
+          {
+            "id": "python",
+            "label": "Python (sqlite3 / psycopg2)",
+            "language": "python",
+            "code": "# VULNERABLE - the search term is interpolated into the LIKE pattern\ncur.execute(\n    f\"SELECT title, body FROM articles WHERE title LIKE '%{q}%'\"\n)\nrows = cur.fetchall()\n# UNION / sqlite_master ride straight in through the unclosed quote."
+          },
+          {
+            "id": "php-pdo",
+            "label": "PHP (PDO)",
+            "language": "php",
+            "code": "// VULNERABLE - $q interpolated straight into the LIKE pattern\n$rows = $pdo->query(\n    \"SELECT title, body FROM articles WHERE title LIKE '%$q%'\"\n)->fetchAll(PDO::FETCH_ASSOC);\n// UNION / sqlite_master ride straight in through the unclosed quote."
+          },
+          {
+            "id": "java-jdbc",
+            "label": "Java (JDBC)",
+            "language": "java",
+            "code": "// VULNERABLE - the search term is concatenated into the LIKE pattern\nStatement st = conn.createStatement();\nResultSet rs = st.executeQuery(\n    \"SELECT title, body FROM articles WHERE title LIKE '%\"\n    + q + \"%'\");\n// UNION / sqlite_master ride straight in through the unclosed quote."
+          },
+          {
+            "id": "dotnet",
+            "label": "C# / .NET (ADO.NET)",
+            "language": "csharp",
+            "code": "// VULNERABLE - the search term is concatenated into the LIKE pattern\nusing var cmd = new SqlCommand(\n    \"SELECT title, body FROM articles WHERE title LIKE '%\"\n    + q + \"%'\", conn);\nusing var reader = cmd.ExecuteReader();\n// Interpolation is just as unsafe: $\"... LIKE '%{q}%'\""
+          },
+          {
+            "id": "go",
+            "label": "Go (database/sql)",
+            "language": "go",
+            "code": "// VULNERABLE - the search term is concatenated into the LIKE pattern\nrows, err := db.Query(\n    \"SELECT title, body FROM articles WHERE title LIKE '%\" + q + \"%'\",\n)\n// UNION / sqlite_master ride straight in through the unclosed quote."
+          },
+          {
+            "id": "rails",
+            "label": "Ruby on Rails (ActiveRecord)",
+            "language": "ruby",
+            "code": "# VULNERABLE - the search term is interpolated into the LIKE pattern\nrows = Article.where(\n  \"title LIKE '%#{q}%'\"\n)\n# find_by_sql is just as unsafe: Article.find_by_sql(\"... LIKE '%#{q}%'\")"
+          },
+          {
+            "id": "laravel",
+            "label": "Laravel (Query Builder)",
+            "language": "php",
+            "code": "// VULNERABLE - $q interpolated into a raw LIKE string\n$rows = DB::table('articles')\n    ->whereRaw(\"title LIKE '%$q%'\")\n    ->get();\n// UNION / sqlite_master ride straight in through the unclosed quote."
+          },
+          {
+            "id": "django",
+            "label": "Django (ORM)",
+            "language": "python",
+            "code": "# VULNERABLE - input interpolated into raw SQL, bypassing the ORM's binding\nrows = Article.objects.raw(\n    f\"SELECT id, title, body FROM articles WHERE title LIKE '%{q}%'\"\n)\n# UNION / sqlite_master ride straight in through the unclosed quote."
+          },
+          {
+            "id": "spring",
+            "label": "Spring Boot (JdbcTemplate)",
+            "language": "java",
+            "code": "// VULNERABLE - the search term is concatenated into the LIKE pattern\nList<Article> rows = jdbcTemplate.query(\n    \"SELECT title, body FROM articles WHERE title LIKE '%\"\n    + q + \"%'\", articleRowMapper);\n// JPA: em.createNativeQuery(\"... LIKE '%\" + q + \"%'\") is just as unsafe"
+          }
+        ],
+        "secureCode": {
+          "language": "js",
+          "code": "// SECURE - the pattern is BOUND; UNION / sqlite_master become 'text to search for'\nconst rows = db\n  .prepare(\"SELECT title, body FROM articles WHERE title LIKE ?\")\n  .all('%' + q + '%');\n// Defense in depth: least privilege - the app account should reach only the tables it needs."
+        },
+        "secureCodeVariants": [
+          {
+            "id": "node",
+            "label": "Node.js (pg / mysql2)",
+            "language": "js",
+            "code": "// pg — bind the pattern; UNION / sqlite_master become plain search text\nconst { rows } = await client.query(\n  'SELECT title, body FROM articles WHERE title LIKE $1',\n  ['%' + q + '%'],\n);\n// Defense in depth: grant the app role SELECT only on the tables it needs."
+          },
+          {
+            "id": "python",
+            "label": "Python (sqlite3 / psycopg2)",
+            "language": "python",
+            "code": "# sqlite3 — bind the pattern; UNION / sqlite_master become literal text\ncur.execute(\n    \"SELECT title, body FROM articles WHERE title LIKE ?\",\n    (f\"%{q}%\",),\n)\nrows = cur.fetchall()\n# Least privilege: the app's DB user should only SELECT the tables it needs."
+          },
+          {
+            "id": "php-pdo",
+            "label": "PHP (PDO)",
+            "language": "php",
+            "code": "// PDO — bind the pattern; UNION / sqlite_master become plain search text\n$stmt = $pdo->prepare(\n    'SELECT title, body FROM articles WHERE title LIKE ?'\n);\n$stmt->execute(['%' . $q . '%']);\n$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);\n// Least privilege: grant the app DB user SELECT only on the tables it needs."
+          },
+          {
+            "id": "java-jdbc",
+            "label": "Java (JDBC)",
+            "language": "java",
+            "code": "// JDBC — bind the pattern; UNION / sqlite_master become plain search text\nPreparedStatement ps = conn.prepareStatement(\n    \"SELECT title, body FROM articles WHERE title LIKE ?\");\nps.setString(1, \"%\" + q + \"%\");\nResultSet rs = ps.executeQuery();\n// Least privilege: the app DB user should hold SELECT only on needed tables."
+          },
+          {
+            "id": "dotnet",
+            "label": "C# / .NET (ADO.NET)",
+            "language": "csharp",
+            "code": "// ADO.NET — bind the pattern; UNION / catalog names become search text\nusing var cmd = new SqlCommand(\n    \"SELECT title, body FROM articles WHERE title LIKE @q\", conn);\ncmd.Parameters.Add(new SqlParameter(\"@q\", \"%\" + q + \"%\"));\nusing var reader = cmd.ExecuteReader();\n// Least privilege: grant the app login SELECT only on the tables it needs."
+          },
+          {
+            "id": "go",
+            "label": "Go (database/sql)",
+            "language": "go",
+            "code": "// database/sql — bind the pattern; UNION / sqlite_master become search text\nrows, err := db.Query(\n    \"SELECT title, body FROM articles WHERE title LIKE $1\",\n    \"%\"+q+\"%\",\n)\n// Least privilege: give the app's DB role SELECT only on needed tables."
+          },
+          {
+            "id": "rails",
+            "label": "Ruby on Rails (ActiveRecord)",
+            "language": "ruby",
+            "code": "# ActiveRecord — bind the pattern; UNION / sqlite_master become search text\nrows = Article.where(\n  \"title LIKE ?\", \"%#{q}%\"\n)\n# Least privilege: the app's DB role should SELECT only the tables it needs."
+          },
+          {
+            "id": "laravel",
+            "label": "Laravel (Query Builder)",
+            "language": "php",
+            "code": "// Laravel — bind the pattern; UNION / sqlite_master become search text\n$rows = DB::table('articles')\n    ->where('title', 'LIKE', '%' . $q . '%')\n    ->get();\n// Least privilege: the app DB user should SELECT only the tables it needs."
+          },
+          {
+            "id": "django",
+            "label": "Django (ORM)",
+            "language": "python",
+            "code": "# Django ORM — filter binds the term; UNION / sqlite_master can't ride in\nrows = Article.objects.filter(\n    title__contains=q\n)\n# Least privilege: the app's DB role should SELECT only the tables it needs."
+          },
+          {
+            "id": "spring",
+            "label": "Spring Boot (JdbcTemplate)",
+            "language": "java",
+            "code": "// Spring JdbcTemplate — bind the pattern; UNION / sqlite_master become text\nList<Article> rows = jdbcTemplate.query(\n    \"SELECT title, body FROM articles WHERE title LIKE ?\",\n    articleRowMapper, \"%\" + q + \"%\");\n// Least privilege: grant the app's DB user SELECT only on needed tables."
+          }
+        ],
+        "takeaway": "Least privilege and bound parameters: a search box should only ever search."
+      }
+    },
+    {
+      "id": "vault",
+      "order": 3,
+      "goal": "Pull the hidden account off the shopping page.",
+      "why": "That account is the first score — it has no business on a storefront.",
+      "doneWhen": "The vault manifest tag shows up in the result grid.",
+      "technique": "union-extraction",
+      "difficulty": "medium",
+      "surface": "search-box",
+      "fields": [
+        {
+          "name": "q",
+          "label": "Search products",
+          "type": "search",
+          "placeholder": "Search the catalog"
+        }
+      ],
+      "query": {
+        "template": "SELECT id, name, price FROM products WHERE name LIKE '%{{input:q}}%'",
+        "description": "Product catalog search"
+      },
+      "winCondition": {
+        "type": "flag-in-result",
+        "flag": "LOOT-VAULT-9F2C4471",
+        "caseSensitive": true,
+        "reason": "Vault manifest surfaced in the result grid - the cross-table UNION held."
+      },
+      "hints": [
+        {
+          "id": "h1",
+          "text": "The search only knows how to hand back one shape of answer. Learn that shape first — how wide it is — then a second question can ride out on the same tray.",
+          "cost": 50
+        },
+        {
+          "id": "h2",
+          "text": "First find how many columns come back: ORDER BY 1, 2, 3 ... until it breaks; the last one that works is the count. Then UNION SELECT that many values - the second query must match the column count.",
+          "cost": 150,
+          "revealAfterAttempts": 2
+        },
+        {
+          "id": "h3",
+          "text": "It is 3 columns. Try  ' UNION SELECT holder_name, account_ref, balance_usd FROM offshore_accounts -- ",
+          "cost": 300,
+          "revealAfterAttempts": 4
+        }
+      ],
+      "expectedSolution": {
+        "inputs": {
+          "q": "' UNION SELECT holder_name, account_ref, balance_usd FROM offshore_accounts -- "
+        },
+        "note": "First the column count:  ' ORDER BY 3 --   is OK,  ' ORDER BY 4 --   errors => 3 columns."
+      },
+      "debrief": {
+        "explanation": "The search term is concatenated into the LIKE pattern, so a closing quote ends the search string and lets you append UNION SELECT. UNION staples a second query - from an unrelated table - onto the same result set; the only requirement is a matching column count, which is why the recon step is discovering that the query returns 3 columns.",
+        "vulnerableCode": {
+          "language": "js",
+          "code": "// VULNERABLE - the search term is concatenated into the LIKE pattern\nconst sql = \"SELECT id, name, price FROM products WHERE name LIKE '%\" + q + \"%'\";\nconst rows = db.prepare(sql).all();"
+        },
+        "vulnerableCodeVariants": [
+          {
+            "id": "node",
+            "label": "Node.js (pg / mysql2)",
+            "language": "js",
+            "code": "// VULNERABLE - the search term is concatenated into the LIKE pattern\nconst { rows } = await client.query(\n  \"SELECT id, name, price FROM products WHERE name LIKE '%\" + q + \"%'\",\n);\n// mysql2: conn.query(\"... WHERE name LIKE '%\" + q + \"%'\") - same flaw"
+          },
+          {
+            "id": "python",
+            "label": "Python (sqlite3 / psycopg2)",
+            "language": "python",
+            "code": "# VULNERABLE - the search term is interpolated into the LIKE pattern\ncur.execute(\n    f\"SELECT id, name, price FROM products WHERE name LIKE '%{q}%'\"\n)\nrows = cur.fetchall()\n# Concatenation is the same flaw: \"... LIKE '%\" + q + \"%'\""
+          },
+          {
+            "id": "php-pdo",
+            "label": "PHP (PDO)",
+            "language": "php",
+            "code": "// VULNERABLE - $q interpolated straight into the LIKE pattern\n$rows = $pdo->query(\n    \"SELECT id, name, price FROM products WHERE name LIKE '%$q%'\"\n)->fetchAll(PDO::FETCH_ASSOC);"
+          },
+          {
+            "id": "java-jdbc",
+            "label": "Java (JDBC)",
+            "language": "java",
+            "code": "// VULNERABLE - the search term is concatenated into the LIKE pattern\nStatement st = conn.createStatement();\nResultSet rs = st.executeQuery(\n    \"SELECT id, name, price FROM products WHERE name LIKE '%\"\n    + q + \"%'\");"
+          },
+          {
+            "id": "dotnet",
+            "label": "C# / .NET (ADO.NET)",
+            "language": "csharp",
+            "code": "// VULNERABLE - the search term is concatenated into the LIKE pattern\nusing var cmd = new SqlCommand(\n    \"SELECT id, name, price FROM products WHERE name LIKE '%\"\n    + q + \"%'\", conn);\nusing var reader = cmd.ExecuteReader();\n// String interpolation is just as unsafe: $\"... LIKE '%{q}%'\""
+          },
+          {
+            "id": "go",
+            "label": "Go (database/sql)",
+            "language": "go",
+            "code": "// VULNERABLE - the search term is concatenated into the LIKE pattern\nrows, err := db.Query(\n    \"SELECT id, name, price FROM products WHERE name LIKE '%\" + q + \"%'\",\n)\n// fmt.Sprintf builds the same injectable string just as easily."
+          },
+          {
+            "id": "rails",
+            "label": "Ruby on Rails (ActiveRecord)",
+            "language": "ruby",
+            "code": "# VULNERABLE - the search term is interpolated into the LIKE pattern\nrows = Product.where(\n  \"name LIKE '%#{q}%'\"\n)\n# find_by_sql is just as unsafe: Product.find_by_sql(\"... LIKE '%#{q}%'\")"
+          },
+          {
+            "id": "laravel",
+            "label": "Laravel (Query Builder)",
+            "language": "php",
+            "code": "// VULNERABLE - $q interpolated into a raw LIKE string\n$rows = DB::table('products')\n    ->whereRaw(\"name LIKE '%$q%'\")\n    ->get();\n// DB::select(\"... LIKE '%$q%'\") is just as unsafe"
+          },
+          {
+            "id": "django",
+            "label": "Django (ORM)",
+            "language": "python",
+            "code": "# VULNERABLE - input interpolated into raw SQL, bypassing the ORM's binding\nrows = Product.objects.raw(\n    f\"SELECT id, name, price FROM products WHERE name LIKE '%{q}%'\"\n)\n# .extra(where=[f\"name LIKE '%{q}%'\"]) is just as unsafe"
+          },
+          {
+            "id": "spring",
+            "label": "Spring Boot (JdbcTemplate)",
+            "language": "java",
+            "code": "// VULNERABLE - the search term is concatenated into the LIKE pattern\nList<Product> rows = jdbcTemplate.query(\n    \"SELECT id, name, price FROM products WHERE name LIKE '%\"\n    + q + \"%'\", productRowMapper);\n// JPA: em.createNativeQuery(\"... LIKE '%\" + q + \"%'\") is just as unsafe"
+          }
+        ],
+        "secureCode": {
+          "language": "js",
+          "code": "// SECURE - the % wildcards are added in code; q is BOUND as a literal value\nconst rows = db\n  .prepare(\"SELECT id, name, price FROM products WHERE name LIKE ?\")\n  .all('%' + q + '%');"
+        },
+        "secureCodeVariants": [
+          {
+            "id": "node",
+            "label": "Node.js (pg / mysql2)",
+            "language": "js",
+            "code": "// pg — the % wildcards live in the bound VALUE, never in the SQL text\nconst { rows } = await client.query(\n  'SELECT id, name, price FROM products WHERE name LIKE $1',\n  ['%' + q + '%'],\n);\n// mysql2: conn.execute('... WHERE name LIKE ?', ['%' + q + '%'])"
+          },
+          {
+            "id": "python",
+            "label": "Python (sqlite3 / psycopg2)",
+            "language": "python",
+            "code": "# sqlite3 — the % wildcards belong to the bound value, not the SQL\ncur.execute(\n    \"SELECT id, name, price FROM products WHERE name LIKE ?\",\n    (f\"%{q}%\",),\n)\nrows = cur.fetchall()\n# psycopg2 uses %s: cur.execute(\"... WHERE name LIKE %s\", (f\"%{q}%\",))"
+          },
+          {
+            "id": "php-pdo",
+            "label": "PHP (PDO)",
+            "language": "php",
+            "code": "// PDO — the % wildcards are part of the bound value, not the SQL\n$stmt = $pdo->prepare(\n    'SELECT id, name, price FROM products WHERE name LIKE ?'\n);\n$stmt->execute(['%' . $q . '%']);\n$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);"
+          },
+          {
+            "id": "java-jdbc",
+            "label": "Java (JDBC)",
+            "language": "java",
+            "code": "// JDBC — bind the pattern; the % wildcards live in the value, not the SQL\nPreparedStatement ps = conn.prepareStatement(\n    \"SELECT id, name, price FROM products WHERE name LIKE ?\");\nps.setString(1, \"%\" + q + \"%\");\nResultSet rs = ps.executeQuery();"
+          },
+          {
+            "id": "dotnet",
+            "label": "C# / .NET (ADO.NET)",
+            "language": "csharp",
+            "code": "// ADO.NET — the % wildcards are part of the bound value, not the SQL\nusing var cmd = new SqlCommand(\n    \"SELECT id, name, price FROM products WHERE name LIKE @q\", conn);\ncmd.Parameters.Add(new SqlParameter(\"@q\", \"%\" + q + \"%\"));\nusing var reader = cmd.ExecuteReader();\n// EF Core: db.Products.Where(p => EF.Functions.Like(p.Name, \"%\" + q + \"%\"))"
+          },
+          {
+            "id": "go",
+            "label": "Go (database/sql)",
+            "language": "go",
+            "code": "// database/sql — the % wildcards live in the bound arg, not the SQL\nrows, err := db.Query(\n    \"SELECT id, name, price FROM products WHERE name LIKE $1\",\n    \"%\"+q+\"%\",\n)\n// MySQL / SQLite: db.Query(\"... WHERE name LIKE ?\", \"%\"+q+\"%\")"
+          },
+          {
+            "id": "rails",
+            "label": "Ruby on Rails (ActiveRecord)",
+            "language": "ruby",
+            "code": "# ActiveRecord — the % wildcards are part of the bound value, not the SQL\nrows = Product.where(\n  \"name LIKE ?\", \"%#{q}%\"\n)\n# Named form: Product.where(\"name LIKE :p\", p: \"%#{q}%\")"
+          },
+          {
+            "id": "laravel",
+            "label": "Laravel (Query Builder)",
+            "language": "php",
+            "code": "// Laravel — the % wildcards live in the bound value, not the SQL\n$rows = DB::table('products')\n    ->where('name', 'LIKE', '%' . $q . '%')\n    ->get();\n// Eloquent: Product::where('name', 'LIKE', \"%{$q}%\")->get();"
+          },
+          {
+            "id": "django",
+            "label": "Django (ORM)",
+            "language": "python",
+            "code": "# Django ORM — __contains binds the term as a parameter (never raw SQL)\nrows = Product.objects.filter(\n    name__contains=q\n)\n# Explicit .raw(): Product.objects.raw(\"... WHERE name LIKE %s\", [\"%\" + q + \"%\"])"
+          },
+          {
+            "id": "spring",
+            "label": "Spring Boot (JdbcTemplate)",
+            "language": "java",
+            "code": "// Spring JdbcTemplate — the % wildcards live in the bound arg, not the SQL\nList<Product> rows = jdbcTemplate.query(\n    \"SELECT id, name, price FROM products WHERE name LIKE ?\",\n    productRowMapper, \"%\" + q + \"%\");\n// JPA: @Query(\"... WHERE p.name LIKE :q\") with @Param(\"q\") \"%\"+q+\"%\""
+          }
+        ],
+        "takeaway": "If the query's shape can't change, no second question rides in on it."
+      }
+    }
+  ],
+  "caseClosed": {
+    "headline": "WE'RE IN.",
+    "fixer": "The door, the floor plan, the first score — clean. Meridian doesn't even know we've been. Now the quiet wing."
+  },
+  "tags": [
+    "case",
+    "the-front-door"
+  ]
+}

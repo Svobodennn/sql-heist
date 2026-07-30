@@ -1,0 +1,443 @@
+{
+  "schemaVersion": 1,
+  "id": "the-vault",
+  "number": "003",
+  "title": "The Vault",
+  "briefing": {
+    "handler": "The Fixer",
+    "text": "The last door. A keyword doorman out front, a vault bolted behind it. Talk past the doorman, then throw the bolt in the same breath. This is the score."
+  },
+  "target": {
+    "appName": "Meridian Vault Control"
+  },
+  "database": {
+    "schemaSql": "CREATE TABLE notices (id INTEGER PRIMARY KEY, title TEXT, body TEXT); CREATE TABLE archive_ledger (id INTEGER PRIMARY KEY, schematic TEXT, loot TEXT);\nCREATE TABLE door_acl (id INTEGER PRIMARY KEY, badge TEXT, door TEXT, granted INTEGER);",
+    "seedSql": "INSERT INTO notices (id,title,body) VALUES (1,'Lobby Renovation','Closed through Q2.'),(2,'Badge Reissue','All staff re-enroll by Friday.'); INSERT INTO archive_ledger (id,schematic,loot) VALUES (1,'BP-VAULT-DOOR','LOOT-DOORMAN-5B1E9F0C'),(2,'BP-SUB-BASEMENT','sublevel-plan-C');\nINSERT INTO door_acl (badge,door,granted) VALUES ('B-1001','LOBBY',1),('B-1001','VAULT',0),('B-2002','LOBBY',1),('B-2002','ARCHIVE',1);",
+    "visibleSchema": [
+      {
+        "table": "notices",
+        "columns": [
+          "id",
+          "title",
+          "body"
+        ]
+      },
+      {
+        "table": "archive_ledger",
+        "columns": [
+          "id",
+          "schematic",
+          "loot"
+        ]
+      },
+      {
+        "table": "door_acl",
+        "columns": [
+          "id",
+          "badge",
+          "door",
+          "granted"
+        ]
+      }
+    ]
+  },
+  "objectives": [
+    {
+      "id": "the-doorman",
+      "order": 1,
+      "goal": "Slip a blocked phrase past the keyword filter and lift the ledger.",
+      "why": "A doorman scans for banned words — word the payload so it slips through.",
+      "doneWhen": "The ledger's loot tag walks past the filter into the results.",
+      "technique": "waf-bypass",
+      "difficulty": "hard",
+      "surface": "search-box",
+      "fields": [
+        {
+          "name": "q",
+          "label": "Search the archive",
+          "type": "search",
+          "placeholder": "Search notices"
+        }
+      ],
+      "query": {
+        "template": "SELECT title, body FROM notices WHERE title LIKE '%{{input:q}}%'",
+        "description": "Archive search, fronted by a keyword blocklist",
+        "inputFilter": {
+          "blocklist": [
+            "UNION SELECT",
+            "UNION ALL SELECT"
+          ],
+          "mode": "reject",
+          "message": "⛔ blocked: that phrase is on the doorman's list."
+        }
+      },
+      "winCondition": {
+        "type": "flag-in-result",
+        "flag": "LOOT-DOORMAN-5B1E9F0C",
+        "caseSensitive": true,
+        "reason": "The phrase walked past the doorman and the ledger's loot surfaced in the results."
+      },
+      "hints": [
+        {
+          "id": "h1",
+          "text": "You already know the move from the Vault - a two-column pull from the ledger. The only new problem is the man at the door blocking the phrase. Don't invent a new attack. Disguise the old one.",
+          "cost": 50
+        },
+        {
+          "id": "h2",
+          "text": "The doorman matches the phrase letter-for-letter, so break it up with something SQLite treats as blank space. An inline comment /**/ between the two words does exactly that: the filter sees a different string, the database sees the keyword.",
+          "cost": 150,
+          "revealAfterAttempts": 2
+        },
+        {
+          "id": "h3",
+          "text": "The blocked  ' UNION SELECT schematic, loot FROM archive_ledger --  becomes  ' UNION/**/SELECT schematic, loot FROM archive_ledger --  . Same query underneath; the /**/ splits the banned phrase so the filter never matches it.",
+          "cost": 300,
+          "revealAfterAttempts": 4
+        }
+      ],
+      "expectedSolution": {
+        "inputs": {
+          "q": "' UNION/**/SELECT schematic, loot FROM archive_ledger -- "
+        },
+        "note": "The naive ' UNION SELECT ... is rejected by the blocklist. Splitting UNION SELECT with an inline comment (/**/ = whitespace to SQLite) slips past the literal match while still parsing as UNION SELECT, and the ledger loot surfaces."
+      },
+      "debrief": {
+        "explanation": "The doorman is a blocklist: it scans your raw input for literal phrases like 'UNION SELECT' and rejects the request if it finds one. But it's matching TEXT, while SQLite parses TOKENS. An inline comment /**/ is just characters to the filter - enough to break the phrase 'UNION SELECT' so the substring check misses - yet to SQLite a comment is whitespace, so 'UNION/**/SELECT' parses as the very keyword the filter meant to stop. Blocklists are brittle by nature: comments, extra whitespace, case, and encodings all route around them, and the query underneath is still built by concatenation.",
+        "vulnerableCode": {
+          "language": "js",
+          "code": "// VULNERABLE - a keyword blocklist bolted in front of a still-concatenated query\nconst BLOCK = [/union\\s+select/i, /union\\s+all\\s+select/i];\nif (BLOCK.some((re) => re.test(q))) return res.status(403).send('blocked');\nconst sql = \"SELECT title, body FROM notices WHERE title LIKE '%\" + q + \"%'\";\nconst rows = db.prepare(sql).all(); // 'UNION/**/SELECT' sails straight past the filter"
+        },
+        "vulnerableCodeVariants": [
+          {
+            "id": "node",
+            "label": "Node.js (pg / mysql2)",
+            "language": "js",
+            "code": "// VULNERABLE - keyword blocklist bolted in front of a still-concatenated pg query\nconst BLOCK = [/union\\s+select/i, /union\\s+all\\s+select/i];\nif (BLOCK.some((re) => re.test(q))) return res.status(403).send('blocked');\nconst { rows } = await client.query(\n  \"SELECT title, body FROM notices WHERE title LIKE '%\" + q + \"%'\",\n);\n// 'UNION/**/SELECT' slips past the regex; mysql2 conn.query has the same flaw"
+          },
+          {
+            "id": "python",
+            "label": "Python (sqlite3 / psycopg2)",
+            "language": "python",
+            "code": "# VULNERABLE - keyword blocklist bolted in front of a still-interpolated query\nif re.search(r\"union\\s+(all\\s+)?select\", q, re.I):\n    raise PermissionError(\"blocked\")\ncur.execute(f\"SELECT title, body FROM notices WHERE title LIKE '%{q}%'\")\nrows = cur.fetchall()\n# 'UNION/**/SELECT' never matches the regex; psycopg2 %-format is the same flaw"
+          },
+          {
+            "id": "php-pdo",
+            "label": "PHP (PDO)",
+            "language": "php",
+            "code": "// VULNERABLE - keyword blocklist bolted in front of a still-concatenated query\nif (preg_match('/union\\s+(all\\s+)?select/i', $q)) {\n    http_response_code(403);\n    exit('blocked');\n}\n$sql = \"SELECT title, body FROM notices WHERE title LIKE '%$q%'\";\n$rows = $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);\n// 'UNION/**/SELECT' slips past preg_match, but PDO still runs the injection"
+          },
+          {
+            "id": "java-jdbc",
+            "label": "Java (JDBC)",
+            "language": "java",
+            "code": "// VULNERABLE - keyword blocklist bolted in front of a still-concatenated query\nif (Pattern.compile(\"union\\\\s+(all\\\\s+)?select\", Pattern.CASE_INSENSITIVE)\n        .matcher(q).find())\n    throw new SecurityException(\"blocked\");\nStatement st = conn.createStatement();\nResultSet rs = st.executeQuery(\n    \"SELECT title, body FROM notices WHERE title LIKE '%\" + q + \"%'\");\n// 'UNION/**/SELECT' never matches the pattern, but JDBC still runs it"
+          },
+          {
+            "id": "dotnet",
+            "label": "C# / .NET (ADO.NET)",
+            "language": "csharp",
+            "code": "// VULNERABLE - keyword blocklist bolted in front of a still-concatenated query\nif (Regex.IsMatch(q, @\"union\\s+(all\\s+)?select\", RegexOptions.IgnoreCase))\n    throw new InvalidOperationException(\"blocked\");\nusing var cmd = new SqlCommand(\n    \"SELECT title, body FROM notices WHERE title LIKE '%\" + q + \"%'\", conn);\nusing var reader = cmd.ExecuteReader();\n// 'UNION/**/SELECT' slips past the regex; interpolation $\"...{q}...\" is the same flaw"
+          },
+          {
+            "id": "go",
+            "label": "Go (database/sql)",
+            "language": "go",
+            "code": "// VULNERABLE - keyword blocklist bolted in front of a still-concatenated query\nif regexp.MustCompile(\"(?i)union\\\\s+(all\\\\s+)?select\").MatchString(q) {\n    http.Error(w, \"blocked\", http.StatusForbidden)\n    return\n}\nrows, err := db.Query(\n    \"SELECT title, body FROM notices WHERE title LIKE '%\" + q + \"%'\")\n// 'UNION/**/SELECT' never matches the regex, but database/sql still runs it"
+          },
+          {
+            "id": "rails",
+            "label": "Ruby on Rails (ActiveRecord)",
+            "language": "ruby",
+            "code": "# VULNERABLE - keyword blocklist bolted in front of a still-interpolated query\nraise \"blocked\" if q =~ /union\\s+(all\\s+)?select/i\nrows = Notice.where(\"title LIKE '%#{q}%'\")\n# 'UNION/**/SELECT' never matches the regex; find_by_sql is just as unsafe"
+          },
+          {
+            "id": "laravel",
+            "label": "Laravel (Query Builder)",
+            "language": "php",
+            "code": "// VULNERABLE - keyword blocklist bolted in front of a raw WHERE string\nif (preg_match('/union\\s+(all\\s+)?select/i', $q)) abort(403, 'blocked');\n$rows = DB::table('notices')\n    ->whereRaw(\"title LIKE '%$q%'\")\n    ->get();\n// 'UNION/**/SELECT' slips past preg_match; DB::select(\"...'%$q%'\") is just as unsafe"
+          },
+          {
+            "id": "django",
+            "label": "Django (ORM)",
+            "language": "python",
+            "code": "# VULNERABLE - keyword blocklist bolted in front of raw SQL, bypassing the ORM\nif re.search(r\"union\\s+(all\\s+)?select\", q, re.I):\n    raise PermissionError(\"blocked\")\nrows = Notice.objects.raw(\n    f\"SELECT id, title, body FROM notices WHERE title LIKE '%{q}%'\"\n)\n# 'UNION/**/SELECT' never matches the regex; .extra(where=[...]) is just as unsafe"
+          },
+          {
+            "id": "spring",
+            "label": "Spring Boot (JdbcTemplate)",
+            "language": "java",
+            "code": "// VULNERABLE - keyword blocklist bolted in front of a still-concatenated query\nif (q.matches(\"(?i).*union\\\\s+(all\\\\s+)?select.*\"))\n    throw new IllegalArgumentException(\"blocked\");\nList<Notice> rows = jdbcTemplate.query(\n    \"SELECT title, body FROM notices WHERE title LIKE '%\" + q + \"%'\",\n    noticeRowMapper);\n// 'UNION/**/SELECT' slips past the check, but JdbcTemplate still runs it"
+          }
+        ],
+        "secureCode": {
+          "language": "js",
+          "code": "// SECURE - bind the pattern; the injection never forms, so there is no phrase to filter\nconst rows = db\n  .prepare('SELECT title, body FROM notices WHERE title LIKE ?')\n  .all('%' + q + '%');\n// A WAF / keyword blocklist is defense-in-depth, NEVER the fix. Parameterize first;\n// prefer an allowlist (what input is permitted) over a blocklist (guessing every bad word)."
+        },
+        "secureCodeVariants": [
+          {
+            "id": "node",
+            "label": "Node.js (pg / mysql2)",
+            "language": "js",
+            "code": "// SECURE - bind the LIKE pattern; the injection never forms, so there is nothing to filter\nconst { rows } = await client.query(\n  'SELECT title, body FROM notices WHERE title LIKE $1',\n  ['%' + q + '%'],\n);\n// A WAF / keyword blocklist is defense-in-depth, NEVER the fix. Parameterize first;\n// prefer an allowlist (what input is permitted) over a blocklist (guessing every bad word).\n// mysql2: conn.execute('SELECT title, body FROM notices WHERE title LIKE ?', ['%' + q + '%'])"
+          },
+          {
+            "id": "python",
+            "label": "Python (sqlite3 / psycopg2)",
+            "language": "python",
+            "code": "# SECURE - bind the LIKE pattern; the injection never forms, so there is nothing to filter\ncur.execute(\n    \"SELECT title, body FROM notices WHERE title LIKE ?\",\n    (\"%\" + q + \"%\",),\n)\nrows = cur.fetchall()\n# A WAF / keyword blocklist is defense-in-depth, NEVER the fix. Parameterize first;\n# prefer an allowlist (what input is permitted) over a blocklist (guessing every bad word).\n# psycopg2 uses %s: cur.execute(\"... title LIKE %s\", (\"%\" + q + \"%\",))"
+          },
+          {
+            "id": "php-pdo",
+            "label": "PHP (PDO)",
+            "language": "php",
+            "code": "// SECURE - bind the LIKE pattern; the injection never forms, so there is nothing to filter\n$stmt = $pdo->prepare(\n    'SELECT title, body FROM notices WHERE title LIKE ?'\n);\n$stmt->execute(['%' . $q . '%']);\n$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);\n// A WAF / keyword blocklist is defense-in-depth, NEVER the fix. Parameterize first;\n// prefer an allowlist (what input is permitted) over a blocklist (guessing every bad word)."
+          },
+          {
+            "id": "java-jdbc",
+            "label": "Java (JDBC)",
+            "language": "java",
+            "code": "// SECURE - bind the LIKE pattern; the injection never forms, so there is nothing to filter\nPreparedStatement ps = conn.prepareStatement(\n    \"SELECT title, body FROM notices WHERE title LIKE ?\");\nps.setString(1, \"%\" + q + \"%\");\nResultSet rs = ps.executeQuery();\n// A WAF / keyword blocklist is defense-in-depth, NEVER the fix. Parameterize first;\n// prefer an allowlist (what input is permitted) over a blocklist (guessing every bad word)."
+          },
+          {
+            "id": "dotnet",
+            "label": "C# / .NET (ADO.NET)",
+            "language": "csharp",
+            "code": "// SECURE - bind the LIKE pattern; the injection never forms, so there is nothing to filter\nusing var cmd = new SqlCommand(\n    \"SELECT title, body FROM notices WHERE title LIKE @q\", conn);\ncmd.Parameters.Add(new SqlParameter(\"@q\", \"%\" + q + \"%\"));\nusing var reader = cmd.ExecuteReader();\n// A WAF / keyword blocklist is defense-in-depth, NEVER the fix. Parameterize first;\n// prefer an allowlist (what input is permitted) over a blocklist (guessing every bad word)."
+          },
+          {
+            "id": "go",
+            "label": "Go (database/sql)",
+            "language": "go",
+            "code": "// SECURE - bind the LIKE pattern; the injection never forms, so there is nothing to filter\nrows, err := db.Query(\n    \"SELECT title, body FROM notices WHERE title LIKE $1\",\n    \"%\"+q+\"%\",\n)\n// A WAF / keyword blocklist is defense-in-depth, NEVER the fix. Parameterize first;\n// prefer an allowlist (what input is permitted) over a blocklist (guessing every bad word).\n// MySQL / SQLite drivers use ? placeholders instead of $1."
+          },
+          {
+            "id": "rails",
+            "label": "Ruby on Rails (ActiveRecord)",
+            "language": "ruby",
+            "code": "# SECURE - bind the LIKE pattern; the injection never forms, so there is nothing to filter\nrows = Notice.where(\"title LIKE ?\", \"%#{q}%\")\n# A WAF / keyword blocklist is defense-in-depth, NEVER the fix. Parameterize first;\n# prefer an allowlist (what input is permitted) over a blocklist (guessing every bad word)."
+          },
+          {
+            "id": "laravel",
+            "label": "Laravel (Query Builder)",
+            "language": "php",
+            "code": "// SECURE - bind the LIKE pattern; the injection never forms, so there is nothing to filter\n$rows = DB::table('notices')\n    ->where('title', 'like', '%' . $q . '%')\n    ->get();\n// A WAF / keyword blocklist is defense-in-depth, NEVER the fix. Parameterize first;\n// prefer an allowlist (what input is permitted) over a blocklist (guessing every bad word)."
+          },
+          {
+            "id": "django",
+            "label": "Django (ORM)",
+            "language": "python",
+            "code": "# SECURE - the ORM parameterizes the LIKE value automatically\nrows = Notice.objects.filter(title__contains=q)\n# A WAF / keyword blocklist is defense-in-depth, NEVER the fix. Parameterize first;\n# prefer an allowlist (what input is permitted) over a blocklist (guessing every bad word).\n# .raw() still binds: Notice.objects.raw(\"... title LIKE %s\", [\"%\" + q + \"%\"])"
+          },
+          {
+            "id": "spring",
+            "label": "Spring Boot (JdbcTemplate)",
+            "language": "java",
+            "code": "// SECURE - bind the LIKE pattern; the injection never forms, so there is nothing to filter\nList<Notice> rows = jdbcTemplate.query(\n    \"SELECT title, body FROM notices WHERE title LIKE ?\",\n    noticeRowMapper, \"%\" + q + \"%\");\n// A WAF / keyword blocklist is defense-in-depth, NEVER the fix. Parameterize first;\n// prefer an allowlist (what input is permitted) over a blocklist (guessing every bad word)."
+          }
+        ],
+        "takeaway": "A list of forbidden words is just a list of words the attacker hasn't disguised yet. A WAF is not a fix - bind the query and the phrase stops mattering."
+      }
+    },
+    {
+      "id": "the-double-tap",
+      "order": 2,
+      "goal": "Stack a second command onto the badge read and force the vault open.",
+      "why": "One punch, two moves — flip the vault door to OPEN.",
+      "doneWhen": "An extra result set proves the stacked write ran — the vault flipped.",
+      "technique": "stacked-queries",
+      "difficulty": "hard",
+      "surface": "profile-lookup",
+      "fields": [
+        {
+          "name": "badge",
+          "label": "Badge ID",
+          "type": "text",
+          "placeholder": "e.g. B-1001"
+        }
+      ],
+      "query": {
+        "template": "SELECT door, granted FROM door_acl WHERE badge = '{{input:badge}}'",
+        "description": "Badge access lookup (the whole input string is executed as a batch)"
+      },
+      "winCondition": {
+        "type": "stacked-queries",
+        "minResultSets": 2,
+        "mustReference": [
+          "UPDATE",
+          "VAULT"
+        ],
+        "reason": "A second statement rode in behind the badge read - the vault door flipped to OPEN and the verify read proved it."
+      },
+      "hints": [
+        {
+          "id": "h1",
+          "text": "This desk doesn't just read your badge - it runs whatever you hand it, top to bottom. A single lookup is polite. Nothing's stopping you from being impolite and handing it a second instruction.",
+          "cost": 50
+        },
+        {
+          "id": "h2",
+          "text": "Close the quote, end the read with a semicolon, then write your own statement: UPDATE door_acl to set granted = 1 on the VAULT door. Add one more SELECT so the change shows up as a result, and finish with -- to comment out the trailing quote.",
+          "cost": 150,
+          "revealAfterAttempts": 2
+        },
+        {
+          "id": "h3",
+          "text": "In the badge box:  B-1001'; UPDATE door_acl SET granted = 1 WHERE door = 'VAULT'; SELECT door, granted FROM door_acl WHERE door = 'VAULT' --   The UPDATE is the break-in; the final SELECT is your receipt.",
+          "cost": 300,
+          "revealAfterAttempts": 4
+        }
+      ],
+      "expectedSolution": {
+        "inputs": {
+          "badge": "B-1001'; UPDATE door_acl SET granted = 1 WHERE door = 'VAULT'; SELECT door, granted FROM door_acl WHERE door = 'VAULT' -- "
+        },
+        "note": "Three statements run: the app's read (rows), your UPDATE (the side effect - VAULT granted flips 0 -> 1), and a verify SELECT (rows). Two row-producing statements => an extra result set surfaces => win. A plain badge like B-1001 runs one statement and changes nothing."
+      },
+      "debrief": {
+        "explanation": "Two failures again: your badge is concatenated into the SQL, and the desk runs the whole string as a batch - so a semicolon ends the app's read and starts a statement of your own. After 'B-1001' you close the quote, add ; UPDATE door_acl SET granted = 1 WHERE door = 'VAULT' (the real damage), then a second SELECT to verify, and -- to swallow the leftover quote. SQLite executes all of it in order: the harmless read, your write, and the confirming read. The extra result set is the proof the stacked statement ran.",
+        "vulnerableCode": {
+          "language": "js",
+          "code": "// VULNERABLE - input concatenated in, and the call runs EVERY statement in the string\nconst sql = \"SELECT door, granted FROM door_acl WHERE badge = '\" + badge + \"'\";\ndb.exec(sql); // exec runs a batch: one ';' and the attacker's second statement rides along"
+        },
+        "vulnerableCodeVariants": [
+          {
+            "id": "node",
+            "label": "Node.js (pg / mysql2)",
+            "language": "js",
+            "code": "// VULNERABLE - mysql2 multipleStatements:true lets a stacked ';' run a second command\nconst conn = await mysql.createConnection({ host, user, database, multipleStatements: true });\nconst sql = \"SELECT door, granted FROM door_acl WHERE badge = '\" + badge + \"'\";\nconst [results] = await conn.query(sql);\n// After the badge read, \"; UPDATE door_acl SET granted=1 WHERE door='VAULT'\" rides in as its own statement."
+          },
+          {
+            "id": "python",
+            "label": "Python (sqlite3 / psycopg2)",
+            "language": "python",
+            "code": "# VULNERABLE - executescript() runs the WHOLE string as a batch of statements\nsql = f\"SELECT door, granted FROM door_acl WHERE badge = '{badge}'\"\ncur.executescript(sql)\n# The stacked \"; UPDATE door_acl SET granted=1 WHERE door='VAULT'\" rides in as its own statement.\n# psycopg2: one execute() with ';'-separated text runs the batch too."
+          },
+          {
+            "id": "php-pdo",
+            "label": "PHP (PDO)",
+            "language": "php",
+            "code": "// VULNERABLE - exec() runs the entire string; emulated prepares also allow stacking\n$sql = \"SELECT door, granted FROM door_acl WHERE badge = '$badge'\";\n$pdo->exec($sql);\n// After the read, \"; UPDATE door_acl SET granted=1 WHERE door='VAULT'\" runs as a second statement."
+          },
+          {
+            "id": "java-jdbc",
+            "label": "Java (JDBC)",
+            "language": "java",
+            "code": "// VULNERABLE - Statement.execute() runs the concatenated string as a batch\nStatement st = conn.createStatement();\nst.execute(\n    \"SELECT door, granted FROM door_acl WHERE badge = '\" + badge + \"'\");\n// MySQL needs allowMultiQueries=true; then \"; UPDATE door_acl SET granted=1 ...\" rides in."
+          },
+          {
+            "id": "dotnet",
+            "label": "C# / .NET (ADO.NET)",
+            "language": "csharp",
+            "code": "// VULNERABLE - one SqlCommand text holds several statements; SQL Server runs them all\nusing var cmd = new SqlCommand(\n    \"SELECT door, granted FROM door_acl WHERE badge = '\" + badge + \"'\", conn);\nusing var reader = cmd.ExecuteReader();\n// The stacked \"; UPDATE door_acl SET granted=1 WHERE door='VAULT'\" rides in as its own statement."
+          },
+          {
+            "id": "go",
+            "label": "Go (database/sql)",
+            "language": "go",
+            "code": "// VULNERABLE - Exec() sends the concatenated string; batch-capable drivers run it all\nsql := \"SELECT door, granted FROM door_acl WHERE badge = '\" + badge + \"'\"\n_, err := db.Exec(sql)\n// The stacked \"; UPDATE door_acl SET granted=1 WHERE door='VAULT'\" rides in as its own statement."
+          },
+          {
+            "id": "rails",
+            "label": "Ruby on Rails (ActiveRecord)",
+            "language": "ruby",
+            "code": "# VULNERABLE - connection.execute runs the raw string, batch and all\nsql = \"SELECT door, granted FROM door_acl WHERE badge = '#{badge}'\"\nActiveRecord::Base.connection.execute(sql)\n# The stacked \"; UPDATE door_acl SET granted=1 WHERE door='VAULT'\" rides in as its own statement."
+          },
+          {
+            "id": "laravel",
+            "label": "Laravel (Query Builder)",
+            "language": "php",
+            "code": "// VULNERABLE - DB::unprepared() runs the raw string with no binding, batch and all\n$sql = \"SELECT door, granted FROM door_acl WHERE badge = '$badge'\";\nDB::unprepared($sql);\n// The stacked \"; UPDATE door_acl SET granted=1 WHERE door='VAULT'\" rides in as its own statement."
+          },
+          {
+            "id": "django",
+            "label": "Django (ORM)",
+            "language": "python",
+            "code": "# VULNERABLE - executescript() (sqlite backend) runs the whole string as a batch\nfrom django.db import connection\nsql = f\"SELECT door, granted FROM door_acl WHERE badge = '{badge}'\"\nconnection.cursor().executescript(sql)\n# The stacked \"; UPDATE door_acl SET granted=1 WHERE door='VAULT'\" rides in as its own statement."
+          },
+          {
+            "id": "spring",
+            "label": "Spring Boot (JdbcTemplate)",
+            "language": "java",
+            "code": "// VULNERABLE - JdbcTemplate.execute() runs the concatenated string as a batch\nString sql = \"SELECT door, granted FROM door_acl WHERE badge = '\" + badge + \"'\";\njdbcTemplate.execute(sql);\n// The stacked \"; UPDATE door_acl SET granted=1 WHERE door='VAULT'\" rides in as its own statement."
+          }
+        ],
+        "secureCode": {
+          "language": "js",
+          "code": "// SECURE - bind the value AND use an API that runs exactly ONE statement\nconst rows = db.prepare('SELECT door, granted FROM door_acl WHERE badge = ?').all(badge);\n// prepare()/get()/all() execute a single statement - a stacked ';' becomes a syntax error, not a command.\n// Least privilege backs this up: the read path's DB role should hold SELECT only, never UPDATE."
+        },
+        "secureCodeVariants": [
+          {
+            "id": "node",
+            "label": "Node.js (pg / mysql2)",
+            "language": "js",
+            "code": "// SECURE - multipleStatements stays OFF and the value is bound, so only ONE statement runs\nconst conn = await mysql.createConnection({ host, user, database /* multipleStatements: false */ });\nconst [rows] = await conn.execute(\n  'SELECT door, granted FROM door_acl WHERE badge = ?', [badge]);\n// A stacked ';' is now an inert literal inside the badge, not a second command."
+          },
+          {
+            "id": "python",
+            "label": "Python (sqlite3 / psycopg2)",
+            "language": "python",
+            "code": "# SECURE - execute() runs a SINGLE statement and binds the value\ncur.execute(\"SELECT door, granted FROM door_acl WHERE badge = ?\", (badge,))\nrows = cur.fetchall()\n# The ';'-payload becomes an inert string; executescript() is the footgun to avoid.\n# psycopg2: cur.execute(\"... badge = %s\", (badge,)) is single-statement too."
+          },
+          {
+            "id": "php-pdo",
+            "label": "PHP (PDO)",
+            "language": "php",
+            "code": "// SECURE - a real prepared statement binds the value and runs exactly one statement\n$pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);\n$stmt = $pdo->prepare('SELECT door, granted FROM door_acl WHERE badge = ?');\n$stmt->execute([$badge]);\n// The stacked ';' is now an inert literal inside the badge, not a second command."
+          },
+          {
+            "id": "java-jdbc",
+            "label": "Java (JDBC)",
+            "language": "java",
+            "code": "// SECURE - PreparedStatement binds the value and runs a single statement\nPreparedStatement ps = conn.prepareStatement(\n    \"SELECT door, granted FROM door_acl WHERE badge = ?\");\nps.setString(1, badge);\nResultSet rs = ps.executeQuery();\n// The ';'-payload becomes an inert string literal, never a second command."
+          },
+          {
+            "id": "dotnet",
+            "label": "C# / .NET (ADO.NET)",
+            "language": "csharp",
+            "code": "// SECURE - bind via SqlParameter; the command runs a single parameterized statement\nusing var cmd = new SqlCommand(\n    \"SELECT door, granted FROM door_acl WHERE badge = @badge\", conn);\ncmd.Parameters.Add(new SqlParameter(\"@badge\", badge));\nusing var reader = cmd.ExecuteReader();\n// A stacked ';' rides inside @badge as data, never as a second command."
+          },
+          {
+            "id": "go",
+            "label": "Go (database/sql)",
+            "language": "go",
+            "code": "// SECURE - the value binds to a placeholder and one statement runs\nrows, err := db.Query(\n    \"SELECT door, granted FROM door_acl WHERE badge = ?\", badge)\n// The ';'-payload becomes an inert string literal, not a second command.\n// Postgres uses $1 instead of ?; either way the driver runs a single statement."
+          },
+          {
+            "id": "rails",
+            "label": "Ruby on Rails (ActiveRecord)",
+            "language": "ruby",
+            "code": "# SECURE - the placeholder binds the value; ActiveRecord runs a single query\nrows = DoorAcl.where(\"badge = ?\", badge).to_a\n# The stacked ';' stays an inert string inside the badge, never a second command.\n# Hash form binds too: DoorAcl.where(badge: badge)"
+          },
+          {
+            "id": "laravel",
+            "label": "Laravel (Query Builder)",
+            "language": "php",
+            "code": "// SECURE - the Query Builder binds the value and issues one prepared statement\n$rows = DB::table('door_acl')\n    ->where('badge', $badge)\n    ->get();\n// A stacked ';' is now an inert literal inside the badge, not a second command."
+          },
+          {
+            "id": "django",
+            "label": "Django (ORM)",
+            "language": "python",
+            "code": "# SECURE - the ORM parameterizes every lookup and runs a single query\nrows = DoorAcl.objects.filter(badge=badge)\n# The ';'-payload becomes an inert string; never route input into executescript().\n# .raw() still binds: DoorAcl.objects.raw(\"... WHERE badge = %s\", [badge])"
+          },
+          {
+            "id": "spring",
+            "label": "Spring Boot (JdbcTemplate)",
+            "language": "java",
+            "code": "// SECURE - JdbcTemplate binds the arg to a ? placeholder; one statement runs\nList<DoorAcl> rows = jdbcTemplate.query(\n    \"SELECT door, granted FROM door_acl WHERE badge = ?\",\n    doorRowMapper, badge);\n// The stacked ';' stays an inert literal inside the badge, never a second command."
+          }
+        ],
+        "takeaway": "A question should ask one thing. Bind the value AND let the driver run a single statement - so a semicolon is a syntax error, not a to-do list."
+      }
+    }
+  ],
+  "caseClosed": {
+    "headline": "VAULT'S OPEN.",
+    "fixer": "Past the doorman, bolt thrown, ledger's ours. That's the job. Now — here's how every one of these doors should've been locked."
+  },
+  "tags": [
+    "case",
+    "the-vault"
+  ]
+}

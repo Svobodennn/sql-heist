@@ -1,0 +1,637 @@
+{
+  "schemaVersion": 1,
+  "id": "the-quiet-room",
+  "number": "002",
+  "title": "The Quiet Room",
+  "briefing": {
+    "handler": "The Fixer",
+    "text": "This wing of Meridian barely talks. Green or dark. Fast or slow. A choked error. But nothing that answers is truly silent — you just have to ask the right way. Read what it leaks."
+  },
+  "target": {
+    "appName": "Meridian Recovery & Security"
+  },
+  "database": {
+    "schemaSql": "CREATE TABLE reset_codes (id INTEGER PRIMARY KEY, code TEXT, account_id INTEGER); CREATE TABLE vault_config (id INTEGER PRIMARY KEY, master_pin TEXT);\nCREATE TABLE sessions (id INTEGER PRIMARY KEY, token TEXT); CREATE TABLE staff (id INTEGER PRIMARY KEY, name TEXT, clearance TEXT);\nCREATE TABLE promotions (id INTEGER PRIMARY KEY, title TEXT, active INTEGER); CREATE TABLE promo_claims (id INTEGER PRIMARY KEY, callsign TEXT UNIQUE, reward TEXT);",
+    "seedSql": "INSERT INTO reset_codes (code,account_id) VALUES ('RC-8823',2),('RC-1290',3),('RC-4417',4); INSERT INTO vault_config (id,master_pin) VALUES (1,'7731');\nINSERT INTO sessions (token) VALUES ('sess-a91f'),('sess-b7d2'),('sess-c3e8'); INSERT INTO staff (name,clearance) VALUES ('R. Vane','OMEGA'),('T. Poll','BETA'),('S. Okoro','BETA');\nINSERT INTO promotions (title,active) VALUES ('Summer Access Pass',1),('Founders Reward',0); INSERT INTO promo_claims (callsign,reward) VALUES ('ADMIN','house'),('FIXER','house'),('MERIDIAN','house');",
+    "visibleSchema": [
+      {
+        "table": "reset_codes",
+        "columns": [
+          "id",
+          "code",
+          "account_id"
+        ]
+      },
+      {
+        "table": "vault_config",
+        "columns": [
+          "id",
+          "master_pin"
+        ]
+      },
+      {
+        "table": "sessions",
+        "columns": [
+          "id",
+          "token"
+        ]
+      },
+      {
+        "table": "staff",
+        "columns": [
+          "id",
+          "name",
+          "clearance"
+        ]
+      },
+      {
+        "table": "promotions",
+        "columns": [
+          "id",
+          "title",
+          "active"
+        ]
+      }
+    ]
+  },
+  "objectives": [
+    {
+      "id": "the-tell",
+      "order": 1,
+      "goal": "Read one digit of the master PIN from a yes/no tell.",
+      "why": "The desk never prints the PIN — but it will confirm a guess.",
+      "doneWhen": "The desk lights green: your guess about the PIN held true.",
+      "technique": "blind-boolean",
+      "difficulty": "medium",
+      "surface": "search-box",
+      "fields": [
+        {
+          "name": "code",
+          "label": "Reset code",
+          "type": "text",
+          "placeholder": "e.g. RC-4417"
+        }
+      ],
+      "query": {
+        "template": "SELECT id FROM reset_codes WHERE code = '{{input:code}}'",
+        "description": "Password-reset code check (returns found / not found)"
+      },
+      "winCondition": {
+        "type": "blind-boolean",
+        "mustReference": [
+          "master_pin"
+        ],
+        "reason": "The desk lit green - your guess about the PIN held TRUE. That is the oracle answering."
+      },
+      "hints": [
+        {
+          "id": "h1",
+          "text": "You will never see the PIN printed. Stop trying to read it. The only thing this desk gives you is green or dark - so make green MEAN something. Ask it a true-or-false question whose answer depends on the PIN.",
+          "cost": 50
+        },
+        {
+          "id": "h2",
+          "text": "Close the quote and add an always-checked condition: ' OR (a subquery that pulls one character of vault_config.master_pin) = 'your guess'. If the guess is right the whole lookup turns true and rows come back (green). Wrong guess, dark. Use substr(master_pin,1,1) for the first character.",
+          "cost": 150,
+          "revealAfterAttempts": 2
+        },
+        {
+          "id": "h3",
+          "text": "In the code box try:  ' OR (SELECT substr(master_pin,1,1) FROM vault_config WHERE id=1)='7' --   Green = the first digit is 7. Change '7' to walk the alphabet/digits, then substr(...,2,1) for the next character.",
+          "cost": 300,
+          "revealAfterAttempts": 4
+        }
+      ],
+      "expectedSolution": {
+        "inputs": {
+          "code": "' OR (SELECT substr(master_pin,1,1) FROM vault_config WHERE id=1)='7' -- "
+        },
+        "note": "Proof-of-concept: this pins the FIRST character of master_pin as '7' (green = TRUE). A wrong guess like ='0' stays dark (FALSE). Walk substr(master_pin,N,1) across positions to read the whole PIN - the trainer counts pinning a decisive bit as the win."
+      },
+      "debrief": {
+        "explanation": "The desk pastes your code straight into its SQL and then leaks a single bit back: a row came back (green) or it didn't (dark). No data is ever printed - but that one bit is an oracle. By closing the quote and adding OR (a subquery that reads the hidden PIN), you make the whole lookup return rows only when your guess about the PIN is correct. Green means TRUE, dark means FALSE. Repeat the question character by character and you read a secret you were never shown - blind.",
+        "vulnerableCode": {
+          "language": "js",
+          "code": "// VULNERABLE - the code is concatenated into SQL; the page reveals only FOUND / NOT FOUND\nconst sql = \"SELECT id FROM reset_codes WHERE code = '\" + code + \"'\";\nconst found = db.prepare(sql).get() != null; // one bit - but that is all the attacker needs\nres.send(found ? 'Reset code is active' : 'No matching request');"
+        },
+        "vulnerableCodeVariants": [
+          {
+            "id": "node",
+            "label": "Node.js (pg / mysql2)",
+            "language": "js",
+            "code": "// VULNERABLE - code is concatenated into SQL; the page reveals only FOUND / NOT FOUND\nconst { rows } = await client.query(\n  \"SELECT id FROM reset_codes WHERE code = '\" + code + \"'\",\n);\nres.send(rows.length > 0 ? 'Reset code is active' : 'No matching request'); // one bit is the oracle\n// mysql2: conn.query(\"... WHERE code = '\" + code + \"'\") - same flaw"
+          },
+          {
+            "id": "python",
+            "label": "Python (sqlite3 / psycopg2)",
+            "language": "python",
+            "code": "# VULNERABLE - code interpolated into SQL; the page reveals only FOUND / NOT FOUND\ncur.execute(f\"SELECT id FROM reset_codes WHERE code = '{code}'\")\nfound = cur.fetchone() is not None  # one bit - but that is all the attacker needs\nreturn 'Reset code is active' if found else 'No matching request'\n# psycopg2 %-format is the same flaw: \"... WHERE code = '%s'\" % code"
+          },
+          {
+            "id": "php-pdo",
+            "label": "PHP (PDO)",
+            "language": "php",
+            "code": "// VULNERABLE - $code interpolated into SQL; the page reveals only FOUND / NOT FOUND\n$sql = \"SELECT id FROM reset_codes WHERE code = '$code'\";\n$found = $pdo->query($sql)->fetch(PDO::FETCH_ASSOC) !== false;\necho $found ? 'Reset code is active' : 'No matching request'; // one bit is the oracle"
+          },
+          {
+            "id": "java-jdbc",
+            "label": "Java (JDBC)",
+            "language": "java",
+            "code": "// VULNERABLE - code concatenated into SQL; the page reveals only FOUND / NOT FOUND\nStatement st = conn.createStatement();\nResultSet rs = st.executeQuery(\n    \"SELECT id FROM reset_codes WHERE code = '\" + code + \"'\");\nboolean found = rs.next(); // one bit - but that is all the attacker needs\nresp.getWriter().write(found ? \"Reset code is active\" : \"No matching request\");"
+          },
+          {
+            "id": "dotnet",
+            "label": "C# / .NET (ADO.NET)",
+            "language": "csharp",
+            "code": "// VULNERABLE - code concatenated into SQL; the page reveals only FOUND / NOT FOUND\nusing var cmd = new SqlCommand(\n    \"SELECT id FROM reset_codes WHERE code = '\" + code + \"'\", conn);\nbool found = cmd.ExecuteScalar() != null; // one bit is the oracle\nreturn found ? \"Reset code is active\" : \"No matching request\";\n// String interpolation is just as unsafe: $\"... WHERE code = '{code}'\""
+          },
+          {
+            "id": "go",
+            "label": "Go (database/sql)",
+            "language": "go",
+            "code": "// VULNERABLE - code concatenated into SQL; the page reveals only FOUND / NOT FOUND\nerr := db.QueryRow(\n    \"SELECT id FROM reset_codes WHERE code = '\" + code + \"'\",\n).Scan(&id)\nfound := err == nil // one bit - but that is all the attacker needs\nif found { fmt.Fprint(w, \"Reset code is active\") } else { fmt.Fprint(w, \"No matching request\") }\n// fmt.Sprintf(\"... WHERE code = '%s'\", code) is the same flaw"
+          },
+          {
+            "id": "rails",
+            "label": "Ruby on Rails (ActiveRecord)",
+            "language": "ruby",
+            "code": "# VULNERABLE - code interpolated into SQL; the page reveals only FOUND / NOT FOUND\nfound = ResetCode.where(\"code = '#{code}'\").exists?\nrender plain: found ? 'Reset code is active' : 'No matching request' # one bit is the oracle\n# find_by_sql is just as unsafe: ResetCode.find_by_sql(\"... WHERE code = '#{code}'\")"
+          },
+          {
+            "id": "laravel",
+            "label": "Laravel (Query Builder)",
+            "language": "php",
+            "code": "// VULNERABLE - $code interpolated into a raw WHERE; the page reveals only FOUND / NOT FOUND\n$found = DB::table('reset_codes')\n    ->whereRaw(\"code = '$code'\")\n    ->exists();\nreturn $found ? 'Reset code is active' : 'No matching request'; // one bit is the oracle\n// DB::select(\"... WHERE code = '$code'\") is just as unsafe"
+          },
+          {
+            "id": "django",
+            "label": "Django (ORM)",
+            "language": "python",
+            "code": "# VULNERABLE - code interpolated into raw SQL, bypassing the ORM's binding\nrows = ResetCode.objects.raw(\n    f\"SELECT id FROM reset_codes WHERE code = '{code}'\"\n)\nfound = len(list(rows)) > 0  # page reveals only FOUND / NOT FOUND - one bit\nreturn HttpResponse('Reset code is active' if found else 'No matching request')\n# .extra(where=[f\"code = '{code}'\"]) is just as unsafe"
+          },
+          {
+            "id": "spring",
+            "label": "Spring Boot (JdbcTemplate)",
+            "language": "java",
+            "code": "// VULNERABLE - code concatenated into SQL; the page reveals only FOUND / NOT FOUND\nList<Long> ids = jdbcTemplate.queryForList(\n    \"SELECT id FROM reset_codes WHERE code = '\" + code + \"'\", Long.class);\nboolean found = !ids.isEmpty(); // one bit - but that is all the attacker needs\nreturn found ? \"Reset code is active\" : \"No matching request\";\n// JPA: em.createNativeQuery(\"... WHERE code = '\" + code + \"'\") is just as unsafe"
+          }
+        ],
+        "secureCode": {
+          "language": "js",
+          "code": "// SECURE - bind the value; input can never become SQL, so there is no oracle to steer\nconst found = db.prepare('SELECT id FROM reset_codes WHERE code = ?').get(code) != null;\nres.send(found ? 'Reset code is active' : 'No matching request');\n// A generic response does NOT save a concatenated query - the fix is binding. Add least privilege:\n// the reset lookup's DB role should have no read access to vault_config in the first place."
+        },
+        "secureCodeVariants": [
+          {
+            "id": "node",
+            "label": "Node.js (pg / mysql2)",
+            "language": "js",
+            "code": "// SECURE - bind the code as $1; input can never become SQL, so there is no oracle to steer\nconst { rows } = await client.query(\n  'SELECT id FROM reset_codes WHERE code = $1',\n  [code],\n);\nres.send(rows.length > 0 ? 'Reset code is active' : 'No matching request');\n// A generic response is NOT the fix - binding is. Least privilege: the reset-lookup\n// DB role should have no read access to vault_config. mysql2: '... code = ?', [code]"
+          },
+          {
+            "id": "python",
+            "label": "Python (sqlite3 / psycopg2)",
+            "language": "python",
+            "code": "# SECURE - the ? placeholder is bound; input is never parsed as SQL, so there is no oracle\ncur.execute(\"SELECT id FROM reset_codes WHERE code = ?\", (code,))\nfound = cur.fetchone() is not None\nreturn 'Reset code is active' if found else 'No matching request'\n# A generic response is NOT the fix - binding is. Least privilege: the reset-lookup\n# DB role should have no read access to vault_config. psycopg2: \"... code = %s\", (code,)"
+          },
+          {
+            "id": "php-pdo",
+            "label": "PHP (PDO)",
+            "language": "php",
+            "code": "// SECURE - prepared statement binds $code; it can never become SQL, so there is no oracle\n$stmt = $pdo->prepare('SELECT id FROM reset_codes WHERE code = ?');\n$stmt->execute([$code]);\n$found = $stmt->fetch(PDO::FETCH_ASSOC) !== false;\necho $found ? 'Reset code is active' : 'No matching request';\n// A generic response is NOT the fix - binding is. Least privilege: the reset-lookup\n// DB role should have no read access to vault_config at all."
+          },
+          {
+            "id": "java-jdbc",
+            "label": "Java (JDBC)",
+            "language": "java",
+            "code": "// SECURE - PreparedStatement binds code; it can never become SQL, so there is no oracle\nPreparedStatement ps = conn.prepareStatement(\n    \"SELECT id FROM reset_codes WHERE code = ?\");\nps.setString(1, code);\nboolean found = ps.executeQuery().next();\nresp.getWriter().write(found ? \"Reset code is active\" : \"No matching request\");\n// A generic response is NOT the fix - binding is. Least privilege: the reset-lookup\n// DB role should have no read access to vault_config at all."
+          },
+          {
+            "id": "dotnet",
+            "label": "C# / .NET (ADO.NET)",
+            "language": "csharp",
+            "code": "// SECURE - bind via SqlParameter; input is never parsed as SQL, so there is no oracle\nusing var cmd = new SqlCommand(\n    \"SELECT id FROM reset_codes WHERE code = @code\", conn);\ncmd.Parameters.Add(new SqlParameter(\"@code\", code));\nbool found = cmd.ExecuteScalar() != null;\nreturn found ? \"Reset code is active\" : \"No matching request\";\n// A generic response is NOT the fix - binding is. Least privilege: the reset-lookup\n// DB role should have no read access to vault_config at all."
+          },
+          {
+            "id": "go",
+            "label": "Go (database/sql)",
+            "language": "go",
+            "code": "// SECURE - code binds to the placeholder; it is never string-concatenated, so no oracle\nerr := db.QueryRow(\n    \"SELECT id FROM reset_codes WHERE code = $1\", code,\n).Scan(&id)\nfound := err == nil\nif found { fmt.Fprint(w, \"Reset code is active\") } else { fmt.Fprint(w, \"No matching request\") }\n// A generic response is NOT the fix - binding is. Least privilege: the reset-lookup\n// DB role should have no read access to vault_config. MySQL/SQLite use ? not $1."
+          },
+          {
+            "id": "rails",
+            "label": "Ruby on Rails (ActiveRecord)",
+            "language": "ruby",
+            "code": "# SECURE - placeholders are bound; input is never parsed as SQL, so there is no oracle\nfound = ResetCode.where(\"code = ?\", code).exists?\nrender plain: found ? 'Reset code is active' : 'No matching request'\n# A generic response is NOT the fix - binding is. Least privilege: the reset-lookup\n# DB role should have no read access to vault_config. Hash form binds too: where(code: code)"
+          },
+          {
+            "id": "laravel",
+            "label": "Laravel (Query Builder)",
+            "language": "php",
+            "code": "// SECURE - the value is bound, sent apart from the SQL, so there is no oracle to steer\n$found = DB::table('reset_codes')\n    ->where('code', $code)\n    ->exists();\nreturn $found ? 'Reset code is active' : 'No matching request';\n// A generic response is NOT the fix - binding is. Least privilege: the reset-lookup\n// DB role should have no read access to vault_config at all."
+          },
+          {
+            "id": "django",
+            "label": "Django (ORM)",
+            "language": "python",
+            "code": "# SECURE - the ORM parameterizes every lookup value, so input can never become SQL\nfound = ResetCode.objects.filter(code=code).exists()\nreturn HttpResponse('Reset code is active' if found else 'No matching request')\n# A generic response is NOT the fix - binding is. Least privilege: the reset-lookup\n# DB role should have no read access to vault_config. .raw() still binds: \"... code = %s\", [code]"
+          },
+          {
+            "id": "spring",
+            "label": "Spring Boot (JdbcTemplate)",
+            "language": "java",
+            "code": "// SECURE - args bind to the ? placeholder positionally, so input never becomes SQL\nList<Long> ids = jdbcTemplate.queryForList(\n    \"SELECT id FROM reset_codes WHERE code = ?\", Long.class, code);\nboolean found = !ids.isEmpty();\nreturn found ? \"Reset code is active\" : \"No matching request\";\n// A generic response is NOT the fix - binding is. Least privilege: the reset-lookup\n// DB role should have no read access to vault_config at all."
+          }
+        ],
+        "takeaway": "A yes/no answer is still an answer. If typed input can steer the query, one bit at a time is enough - bind the value so there is no question to smuggle in."
+      }
+    },
+    {
+      "id": "the-stopwatch",
+      "order": 2,
+      "goal": "Confirm the hidden OMEGA clearance by the gate's delay.",
+      "why": "The gate answers everything the same — so read its clock, not its face.",
+      "doneWhen": "The response drags — the slow branch fired, so OMEGA is real.",
+      "technique": "blind-timing",
+      "difficulty": "medium",
+      "surface": "url-param",
+      "fields": [
+        {
+          "name": "token",
+          "label": "session token",
+          "type": "text",
+          "placeholder": "?token=..."
+        }
+      ],
+      "query": {
+        "template": "SELECT id FROM sessions WHERE token = '{{input:token}}'",
+        "description": "Gate session probe (always returns 'processing')"
+      },
+      "winCondition": {
+        "type": "blind-timing",
+        "thresholdMs": 750,
+        "slowDelayMs": 3000,
+        "mustReference": [
+          "staff"
+        ],
+        "reason": "The gate dragged its feet - the slow branch fired, which means your condition held TRUE."
+      },
+      "hints": [
+        {
+          "id": "h1",
+          "text": "The gate says 'processing' no matter what - so output tells you nothing. What it can't hide is how LONG it thinks. Give it a question that only makes it sweat when the answer is yes.",
+          "cost": 50
+        },
+        {
+          "id": "h2",
+          "text": "Close the quote and OR in a condition built from CASE WHEN (a check on the staff table) THEN <true> ELSE <false>. Word it so the whole lookup returns rows - the slow branch - only when the OMEGA clearance actually exists. A wrong guess stays fast.",
+          "cost": 150,
+          "revealAfterAttempts": 2
+        },
+        {
+          "id": "h3",
+          "text": "In the token box try:  ' OR (SELECT CASE WHEN COUNT(*)>0 THEN 1 ELSE 0 END FROM staff WHERE clearance='OMEGA')=1 --   A drag/slow response = OMEGA exists (TRUE). Swap 'OMEGA' for 'ZULU' and it snaps back fast = FALSE.",
+          "cost": 300,
+          "revealAfterAttempts": 4
+        }
+      ],
+      "expectedSolution": {
+        "inputs": {
+          "token": "' OR (SELECT CASE WHEN COUNT(*)>0 THEN 1 ELSE 0 END FROM staff WHERE clearance='OMEGA')=1 -- "
+        },
+        "note": "TRUE branch fires because an OMEGA row exists -> modeled slow response (>= threshold) -> win. A benign token, or the same probe with a clearance that does not exist (e.g. 'ZULU'), stays fast = FALSE."
+      },
+      "debrief": {
+        "explanation": "The gate concatenates your token into its SQL, and it always sends back the same 'processing' - no visible tell at all. So you build a different oracle: a CASE WHEN <condition> branch that only does the expensive work when your condition is true. When OMEGA staff exist the branch fires, the response drags, and that DELAY is the yes. When they don't, it snaps back fast - a no. You read a secret through time instead of output. (Honest note: real engines pair the true branch with SLEEP()/pg_sleep()/heavy work; SQLite has no sleep and WASM here is synchronous, so this trainer MODELS the delay - the injection shape and the read-through-timing idea are the real lesson.)",
+        "vulnerableCode": {
+          "language": "js",
+          "code": "// VULNERABLE - token concatenated into SQL; every response looks identical to the user...\nconst sql = \"SELECT id FROM sessions WHERE token = '\" + token + \"'\";\ndb.prepare(sql).get(); // ...but a CASE WHEN branch makes the DB slow ONLY when a condition holds\nres.send('processing'); // real engines: ... THEN pg_sleep(3) - the wait leaks the answer"
+        },
+        "vulnerableCodeVariants": [
+          {
+            "id": "node",
+            "label": "Node.js (pg / mysql2)",
+            "language": "js",
+            "code": "// VULNERABLE - token concatenated into SQL; every response looks identical to the user...\nconst { rows } = await client.query(\n  \"SELECT id FROM sessions WHERE token = '\" + token + \"'\",\n);\nres.send('processing'); // ...but a CASE WHEN branch makes the DB slow ONLY when a condition holds\n// real engines: ... THEN pg_sleep(3); the wait leaks the answer. mysql2 conn.query is the same flaw"
+          },
+          {
+            "id": "python",
+            "label": "Python (sqlite3 / psycopg2)",
+            "language": "python",
+            "code": "# VULNERABLE - token interpolated into SQL; every response looks identical to the user...\ncur.execute(f\"SELECT id FROM sessions WHERE token = '{token}'\")\ncur.fetchone()\nreturn \"processing\"  # ...but a CASE WHEN branch makes the DB slow ONLY when a condition holds\n# real engines: ... THEN pg_sleep(3); the wait leaks the answer. psycopg2 \"%s\" % token is the same flaw"
+          },
+          {
+            "id": "php-pdo",
+            "label": "PHP (PDO)",
+            "language": "php",
+            "code": "// VULNERABLE - $token interpolated into SQL; every response looks identical to the user...\n$sql = \"SELECT id FROM sessions WHERE token = '$token'\";\n$pdo->query($sql)->fetch(PDO::FETCH_ASSOC);\necho 'processing'; // ...but a CASE WHEN branch makes the DB slow ONLY when a condition holds\n// real engines: ... THEN pg_sleep(3) - the wait leaks the answer"
+          },
+          {
+            "id": "java-jdbc",
+            "label": "Java (JDBC)",
+            "language": "java",
+            "code": "// VULNERABLE - token concatenated into SQL; every response looks identical to the user...\nStatement st = conn.createStatement();\nst.executeQuery(\"SELECT id FROM sessions WHERE token = '\" + token + \"'\");\nresponse.getWriter().print(\"processing\"); // ...but a CASE WHEN branch makes the DB slow ONLY when a condition holds\n// real engines: ... THEN pg_sleep(3) - the wait leaks the answer"
+          },
+          {
+            "id": "dotnet",
+            "label": "C# / .NET (ADO.NET)",
+            "language": "csharp",
+            "code": "// VULNERABLE - token concatenated into SQL; every response looks identical to the user...\nusing var cmd = new SqlCommand(\n    \"SELECT id FROM sessions WHERE token = '\" + token + \"'\", conn);\ncmd.ExecuteReader();\nawait Response.WriteAsync(\"processing\"); // ...but a CASE WHEN branch makes the DB slow ONLY when a condition holds\n// real engines: ... THEN pg_sleep(3) - the wait leaks the answer"
+          },
+          {
+            "id": "go",
+            "label": "Go (database/sql)",
+            "language": "go",
+            "code": "// VULNERABLE - token concatenated into SQL; every response looks identical to the user...\nrow := db.QueryRow(\n    \"SELECT id FROM sessions WHERE token = '\" + token + \"'\",\n)\nrow.Scan(&id)\nfmt.Fprint(w, \"processing\") // ...but a CASE WHEN branch makes the DB slow ONLY when a condition holds\n// real engines: ... THEN pg_sleep(3); the wait leaks the answer. fmt.Sprintf(...) is the same flaw"
+          },
+          {
+            "id": "rails",
+            "label": "Ruby on Rails (ActiveRecord)",
+            "language": "ruby",
+            "code": "# VULNERABLE - token interpolated into SQL; every response looks identical to the user...\nSession.where(\"token = '#{token}'\").first\nrender plain: \"processing\"  # ...but a CASE WHEN branch makes the DB slow ONLY when a condition holds\n# real engines: ... THEN pg_sleep(3); the wait leaks the answer. find_by_sql is the same flaw"
+          },
+          {
+            "id": "laravel",
+            "label": "Laravel (Query Builder)",
+            "language": "php",
+            "code": "// VULNERABLE - $token interpolated into a raw WHERE string; every response looks identical...\nDB::table('sessions')->whereRaw(\"token = '$token'\")->first();\nreturn 'processing'; // ...but a CASE WHEN branch makes the DB slow ONLY when a condition holds\n// real engines: ... THEN pg_sleep(3); the wait leaks the answer. DB::select(\"...'$token'\") is the same flaw"
+          },
+          {
+            "id": "django",
+            "label": "Django (ORM)",
+            "language": "python",
+            "code": "# VULNERABLE - token interpolated into raw SQL; every response looks identical to the user...\nlist(Session.objects.raw(f\"SELECT id FROM sessions WHERE token = '{token}'\"))\nreturn HttpResponse(\"processing\")  # ...but a CASE WHEN branch makes the DB slow ONLY when a condition holds\n# real engines: ... THEN pg_sleep(3); the wait leaks the answer. .extra(where=[...]) is the same flaw"
+          },
+          {
+            "id": "spring",
+            "label": "Spring Boot (JdbcTemplate)",
+            "language": "java",
+            "code": "// VULNERABLE - token concatenated into SQL; every response looks identical to the user...\njdbcTemplate.query(\n    \"SELECT id FROM sessions WHERE token = '\" + token + \"'\",\n    sessionRowMapper);\nreturn \"processing\"; // ...but a CASE WHEN branch makes the DB slow ONLY when a condition holds\n// real engines: ... THEN pg_sleep(3); the wait leaks the answer. em.createNativeQuery(...) is the same flaw"
+          }
+        ],
+        "secureCode": {
+          "language": "js",
+          "code": "// SECURE - bind the token; input never becomes SQL, so no branch can be steered\ndb.prepare('SELECT id FROM sessions WHERE token = ?').get(token);\nres.send('processing');\n// You cannot patch a timing side channel by hiding output - the answer leaks through the clock.\n// Keep input OUT of the SQL (bind), and apply least privilege so a session check cannot read staff."
+        },
+        "secureCodeVariants": [
+          {
+            "id": "node",
+            "label": "Node.js (pg / mysql2)",
+            "language": "js",
+            "code": "// SECURE - bind the token; input never becomes SQL, so no branch can be steered\nconst { rows } = await client.query('SELECT id FROM sessions WHERE token = $1', [token]);\nres.send('processing');\n// Hiding output cannot patch a timing channel - keep input OUT of the SQL (bind).\n// Least privilege: a session check must not read the staff table. Add a statement_timeout.\n// mysql2: conn.execute('SELECT id FROM sessions WHERE token = ?', [token])"
+          },
+          {
+            "id": "python",
+            "label": "Python (sqlite3 / psycopg2)",
+            "language": "python",
+            "code": "# SECURE - ? placeholders are bound; input is never parsed as SQL\ncur.execute(\"SELECT id FROM sessions WHERE token = ?\", (token,))\ncur.fetchone()\nreturn \"processing\"\n# Hiding output cannot patch a timing channel - keep input OUT of the SQL (bind).\n# Least privilege: a session check must not read the staff table. Set a statement_timeout.\n# psycopg2 uses %s: cur.execute(\"... WHERE token = %s\", (token,))"
+          },
+          {
+            "id": "php-pdo",
+            "label": "PHP (PDO)",
+            "language": "php",
+            "code": "// SECURE - prepared statement; the token is bound, never concatenated\n$stmt = $pdo->prepare('SELECT id FROM sessions WHERE token = ?');\n$stmt->execute([$token]);\necho 'processing';\n// Hiding output cannot patch a timing channel - keep input OUT of the SQL (bind).\n// Least privilege: a session check must not read the staff table. Set a statement timeout."
+          },
+          {
+            "id": "java-jdbc",
+            "label": "Java (JDBC)",
+            "language": "java",
+            "code": "// SECURE - PreparedStatement binds the token with setString\nPreparedStatement ps = conn.prepareStatement(\n    \"SELECT id FROM sessions WHERE token = ?\");\nps.setString(1, token);\nps.executeQuery();\nresponse.getWriter().print(\"processing\");\n// Hiding output cannot patch a timing channel - keep input OUT of the SQL (bind).\n// Least privilege: a session check must not read the staff table. Set a query timeout."
+          },
+          {
+            "id": "dotnet",
+            "label": "C# / .NET (ADO.NET)",
+            "language": "csharp",
+            "code": "// SECURE - bind via SqlParameter; input is never parsed as SQL\nusing var cmd = new SqlCommand(\n    \"SELECT id FROM sessions WHERE token = @t\", conn);\ncmd.Parameters.Add(new SqlParameter(\"@t\", token));\ncmd.ExecuteReader();\nawait Response.WriteAsync(\"processing\");\n// Hiding output cannot patch a timing channel - keep input OUT of the SQL (bind).\n// Least privilege: a session check must not read the staff table. Set CommandTimeout."
+          },
+          {
+            "id": "go",
+            "label": "Go (database/sql)",
+            "language": "go",
+            "code": "// SECURE - args bind to placeholders, never string-concatenated\nrow := db.QueryRow(\n    \"SELECT id FROM sessions WHERE token = $1\", token,\n)\nrow.Scan(&id)\nfmt.Fprint(w, \"processing\")\n// Hiding output cannot patch a timing channel - keep input OUT of the SQL (bind).\n// Least privilege: a session check must not read the staff table. Use a context timeout."
+          },
+          {
+            "id": "rails",
+            "label": "Ruby on Rails (ActiveRecord)",
+            "language": "ruby",
+            "code": "# SECURE - placeholders are bound; input is never parsed as SQL\nSession.where(\"token = ?\", token).first\nrender plain: \"processing\"\n# Hiding output cannot patch a timing channel - keep input OUT of the SQL (bind).\n# Least privilege: a session check must not read the staff table. Set a statement_timeout.\n# Hash form also binds: Session.find_by(token: token)"
+          },
+          {
+            "id": "laravel",
+            "label": "Laravel (Query Builder)",
+            "language": "php",
+            "code": "// SECURE - the value is bound, sent apart from the SQL\nDB::table('sessions')->where('token', $token)->first();\nreturn 'processing';\n// Hiding output cannot patch a timing channel - keep input OUT of the SQL (bind).\n// Least privilege: a session check must not read the staff table. Set a statement timeout.\n// Raw still binds: ->whereRaw('token = ?', [$token])"
+          },
+          {
+            "id": "django",
+            "label": "Django (ORM)",
+            "language": "python",
+            "code": "# SECURE - every lookup value is parameterized automatically\nSession.objects.filter(token=token).first()\nreturn HttpResponse(\"processing\")\n# Hiding output cannot patch a timing channel - keep input OUT of the SQL (bind).\n# Least privilege: a session check must not read the staff table. Set a statement_timeout.\n# .raw() still binds: Session.objects.raw(\"... WHERE token = %s\", [token])"
+          },
+          {
+            "id": "spring",
+            "label": "Spring Boot (JdbcTemplate)",
+            "language": "java",
+            "code": "// SECURE - args bind to ? placeholders positionally\njdbcTemplate.query(\n    \"SELECT id FROM sessions WHERE token = ?\",\n    sessionRowMapper, token);\nreturn \"processing\";\n// Hiding output cannot patch a timing channel - keep input OUT of the SQL (bind).\n// Least privilege: a session check must not read the staff table. Set a query timeout."
+          }
+        ],
+        "takeaway": "If the query still runs attacker-controlled logic, silence isn't safety - the response time talks. Bind the input so there is no branch to steer, whatever the clock says."
+      }
+    },
+    {
+      "id": "the-confession",
+      "order": 3,
+      "goal": "Force a duplicate error that names the hidden claims table.",
+      "why": "The desk hides its table — make it blurt the name in an error.",
+      "doneWhen": "The error names its own drawer: promo_claims.",
+      "technique": "error-based",
+      "difficulty": "medium",
+      "surface": "search-box",
+      "fields": [
+        {
+          "name": "callsign",
+          "label": "Claim your callsign",
+          "type": "text",
+          "placeholder": "e.g. NOVA-77"
+        }
+      ],
+      "query": {
+        "template": "INSERT INTO promo_claims (callsign) VALUES ('{{input:callsign}}')",
+        "description": "Reserve a promo callsign (raw DB errors are shown to the user)"
+      },
+      "winCondition": {
+        "type": "error-based",
+        "errorContains": "promo_claims",
+        "reason": "The desk choked and named its own hidden drawer: promo_claims. The error was the leak."
+      },
+      "hints": [
+        {
+          "id": "h1",
+          "text": "A form that shows you the database's own complaint is a form that will tell on itself. You don't need it to succeed - you need it to FAIL loudly. Feed it something it has to reject.",
+          "cost": 50
+        },
+        {
+          "id": "h2",
+          "text": "The desk enforces unique callsigns. Submit one that's already taken and the database refuses the duplicate - and its refusal names the table.column it enforced the rule on. House names like ADMIN are always reserved.",
+          "cost": 150,
+          "revealAfterAttempts": 2
+        },
+        {
+          "id": "h3",
+          "text": "Type  ADMIN  and submit. The response is 'UNIQUE constraint failed: promo_claims.callsign' - there's the hidden table (promo_claims) and its column, confessed by the error itself.",
+          "cost": 300,
+          "revealAfterAttempts": 4
+        }
+      ],
+      "expectedSolution": {
+        "inputs": {
+          "callsign": "ADMIN"
+        },
+        "note": "ADMIN is already claimed, so the INSERT trips SQLite's UNIQUE constraint and the raw error names the hidden table promo_claims. A fresh callsign (e.g. NOVA-77) inserts cleanly and reveals nothing; a different error (e.g. a value-count mismatch) is not the targeted confession."
+      },
+      "debrief": {
+        "explanation": "Two mistakes stacked on top of each other: the desk builds its SQL by concatenation, AND it forwards the database's raw complaint straight to you. Submit a callsign that already exists and SQLite refuses the duplicate with 'UNIQUE constraint failed: promo_claims.callsign' - a message that names the exact table and column you were never shown. The error itself is the leak. HONEST NOTE: SQLite leaks STRUCTURE this way (identifiers - table and column names), not row data. The classic MySQL version of this technique goes further, abusing functions like extractvalue()/updatexml() to smuggle actual DATA into the error text; SQLite has no such trick, so it won't spill row contents through errors. But a verbose error is still a free map of your schema.",
+        "vulnerableCode": {
+          "language": "js",
+          "code": "// VULNERABLE - input concatenated into SQL AND the raw DB error is handed to the user\ntry {\n  db.prepare(\"INSERT INTO promo_claims (callsign) VALUES ('\" + callsign + \"')\").run();\n  res.send('Callsign reserved');\n} catch (err) {\n  res.status(400).send(err.message); // leaks: \"UNIQUE constraint failed: promo_claims.callsign\"\n}"
+        },
+        "vulnerableCodeVariants": [
+          {
+            "id": "node",
+            "label": "Node.js (pg / mysql2)",
+            "language": "js",
+            "code": "// VULNERABLE - callsign concatenated into the INSERT, and the raw DB error is echoed back\ntry {\n  await client.query(\n    \"INSERT INTO promo_claims (callsign) VALUES ('\" + callsign + \"')\",\n  );\n  res.send('Callsign reserved');\n} catch (err) {\n  res.status(400).send(err.message); // leaks \"...promo_claims...\" on a duplicate key\n}"
+          },
+          {
+            "id": "python",
+            "label": "Python (sqlite3 / psycopg2)",
+            "language": "python",
+            "code": "# VULNERABLE - callsign interpolated into the INSERT, and the raw error is returned to the caller\ntry:\n    cur.execute(f\"INSERT INTO promo_claims (callsign) VALUES ('{callsign}')\")\nexcept Exception as e:\n    return Response(str(e), status=400)  # leaks \"UNIQUE constraint failed: promo_claims.callsign\""
+          },
+          {
+            "id": "php-pdo",
+            "label": "PHP (PDO)",
+            "language": "php",
+            "code": "// VULNERABLE - $callsign interpolated into the INSERT, and the raw PDO error is echoed back\ntry {\n    $pdo->exec(\"INSERT INTO promo_claims (callsign) VALUES ('$callsign')\");\n    echo 'Callsign reserved';\n} catch (PDOException $e) {\n    http_response_code(400);\n    echo $e->getMessage(); // leaks \"...promo_claims...\" on a duplicate\n}"
+          },
+          {
+            "id": "java-jdbc",
+            "label": "Java (JDBC)",
+            "language": "java",
+            "code": "// VULNERABLE - callsign concatenated into the INSERT, and the raw SQLException is sent back\ntry (Statement st = conn.createStatement()) {\n    st.executeUpdate(\n        \"INSERT INTO promo_claims (callsign) VALUES ('\" + callsign + \"')\");\n} catch (SQLException e) {\n    resp.setStatus(400);\n    resp.getWriter().write(e.getMessage()); // leaks \"...promo_claims...\"\n}"
+          },
+          {
+            "id": "dotnet",
+            "label": "C# / .NET (ADO.NET)",
+            "language": "csharp",
+            "code": "// VULNERABLE - callsign concatenated into the INSERT, and the raw error is returned to the client\ntry {\n    using var cmd = new SqlCommand(\n        \"INSERT INTO promo_claims (callsign) VALUES ('\" + callsign + \"')\", conn);\n    cmd.ExecuteNonQuery();\n} catch (SqlException e) {\n    return StatusCode(400, e.Message); // leaks \"...promo_claims...\" on a duplicate key\n}"
+          },
+          {
+            "id": "go",
+            "label": "Go (database/sql)",
+            "language": "go",
+            "code": "// VULNERABLE - callsign concatenated into the INSERT, and the raw error is written to the response\n_, err := db.Exec(\n    \"INSERT INTO promo_claims (callsign) VALUES ('\" + callsign + \"')\",\n)\nif err != nil {\n    http.Error(w, err.Error(), http.StatusBadRequest) // leaks \"...promo_claims...\"\n}"
+          },
+          {
+            "id": "rails",
+            "label": "Ruby on Rails (ActiveRecord)",
+            "language": "ruby",
+            "code": "# VULNERABLE - callsign interpolated into the INSERT, and the raw error is rendered back\nbegin\n  ActiveRecord::Base.connection.execute(\n    \"INSERT INTO promo_claims (callsign) VALUES ('#{callsign}')\"\n  )\nrescue ActiveRecord::StatementInvalid => e\n  render plain: e.message, status: 400 # leaks \"...promo_claims...\"\nend"
+          },
+          {
+            "id": "laravel",
+            "label": "Laravel (Query Builder)",
+            "language": "php",
+            "code": "// VULNERABLE - $callsign interpolated into a raw INSERT, and the raw error is echoed back\ntry {\n    DB::insert(\"INSERT INTO promo_claims (callsign) VALUES ('$callsign')\");\n    return 'Callsign reserved';\n} catch (\\Illuminate\\Database\\QueryException $e) {\n    return response($e->getMessage(), 400); // leaks \"...promo_claims...\"\n}"
+          },
+          {
+            "id": "django",
+            "label": "Django (ORM)",
+            "language": "python",
+            "code": "# VULNERABLE - callsign interpolated into raw SQL, and the raw error is returned to the client\nfrom django.db import connection\ntry:\n    with connection.cursor() as cur:\n        cur.execute(f\"INSERT INTO promo_claims (callsign) VALUES ('{callsign}')\")\nexcept Exception as e:\n    return HttpResponse(str(e), status=400)  # leaks \"...promo_claims...\""
+          },
+          {
+            "id": "spring",
+            "label": "Spring Boot (JdbcTemplate)",
+            "language": "java",
+            "code": "// VULNERABLE - callsign concatenated into the INSERT, and the raw error is returned to the client\ntry {\n    jdbcTemplate.update(\n        \"INSERT INTO promo_claims (callsign) VALUES ('\" + callsign + \"')\");\n} catch (DataAccessException e) {\n    return ResponseEntity.status(400).body(e.getMessage()); // leaks \"...promo_claims...\"\n}"
+          }
+        ],
+        "secureCode": {
+          "language": "js",
+          "code": "// SECURE - bind the value, and NEVER surface the raw DB error to the client\ntry {\n  db.prepare('INSERT INTO promo_claims (callsign) VALUES (?)').run(callsign);\n  res.send('Callsign reserved');\n} catch (err) {\n  logger.error('reserve_callsign_failed', err); // full detail stays server-side\n  res.status(409).send('That callsign is unavailable'); // generic message leaks no schema\n}"
+        },
+        "secureCodeVariants": [
+          {
+            "id": "node",
+            "label": "Node.js (pg / mysql2)",
+            "language": "js",
+            "code": "// pg - bind the callsign (stops the injection) AND return a generic error (stops the schema leak)\ntry {\n  await client.query('INSERT INTO promo_claims (callsign) VALUES ($1)', [callsign]);\n  res.send('Callsign reserved');\n} catch (err) {\n  logger.error('reserve_callsign_failed', err); // real error stays server-side\n  res.status(409).send('That callsign is unavailable');\n}\n// mysql2: conn.execute('INSERT INTO promo_claims (callsign) VALUES (?)', [callsign])"
+          },
+          {
+            "id": "python",
+            "label": "Python (sqlite3 / psycopg2)",
+            "language": "python",
+            "code": "# Bind the callsign (stops injection); log the detail, return a generic error (stops the schema leak)\ntry:\n    cur.execute(\"INSERT INTO promo_claims (callsign) VALUES (?)\", (callsign,))\nexcept sqlite3.IntegrityError:\n    logger.exception(\"reserve_callsign_failed\")  # detail to the log, not the user\n    return Response(\"That callsign is unavailable\", status=409)\n# psycopg2 uses %s: cur.execute(\"... VALUES (%s)\", (callsign,))"
+          },
+          {
+            "id": "php-pdo",
+            "label": "PHP (PDO)",
+            "language": "php",
+            "code": "// PDO binds the callsign (stops injection); a generic error stops the schema leak\ntry {\n    $stmt = $pdo->prepare('INSERT INTO promo_claims (callsign) VALUES (?)');\n    $stmt->execute([$callsign]);\n} catch (PDOException $e) {\n    error_log($e->getMessage());        // detail stays in the server log\n    http_response_code(409);\n    echo 'That callsign is unavailable';\n}"
+          },
+          {
+            "id": "java-jdbc",
+            "label": "Java (JDBC)",
+            "language": "java",
+            "code": "// PreparedStatement binds the callsign (stops injection); a generic reply stops the schema leak\ntry (PreparedStatement ps = conn.prepareStatement(\n        \"INSERT INTO promo_claims (callsign) VALUES (?)\")) {\n    ps.setString(1, callsign);\n    ps.executeUpdate();\n} catch (SQLException e) {\n    log.error(\"reserve_callsign_failed\", e);   // detail stays server-side\n    resp.sendError(409, \"That callsign is unavailable\"); // generic message only\n}"
+          },
+          {
+            "id": "dotnet",
+            "label": "C# / .NET (ADO.NET)",
+            "language": "csharp",
+            "code": "// Bind via SqlParameter (stops injection); return a generic error (stops the schema leak)\ntry {\n    using var cmd = new SqlCommand(\"INSERT INTO promo_claims (callsign) VALUES (@c)\", conn);\n    cmd.Parameters.Add(new SqlParameter(\"@c\", callsign));\n    cmd.ExecuteNonQuery();\n} catch (SqlException e) {\n    _logger.LogError(e, \"reserve_callsign_failed\"); // server-side only\n    return StatusCode(409, \"That callsign is unavailable\");\n}"
+          },
+          {
+            "id": "go",
+            "label": "Go (database/sql)",
+            "language": "go",
+            "code": "// Bind the callsign as $1 (stops injection); return a generic error (stops the schema leak)\n_, err := db.Exec(\"INSERT INTO promo_claims (callsign) VALUES ($1)\", callsign)\nif err != nil {\n    log.Printf(\"reserve_callsign_failed: %v\", err) // detail stays in the server log\n    http.Error(w, \"That callsign is unavailable\", http.StatusConflict)\n    return\n}\n// MySQL / SQLite drivers use a ? placeholder instead of $1."
+          },
+          {
+            "id": "rails",
+            "label": "Ruby on Rails (ActiveRecord)",
+            "language": "ruby",
+            "code": "# Bind the callsign (stops injection); log the detail, return a generic error (stops the schema leak)\nbegin\n  PromoClaim.create!(callsign: callsign)\nrescue ActiveRecord::RecordNotUnique => e\n  Rails.logger.error(\"reserve_callsign_failed: #{e.message}\") # detail server-side only\n  render plain: \"That callsign is unavailable\", status: 409\nend"
+          },
+          {
+            "id": "laravel",
+            "label": "Laravel (Query Builder)",
+            "language": "php",
+            "code": "// Query Builder binds the callsign (stops injection); a generic error stops the schema leak\ntry {\n    DB::table('promo_claims')->insert(['callsign' => $callsign]);\n    return 'Callsign reserved';\n} catch (\\Illuminate\\Database\\QueryException $e) {\n    Log::error('reserve_callsign_failed', ['error' => $e->getMessage()]); // server-side only\n    return response('That callsign is unavailable', 409);\n}"
+          },
+          {
+            "id": "django",
+            "label": "Django (ORM)",
+            "language": "python",
+            "code": "# ORM parameterizes the callsign (stops injection); a generic error stops the schema leak\ntry:\n    PromoClaim.objects.create(callsign=callsign)\nexcept IntegrityError:\n    logger.exception(\"reserve_callsign_failed\")  # detail to the log, not the user\n    return HttpResponse(\"That callsign is unavailable\", status=409)"
+          },
+          {
+            "id": "spring",
+            "label": "Spring Boot (JdbcTemplate)",
+            "language": "java",
+            "code": "// JdbcTemplate binds the callsign to ? (stops injection); a generic reply stops the schema leak\ntry {\n    jdbcTemplate.update(\"INSERT INTO promo_claims (callsign) VALUES (?)\", callsign);\n} catch (DataAccessException e) {\n    log.error(\"reserve_callsign_failed\", e);            // server-side only\n    return ResponseEntity.status(409).body(\"That callsign is unavailable\");\n}"
+          }
+        ],
+        "takeaway": "Never let the back office talk to the customer. Log the real error, hand back a shrug - and parameterize, because a verbose error is a free map of your schema."
+      }
+    }
+  ],
+  "caseClosed": {
+    "headline": "IT TALKED.",
+    "fixer": "A yes/no, a stopwatch, a slip of the tongue — the quiet room gave it all up. One door left."
+  },
+  "tags": [
+    "case",
+    "the-quiet-room"
+  ]
+}
