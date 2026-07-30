@@ -22,7 +22,7 @@ const CASES: CaseSpec[] = [
     headline: "WE'RE IN.",
     steps: [
       { username: "' OR '1'='1' -- ", password: 'x' },
-      { q: "' UNION SELECT schematic_id, payload FROM z_bp_registry_7f3a -- " },
+      { q: "' UNION SELECT name, sql FROM sqlite_master -- " },
       { q: "' UNION SELECT holder_name, account_ref, balance_usd FROM offshore_accounts -- " },
     ],
   },
@@ -33,7 +33,7 @@ const CASES: CaseSpec[] = [
     headline: 'IT TALKED.',
     steps: [
       { code: "' OR (SELECT substr(master_pin,1,1) FROM vault_config WHERE id=1)='7' -- " },
-      { token: "' OR (SELECT CASE WHEN COUNT(*)>0 THEN 1 ELSE 0 END FROM staff WHERE clearance='OMEGA')=1 -- " },
+      { token: "' OR (SELECT master_pin FROM vault_config WHERE id=1)='7731' -- " },
       { callsign: 'ADMIN' },
     ],
   },
@@ -46,7 +46,7 @@ const CASES: CaseSpec[] = [
       { q: "' UNION/**/SELECT schematic, loot FROM archive_ledger -- " },
       {
         badge:
-          "B-1001'; UPDATE door_acl SET granted = 1 WHERE door = 'VAULT'; SELECT door, granted FROM door_acl WHERE door = 'VAULT' -- ",
+          "B-1001'; UPDATE door_acl SET granted = 1 WHERE door = 'VLT-DOOR-3E9A'; SELECT door, granted FROM door_acl WHERE door = 'VLT-DOOR-3E9A' -- ",
       },
     ],
   },

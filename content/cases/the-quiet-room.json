@@ -245,16 +245,16 @@
         "takeaway": "A yes/no answer is still an answer. If typed input can steer the query, one bit at a time is enough - bind the value so there is no question to smuggle in."
       },
       "payoff": {
-        "got": "A PIN DIGIT",
-        "fixer": "The desk just confirmed a digit of the master PIN. One bit at a time — but it's talking now."
+        "got": "MASTER PIN",
+        "fixer": "The desk confirmed the PIN one digit at a time — you've got the number. Now prove the vault gate honors it."
       }
     },
     {
       "id": "the-stopwatch",
       "order": 2,
-      "goal": "Confirm the hidden OMEGA clearance by the gate's delay.",
-      "why": "The gate answers everything the same — so read its clock, not its face.",
-      "doneWhen": "The response drags — the slow branch fired, so OMEGA is real.",
+      "goal": "Prove the pried PIN is live — read it off the vault gate's clock.",
+      "why": "A pried number is just a guess until the lock honors it. The gate won't say yes or no, but it stalls only when the PIN is the real one.",
+      "doneWhen": "The gate drags its feet — the slow branch fires only when master_pin matches what you pried.",
       "technique": "blind-timing",
       "difficulty": "medium",
       "surface": "url-param",
@@ -275,37 +275,38 @@
         "thresholdMs": 750,
         "slowDelayMs": 3000,
         "mustReference": [
-          "staff"
+          "master_pin",
+          "7731"
         ],
-        "reason": "The gate dragged its feet - the slow branch fired, which means your condition held TRUE."
+        "reason": "The gate dragged its feet — the slow branch fired only because master_pin really is 7731, the PIN you pried."
       },
       "hints": [
         {
           "id": "h1",
-          "text": "The gate says 'processing' no matter what - so output tells you nothing. What it can't hide is how LONG it thinks. Give it a question that only makes it sweat when the answer is yes.",
+          "text": "You pried the PIN from the reset desk. This gate is a different lock and it won't print yes or no — make it answer with TIME. Give it a check that only runs slow when the PIN is the real one.",
           "cost": 50
         },
         {
           "id": "h2",
-          "text": "Close the quote and OR in a condition built from CASE WHEN (a check on the staff table) THEN <true> ELSE <false>. Word it so the whole lookup returns rows - the slow branch - only when the OMEGA clearance actually exists. A wrong guess stays fast.",
+          "text": "Close the quote and OR in a condition built on the stored master_pin. Compare it to the number you pried; when they match the whole lookup returns rows — the slow branch. A wrong PIN stays fast.",
           "cost": 150,
           "revealAfterAttempts": 2
         },
         {
           "id": "h3",
-          "text": "In the token box try:  ' OR (SELECT CASE WHEN COUNT(*)>0 THEN 1 ELSE 0 END FROM staff WHERE clearance='OMEGA')=1 --   A drag/slow response = OMEGA exists (TRUE). Swap 'OMEGA' for 'ZULU' and it snaps back fast = FALSE.",
+          "text": "In the token box try:  ' OR (SELECT master_pin FROM vault_config WHERE id=1)='7731' --   The gate drags only because 7731 is the live PIN; swap in a wrong number and it snaps back fast.",
           "cost": 300,
           "revealAfterAttempts": 4
         }
       ],
       "expectedSolution": {
         "inputs": {
-          "token": "' OR (SELECT CASE WHEN COUNT(*)>0 THEN 1 ELSE 0 END FROM staff WHERE clearance='OMEGA')=1 -- "
+          "token": "' OR (SELECT master_pin FROM vault_config WHERE id=1)='7731' -- "
         },
-        "note": "TRUE branch fires because an OMEGA row exists -> modeled slow response (>= threshold) -> win. A benign token, or the same probe with a clearance that does not exist (e.g. 'ZULU'), stays fast = FALSE."
+        "note": "The slow branch fires only when the stored master_pin equals the value you pried in the first objective (7731). A wrong PIN stays fast — a no."
       },
       "debrief": {
-        "explanation": "The gate concatenates your token into its SQL, and it always sends back the same 'processing' - no visible tell at all. So you build a different oracle: a CASE WHEN <condition> branch that only does the expensive work when your condition is true. When OMEGA staff exist the branch fires, the response drags, and that DELAY is the yes. When they don't, it snaps back fast - a no. You read a secret through time instead of output. (Honest note: real engines pair the true branch with SLEEP()/pg_sleep()/heavy work; SQLite has no sleep and WASM here is synchronous, so this trainer MODELS the delay - the injection shape and the read-through-timing idea are the real lesson.)",
+        "explanation": "The gate concatenates your token into its SQL and always answers the same, so there's no visible tell. You build a timing oracle instead: OR in a check that compares the stored master_pin to the PIN you already pried. When they match the lookup returns rows and the response drags — that DELAY is the yes; a wrong PIN returns nothing and snaps back fast. This is the strict link in the case: the gate only confirms the exact secret the previous step leaked. (Honest note: real engines pair the true branch with SLEEP()/pg_sleep(); SQLite has no sleep and WASM here is synchronous, so this trainer MODELS the delay — the injection shape and the read-through-timing idea are the real lesson.)",
         "vulnerableCode": {
           "language": "js",
           "code": "// VULNERABLE - token concatenated into SQL; every response looks identical to the user...\nconst sql = \"SELECT id FROM sessions WHERE token = '\" + token + \"'\";\ndb.prepare(sql).get(); // ...but a CASE WHEN branch makes the DB slow ONLY when a condition holds\nres.send('processing'); // real engines: ... THEN pg_sleep(3) - the wait leaks the answer"
@@ -441,8 +442,8 @@
         "takeaway": "If the query still runs attacker-controlled logic, silence isn't safety - the response time talks. Bind the input so there is no branch to steer, whatever the clock says."
       },
       "payoff": {
-        "got": "OMEGA CONFIRMED",
-        "fixer": "It dragged its feet — the clearance they swore didn't exist just answered."
+        "got": "PIN CONFIRMED LIVE",
+        "fixer": "The gate stalled — that PIN is the live one. The vault will honor it."
       }
     },
     {

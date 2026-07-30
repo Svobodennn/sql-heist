@@ -38,15 +38,6 @@
           "name",
           "price"
         ]
-      },
-      {
-        "table": "offshore_accounts",
-        "columns": [
-          "id",
-          "holder_name",
-          "account_ref",
-          "balance_usd"
-        ]
       }
     ]
   },
@@ -258,9 +249,9 @@
     {
       "id": "blueprint",
       "order": 2,
-      "goal": "Make the app name a table it never lists.",
-      "why": "You can't take what you can't see — find the hidden room.",
-      "doneWhen": "The blueprint's loot tag surfaces in the results.",
+      "goal": "List the rooms Meridian keeps off its own floor plan.",
+      "why": "You can't rob a room you can't name — read the building's own index and find what recon never listed.",
+      "doneWhen": "The catalog hands back a table recon never showed you: offshore_accounts.",
       "technique": "schema-discovery",
       "difficulty": "hard",
       "surface": "search-box",
@@ -278,9 +269,9 @@
       },
       "winCondition": {
         "type": "flag-in-result",
-        "flag": "LOOT-BLUEPRINT-3D1F8A22",
-        "caseSensitive": true,
-        "reason": "Blueprints in hand - pulled from a table recon never listed."
+        "flag": "offshore_accounts",
+        "caseSensitive": false,
+        "reason": "The catalog gave up a hidden room — offshore_accounts, a table recon never listed."
       },
       "hints": [
         {
@@ -296,19 +287,19 @@
         },
         {
           "id": "h3",
-          "text": "First  ' UNION SELECT name, sql FROM sqlite_master --   to find the table and its columns, then  ' UNION SELECT schematic_id, payload FROM z_bp_registry_7f3a -- ",
+          "text": "The articles search returns 2 columns, so match it:  ' UNION SELECT name, sql FROM sqlite_master --   The name column lists every table — including offshore_accounts, the room you rob next.",
           "cost": 300,
           "revealAfterAttempts": 4
         }
       ],
       "expectedSolution": {
         "inputs": {
-          "q": "' UNION SELECT schematic_id, payload FROM z_bp_registry_7f3a -- "
+          "q": "' UNION SELECT name, sql FROM sqlite_master -- "
         },
-        "note": "Step 1 (discovery, not a win):  ' UNION SELECT name, sql FROM sqlite_master --   reveals the hidden table and its columns. Step 2 is the inputs above."
+        "note": "The catalog read returns every table's name and its CREATE — including the two rooms recon hid (z_bp_registry_7f3a and offshore_accounts). Those names are what the next objective needs."
       },
       "debrief": {
-        "explanation": "Same concatenation flaw as the search box. Because you do not know the table name, you read the database's own catalog - sqlite_master - through a UNION to reveal the hidden schema (its CREATE statements list the columns), then UNION the discovered table to pull its rows. This job returns 2 columns, so every UNION must supply exactly 2 values.",
+        "explanation": "You don't know the hidden table's name, so you read the database's own catalog — sqlite_master — through the UNION. Its rows list every table plus the CREATE statement that spells out each one's columns. The app query returns 2 columns, so the UNION must supply exactly 2 (here name and sql). That index is the only place offshore_accounts is written down — recon never listed it.",
         "vulnerableCode": {
           "language": "js",
           "code": "// VULNERABLE - same pattern as the search box; the catalog (sqlite_master) is readable too\nconst sql = \"SELECT title, body FROM articles WHERE title LIKE '%\" + q + \"%'\";\nconst rows = db.prepare(sql).all();"
@@ -444,15 +435,15 @@
         "takeaway": "Least privilege and bound parameters: a search box should only ever search."
       },
       "payoff": {
-        "got": "HIDDEN TABLE FOUND",
-        "fixer": "There's the unlisted room. Now we know it's there, we can reach into what they hid."
+        "got": "HIDDEN ROOMS MAPPED",
+        "fixer": "Two rooms they keep off the floor plan — a blueprint cache and an offshore ledger. Names in hand, we can reach straight into the ledger."
       }
     },
     {
       "id": "vault",
       "order": 3,
-      "goal": "Pull the hidden account off the shopping page.",
-      "why": "That account is the first score — it has no business on a storefront.",
+      "goal": "Pull the offshore ledger you just mapped off the shopping page.",
+      "why": "You have its name now — offshore_accounts, the room recon hid. That account is the first score.",
       "doneWhen": "The vault manifest tag shows up in the result grid.",
       "technique": "union-extraction",
       "difficulty": "medium",
@@ -478,7 +469,7 @@
       "hints": [
         {
           "id": "h1",
-          "text": "The search only knows how to hand back one shape of answer. Learn that shape first — how wide it is — then a second question can ride out on the same tray.",
+          "text": "The room isn't on the floor plan — you mapped its name a step ago. First learn how wide this search is: how many columns come back, so a second question can ride out on the same tray.",
           "cost": 50
         },
         {
