@@ -3,6 +3,7 @@
 import { useMemo } from 'react'
 import type { ComposedSegment } from '@/lib/engine/queryComposer'
 import { classifyChars, toRuns } from '../../lib/sqlHighlight'
+import { toSpokenSql } from '../../lib/sqlSpoken'
 import { useDebouncedValue } from '../../lib/useDebouncedValue'
 import { cx } from '../../lib/cx'
 import styles from './SqlPreview.module.css'
@@ -29,22 +30,6 @@ import styles from './SqlPreview.module.css'
 interface SqlPreviewProps {
   segments: ComposedSegment[]
   className?: string
-}
-
-// Spoken reconstruction: static text verbatim, injected spans wrapped so the
-// injection is unmistakable to assistive tech. Whitespace is collapsed because a
-// screen reader ignores the visual layout anyway.
-function toSpokenSql(segments: ComposedSegment[]): string {
-  const body = segments
-    .map((seg) => {
-      if (seg.kind === 'static') return seg.text
-      if (seg.value.length === 0) return ` empty injection point for ${seg.field} `
-      return ` injected: ${seg.value} , end injected `
-    })
-    .join('')
-    .replace(/\s+/g, ' ')
-    .trim()
-  return `SQL sent to the database: ${body}`
 }
 
 export function SqlPreview({ segments, className }: SqlPreviewProps) {

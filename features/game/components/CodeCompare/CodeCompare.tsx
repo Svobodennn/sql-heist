@@ -1,8 +1,7 @@
 'use client'
 
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react'
-import type { CodeSnippet } from '@/lib/schema/level'
-import { nextTabIndex, type LanguageGroup } from '../../lib/secureCode'
+import { nextTabIndex, optionCount, snippetAt, type LanguageGroup } from '../../lib/secureCode'
 import { cx } from '../../lib/cx'
 import { useTranslation } from '@/i18n/useTranslation'
 import { IconLock, IconLockBroken } from '../icons'
@@ -46,17 +45,6 @@ function CodeBlock({ code }: { code: string }) {
       </code>
     </pre>
   )
-}
-
-const optionCount = (groups: LanguageGroup[]) => groups.reduce((n, g) => n + g.options.length, 0)
-
-// Resolve a side's snippet at the selected (lang, fw), guarding both indices: a
-// side with fewer languages/drivers than the selector (a legacy single snippet, or
-// a count mismatch) falls back to its first group / first option — its single fix.
-function snippetAt(groups: LanguageGroup[], lang: number, fw: number): CodeSnippet | undefined {
-  const group = groups[lang] ?? groups[0]
-  const option = group?.options[fw] ?? group?.options[0]
-  return option?.snippet
 }
 
 export function CodeCompare({

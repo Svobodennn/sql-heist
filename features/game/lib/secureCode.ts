@@ -143,3 +143,20 @@ export function nextTabIndex(current: number, key: string, count: number): numbe
       return current
   }
 }
+
+// Total driver options across all language groups (used to size the framework row).
+export const optionCount = (groups: LanguageGroup[]) =>
+  groups.reduce((n, g) => n + g.options.length, 0)
+
+// Resolve a side's snippet at the selected (lang, fw), guarding both indices: a
+// side with fewer languages/drivers than the selector (a legacy single snippet, or
+// a count mismatch) falls back to its first group / first option — its single fix.
+export function snippetAt(
+  groups: LanguageGroup[],
+  lang: number,
+  fw: number,
+): CodeSnippet | undefined {
+  const group = groups[lang] ?? groups[0]
+  const option = group?.options[fw] ?? group?.options[0]
+  return option?.snippet
+}
