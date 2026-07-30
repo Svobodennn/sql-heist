@@ -17,6 +17,68 @@
       "language": "js",
       "code": "// VULNERABLE - input is concatenated straight into the SQL string\nconst sql =\n  \"SELECT id, username, is_admin FROM users \" +\n  \"WHERE username = '\" + username + \"' AND password = '\" + password + \"'\";\nconst row = db.prepare(sql).get(); // code + data in one string => injection"
     },
+    "vulnerableCodeVariants": [
+      {
+        "id": "node",
+        "label": "Node.js (pg / mysql2)",
+        "language": "js",
+        "code": "// VULNERABLE - username/password concatenated straight into the SQL text\nconst { rows } = await client.query(\n  \"SELECT id, username, is_admin FROM users \" +\n  \"WHERE username = '\" + username + \"' AND password = '\" + password + \"'\",\n);\nconst row = rows[0];\n// mysql2: conn.query(\"... username = '\" + username + \"'\") - same flaw"
+      },
+      {
+        "id": "python",
+        "label": "Python (sqlite3 / psycopg2)",
+        "language": "python",
+        "code": "# VULNERABLE - username/password interpolated straight into the SQL string\ncur.execute(\n    f\"SELECT id, username, is_admin FROM users \"\n    f\"WHERE username = '{username}' AND password = '{password}'\"\n)\nrow = cur.fetchone()\n# psycopg2 %-format is the same flaw: \"... username = '%s'\" % username"
+      },
+      {
+        "id": "php-pdo",
+        "label": "PHP (PDO)",
+        "language": "php",
+        "code": "// VULNERABLE - $username/$password interpolated straight into the SQL string\n$sql = \"SELECT id, username, is_admin FROM users \"\n     . \"WHERE username = '$username' AND password = '$password'\";\n$row = $pdo->query($sql)->fetch(PDO::FETCH_ASSOC);"
+      },
+      {
+        "id": "java-jdbc",
+        "label": "Java (JDBC)",
+        "language": "java",
+        "code": "// VULNERABLE - username/password concatenated straight into the SQL text\nStatement st = conn.createStatement();\nResultSet rs = st.executeQuery(\n    \"SELECT id, username, is_admin FROM users WHERE username = '\"\n    + username + \"' AND password = '\" + password + \"'\");"
+      },
+      {
+        "id": "dotnet",
+        "label": "C# / .NET (ADO.NET)",
+        "language": "csharp",
+        "code": "// VULNERABLE - username/password concatenated straight into the SQL text\nusing var cmd = new SqlCommand(\n    \"SELECT id, username, is_admin FROM users WHERE username = '\"\n    + username + \"' AND password = '\" + password + \"'\", conn);\nusing var reader = cmd.ExecuteReader();\n// String interpolation is just as unsafe: $\"... username = '{username}'\""
+      },
+      {
+        "id": "go",
+        "label": "Go (database/sql)",
+        "language": "go",
+        "code": "// VULNERABLE - username/password concatenated straight into the SQL text\nrow := db.QueryRow(\n    \"SELECT id, username, is_admin FROM users WHERE username = '\" +\n        username + \"' AND password = '\" + password + \"'\",\n)\nerr := row.Scan(&id, &name, &isAdmin)\n// fmt.Sprintf(\"... username = '%s'\", username) is the same flaw"
+      },
+      {
+        "id": "rails",
+        "label": "Ruby on Rails (ActiveRecord)",
+        "language": "ruby",
+        "code": "# VULNERABLE - username/password interpolated straight into the SQL string\nuser = User.where(\n  \"username = '#{username}' AND password = '#{password}'\"\n).first\n# find_by_sql is just as unsafe: User.find_by_sql(\"... username = '#{username}'\")"
+      },
+      {
+        "id": "laravel",
+        "label": "Laravel (Query Builder)",
+        "language": "php",
+        "code": "// VULNERABLE - $username/$password interpolated into a raw WHERE string\n$user = DB::table('users')\n    ->whereRaw(\"username = '$username' AND password = '$password'\")\n    ->first();\n// DB::select(\"... username = '$username'\") is just as unsafe"
+      },
+      {
+        "id": "django",
+        "label": "Django (ORM)",
+        "language": "python",
+        "code": "# VULNERABLE - input interpolated into raw SQL, bypassing the ORM's binding\nuser = User.objects.raw(\n    f\"SELECT id, username, is_admin FROM users \"\n    f\"WHERE username = '{username}' AND password = '{password}'\"\n)[0]\n# .extra(where=[f\"username = '{username}'\"]) is just as unsafe"
+      },
+      {
+        "id": "spring",
+        "label": "Spring Boot (JdbcTemplate)",
+        "language": "java",
+        "code": "// VULNERABLE - username/password concatenated straight into the SQL text\nList<User> rows = jdbcTemplate.query(\n    \"SELECT id, username, is_admin FROM users WHERE username = '\"\n    + username + \"' AND password = '\" + password + \"'\",\n    userRowMapper);\n// JPA: em.createNativeQuery(\"... username = '\" + username + \"'\") is just as unsafe"
+      }
+    ],
     "secureCode": {
       "language": "js",
       "code": "// SECURE - values are BOUND as parameters, never parsed as SQL\nconst row = db\n  .prepare(\"SELECT id, username, is_admin FROM users WHERE username = ? AND password = ?\")\n  .get(username, password);\n// Defense in depth: never store plaintext passwords - hash (bcrypt/argon2), compare in constant time."

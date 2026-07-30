@@ -17,6 +17,68 @@
       "language": "js",
       "code": "// VULNERABLE - the search term is concatenated into the LIKE pattern\nconst sql = \"SELECT id, name, price FROM products WHERE name LIKE '%\" + q + \"%'\";\nconst rows = db.prepare(sql).all();"
     },
+    "vulnerableCodeVariants": [
+      {
+        "id": "node",
+        "label": "Node.js (pg / mysql2)",
+        "language": "js",
+        "code": "// VULNERABLE - the search term is concatenated into the LIKE pattern\nconst { rows } = await client.query(\n  \"SELECT id, name, price FROM products WHERE name LIKE '%\" + q + \"%'\",\n);\n// mysql2: conn.query(\"... WHERE name LIKE '%\" + q + \"%'\") - same flaw"
+      },
+      {
+        "id": "python",
+        "label": "Python (sqlite3 / psycopg2)",
+        "language": "python",
+        "code": "# VULNERABLE - the search term is interpolated into the LIKE pattern\ncur.execute(\n    f\"SELECT id, name, price FROM products WHERE name LIKE '%{q}%'\"\n)\nrows = cur.fetchall()\n# Concatenation is the same flaw: \"... LIKE '%\" + q + \"%'\""
+      },
+      {
+        "id": "php-pdo",
+        "label": "PHP (PDO)",
+        "language": "php",
+        "code": "// VULNERABLE - $q interpolated straight into the LIKE pattern\n$rows = $pdo->query(\n    \"SELECT id, name, price FROM products WHERE name LIKE '%$q%'\"\n)->fetchAll(PDO::FETCH_ASSOC);"
+      },
+      {
+        "id": "java-jdbc",
+        "label": "Java (JDBC)",
+        "language": "java",
+        "code": "// VULNERABLE - the search term is concatenated into the LIKE pattern\nStatement st = conn.createStatement();\nResultSet rs = st.executeQuery(\n    \"SELECT id, name, price FROM products WHERE name LIKE '%\"\n    + q + \"%'\");"
+      },
+      {
+        "id": "dotnet",
+        "label": "C# / .NET (ADO.NET)",
+        "language": "csharp",
+        "code": "// VULNERABLE - the search term is concatenated into the LIKE pattern\nusing var cmd = new SqlCommand(\n    \"SELECT id, name, price FROM products WHERE name LIKE '%\"\n    + q + \"%'\", conn);\nusing var reader = cmd.ExecuteReader();\n// String interpolation is just as unsafe: $\"... LIKE '%{q}%'\""
+      },
+      {
+        "id": "go",
+        "label": "Go (database/sql)",
+        "language": "go",
+        "code": "// VULNERABLE - the search term is concatenated into the LIKE pattern\nrows, err := db.Query(\n    \"SELECT id, name, price FROM products WHERE name LIKE '%\" + q + \"%'\",\n)\n// fmt.Sprintf builds the same injectable string just as easily."
+      },
+      {
+        "id": "rails",
+        "label": "Ruby on Rails (ActiveRecord)",
+        "language": "ruby",
+        "code": "# VULNERABLE - the search term is interpolated into the LIKE pattern\nrows = Product.where(\n  \"name LIKE '%#{q}%'\"\n)\n# find_by_sql is just as unsafe: Product.find_by_sql(\"... LIKE '%#{q}%'\")"
+      },
+      {
+        "id": "laravel",
+        "label": "Laravel (Query Builder)",
+        "language": "php",
+        "code": "// VULNERABLE - $q interpolated into a raw LIKE string\n$rows = DB::table('products')\n    ->whereRaw(\"name LIKE '%$q%'\")\n    ->get();\n// DB::select(\"... LIKE '%$q%'\") is just as unsafe"
+      },
+      {
+        "id": "django",
+        "label": "Django (ORM)",
+        "language": "python",
+        "code": "# VULNERABLE - input interpolated into raw SQL, bypassing the ORM's binding\nrows = Product.objects.raw(\n    f\"SELECT id, name, price FROM products WHERE name LIKE '%{q}%'\"\n)\n# .extra(where=[f\"name LIKE '%{q}%'\"]) is just as unsafe"
+      },
+      {
+        "id": "spring",
+        "label": "Spring Boot (JdbcTemplate)",
+        "language": "java",
+        "code": "// VULNERABLE - the search term is concatenated into the LIKE pattern\nList<Product> rows = jdbcTemplate.query(\n    \"SELECT id, name, price FROM products WHERE name LIKE '%\"\n    + q + \"%'\", productRowMapper);\n// JPA: em.createNativeQuery(\"... LIKE '%\" + q + \"%'\") is just as unsafe"
+      }
+    ],
     "secureCode": {
       "language": "js",
       "code": "// SECURE - the % wildcards are added in code; q is BOUND as a literal value\nconst rows = db\n  .prepare(\"SELECT id, name, price FROM products WHERE name LIKE ?\")\n  .all('%' + q + '%');"
