@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { IconArrowRight, IconCheck } from '@/app/components/icons'
 import { Logo } from '@/app/components/Logo'
+import { JsonLd } from '@/app/components/JsonLd'
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from './siteConfig'
 import {
   HOME_COPY,
   HEIST_LOOP,
@@ -15,11 +17,32 @@ import styles from './page.module.css'
 // not the interactive preview, so first paint stays light (docs/01-architecture
 // §2.1: the landing must not block on WASM). The marquee is pure-CSS transform,
 // aria-hidden, and pauses under prefers-reduced-motion.
+// Structured data: the site + the game-as-software entity (free, browser-based).
+const websiteLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: SITE_NAME,
+  url: SITE_URL,
+  description: SITE_DESCRIPTION,
+}
+const softwareLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: SITE_NAME,
+  applicationCategory: 'GameApplication',
+  operatingSystem: 'Web browser',
+  url: SITE_URL,
+  description: SITE_DESCRIPTION,
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+}
+
 export default function HomePage() {
   const { hero, what, how, faq, closer } = HOME_COPY
 
   return (
     <main className={styles.page}>
+      <JsonLd data={websiteLd} />
+      <JsonLd data={softwareLd} />
       {/* ---------- Hero ---------- */}
       <section className={styles.hero}>
         {/* Faint scanline + vignette. Decorative, static, non-interactive. */}

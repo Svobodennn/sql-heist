@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { ContentPage } from '@/app/components/ContentPage'
+import { JsonLd } from '@/app/components/JsonLd'
 import { getServerTranslator } from '@/i18n/server'
 import styles from '@/app/components/ContentPage/content.module.css'
 
@@ -87,10 +88,34 @@ const FAQS: { q: string; a: ReactNode }[] = [
   },
 ]
 
+// Plain-text answers for the FAQPage JSON-LD (Google FAQ rich results). Paired
+// with FAQS above by index — keep in sync when editing the list.
+const FAQ_ANSWERS_TEXT = [
+  'Yes. Every job runs entirely in your browser against a sandboxed SQLite database that ships with the game. There are no real systems on the other side, no network calls, and nothing to break but the practice target.',
+  'No. It runs in a modern browser. The database engine (SQLite compiled to WebAssembly) loads on demand the first time you need it — no accounts, no downloads, no setup.',
+  'It helps. The game assumes you can read a SELECT and roughly follow a WHERE clause. It teaches you injection — not SQL from zero. If queries are brand new to you, learn the basics first, then come pull a job.',
+  'We teach how injection works so you can recognise it and close it — every job ends with the fix, not the break-in. Use what you learn only on systems you own or have explicit permission to test. Anywhere else is a crime, and that is on you.',
+  'On this device, in your browser local storage. There is no account and no server, so we never see it. Clear your browser data — or open the game somewhere else — and you start fresh.',
+  'No. It is free to play.',
+  'Refresh first. If it still will not start, your browser may be blocking WebAssembly or running in a locked-down mode — try a current version of Chrome, Firefox, or Safari with default settings.',
+  'English only for now. Turkish and Polish are on the board — the language switch in the nav is a placeholder until they land.',
+]
+
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: FAQS.map((f, i) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: FAQ_ANSWERS_TEXT[i] },
+  })),
+}
+
 export default function FaqPage() {
   const t = getServerTranslator()
   return (
     <ContentPage eyebrow={t('faq.eyebrow')} title={t('faq.title')} lead={t('faq.lead')}>
+      <JsonLd data={faqLd} />
       <h2 className="sr-only">{t('faq.srHeading')}</h2>
       <div className={styles.faqList}>
         {FAQS.map((item, i) => (
