@@ -5,7 +5,7 @@ import {
   HEIST_LOOP,
   HOME_COPY,
   buildTickerTrack,
-} from './homeContent'
+} from '@/app/homeContent'
 
 describe('homeContent', () => {
   it('ticker carries the signature injection payloads', () => {

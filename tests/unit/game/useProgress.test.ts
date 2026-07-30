@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { readProgress } from './useProgress'
+import { readProgress } from '@/features/game/lib/useProgress'
 
 // Module-private in useProgress.ts; mirror the literal so a rename surfaces here.
 const STORAGE_KEY = 'sql-heist:progress:v1'

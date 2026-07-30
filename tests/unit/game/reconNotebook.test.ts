@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { VisibleTable } from '@/lib/schema/level'
-import { accrueDiscovered, initNotebook, notebookSize } from './reconNotebook'
+import { accrueDiscovered, initNotebook, notebookSize } from '@/features/game/lib/reconNotebook'
 
 const visible: VisibleTable[] = [{ table: 'articles', columns: ['id', 'title', 'body'] }]
 

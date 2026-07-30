@@ -10,7 +10,7 @@ import {
   oracleView,
   sideEffectView,
   timingView,
-} from './signalView'
+} from '@/features/game/lib/signalView'
 
 // Synthetic RunSignal fixtures — the panel is built + tested against these, never
 // against real Act II level JSON (authored in a parallel track).

@@ -7,7 +7,7 @@ import {
   groupSecureSnippets,
   shortFrameworkLabel,
   languageName,
-} from './secureCode'
+} from '@/features/game/lib/secureCode'
 
 // Legacy: a single secure snippet (what a level ships without per-stack variants).
 const legacy: CodeSnippet = { language: 'js', code: 'db.prepare(sql).get(user, pass)' }

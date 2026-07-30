@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createTranslator, lookup, type MessageTree } from './translate'
+import { createTranslator, lookup, type MessageTree } from '@/i18n/translate'
 import en from '@/messages/en.json'
 import tr from '@/messages/tr.json'
 import pl from '@/messages/pl.json'

@@ -9,7 +9,7 @@ import {
   previousPhase,
   reducer,
   type GameState,
-} from './phaseMachine'
+} from '@/features/game/lib/phaseMachine'
 
 const level = parseLevel(frontDoorJson)
 const result = (over: Partial<ExecutionResult> = {}): ExecutionResult => ({

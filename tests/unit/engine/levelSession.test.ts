@@ -9,7 +9,7 @@ import {
 } from '@/lib/engine/__fixtures__/levels'
 import type { Level } from '@/lib/schema/level'
 
-const wasmPath = fileURLToPath(new URL('../../public/sql-wasm.wasm', import.meta.url))
+const wasmPath = fileURLToPath(new URL('../../../public/sql-wasm.wasm', import.meta.url))
 
 let engine: SqlEngine
 

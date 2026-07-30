@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import type { JobMeta } from '../levels'
-import { actOf, groupByAct } from './actBoard'
+import type { JobMeta } from '@/features/game/levels'
+import { actOf, groupByAct } from '@/features/game/lib/actBoard'
 
 function meta(order: number, id = `job-${order}`): JobMeta {
   return {

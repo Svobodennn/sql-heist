@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { BADGE_TECHNIQUES, badgeSummary, computeBadges, earnedTechniques } from './badges'
+import { BADGE_TECHNIQUES, badgeSummary, computeBadges, earnedTechniques } from '@/features/game/lib/badges'
 
 // Mirrors getJobMetas() shape (id + technique) without importing the real Act II
 // levels (parallel track, not in this worktree).

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { classifyChars, toRuns, type CharStyle } from './sqlHighlight'
+import { classifyChars, toRuns, type CharStyle } from '@/features/game/lib/sqlHighlight'
 
 // The tokenizer is purely cosmetic, but the comment tail is load-bearing
 // pedagogy: the player must SEE the password check get commented out.

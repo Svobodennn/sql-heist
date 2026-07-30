@@ -71,7 +71,7 @@ describe('sqlRunner.exec — NEVER throws; errors land in .error', () => {
 })
 
 describe('sqlRunner.exec — real SQLite (WASM) error capture', () => {
-  const wasmPath = fileURLToPath(new URL('../../public/sql-wasm.wasm', import.meta.url))
+  const wasmPath = fileURLToPath(new URL('../../../public/sql-wasm.wasm', import.meta.url))
 
   it('captures a genuine SQLite error message from sql.js', async () => {
     const SQL = await loadSqlJs({ locateFile: () => wasmPath })
