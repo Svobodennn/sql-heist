@@ -137,6 +137,12 @@
   "content": {
     "updated": "Ostatnia aktualizacja"
   },
+  "consent": {
+    "aria": "Informacja o pamięci",
+    "title": "Ta gra korzysta z pamięci lokalnej",
+    "body": "SQL Heist trzyma Twój postęp i wybór języka w pamięci lokalnej przeglądarki (local storage). Żadnego śledzenia, żadnej analityki, żadnych ciasteczek reklamowych — i nic nie opuszcza Twojego urządzenia.",
+    "accept": "Rozumiem"
+  },
   "privacy": {
     "eyebrow": "Drobny druk",
     "title": "Prywatność",

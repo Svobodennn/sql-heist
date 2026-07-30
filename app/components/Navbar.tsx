@@ -5,16 +5,18 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { cx } from './cx'
 import { Logo } from './Logo'
-import { IconMenu, IconClose, IconUser } from './icons'
+import { IconMenu, IconClose, IconUser, IconHome, IconBoard, IconHelpCircle } from './icons'
 import { ShareButton } from './ShareButton'
 import { LanguageSwitcher } from './LanguageSwitcher'
 import { useTranslation } from '@/app/i18n/useTranslation'
 import styles from './Navbar.module.css'
 
+// Icons are decorative (aria-hidden in <Base>); the translated text stays the
+// accessible label for each destination.
 const NAV_LINKS = [
-  { href: '/', key: 'nav.home' },
-  { href: '/jobs', key: 'nav.jobs' },
-  { href: '/help', key: 'nav.help' },
+  { href: '/', key: 'nav.home', Icon: IconHome },
+  { href: '/jobs', key: 'nav.jobs', Icon: IconBoard },
+  { href: '/help', key: 'nav.help', Icon: IconHelpCircle },
 ] as const
 
 // Site chrome. Rendered once from app/layout.tsx so it wraps every route. It is
@@ -61,6 +63,7 @@ export function Navbar() {
                 className={cx(styles.link, isActive(link.href) && styles.linkActive)}
                 aria-current={isActive(link.href) ? 'page' : undefined}
               >
+                <link.Icon size={16} />
                 {t(link.key)}
               </Link>
             </li>
@@ -99,6 +102,7 @@ export function Navbar() {
                 className={cx(styles.mobileLink, isActive(link.href) && styles.linkActive)}
                 aria-current={isActive(link.href) ? 'page' : undefined}
               >
+                <link.Icon size={18} />
                 {t(link.key)}
               </Link>
             </li>

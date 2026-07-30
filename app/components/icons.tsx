@@ -94,3 +94,33 @@ export const IconMail = (p: IconProps) => (
     <path d="m3.5 6.5 8.5 6 8.5-6" />
   </Base>
 )
+
+// ---- Primary-nav leading icons (decorative; the link text is the label) ----
+
+// Home = a house.
+export const IconHome = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M3 10.75 12 4l9 6.75" />
+    <path d="M5.5 9.5V19a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V9.5" />
+    <path d="M9.75 20v-5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75v5" />
+  </Base>
+)
+
+// Jobs = "The Board": a 2×2 grid of job cards.
+export const IconBoard = (p: IconProps) => (
+  <Base {...p}>
+    <rect x="4" y="4" width="7" height="7" rx="1.5" />
+    <rect x="13" y="4" width="7" height="7" rx="1.5" />
+    <rect x="4" y="13" width="7" height="7" rx="1.5" />
+    <rect x="13" y="13" width="7" height="7" rx="1.5" />
+  </Base>
+)
+
+// Help = a question mark in a circle.
+export const IconHelpCircle = (p: IconProps) => (
+  <Base {...p}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M9.2 9.3a3 3 0 0 1 5.6 1c0 2-2.8 2.5-2.8 4" />
+    <path d="M12 17.3h.01" />
+  </Base>
+)

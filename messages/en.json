@@ -132,6 +132,12 @@
   "content": {
     "updated": "Last updated"
   },
+  "consent": {
+    "aria": "Storage notice",
+    "title": "This game uses local storage",
+    "body": "SQL Heist keeps your progress and language choice in your browser's local storage. No tracking, no analytics, no ad cookies — and nothing ever leaves your device.",
+    "accept": "Got it"
+  },
   "privacy": {
     "eyebrow": "The Fine Print",
     "title": "Privacy",

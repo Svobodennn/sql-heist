@@ -1,0 +1,91 @@
+/* Bottom storage notice. The fixed wrapper is click-through (pointer-events:none)
+ * so it can never block the page; only the card is interactive. Anchored
+ * bottom-start (inline-start) — clear of the right-aligned in-game CTAs and the
+ * bottom-centre toast. z sits above content but below transient modal/toast. */
+.root {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: var(--z-consent);
+  padding: var(--space-4);
+  /* Keep clear of the iOS home indicator without shifting anything. */
+  padding-bottom: max(var(--space-4), env(safe-area-inset-bottom));
+  pointer-events: none;
+}
+
+.card {
+  pointer-events: auto;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 30rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 10px 28px rgba(0, 0, 0, 0.5);
+  /* Global prefers-reduced-motion rule (globals.css) collapses this to ~0ms. */
+  animation: consent-in var(--dur-normal) var(--ease-out) both;
+}
+
+.copy {
+  flex: 1 1 15rem;
+  min-width: 0;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.body {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.accept {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding-inline: var(--space-4);
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-fg);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+.accept:hover {
+  background: var(--primary-hover);
+}
+.accept:active {
+  transform: scale(0.98);
+}
+
+@keyframes consent-in {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

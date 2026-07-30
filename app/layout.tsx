@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { Geist, Geist_Mono, Space_Grotesk } from 'next/font/google'
 import { Navbar } from './components/Navbar'
 import { Footer } from './components/Footer'
+import { CookieConsent } from './components/CookieConsent'
 import { I18nProvider } from './i18n/I18nProvider'
 import styles from './layout.module.css'
 import './globals.css'
@@ -48,6 +49,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             </div>
             <Footer />
           </div>
+          <CookieConsent />
         </I18nProvider>
       </body>
     </html>

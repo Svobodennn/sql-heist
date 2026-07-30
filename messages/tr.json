@@ -137,6 +137,12 @@
   "content": {
     "updated": "Son güncelleme"
   },
+  "consent": {
+    "aria": "Depolama bildirimi",
+    "title": "Bu oyun yerel depolama kullanır",
+    "body": "SQL Heist; ilerlemeni ve dil tercihini tarayıcının yerel depolamasında (local storage) tutar. Takip yok, analiz yok, reklam çerezi yok — ve hiçbir şey cihazından dışarı çıkmaz.",
+    "accept": "Anladım"
+  },
   "privacy": {
     "eyebrow": "İnce Yazı",
     "title": "Gizlilik",

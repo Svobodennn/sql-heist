@@ -83,6 +83,7 @@
   --radius-full: 9999px;
 
   --z-dropdown: 10;
+  --z-consent: 40; /* storage notice: above content, below transient modal/toast */
   --z-modal: 50;
   --z-toast: 100;
 
@@ -247,6 +248,9 @@ textarea.mono {
 }
 .btn--primary:hover:not(:disabled) {
   background: var(--primary-hover);
+  /* Re-assert dark ink: the global `a:hover` (same brass as this hover bg) would
+   * otherwise repaint anchor-button text to brass and hide the label. */
+  color: var(--btn-primary-fg);
 }
 .btn--ghost {
   background: transparent;
@@ -263,6 +267,9 @@ textarea.mono {
 }
 .btn--success:hover:not(:disabled) {
   filter: brightness(1.08);
+  /* Same guard as --primary: keep dark ink so the global `a:hover` can't turn
+   * anchor-button text brass (e.g. the Debrief "Next job" CTA). */
+  color: var(--noir-900);
 }
 .btn--danger {
   background: transparent;
