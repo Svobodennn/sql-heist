@@ -243,6 +243,10 @@
           }
         ],
         "takeaway": "A yes/no answer is still an answer. If typed input can steer the query, one bit at a time is enough - bind the value so there is no question to smuggle in."
+      },
+      "payoff": {
+        "got": "A PIN DIGIT",
+        "fixer": "The desk just confirmed a digit of the master PIN. One bit at a time — but it's talking now."
       }
     },
     {
@@ -435,6 +439,10 @@
           }
         ],
         "takeaway": "If the query still runs attacker-controlled logic, silence isn't safety - the response time talks. Bind the input so there is no branch to steer, whatever the clock says."
+      },
+      "payoff": {
+        "got": "OMEGA CONFIRMED",
+        "fixer": "It dragged its feet — the clearance they swore didn't exist just answered."
       }
     },
     {
@@ -623,6 +631,10 @@
           }
         ],
         "takeaway": "Never let the back office talk to the customer. Log the real error, hand back a shrug - and parameterize, because a verbose error is a free map of your schema."
+      },
+      "payoff": {
+        "got": "TABLE NAME LEAKED",
+        "fixer": "It choked and named its own drawer: promo_claims. The quiet room isn't so quiet."
       }
     }
   ],

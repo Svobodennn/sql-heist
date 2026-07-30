@@ -249,6 +249,10 @@
           }
         ],
         "takeaway": "Stop gluing what people type onto your questions. Bind it — and \"or one equals one\" is just a bad username again."
+      },
+      "payoff": {
+        "got": "ADMIN ACCESS",
+        "fixer": "Admin's badge on your chest. Now we can walk the whole floor plan — find what they don't list."
       }
     },
     {
@@ -438,6 +442,10 @@
           }
         ],
         "takeaway": "Least privilege and bound parameters: a search box should only ever search."
+      },
+      "payoff": {
+        "got": "HIDDEN TABLE FOUND",
+        "fixer": "There's the unlisted room. Now we know it's there, we can reach into what they hid."
       }
     },
     {
@@ -627,6 +635,10 @@
           }
         ],
         "takeaway": "If the query's shape can't change, no second question rides in on it."
+      },
+      "payoff": {
+        "got": "OFFSHORE MANIFEST",
+        "fixer": "The account that has no business on a storefront — banked. First score done."
       }
     }
   ],

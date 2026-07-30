@@ -237,6 +237,10 @@
           }
         ],
         "takeaway": "A list of forbidden words is just a list of words the attacker hasn't disguised yet. A WAF is not a fix - bind the query and the phrase stops mattering."
+      },
+      "payoff": {
+        "got": "LEDGER LIFTED",
+        "fixer": "Walked the phrase right past the doorman — the ledger's loot is on the table."
       }
     },
     {
@@ -429,6 +433,10 @@
           }
         ],
         "takeaway": "A question should ask one thing. Bind the value AND let the driver run a single statement - so a semicolon is a syntax error, not a to-do list."
+      },
+      "payoff": {
+        "got": "VAULT OPEN",
+        "fixer": "Two moves, one breath — the vault door flipped to OPEN. That is the job."
       }
     }
   ],
