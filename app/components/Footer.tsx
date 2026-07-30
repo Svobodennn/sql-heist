@@ -68,6 +68,14 @@ export function Footer() {
         <div className={styles.bottom}>
           <span>&copy; {new Date().getFullYear()} SQL Heist</span>
           <span className={styles.note}>Runs entirely in your browser. No server, no net.</span>
+          <a
+            className={styles.alsoTry}
+            href="https://www.sqlnoir.com"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            also try <strong>SQL&nbsp;Noir</strong> ↗
+          </a>
         </div>
       </div>
     </footer>

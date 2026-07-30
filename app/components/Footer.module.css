@@ -76,6 +76,26 @@
   font-family: var(--font-mono);
 }
 
+/* Friendly homage to the game that inspired this one — in the spirit of
+   Minecraft <-> Terraria's "also try". */
+.alsoTry {
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+  padding: 2px 8px;
+  transition:
+    color 0.2s,
+    border-color 0.2s;
+}
+.alsoTry:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+.alsoTry strong {
+  font-weight: 700;
+}
+
 @media (min-width: 640px) {
   .cols {
     grid-template-columns: repeat(3, minmax(0, 1fr));
