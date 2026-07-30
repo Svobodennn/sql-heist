@@ -86,6 +86,86 @@ export const JOB_NARRATIVE: Record<string, JobNarrative> = {
         "You made the building hand you its own directory. Handy for you — a nightmare for them. The fix isn't hiding the catalog; it's making sure a search box can never ask for it.",
     },
   },
+  'the-tell': {
+    loot: {
+      headline: 'GOT THE PIN.',
+      fixer:
+        "That's the master PIN — pulled out of a desk that only knows yes and no. It never showed you a digit. It just couldn't keep its face still when you got close.",
+      stars: {
+        3: "Digit by digit, and the desk never knew it was talking. That's the quiet kind of craft.",
+        2: "A few wrong guesses before you found the rhythm, but the PIN's yours.",
+        1: "You hammered at it till the light gave. Loud — but you've got the PIN. Read quieter next time.",
+      },
+    },
+    debrief: {
+      transition:
+        'You never read that PIN off a screen — you read it off a light. The desk took whatever you slid under it as part of the question, then lit yes or no. And yes-or-no, asked enough ways, spells a secret whole.',
+    },
+  },
+  'the-stopwatch': {
+    loot: {
+      headline: "OMEGA'S REAL.",
+      fixer:
+        "There's your answer — OMEGA's real, and the gate never said so out loud. It kept that flat 'processing' and let the pause do the talking. Three slow seconds is a yes.",
+      stars: {
+        3: "One question, one drag of the clock, and you had your yes. The gate never knew it was talking. That's craft.",
+        2: "A few knocks before you trusted the clock, but you timed the lie. The answer's yours.",
+        1: 'You knocked till the gate got tired, but you caught the drag in the end. Loud work — trust the clock sooner next time.',
+      },
+    },
+    debrief: {
+      transition:
+        "The gate gave everyone the same answer and called that silence. But it let your question decide how hard it had to work — and a machine straining on cue is a machine that's talking. You don't quiet that by hiding the words.",
+    },
+  },
+  'the-confession': {
+    loot: {
+      headline: 'IT TALKED.',
+      fixer:
+        "There's the name — the drawer they kept off every map, coughed up the second the desk choked. Push a man till he stumbles and he'll name what he meant to bury. Now you know where they keep the rest.",
+      stars: {
+        3: "One name, one stumble, and the desk said exactly what you came for. Barely had to lean. That's craft.",
+        2: "A couple of wrong names before it choked, but it gave up the drawer. That'll do.",
+        1: 'You jammed it till it gagged. Ugly way to pull a confession — but it talked. Ease up next time.',
+      },
+    },
+    debrief: {
+      transition:
+        "You didn't crack anything open. The desk just can't hold its tongue when it's upset — every time the back office grumbled, it passed the words straight to you. Right down to the name on the drawer it was told to keep shut.",
+    },
+  },
+  'the-double-tap': {
+    loot: {
+      headline: 'GRANTED.',
+      fixer:
+        "That vault door reads OPEN now — and you're the hand that wrote it. The desk took your second order same as its own, never asked who sent it. One punch, two moves.",
+      stars: {
+        3: "Both moves in one breath, and the desk never flinched. Read the badge, took your order, handed you the receipt. That's craft.",
+        2: "A few passes to make the second order land, but the door swung. That'll do.",
+        1: "You fumbled the second move a dozen times before it stuck. Loud — but the vault's open. Tighten the hand next time.",
+      },
+    },
+    debrief: {
+      transition:
+        "The desk never counted how many orders you handed it. It read your badge, then kept right on reading — into a command you wrote yourself — and carried that one out too, no questions asked. A door should only ever do the one thing it's asked.",
+    },
+  },
+  'the-doorman': {
+    loot: {
+      headline: 'PAST THE MAN.',
+      fixer:
+        "There's the ledger — and the doorman held the door while you walked it out. He only knows the words he was taught, spelled just so. Say them a little crooked and he hears nothing at all.",
+      stars: {
+        3: "One pass, the phrase dressed just enough, and the doorman tipped his hat. He never heard the word he was posted there to stop. That's craft.",
+        2: "A couple of tries to dress the phrase right, but you walked out with the ledger. That'll do.",
+        1: "You set the doorman off a dozen times before one slipped by. Loud — but the ledger's yours. Dress it cleaner next time.",
+      },
+    },
+    debrief: {
+      transition:
+        "They didn't fix the door — they just posted a man out front with a list of words to refuse. But he only knows the words spelled his way, and the desk behind him still reads whatever slips past. A guard who checks your spelling was never a lock.",
+    },
+  },
 }
 
 export function getJobNarrative(levelId: string): JobNarrative | undefined {
