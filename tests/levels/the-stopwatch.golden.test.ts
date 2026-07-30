@@ -82,6 +82,16 @@ describe('the-stopwatch.json — schema + blind timing oracle', () => {
     expect(evaluate(level.winCondition, toWinContext(result, inputs)).won).toBe(false)
   })
 
+  it('NO WIN: a blanket tautology (OR 1=1) returns rows but is NOT the timing oracle', () => {
+    // Regression: rows come back, but the slow branch never hinged on the secret.
+    // mustReference ['staff'] holds the win back until the payload interrogates it.
+    const inputs = { token: "' OR 1=1 -- " }
+    const result = session.run(inputs)
+    expect(result.error).toBeUndefined()
+    expect(result.rowCount).toBeGreaterThan(0)
+    expect(evaluate(level.winCondition, toWinContext(result, inputs)).won).toBe(false)
+  })
+
   it('secure fix: the parametrized lookup reduces the timing payload to [] rows', async () => {
     const SQL = await loadSqlJs({ locateFile: () => wasmPath })
     const db = new SQL.Database()

@@ -76,6 +76,17 @@ describe('the-double-tap.json — schema + stacked queries', () => {
     expect(vault?.[1]).toBe(0)
   })
 
+  it('NO WIN: a throwaway ;SELECT 1 adds a result set but does NOT open the vault', () => {
+    // Regression: this stacks a second statement (resultSetCount hits 2, the old
+    // winning bar) but performs no UPDATE — the vault never flips. mustReference
+    // ['UPDATE','VAULT'] holds the win back until the payload does the actual job.
+    const inputs = { badge: "B-1001'; SELECT 1 -- " }
+    const result = session.run(inputs)
+    expect(result.error).toBeUndefined()
+    expect(result.resultSetCount).toBe(2)
+    expect(evaluate(level.winCondition, toWinContext(result, inputs)).won).toBe(false)
+  })
+
   it('NO WIN: an errored stacked payload never wins (anti-trivial guard)', () => {
     const inputs = { badge: "B-1001'; DROP TABLE nope; -- " }
     const result = session.run(inputs)

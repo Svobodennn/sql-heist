@@ -49,6 +49,7 @@
   },
   "winCondition": {
     "type": "blind-boolean",
+    "mustReference": ["master_pin"],
     "reason": "The desk lit green - your guess about the PIN held TRUE. That is the oracle answering."
   },
   "hints": [

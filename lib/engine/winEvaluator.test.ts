@@ -181,6 +181,37 @@ describe('evaluate — WS3 blind-boolean / blind-timing (oracle TRUE = a row)', 
     expect(evaluate({ type: 'blind-boolean' }, ctx({ error: 'boom', rows: [] })).won).toBe(false)
     expect(evaluate({ type: 'blind-timing' }, ctx({ error: 'boom', rows: [] })).won).toBe(false)
   })
+
+  it('mustReference: a real oracle payload (reads the secret) wins', () => {
+    const cond: WinCondition = { type: 'blind-boolean', mustReference: ['master_pin'] }
+    const oracle = ctx({
+      columns: ['id'],
+      rows: [[1]],
+      composedSql:
+        "SELECT id FROM reset_codes WHERE code = '' OR (SELECT substr(master_pin,1,1) FROM vault_config WHERE id=1)='7' -- '",
+    })
+    expect(evaluate(cond, oracle).won).toBe(true)
+  })
+
+  it('mustReference: a blanket tautology returns rows but does NOT win', () => {
+    const cond: WinCondition = { type: 'blind-boolean', mustReference: ['master_pin'] }
+    const tautology = ctx({
+      columns: ['id'],
+      rows: [[1], [2], [3]],
+      composedSql: "SELECT id FROM reset_codes WHERE code = '' OR 1=1 -- '",
+    })
+    const r = evaluate(cond, tautology)
+    expect(r.won).toBe(false)
+    expect(r.reason.length).toBeGreaterThan(0)
+  })
+
+  it('mustReference is case-insensitive and applies to blind-timing too', () => {
+    const cond: WinCondition = { type: 'blind-timing', mustReference: ['staff'] }
+    expect(
+      evaluate(cond, ctx({ rows: [[1]], composedSql: "... FROM STAFF WHERE clearance='OMEGA'" })).won,
+    ).toBe(true)
+    expect(evaluate(cond, ctx({ rows: [[1]], composedSql: '... OR 1=1 --' })).won).toBe(false)
+  })
 })
 
 describe('evaluate — WS3 stacked-queries (extra result set = observable effect)', () => {
@@ -203,6 +234,24 @@ describe('evaluate — WS3 stacked-queries (extra result set = observable effect
   it('loses on a stacked payload that errored', () => {
     const cond: WinCondition = { type: 'stacked-queries' }
     expect(evaluate(cond, ctx({ error: 'syntax error', resultSetCount: 2 })).won).toBe(false)
+  })
+
+  it('mustReference: a throwaway ;SELECT 1 hits the result-set bar but does NOT win', () => {
+    const cond: WinCondition = { type: 'stacked-queries', mustReference: ['UPDATE', 'VAULT'] }
+    const cheese = ctx({
+      resultSetCount: 2,
+      rows: [[1]],
+      composedSql: "SELECT door, granted FROM door_acl WHERE badge = 'x'; SELECT 1 -- '",
+    })
+    expect(evaluate(cond, cheese).won).toBe(false)
+
+    const real = ctx({
+      resultSetCount: 2,
+      rows: [[1]],
+      composedSql:
+        "SELECT door, granted FROM door_acl WHERE badge = 'x'; UPDATE door_acl SET granted=1 WHERE door='VAULT'; SELECT door, granted FROM door_acl WHERE door='VAULT' -- '",
+    })
+    expect(evaluate(cond, real).won).toBe(true)
   })
 })
 

@@ -67,6 +67,7 @@
   "winCondition": {
     "type": "stacked-queries",
     "minResultSets": 2,
+    "mustReference": ["UPDATE", "VAULT"],
     "reason": "A second statement rode in behind the badge read - the vault door flipped to OPEN and the verify read proved it."
   },
   "hints": [

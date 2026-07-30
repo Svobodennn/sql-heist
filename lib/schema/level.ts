@@ -144,6 +144,10 @@ export const winConditionSchema = z.discriminatedUnion('type', [
   //     benign/false returns 0 rows -> anti-trivial loss).
   z.object({
     type: z.literal('blind-boolean'),
+    // The composed SQL must reference ALL of these (case-insensitive) for the win
+    // to count. Without it a blanket tautology (' OR 1=1) returns rows and "wins"
+    // a blind level without interrogating the secret. Absent => bit-only (legacy).
+    mustReference: z.array(z.string()).min(1).optional(),
     reason: z.string().optional(),
   }),
   // (6) blind-timing: timing oracle modeled SYMBOLICALLY. sql.js is synchronous,
@@ -155,6 +159,9 @@ export const winConditionSchema = z.discriminatedUnion('type', [
     type: z.literal('blind-timing'),
     thresholdMs: z.number().optional(),
     slowDelayMs: z.number().optional(),
+    // Same oracle guard as blind-boolean: the slow branch must hinge on the
+    // secret, not a blanket always-true condition. Absent => bit-only (legacy).
+    mustReference: z.array(z.string()).min(1).optional(),
     reason: z.string().optional(),
   }),
   // (7) stacked-queries: a multi-statement payload's side effect is observable
@@ -163,6 +170,11 @@ export const winConditionSchema = z.discriminatedUnion('type', [
   z.object({
     type: z.literal('stacked-queries'),
     minResultSets: z.number().optional(),
+    // Oracle-style guard (same as blind types): the composed SQL must reference
+    // ALL of these (case-insensitive), so a throwaway second statement (';SELECT 1)
+    // can't "win" a job whose point is a specific stacked side effect. Absent =>
+    // any extra result set counts (legacy).
+    mustReference: z.array(z.string()).min(1).optional(),
     reason: z.string().optional(),
   }),
 ])

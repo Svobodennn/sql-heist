@@ -51,6 +51,7 @@
     "type": "blind-timing",
     "thresholdMs": 750,
     "slowDelayMs": 3000,
+    "mustReference": ["staff"],
     "reason": "The gate dragged its feet - the slow branch fired, which means your condition held TRUE."
   },
   "hints": [

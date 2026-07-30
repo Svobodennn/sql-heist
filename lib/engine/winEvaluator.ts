@@ -70,6 +70,16 @@ function rowToObject(columns: string[], row: ReadonlyArray<SqlCell>): Record<str
   return obj
 }
 
+// Oracle guard shared by the blind + stacked win types: does the composed SQL
+// reference EVERY required token (case-insensitive)? Rejects a "win" that produced
+// the right SHAPE of result without performing the technique — a blanket ' OR 1=1
+// (returns rows but reads nothing), or a throwaway stacked ';SELECT 1' (adds a
+// result set but does nothing). The level opts in via winCondition.mustReference.
+function composedReferencesAll(composedSql: string, tokens: string[]): boolean {
+  const haystack = composedSql.toLowerCase()
+  return tokens.every((token) => haystack.includes(token.toLowerCase()))
+}
+
 export function evaluate(cond: WinCondition, ctx: WinContext): WinEvaluation {
   // error-based (WS3): a TARGETED SQLite error IS the win — data leaks through
   // the message. Checked BEFORE the generic guard below, so it is the ONLY win
@@ -157,18 +167,37 @@ export function evaluate(cond: WinCondition, ctx: WinContext): WinEvaluation {
       // read; the oracle's TRUE state is a returned row (same signal as boolean).
       // Differentiation TRUE↔FALSE is a level property (solve wins; the FALSE/
       // benign probe returns 0 rows and loses via the guard above).
-      return ctx.rowCount > 0
-        ? win(cond.reason ?? 'The oracle answered TRUE — a row came back.')
-        : lose(cond.reason ?? 'The oracle answered FALSE — no row came back.')
+      if (ctx.rowCount <= 0) {
+        return lose(cond.reason ?? 'The oracle answered FALSE — no row came back.')
+      }
+      // A row came back, but a blanket tautology (' OR 1=1) also returns rows
+      // WITHOUT reading the secret — that is not the blind technique. When the
+      // level names what its oracle must interrogate, require the payload to
+      // actually reference it, so a trivial always-true condition can't "win".
+      if (cond.mustReference && !composedReferencesAll(ctx.composedSql, cond.mustReference)) {
+        return lose(
+          'Green — but from a blanket always-true condition, which lights up no matter what the secret holds. The blind trick is to make TRUE/FALSE hinge on the hidden value itself.',
+        )
+      }
+      return win(cond.reason ?? 'The oracle answered TRUE — a row came back.')
     }
 
     case 'stacked-queries': {
       // A stacked payload appends a statement whose result set is observable.
       // The app query yields N result sets; a stacked read/verify yields more.
       const min = cond.minResultSets ?? 2
-      return (ctx.resultSetCount ?? 0) >= min
-        ? win(cond.reason ?? 'Stacked statement executed — an extra result set surfaced.')
-        : lose(cond.reason ?? 'Only one statement ran — stack another to reveal the effect.')
+      if ((ctx.resultSetCount ?? 0) < min) {
+        return lose(cond.reason ?? 'Only one statement ran — stack another to reveal the effect.')
+      }
+      // An extra result set alone isn't the job: a throwaway ';SELECT 1' also adds
+      // one. When the level names the side effect it wants, require the payload to
+      // actually perform it (not just append any second statement).
+      if (cond.mustReference && !composedReferencesAll(ctx.composedSql, cond.mustReference)) {
+        return lose(
+          'A second statement rode in — but it did not do the job. Stack the write that actually flips what the target guards.',
+        )
+      }
+      return win(cond.reason ?? 'Stacked statement executed — an extra result set surfaced.')
     }
   }
 }

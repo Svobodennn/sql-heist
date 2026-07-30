@@ -77,6 +77,17 @@ describe('the-tell.json — schema + blind boolean oracle', () => {
     expect(evaluate(level.winCondition, toWinContext(result, inputs)).won).toBe(false)
   })
 
+  it('NO WIN: a blanket tautology (OR 1=1) returns rows but is NOT the oracle', () => {
+    // Regression: ' OR 1=1 -- lets every row through (green), but it never reads
+    // the PIN — so it is not the blind technique the job teaches. mustReference
+    // ['master_pin'] holds the win back until the payload interrogates the secret.
+    const inputs = { code: "' OR 1=1 -- " }
+    const result = session.run(inputs)
+    expect(result.error).toBeUndefined()
+    expect(result.rowCount).toBeGreaterThan(0)
+    expect(evaluate(level.winCondition, toWinContext(result, inputs)).won).toBe(false)
+  })
+
   it('secure fix: the parametrized lookup reduces the oracle payload to [] rows', async () => {
     const SQL = await loadSqlJs({ locateFile: () => wasmPath })
     const db = new SQL.Database()
