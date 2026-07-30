@@ -1,5 +1,5 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
-import { cx } from '../../lib/cx'
+import { cx } from '@/ui/cx'
 
 // Thin wrapper over the global .btn design-system class (globals.css). All states
 // (hover/active/disabled) + the 44px touch target live in CSS; this only wires

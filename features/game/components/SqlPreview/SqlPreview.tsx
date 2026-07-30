@@ -5,7 +5,7 @@ import type { ComposedSegment } from '@/lib/engine/queryComposer'
 import { classifyChars, toRuns } from '../../lib/sqlHighlight'
 import { toSpokenSql } from '../../lib/sqlSpoken'
 import { useDebouncedValue } from '../../lib/useDebouncedValue'
-import { cx } from '../../lib/cx'
+import { cx } from '@/ui/cx'
 import styles from './SqlPreview.module.css'
 
 // THE WIRE (docs/04-frontend-ux.md §5.2) — the transparent, live "composed SQL".

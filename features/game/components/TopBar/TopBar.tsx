@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import type { Phase } from '../../lib/phaseMachine'
-import { cx } from '../../lib/cx'
+import { cx } from '@/ui/cx'
 import { useTranslation } from '@/i18n/useTranslation'
 import { IconArrowLeft, IconBoard, IconMute, IconStar, IconTimer, IconVolume } from '../icons'
 import { PhaseStepper } from '../PhaseStepper'

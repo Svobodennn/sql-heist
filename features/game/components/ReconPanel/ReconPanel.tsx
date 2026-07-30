@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 import type { Level } from '@/lib/schema/level'
-import { cx } from '../../lib/cx'
+import { cx } from '@/ui/cx'
 import { useTranslation } from '@/i18n/useTranslation'
 import { Button } from '../Button'
 import { BrowserChrome } from '../BrowserChrome'

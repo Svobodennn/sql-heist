@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { cx } from '../cx'
+import { cx } from '@/ui/cx'
 import { Logo } from '../Logo'
 import { IconMenu, IconClose, IconUser, IconHome, IconBoard, IconHelpCircle } from '../icons'
 import { ShareButton } from '../ShareButton'

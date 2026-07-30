@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { LOCALES, LOCALE_LABELS, LOCALE_SHORT } from '@/i18n/config'
 import { useTranslation } from '@/i18n/useTranslation'
-import { cx } from '../cx'
+import { cx } from '@/ui/cx'
 import { IconGlobe, IconChevronDown, IconCheck } from '../icons'
 import styles from './LanguageSwitcher.module.css'
 

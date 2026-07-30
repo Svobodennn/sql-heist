@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import type { Hint } from '@/lib/schema/level'
 import { DEFAULT_SCORING, canOpenHint } from '@/lib/engine/scoring'
-import { cx } from '../../lib/cx'
+import { cx } from '@/ui/cx'
 import { useTranslation } from '@/i18n/useTranslation'
 import { Button } from '../Button'
 import { Stamp } from '../Stamp'

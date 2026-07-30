@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from '@/i18n/useTranslation'
-import { cx } from '../cx'
+import { cx } from '@/ui/cx'
 import { IconShare, IconCheck, IconLink } from '../icons'
 import styles from './ShareButton.module.css'
 

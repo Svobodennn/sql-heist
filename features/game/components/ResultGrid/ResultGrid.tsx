@@ -2,7 +2,7 @@
 
 import type { ExecutionResult } from '@/lib/engine/sqlRunner'
 import type { WinCondition } from '@/lib/schema/level'
-import { cx } from '../../lib/cx'
+import { cx } from '@/ui/cx'
 import { cellToText, computeLoot } from '../../lib/resultView'
 import { useTranslation } from '@/i18n/useTranslation'
 import { IconAlert, IconLootTag } from '../icons'

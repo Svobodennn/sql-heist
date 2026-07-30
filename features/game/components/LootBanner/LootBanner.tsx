@@ -3,7 +3,7 @@
 import { m, useReducedMotion } from 'framer-motion'
 import type { Level } from '@/lib/schema/level'
 import type { ExecutionResult } from '@/lib/engine/sqlRunner'
-import { cx } from '../../lib/cx'
+import { cx } from '@/ui/cx'
 import { getJobNarrative } from '../../lib/narrative'
 import { useTranslation } from '@/i18n/useTranslation'
 import { Button } from '../Button'

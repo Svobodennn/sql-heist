@@ -3,7 +3,7 @@
 import type { JobMeta } from '../../levels'
 import type { ProgressMap } from '../../lib/useProgress'
 import { badgeSummary, computeBadges } from '../../lib/badges'
-import { cx } from '../../lib/cx'
+import { cx } from '@/ui/cx'
 import { useTranslation } from '@/i18n/useTranslation'
 import { IconAward, IconCheck } from '../icons'
 import { Stamp } from '../Stamp'

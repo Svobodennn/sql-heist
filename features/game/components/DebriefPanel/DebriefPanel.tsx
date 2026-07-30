@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import type { Level } from '@/lib/schema/level'
 import { compose } from '@/lib/engine/queryComposer'
-import { cx } from '../../lib/cx'
+import { cx } from '@/ui/cx'
 import { DEBRIEF_INTRO, getJobNarrative } from '../../lib/narrative'
 import {
   groupSecureSnippets,

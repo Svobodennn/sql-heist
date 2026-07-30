@@ -1,7 +1,7 @@
 'use client'
 
 import type { Phase } from '../../lib/phaseMachine'
-import { cx } from '../../lib/cx'
+import { cx } from '@/ui/cx'
 import { useTranslation } from '@/i18n/useTranslation'
 import { IconCheck } from '../icons'
 import styles from '../TopBar/TopBar.module.css'

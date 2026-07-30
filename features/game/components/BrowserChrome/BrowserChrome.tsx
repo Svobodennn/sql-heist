@@ -1,7 +1,7 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { cx } from '../../lib/cx'
+import { cx } from '@/ui/cx'
 import { IconLock } from '../icons'
 import styles from './BrowserChrome.module.css'
 

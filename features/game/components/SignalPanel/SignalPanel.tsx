@@ -10,7 +10,7 @@ import {
   timingView,
   type SignalTone,
 } from '../../lib/signalView'
-import { cx } from '../../lib/cx'
+import { cx } from '@/ui/cx'
 import { useTranslation } from '@/i18n/useTranslation'
 import { ResultGrid } from '../ResultGrid'
 import { IconAlert, IconCheck, IconStack, IconTimer, IconX } from '../icons'

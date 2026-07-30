@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react'
 import { nextTabIndex, optionCount, snippetAt, type LanguageGroup } from '../../lib/secureCode'
-import { cx } from '../../lib/cx'
+import { cx } from '@/ui/cx'
 import { useTranslation } from '@/i18n/useTranslation'
 import { IconLock, IconLockBroken } from '../icons'
 import { LangIcon } from '../langIcons'

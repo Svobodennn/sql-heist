@@ -1,7 +1,7 @@
 'use client'
 
 import { DEFAULT_SCORING, hintPenalty } from '@/lib/engine/scoring'
-import { cx } from '../../lib/cx'
+import { cx } from '@/ui/cx'
 import { useTranslation } from '@/i18n/useTranslation'
 import { IconStar } from '../icons'
 import styles from './ScoreBreakdown.module.css'

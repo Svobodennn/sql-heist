@@ -1,7 +1,7 @@
 'use client'
 
 import type { JobMeta } from '../../levels'
-import { cx } from '../../lib/cx'
+import { cx } from '@/ui/cx'
 import { groupByAct } from '../../lib/actBoard'
 import { rankForScore } from '../../lib/narrative'
 import { isUnlocked, useProgress } from '../../lib/useProgress'

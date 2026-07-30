@@ -2,7 +2,7 @@
 
 import type { FilterOutcome } from '@/lib/engine/queryComposer'
 import { filterBanner } from '../../lib/signalView'
-import { cx } from '../../lib/cx'
+import { cx } from '@/ui/cx'
 import { useTranslation } from '@/i18n/useTranslation'
 import { IconBlock, IconScissors } from '../icons'
 import styles from './WafBanner.module.css'
