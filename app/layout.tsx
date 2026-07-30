@@ -5,6 +5,7 @@ import { Navbar } from './components/Navbar'
 import { Footer } from './components/Footer'
 import { CookieConsent } from './components/CookieConsent'
 import { I18nProvider } from '@/i18n/I18nProvider'
+import { SITE_URL, SITE_NAME, SITE_TAGLINE, SITE_DESCRIPTION } from './siteConfig'
 import styles from './layout.module.css'
 import './globals.css'
 
@@ -29,9 +30,27 @@ const mono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'SQL Heist — Learn SQL Injection by Pulling It Off',
-  description:
-    'A noir heist game that teaches SQL injection against a real in-browser SQLite engine — then teaches you to defend it. Three jobs. No setup.',
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    template: `%s · ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  alternates: { canonical: '/' },
+  openGraph: {
+    type: 'website',
+    siteName: SITE_NAME,
+    url: SITE_URL,
+    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    description: SITE_DESCRIPTION,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    description: SITE_DESCRIPTION,
+  },
+  robots: { index: true, follow: true },
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {

@@ -6,9 +6,10 @@ import { Callout, LegalSection } from '@/app/components/ContentPage/content-bloc
 import { getServerTranslator } from '@/i18n/server'
 
 export const metadata: Metadata = {
-  title: 'Privacy — SQL Heist',
+  title: 'Privacy',
   description:
     'How SQL Heist handles your data: no accounts, no tracking, progress stored locally in your browser. It runs entirely client-side.',
+  alternates: { canonical: '/privacy' },
 }
 
 // One source of truth for the numbered clauses: the centred reading column maps

@@ -6,9 +6,10 @@ import { getServerTranslator } from '@/i18n/server'
 import styles from '@/app/components/ContentPage/content.module.css'
 
 export const metadata: Metadata = {
-  title: 'FAQ — SQL Heist',
+  title: 'FAQ',
   description:
     'Straight answers about SQL Heist: is it legal, do you need to install anything, where your progress is saved, and who this is for.',
+  alternates: { canonical: '/faq' },
 }
 
 const FAQS: { q: string; a: ReactNode }[] = [

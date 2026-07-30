@@ -6,9 +6,10 @@ import { Callout, LegalSection } from '@/app/components/ContentPage/content-bloc
 import { getServerTranslator } from '@/i18n/server'
 
 export const metadata: Metadata = {
-  title: 'Terms of Use — SQL Heist',
+  title: 'Terms of Use',
   description:
     'The terms for using SQL Heist: an educational game. Use the skills only on systems you own or are authorised to test.',
+  alternates: { canonical: '/terms' },
 }
 
 // One source of truth for the numbered clauses: the centred reading column maps

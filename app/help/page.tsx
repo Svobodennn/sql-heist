@@ -8,9 +8,10 @@ import { getServerTranslator } from '@/i18n/server'
 import styles from '@/app/components/ContentPage/content.module.css'
 
 export const metadata: Metadata = {
-  title: 'How the job works — SQL Heist',
+  title: 'How the job works',
   description:
     'How to play SQL Heist: five moves per job — Brief, Recon, Exploit, Loot, Debrief. Read the wire, run your payload, learn the fix.',
+  alternates: { canonical: '/help' },
 }
 
 const MOVES: { title: string; body: string }[] = [

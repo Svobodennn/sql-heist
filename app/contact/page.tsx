@@ -7,8 +7,9 @@ import { getServerTranslator } from '@/i18n/server'
 import styles from '@/app/components/ContentPage/content.module.css'
 
 export const metadata: Metadata = {
-  title: 'Contact — SQL Heist',
+  title: 'Contact',
   description: 'Reach the SQL Heist crew: report a bug, ask a question, or leave word.',
+  alternates: { canonical: '/contact' },
 }
 
 const EMAIL = 'melih.sarac@hotmail.com'
