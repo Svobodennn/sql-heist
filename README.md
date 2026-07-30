@@ -73,3 +73,7 @@ public/           Static assets (incl. the sql.js WebAssembly binary)
 ## A note on the code
 
 This is a **learning project**. The intentionally "vulnerable" query building inside the engine is the whole point of the exercise. Real applications must always use parameterized queries / prepared statements — which is exactly what every job's debrief demonstrates.
+
+## Credits
+
+- The logo/favicon mark ("cowled") is from [game-icons.net](https://game-icons.net), licensed under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/).
