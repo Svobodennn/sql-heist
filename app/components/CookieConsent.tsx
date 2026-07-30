@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { useTranslation } from '@/app/i18n/useTranslation'
+import { useTranslation } from '@/i18n/useTranslation'
 import { IconCheck } from './icons'
 import styles from './CookieConsent.module.css'
 

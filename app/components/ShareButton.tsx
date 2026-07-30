@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useTranslation } from '@/app/i18n/useTranslation'
+import { useTranslation } from '@/i18n/useTranslation'
 import { cx } from './cx'
 import { IconShare, IconCheck, IconLink } from './icons'
 import styles from './ShareButton.module.css'

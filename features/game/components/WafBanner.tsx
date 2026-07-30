@@ -3,7 +3,7 @@
 import type { FilterOutcome } from '@/lib/engine/queryComposer'
 import { filterBanner } from '../lib/signalView'
 import { cx } from '../lib/cx'
-import { useTranslation } from '@/app/i18n/useTranslation'
+import { useTranslation } from '@/i18n/useTranslation'
 import { IconBlock, IconScissors } from './icons'
 import styles from './WafBanner.module.css'
 

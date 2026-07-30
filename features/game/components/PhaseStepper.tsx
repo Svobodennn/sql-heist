@@ -2,7 +2,7 @@
 
 import type { Phase } from '../lib/phaseMachine'
 import { cx } from '../lib/cx'
-import { useTranslation } from '@/app/i18n/useTranslation'
+import { useTranslation } from '@/i18n/useTranslation'
 import { IconCheck } from './icons'
 import styles from './TopBar.module.css'
 

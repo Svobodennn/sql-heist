@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from 'react'
 import type { EngineStatus } from '../lib/useEngine'
-import { useTranslation } from '@/app/i18n/useTranslation'
+import { useTranslation } from '@/i18n/useTranslation'
 import { Button } from './Button'
 import { IconAlert } from './icons'
 import styles from './EngineLoader.module.css'

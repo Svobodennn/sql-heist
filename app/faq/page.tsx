@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { ContentPage } from '@/app/components/ContentPage'
-import { getServerTranslator } from '@/app/i18n/server'
+import { getServerTranslator } from '@/i18n/server'
 import styles from '@/app/components/content.module.css'
 
 export const metadata: Metadata = {

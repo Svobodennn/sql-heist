@@ -3,7 +3,7 @@
 import type { ExecutionResult, SqlCell } from '@/lib/engine/sqlRunner'
 import type { WinCondition } from '@/lib/schema/level'
 import { cx } from '../lib/cx'
-import { useTranslation } from '@/app/i18n/useTranslation'
+import { useTranslation } from '@/i18n/useTranslation'
 import { IconAlert, IconLootTag } from './icons'
 import styles from './ResultGrid.module.css'
 

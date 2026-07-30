@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { starsForScore } from '@/lib/engine/scoring'
 import type { JobMeta } from '../levels'
 import { cx } from '../lib/cx'
-import { useTranslation } from '@/app/i18n/useTranslation'
+import { useTranslation } from '@/i18n/useTranslation'
 import { IconArrowRight, IconCheck, IconLock, IconStar } from './icons'
 import styles from './JobCard.module.css'
 

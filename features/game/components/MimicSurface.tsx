@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import type { InputField, SurfaceKind } from '@/lib/schema/level'
 import { cx } from '../lib/cx'
-import { useTranslation } from '@/app/i18n/useTranslation'
+import { useTranslation } from '@/i18n/useTranslation'
 import { Button } from './Button'
 import styles from './MimicSurface.module.css'
 

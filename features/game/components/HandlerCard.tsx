@@ -1,7 +1,7 @@
 'use client'
 
 import { cx } from '../lib/cx'
-import { useTranslation } from '@/app/i18n/useTranslation'
+import { useTranslation } from '@/i18n/useTranslation'
 import { Stamp } from './Stamp'
 import styles from './HandlerCard.module.css'
 

@@ -3,7 +3,7 @@
 import type { Level } from '@/lib/schema/level'
 import type { EngineStatus } from '../lib/useEngine'
 import { cx } from '../lib/cx'
-import { useTranslation } from '@/app/i18n/useTranslation'
+import { useTranslation } from '@/i18n/useTranslation'
 import { Button } from './Button'
 import { HandlerCard } from './HandlerCard'
 import { Stamp } from './Stamp'

@@ -3,7 +3,7 @@
 import { AnimatePresence, m, useReducedMotion } from 'framer-motion'
 import type { ToastItem } from '../lib/useToasts'
 import { cx } from '../lib/cx'
-import { useTranslation } from '@/app/i18n/useTranslation'
+import { useTranslation } from '@/i18n/useTranslation'
 import { IconAlert, IconCheck, IconTarget } from './icons'
 import styles from './Toast.module.css'
 

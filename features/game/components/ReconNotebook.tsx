@@ -3,7 +3,7 @@
 import type { ReconNotebook as Notebook } from '../lib/reconNotebook'
 import { notebookSize } from '../lib/reconNotebook'
 import { cx } from '../lib/cx'
-import { useTranslation } from '@/app/i18n/useTranslation'
+import { useTranslation } from '@/i18n/useTranslation'
 import { IconChevronDown, IconNotebook } from './icons'
 import styles from './ReconNotebook.module.css'
 

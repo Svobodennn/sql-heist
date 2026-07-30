@@ -8,7 +8,7 @@ import { Logo } from './Logo'
 import { IconMenu, IconClose, IconUser, IconHome, IconBoard, IconHelpCircle } from './icons'
 import { ShareButton } from './ShareButton'
 import { LanguageSwitcher } from './LanguageSwitcher'
-import { useTranslation } from '@/app/i18n/useTranslation'
+import { useTranslation } from '@/i18n/useTranslation'
 import styles from './Navbar.module.css'
 
 // Icons are decorative (aria-hidden in <Base>); the translated text stays the

@@ -4,7 +4,7 @@ import { ContentPage } from '@/app/components/ContentPage'
 import { Callout, Section } from '@/app/components/content-blocks'
 import { IconArrowRight } from '@/app/components/icons'
 import { cx } from '@/app/components/cx'
-import { getServerTranslator } from '@/app/i18n/server'
+import { getServerTranslator } from '@/i18n/server'
 import styles from '@/app/components/content.module.css'
 
 export const metadata: Metadata = {

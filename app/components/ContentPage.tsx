@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { getServerTranslator } from '@/app/i18n/server'
+import { getServerTranslator } from '@/i18n/server'
 import { Logo } from './Logo'
 import styles from './content.module.css'
 

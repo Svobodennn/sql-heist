@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { ContentPage } from '@/app/components/ContentPage'
 import { Callout, LegalSection } from '@/app/components/content-blocks'
-import { getServerTranslator } from '@/app/i18n/server'
+import { getServerTranslator } from '@/i18n/server'
 
 export const metadata: Metadata = {
   title: 'Terms of Use — SQL Heist',

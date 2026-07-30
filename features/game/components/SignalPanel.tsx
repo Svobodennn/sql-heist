@@ -11,7 +11,7 @@ import {
   type SignalTone,
 } from '../lib/signalView'
 import { cx } from '../lib/cx'
-import { useTranslation } from '@/app/i18n/useTranslation'
+import { useTranslation } from '@/i18n/useTranslation'
 import { ResultGrid } from './ResultGrid'
 import { IconAlert, IconCheck, IconStack, IconTimer, IconX } from './icons'
 import styles from './SignalPanel.module.css'

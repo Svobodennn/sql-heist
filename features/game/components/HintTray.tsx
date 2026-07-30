@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 're
 import type { Hint } from '@/lib/schema/level'
 import { DEFAULT_SCORING, canOpenHint } from '@/lib/engine/scoring'
 import { cx } from '../lib/cx'
-import { useTranslation } from '@/app/i18n/useTranslation'
+import { useTranslation } from '@/i18n/useTranslation'
 import { Button } from './Button'
 import { Stamp } from './Stamp'
 import { IconBulb } from './icons'

@@ -2,7 +2,7 @@
 
 import { DEFAULT_SCORING, hintPenalty } from '@/lib/engine/scoring'
 import { cx } from '../lib/cx'
-import { useTranslation } from '@/app/i18n/useTranslation'
+import { useTranslation } from '@/i18n/useTranslation'
 import { IconStar } from './icons'
 import styles from './ScoreBreakdown.module.css'
 

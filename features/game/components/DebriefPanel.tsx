@@ -11,7 +11,7 @@ import {
   selectSecureSnippets,
   selectVulnerableSnippets,
 } from '../lib/secureCode'
-import { useTranslation } from '@/app/i18n/useTranslation'
+import { useTranslation } from '@/i18n/useTranslation'
 import { Button } from './Button'
 import { CodeCompare } from './CodeCompare'
 import { SqlPreview } from './SqlPreview'
