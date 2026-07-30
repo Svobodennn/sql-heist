@@ -1,0 +1,381 @@
+/* ============================================================================
+   CasePlayer shell + layout
+   ============================================================================ */
+.shell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+.inner {
+  flex: 1;
+  padding-block: var(--space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.caseHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+.caseHeaderMain {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.caseTitle {
+  font-size: 1.875rem;
+  margin-block: 2px;
+}
+.caseTarget {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  min-height: 44px;
+}
+.backLink:hover {
+  color: var(--primary);
+}
+
+.briefing {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+.briefingSummary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  min-height: 44px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  list-style: none;
+}
+.briefingSummary::-webkit-details-marker {
+  display: none;
+}
+.briefingChevron {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.briefing[open] .briefingChevron {
+  transform: rotate(180deg);
+}
+.briefingText {
+  margin: 0;
+  padding: 0 var(--space-4) var(--space-4);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  align-items: start;
+}
+@media (min-width: 1024px) {
+  .layout {
+    grid-template-columns: 300px 1fr;
+  }
+}
+.aside {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+/* The plan + notebook track the page on desktop so they stay in view while the
+   exploit surface scrolls. */
+@media (min-width: 1024px) {
+  .aside {
+    position: sticky;
+    top: var(--space-4);
+  }
+}
+.main {
+  min-width: 0;
+}
+.view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.payoffCta {
+  display: flex;
+}
+
+/* ============================================================================
+   ObjectiveConsole — the active objective's exploit surface (THE FRONT / THE WIRE)
+   ============================================================================ */
+.console {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.recap {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+.recapSummary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  min-height: 44px;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  list-style: none;
+}
+.recapSummary::-webkit-details-marker {
+  display: none;
+}
+.recapChevron {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.recap[open] .recapChevron {
+  transform: rotate(180deg);
+}
+.recapBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 0 var(--space-4) var(--space-4);
+}
+.recapHead {
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--info);
+}
+.recapTables {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.recapTable {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.recapTableName {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--info);
+}
+.recapCols {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.recapCol {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  padding: 1px 8px;
+  border-radius: var(--radius-full);
+  background: var(--surface-raised);
+}
+
+.split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+@media (min-width: 1280px) {
+  .split {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-6);
+    align-items: start;
+  }
+}
+.front,
+.wire {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.side {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.live {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--success);
+  letter-spacing: 0.1em;
+}
+.liveDot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  background: var(--success);
+  animation: caret-blink 1.4s ease-in-out infinite;
+}
+.sqlBox {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.sqlLabel {
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.kbdHint {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+@media (max-width: 400px) {
+  .kbdHint {
+    display: none;
+  }
+}
+.resultBox {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* ============================================================================
+   CaseClosed — payoff + per-objective defense debriefs
+   ============================================================================ */
+.closed {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+.closedHead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  border-left: 3px solid var(--success);
+  padding-left: var(--space-4);
+}
+.closedHeadline {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  margin: 0;
+  color: var(--text);
+}
+.closedHeadline:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 4px;
+  border-radius: var(--radius-sm);
+}
+.fixer {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  max-width: 65ch;
+}
+.fixerTag {
+  display: inline-block;
+  margin-right: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--success);
+}
+
+.defenseIntro {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.defenseSub {
+  color: var(--text-secondary);
+}
+
+.defenseList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+.defense {
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.defenseHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.defenseBadge {
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  padding: 3px 10px;
+}
+.defenseGoal {
+  font-size: 1.25rem;
+  margin: 0;
+}
+.moveLabel {
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.explanation {
+  margin: 0;
+}
+.takeaway {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-sm);
+  background: var(--success-subtle);
+  color: var(--text);
+  line-height: 1.5;
+}
+.takeaway svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--success);
+}
+.closedActions {
+  display: flex;
+  justify-content: flex-start;
+}
