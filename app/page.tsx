@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { IconArrowRight, IconCheck } from '@/app/components/icons'
+import { Logo } from '@/app/components/Logo'
 import {
   HOME_COPY,
   HEIST_LOOP,
@@ -167,6 +168,7 @@ export default function HomePage() {
       <section className={styles.closer} aria-labelledby="closer-heading">
         <div className="container">
           <div className={styles.closerInner}>
+            <Logo size={34} className={styles.closerMark} />
             <p className={styles.fixer}>
               <span className={styles.fixerName}>{closer.fixerName}</span>
               <span className={styles.fixerLine}>{closer.fixerLine}</span>

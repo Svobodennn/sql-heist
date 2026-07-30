@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ContentPage } from '@/app/components/ContentPage'
-import { Callout, Section } from '@/app/components/content-blocks'
+import { Callout, Section, TableOfContents } from '@/app/components/content-blocks'
 import { IconArrowRight } from '@/app/components/icons'
 import { cx } from '@/app/components/cx'
 import { getServerTranslator } from '@/app/i18n/server'
@@ -38,9 +38,22 @@ const MOVES: { title: string; body: string }[] = [
 
 export default function HelpPage() {
   const t = getServerTranslator()
+  const toc = [
+    { href: '#before', label: t('help.sectionBefore') },
+    { href: '#moves', label: t('help.sectionMoves') },
+    { href: '#wire', label: t('help.sectionWire') },
+    { href: '#controls', label: t('help.sectionControls') },
+    { href: '#stuck', label: t('help.sectionStuck') },
+    { href: '#point', label: t('help.sectionPoint') },
+  ]
   return (
-    <ContentPage eyebrow={t('help.eyebrow')} title={t('help.title')} lead={t('help.lead')}>
-      <Section title={t('help.sectionBefore')}>
+    <ContentPage
+      eyebrow={t('help.eyebrow')}
+      title={t('help.title')}
+      lead={t('help.lead')}
+      aside={<TableOfContents items={toc} />}
+    >
+      <Section id="before" title={t('help.sectionBefore')}>
         <p>
           Every job points you at Meridian &mdash; a data broker that got rich holding other
           people&apos;s secrets. Behind each of its doors is a <strong>real SQLite database</strong>,
@@ -55,7 +68,7 @@ export default function HelpPage() {
         </Callout>
       </Section>
 
-      <Section title={t('help.sectionMoves')}>
+      <Section id="moves" title={t('help.sectionMoves')}>
         <p>Every job runs the same arc. You always know where you are in it.</p>
         <ol className={styles.steps}>
           {MOVES.map((move) => (
@@ -73,7 +86,7 @@ export default function HelpPage() {
         </ol>
       </Section>
 
-      <Section title={t('help.sectionWire')}>
+      <Section id="wire" title={t('help.sectionWire')}>
         <p>
           The Exploit screen shows two faces of the same moment. On the left, the ordinary form the
           victim sees. On the right, the raw SQL your input becomes. Colour carries meaning &mdash; and
@@ -104,7 +117,7 @@ export default function HelpPage() {
         </ul>
       </Section>
 
-      <Section title={t('help.sectionControls')}>
+      <Section id="controls" title={t('help.sectionControls')}>
         <ul className={styles.keyRows}>
           <li className={styles.keyRow}>
             <span>Run your payload with</span>
@@ -129,7 +142,7 @@ export default function HelpPage() {
         </ul>
       </Section>
 
-      <Section title={t('help.sectionStuck')}>
+      <Section id="stuck" title={t('help.sectionStuck')}>
         <p>
           Every job carries three hints, opened in order: a word, then the method, then the play. They
           cost score, so spend them like they&apos;re yours. Guessing blind is for amateurs and dead
@@ -137,7 +150,7 @@ export default function HelpPage() {
         </p>
       </Section>
 
-      <Section title={t('help.sectionPoint')}>
+      <Section id="point" title={t('help.sectionPoint')}>
         <p>
           This isn&apos;t a game about pulling off crimes. It&apos;s a game about seeing the one flaw
           that makes them possible &mdash; so you recognise it in the wild and shut it. You learn the

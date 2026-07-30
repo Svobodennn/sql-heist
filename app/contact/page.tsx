@@ -20,6 +20,25 @@ export default function ContactPage() {
       eyebrow={t('contact.eyebrow')}
       title={t('contact.title')}
       lead={t('contact.lead')}
+      aside={
+        <aside className={styles.rail}>
+          <div className={styles.miniCard}>
+            <h2>Found a hole in our game instead of theirs?</h2>
+            <p>
+              Good. If something&apos;s broken, exploitable, or just wrong, tell us the same way.
+              We&apos;d rather hear it from you than read about it later.
+            </p>
+          </div>
+          <div className={styles.miniCard}>
+            <h2>Looking for answers, not a person?</h2>
+            <p>
+              Most first questions are already handled. Try the <Link href="/faq">FAQ</Link> or the{' '}
+              <Link href="/help">how-it-works page</Link> &mdash; you&apos;ll probably be back on a
+              job faster.
+            </p>
+          </div>
+        </aside>
+      }
     >
       <Section title="Leave word">
         <p>
@@ -43,24 +62,6 @@ export default function ContactPage() {
           </div>
         </div>
       </Section>
-
-      <div className={styles.cardGrid}>
-        <div className={styles.miniCard}>
-          <h2>Found a hole in our game instead of theirs?</h2>
-          <p>
-            Good. If something&apos;s broken, exploitable, or just wrong, tell us the same way. We&apos;d
-            rather hear it from you than read about it later.
-          </p>
-        </div>
-        <div className={styles.miniCard}>
-          <h2>Looking for answers, not a person?</h2>
-          <p>
-            Most first questions are already handled. Try the <Link href="/faq">FAQ</Link> or the{' '}
-            <Link href="/help">how-it-works page</Link> &mdash; you&apos;ll probably be back on a job
-            faster.
-          </p>
-        </div>
-      </div>
     </ContentPage>
   )
 }

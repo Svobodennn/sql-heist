@@ -30,11 +30,15 @@
 }
 .heroInner {
   position: relative;
-  max-width: 46rem;
+  max-width: 60rem;
+  margin-inline: auto;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-4);
+}
+.heroMark {
+  color: var(--primary);
 }
 .title {
   font-family: var(--font-display);
@@ -73,61 +77,82 @@
   color: var(--text-secondary);
 }
 
-/* ---------- Body / reading column ---------- */
-.body {
-  max-width: 68ch;
+/* ---------- Body: reading column + right rail ----------
+ * A shared 60rem measure centres the whole content block in the wide shell, so
+ * the hero and the reading column share one left edge instead of hugging left
+ * with dead space. On wide viewports the freed right column carries a rail
+ * (an "On this page" nav for the long docs, helper cards elsewhere). */
+.layout {
+  max-width: 60rem;
+  margin-inline: auto;
   margin-top: var(--space-10);
+}
+.main {
+  max-width: 68ch;
   counter-reset: legal;
 }
-:where(.body) h2 {
+@media (min-width: 60rem) {
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 16rem;
+    column-gap: var(--space-10);
+    align-items: start;
+  }
+  .main {
+    grid-column: 1;
+    grid-row: 1;
+    max-width: none;
+  }
+}
+:where(.main) h2 {
   font-family: var(--font-display);
   font-size: 1.375rem;
   font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--text);
 }
-:where(.body) h3 {
+:where(.main) h3 {
   font-family: var(--font-display);
   font-size: 1.0625rem;
   font-weight: 600;
   color: var(--text);
 }
-:where(.body) p {
+:where(.main) p {
   color: var(--text-secondary);
   line-height: 1.7;
 }
-:where(.body) p + p {
+:where(.main) p + p {
   margin-top: var(--space-3);
 }
-:where(.body) ul,
-:where(.body) ol {
+:where(.main) ul,
+:where(.main) ol {
   color: var(--text-secondary);
   line-height: 1.7;
   padding-left: var(--space-6);
   margin-top: var(--space-3);
 }
-:where(.body) li {
+:where(.main) li {
   margin-top: var(--space-2);
 }
-:where(.body) li::marker {
+:where(.main) li::marker {
   color: var(--text-muted);
 }
-:where(.body) strong {
+:where(.main) strong {
   color: var(--text);
   font-weight: 600;
 }
-:where(.body) a {
+:where(.main) a {
   color: var(--primary);
   text-decoration: underline;
   text-decoration-color: color-mix(in srgb, var(--primary) 45%, transparent);
   text-underline-offset: 2px;
   border-radius: 2px;
 }
-:where(.body) a:hover {
+:where(.main) a:hover {
   color: var(--primary-hover);
   text-decoration-color: currentColor;
 }
-:where(.body) code {
+:where(.main) code {
   font-family: var(--font-mono);
   font-variant-ligatures: none;
   font-size: 0.875em;
@@ -141,6 +166,7 @@
 /* ---------- Generic section ---------- */
 .section {
   margin-top: var(--space-10);
+  scroll-margin-top: var(--space-8);
 }
 .section:first-child {
   margin-top: 0;
@@ -493,13 +519,88 @@
   line-height: 1.6;
 }
 
-/* ---------- Mini-card grid (Contact secondary) ---------- */
-.cardGrid {
-  margin-top: var(--space-8);
-  display: grid;
-  grid-template-columns: 1fr;
+/* ---------- Right rail (ToC + helper/secondary cards) ----------
+ * The second grid column on wide viewports. Below 60rem it collapses to a
+ * stacked block under the reading column; the ToC variant hides entirely there
+ * (it is a convenience jump-nav — every section stays reachable by scrolling). */
+.rail {
+  display: flex;
+  flex-direction: column;
   gap: var(--space-4);
+  margin-top: var(--space-10);
 }
+@media (min-width: 60rem) {
+  .rail {
+    grid-column: 2;
+    grid-row: 1;
+    margin-top: 0;
+    position: sticky;
+    top: var(--space-8);
+    align-self: start;
+    max-height: calc(100dvh - var(--space-12));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+@media (max-width: 59.999rem) {
+  .railToc {
+    display: none;
+  }
+}
+.miniCard p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.miniCard p a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--primary) 45%, transparent);
+  text-underline-offset: 2px;
+  border-radius: 2px;
+}
+.miniCard p a:hover {
+  color: var(--primary-hover);
+  text-decoration-color: currentColor;
+}
+
+/* "On this page" table of contents */
+.tocTitle {
+  margin-bottom: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.tocList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--border);
+}
+.tocLink {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  margin-left: -1px;
+  padding: var(--space-1) var(--space-3);
+  border-left: 2px solid transparent;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.35;
+  text-decoration: none;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+.tocLink:hover {
+  color: var(--primary);
+  border-left-color: color-mix(in srgb, var(--primary) 55%, transparent);
+}
+
+/* Secondary / helper cards (Contact notes, FAQ "still stuck") */
 .miniCard {
   padding: var(--space-6);
   border: 1px solid var(--border);
@@ -518,10 +619,4 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-3);
-}
-
-@media (min-width: 640px) {
-  .cardGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }

@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { ContentPage } from '@/app/components/ContentPage'
-import { Section } from '@/app/components/content-blocks'
 import { getServerTranslator } from '@/app/i18n/server'
 import styles from '@/app/components/content.module.css'
 
@@ -90,7 +89,22 @@ const FAQS: { q: string; a: ReactNode }[] = [
 export default function FaqPage() {
   const t = getServerTranslator()
   return (
-    <ContentPage eyebrow={t('faq.eyebrow')} title={t('faq.title')} lead={t('faq.lead')}>
+    <ContentPage
+      eyebrow={t('faq.eyebrow')}
+      title={t('faq.title')}
+      lead={t('faq.lead')}
+      aside={
+        <aside className={styles.rail}>
+          <div className={styles.miniCard}>
+            <h2>{t('faq.stillStuck')}</h2>
+            <p>
+              The <Link href="/help">how-it-works page</Link> walks through a full job, or{' '}
+              <Link href="/contact">leave word</Link> and we&apos;ll get back to you.
+            </p>
+          </div>
+        </aside>
+      }
+    >
       <h2 className="sr-only">{t('faq.srHeading')}</h2>
       <div className={styles.faqList}>
         {FAQS.map((item, i) => (
@@ -103,13 +117,6 @@ export default function FaqPage() {
           </details>
         ))}
       </div>
-
-      <Section title={t('faq.stillStuck')}>
-        <p>
-          The <Link href="/help">how-it-works page</Link> walks through a full job, or{' '}
-          <Link href="/contact">leave word</Link> and we&apos;ll get back to you.
-        </p>
-      </Section>
     </ContentPage>
   )
 }

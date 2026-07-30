@@ -196,10 +196,16 @@
 }
 .sectionHead {
   max-width: 46rem;
+  margin-inline: auto;
   margin-bottom: var(--space-8);
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: var(--space-3);
+  text-align: center;
+}
+.sectionHead .sectionLede {
+  margin-inline: auto;
 }
 .sectionTitle {
   font-family: var(--font-display);
@@ -221,6 +227,7 @@
 .dossier {
   position: relative;
   max-width: 52rem;
+  margin-inline: auto;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -346,6 +353,7 @@
 /* ---------- FAQ accordion (native <details>) ---------- */
 .faqList {
   max-width: 46rem;
+  margin-inline: auto;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
@@ -424,6 +432,8 @@
   line-height: 1.7;
 }
 .faqMore {
+  max-width: 46rem;
+  margin-inline: auto;
   margin-top: var(--space-6);
 }
 .faqMore a {
@@ -453,6 +463,11 @@
   align-items: center;
   gap: var(--space-4);
   text-align: center;
+}
+/* Brass sign-off mark — the Skeleton key closes the pitch. */
+.closerMark {
+  color: var(--primary);
+  margin-bottom: calc(-1 * var(--space-2));
 }
 .fixer {
   display: flex;
