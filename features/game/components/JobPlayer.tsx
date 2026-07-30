@@ -105,7 +105,18 @@ export function JobPlayer({ level, nextJobId }: { level: Level; nextJobId?: stri
     } else if (result.error) {
       push('error', t('game.toast.choked'))
     } else {
-      push('info', evaluation.reason)
+      // MISS: a clean run (no WAF reject, no engine error) that just didn't meet
+      // the win condition. Do NOT echo evaluation.reason — levels author reason as
+      // the WIN sentence (front-door: "Privileged account pulled…"), and the frozen
+      // evaluator hands that same string back on a LOSS too, so it would read as a
+      // false win. Show a neutral, result-aware "not yet" instead. Literal (not
+      // i18n) by design: this track introduces no new message-catalog keys.
+      push(
+        'info',
+        result.rowCount > 0
+          ? 'Rows came back, but not the ones you need.'
+          : "Nothing came back — that one didn't land.",
+      )
     }
   }, [run, state.inputs, level, push, t])
 

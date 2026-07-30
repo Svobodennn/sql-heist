@@ -7,15 +7,18 @@ import { useTranslation } from '@/app/i18n/useTranslation'
 import { IconChevronDown, IconNotebook } from './icons'
 import styles from './ReconNotebook.module.css'
 
-// Recon notebook (docs/ws3-design.md "UI scope"): a collapsible ledger that
-// auto-accrues everything the player has learned this job — the advertised
-// visibleSchema plus any column names pried out of a result grid. State lives in
-// the ExploitConsole (features/game/lib/reconNotebook); this only renders it.
-// Column names are level/engine strings, but rendered as escaped text regardless.
+// Recon notebook (docs/ws3-design.md "UI scope"): a collapsible ledger of the schema the
+// player PRIED LOOSE this job — tables/columns the recon recap never listed but that
+// surfaced as result VALUES (e.g. a hidden table's CREATE statement UNION'd out of
+// sqlite_master). It deliberately does NOT restate the advertised visibleSchema — that
+// already sits in the top recap; mirroring it here was the WS3 bug. State lives in the
+// ExploitConsole (features/game/lib/reconNotebook); this only renders it. Table/column
+// names are engine strings, but rendered as escaped text regardless.
 export function ReconNotebook({ notebook }: { notebook: Notebook }) {
   const { t } = useTranslation()
   const size = notebookSize(notebook)
-  const discovered = notebook.discoveredColumns
+  const facts = size.tables + size.columns
+  const discovered = notebook.discovered
 
   return (
     <details className={styles.wrap}>
@@ -25,38 +28,27 @@ export function ReconNotebook({ notebook }: { notebook: Notebook }) {
         <span className={styles.summaryText}>{t('game.notebook.title')}</span>
         <span
           className={cx('mono', styles.count)}
-          aria-label={t('game.notebook.factsAria', { n: size.columns })}
+          aria-label={t('game.notebook.factsAria', { n: facts })}
         >
-          {size.columns}
+          {facts}
         </span>
       </summary>
 
       <div className={styles.body}>
-        <section aria-label={t('game.notebook.advertisedAria')}>
-          <p className={styles.sectionHead}>{t('game.notebook.advertised')}</p>
-          <ul className={styles.tables}>
-            {notebook.tables.map((tbl) => (
-              <li key={tbl.table} className={styles.table}>
-                <span className={cx('mono', styles.tableName)}>{tbl.table}</span>
-                <span className={styles.cols}>
-                  {tbl.columns.map((col) => (
-                    <span key={col} className={cx('mono', styles.col)}>
-                      {col}
-                    </span>
-                  ))}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-
         <section aria-label={t('game.notebook.priedAria')}>
           <p className={styles.sectionHead}>{t('game.notebook.pried')}</p>
           {discovered.length > 0 ? (
-            <ul className={styles.discovered}>
-              {discovered.map((col) => (
-                <li key={col} className={cx('mono', styles.discoveredCol)}>
-                  {col}
+            <ul className={styles.tables}>
+              {discovered.map((tbl) => (
+                <li key={tbl.table} className={styles.table}>
+                  <span className={cx('mono', styles.discoveredTableName)}>{tbl.table}</span>
+                  <span className={styles.cols}>
+                    {tbl.columns.map((col) => (
+                      <span key={col} className={cx('mono', styles.discoveredCol)}>
+                        {col}
+                      </span>
+                    ))}
+                  </span>
                 </li>
               ))}
             </ul>
