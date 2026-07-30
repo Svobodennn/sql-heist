@@ -17,10 +17,134 @@
       "language": "js",
       "code": "// VULNERABLE - token concatenated into SQL; every response looks identical to the user...\nconst sql = \"SELECT id FROM sessions WHERE token = '\" + token + \"'\";\ndb.prepare(sql).get(); // ...but a CASE WHEN branch makes the DB slow ONLY when a condition holds\nres.send('processing'); // real engines: ... THEN pg_sleep(3) - the wait leaks the answer"
     },
+    "vulnerableCodeVariants": [
+      {
+        "id": "node",
+        "label": "Node.js (pg / mysql2)",
+        "language": "js",
+        "code": "// VULNERABLE - token concatenated into SQL; every response looks identical to the user...\nconst { rows } = await client.query(\n  \"SELECT id FROM sessions WHERE token = '\" + token + \"'\",\n);\nres.send('processing'); // ...but a CASE WHEN branch makes the DB slow ONLY when a condition holds\n// real engines: ... THEN pg_sleep(3); the wait leaks the answer. mysql2 conn.query is the same flaw"
+      },
+      {
+        "id": "python",
+        "label": "Python (sqlite3 / psycopg2)",
+        "language": "python",
+        "code": "# VULNERABLE - token interpolated into SQL; every response looks identical to the user...\ncur.execute(f\"SELECT id FROM sessions WHERE token = '{token}'\")\ncur.fetchone()\nreturn \"processing\"  # ...but a CASE WHEN branch makes the DB slow ONLY when a condition holds\n# real engines: ... THEN pg_sleep(3); the wait leaks the answer. psycopg2 \"%s\" % token is the same flaw"
+      },
+      {
+        "id": "php-pdo",
+        "label": "PHP (PDO)",
+        "language": "php",
+        "code": "// VULNERABLE - $token interpolated into SQL; every response looks identical to the user...\n$sql = \"SELECT id FROM sessions WHERE token = '$token'\";\n$pdo->query($sql)->fetch(PDO::FETCH_ASSOC);\necho 'processing'; // ...but a CASE WHEN branch makes the DB slow ONLY when a condition holds\n// real engines: ... THEN pg_sleep(3) - the wait leaks the answer"
+      },
+      {
+        "id": "java-jdbc",
+        "label": "Java (JDBC)",
+        "language": "java",
+        "code": "// VULNERABLE - token concatenated into SQL; every response looks identical to the user...\nStatement st = conn.createStatement();\nst.executeQuery(\"SELECT id FROM sessions WHERE token = '\" + token + \"'\");\nresponse.getWriter().print(\"processing\"); // ...but a CASE WHEN branch makes the DB slow ONLY when a condition holds\n// real engines: ... THEN pg_sleep(3) - the wait leaks the answer"
+      },
+      {
+        "id": "dotnet",
+        "label": "C# / .NET (ADO.NET)",
+        "language": "csharp",
+        "code": "// VULNERABLE - token concatenated into SQL; every response looks identical to the user...\nusing var cmd = new SqlCommand(\n    \"SELECT id FROM sessions WHERE token = '\" + token + \"'\", conn);\ncmd.ExecuteReader();\nawait Response.WriteAsync(\"processing\"); // ...but a CASE WHEN branch makes the DB slow ONLY when a condition holds\n// real engines: ... THEN pg_sleep(3) - the wait leaks the answer"
+      },
+      {
+        "id": "go",
+        "label": "Go (database/sql)",
+        "language": "go",
+        "code": "// VULNERABLE - token concatenated into SQL; every response looks identical to the user...\nrow := db.QueryRow(\n    \"SELECT id FROM sessions WHERE token = '\" + token + \"'\",\n)\nrow.Scan(&id)\nfmt.Fprint(w, \"processing\") // ...but a CASE WHEN branch makes the DB slow ONLY when a condition holds\n// real engines: ... THEN pg_sleep(3); the wait leaks the answer. fmt.Sprintf(...) is the same flaw"
+      },
+      {
+        "id": "rails",
+        "label": "Ruby on Rails (ActiveRecord)",
+        "language": "ruby",
+        "code": "# VULNERABLE - token interpolated into SQL; every response looks identical to the user...\nSession.where(\"token = '#{token}'\").first\nrender plain: \"processing\"  # ...but a CASE WHEN branch makes the DB slow ONLY when a condition holds\n# real engines: ... THEN pg_sleep(3); the wait leaks the answer. find_by_sql is the same flaw"
+      },
+      {
+        "id": "laravel",
+        "label": "Laravel (Query Builder)",
+        "language": "php",
+        "code": "// VULNERABLE - $token interpolated into a raw WHERE string; every response looks identical...\nDB::table('sessions')->whereRaw(\"token = '$token'\")->first();\nreturn 'processing'; // ...but a CASE WHEN branch makes the DB slow ONLY when a condition holds\n// real engines: ... THEN pg_sleep(3); the wait leaks the answer. DB::select(\"...'$token'\") is the same flaw"
+      },
+      {
+        "id": "django",
+        "label": "Django (ORM)",
+        "language": "python",
+        "code": "# VULNERABLE - token interpolated into raw SQL; every response looks identical to the user...\nlist(Session.objects.raw(f\"SELECT id FROM sessions WHERE token = '{token}'\"))\nreturn HttpResponse(\"processing\")  # ...but a CASE WHEN branch makes the DB slow ONLY when a condition holds\n# real engines: ... THEN pg_sleep(3); the wait leaks the answer. .extra(where=[...]) is the same flaw"
+      },
+      {
+        "id": "spring",
+        "label": "Spring Boot (JdbcTemplate)",
+        "language": "java",
+        "code": "// VULNERABLE - token concatenated into SQL; every response looks identical to the user...\njdbcTemplate.query(\n    \"SELECT id FROM sessions WHERE token = '\" + token + \"'\",\n    sessionRowMapper);\nreturn \"processing\"; // ...but a CASE WHEN branch makes the DB slow ONLY when a condition holds\n// real engines: ... THEN pg_sleep(3); the wait leaks the answer. em.createNativeQuery(...) is the same flaw"
+      }
+    ],
     "secureCode": {
       "language": "js",
       "code": "// SECURE - bind the token; input never becomes SQL, so no branch can be steered\ndb.prepare('SELECT id FROM sessions WHERE token = ?').get(token);\nres.send('processing');\n// You cannot patch a timing side channel by hiding output - the answer leaks through the clock.\n// Keep input OUT of the SQL (bind), and apply least privilege so a session check cannot read staff."
     },
+    "secureCodeVariants": [
+      {
+        "id": "node",
+        "label": "Node.js (pg / mysql2)",
+        "language": "js",
+        "code": "// SECURE - bind the token; input never becomes SQL, so no branch can be steered\nconst { rows } = await client.query('SELECT id FROM sessions WHERE token = $1', [token]);\nres.send('processing');\n// Hiding output cannot patch a timing channel - keep input OUT of the SQL (bind).\n// Least privilege: a session check must not read the staff table. Add a statement_timeout.\n// mysql2: conn.execute('SELECT id FROM sessions WHERE token = ?', [token])"
+      },
+      {
+        "id": "python",
+        "label": "Python (sqlite3 / psycopg2)",
+        "language": "python",
+        "code": "# SECURE - ? placeholders are bound; input is never parsed as SQL\ncur.execute(\"SELECT id FROM sessions WHERE token = ?\", (token,))\ncur.fetchone()\nreturn \"processing\"\n# Hiding output cannot patch a timing channel - keep input OUT of the SQL (bind).\n# Least privilege: a session check must not read the staff table. Set a statement_timeout.\n# psycopg2 uses %s: cur.execute(\"... WHERE token = %s\", (token,))"
+      },
+      {
+        "id": "php-pdo",
+        "label": "PHP (PDO)",
+        "language": "php",
+        "code": "// SECURE - prepared statement; the token is bound, never concatenated\n$stmt = $pdo->prepare('SELECT id FROM sessions WHERE token = ?');\n$stmt->execute([$token]);\necho 'processing';\n// Hiding output cannot patch a timing channel - keep input OUT of the SQL (bind).\n// Least privilege: a session check must not read the staff table. Set a statement timeout."
+      },
+      {
+        "id": "java-jdbc",
+        "label": "Java (JDBC)",
+        "language": "java",
+        "code": "// SECURE - PreparedStatement binds the token with setString\nPreparedStatement ps = conn.prepareStatement(\n    \"SELECT id FROM sessions WHERE token = ?\");\nps.setString(1, token);\nps.executeQuery();\nresponse.getWriter().print(\"processing\");\n// Hiding output cannot patch a timing channel - keep input OUT of the SQL (bind).\n// Least privilege: a session check must not read the staff table. Set a query timeout."
+      },
+      {
+        "id": "dotnet",
+        "label": "C# / .NET (ADO.NET)",
+        "language": "csharp",
+        "code": "// SECURE - bind via SqlParameter; input is never parsed as SQL\nusing var cmd = new SqlCommand(\n    \"SELECT id FROM sessions WHERE token = @t\", conn);\ncmd.Parameters.Add(new SqlParameter(\"@t\", token));\ncmd.ExecuteReader();\nawait Response.WriteAsync(\"processing\");\n// Hiding output cannot patch a timing channel - keep input OUT of the SQL (bind).\n// Least privilege: a session check must not read the staff table. Set CommandTimeout."
+      },
+      {
+        "id": "go",
+        "label": "Go (database/sql)",
+        "language": "go",
+        "code": "// SECURE - args bind to placeholders, never string-concatenated\nrow := db.QueryRow(\n    \"SELECT id FROM sessions WHERE token = $1\", token,\n)\nrow.Scan(&id)\nfmt.Fprint(w, \"processing\")\n// Hiding output cannot patch a timing channel - keep input OUT of the SQL (bind).\n// Least privilege: a session check must not read the staff table. Use a context timeout."
+      },
+      {
+        "id": "rails",
+        "label": "Ruby on Rails (ActiveRecord)",
+        "language": "ruby",
+        "code": "# SECURE - placeholders are bound; input is never parsed as SQL\nSession.where(\"token = ?\", token).first\nrender plain: \"processing\"\n# Hiding output cannot patch a timing channel - keep input OUT of the SQL (bind).\n# Least privilege: a session check must not read the staff table. Set a statement_timeout.\n# Hash form also binds: Session.find_by(token: token)"
+      },
+      {
+        "id": "laravel",
+        "label": "Laravel (Query Builder)",
+        "language": "php",
+        "code": "// SECURE - the value is bound, sent apart from the SQL\nDB::table('sessions')->where('token', $token)->first();\nreturn 'processing';\n// Hiding output cannot patch a timing channel - keep input OUT of the SQL (bind).\n// Least privilege: a session check must not read the staff table. Set a statement timeout.\n// Raw still binds: ->whereRaw('token = ?', [$token])"
+      },
+      {
+        "id": "django",
+        "label": "Django (ORM)",
+        "language": "python",
+        "code": "# SECURE - every lookup value is parameterized automatically\nSession.objects.filter(token=token).first()\nreturn HttpResponse(\"processing\")\n# Hiding output cannot patch a timing channel - keep input OUT of the SQL (bind).\n# Least privilege: a session check must not read the staff table. Set a statement_timeout.\n# .raw() still binds: Session.objects.raw(\"... WHERE token = %s\", [token])"
+      },
+      {
+        "id": "spring",
+        "label": "Spring Boot (JdbcTemplate)",
+        "language": "java",
+        "code": "// SECURE - args bind to ? placeholders positionally\njdbcTemplate.query(\n    \"SELECT id FROM sessions WHERE token = ?\",\n    sessionRowMapper, token);\nreturn \"processing\";\n// Hiding output cannot patch a timing channel - keep input OUT of the SQL (bind).\n// Least privilege: a session check must not read the staff table. Set a query timeout."
+      }
+    ],
     "takeaway": "If the query still runs attacker-controlled logic, silence isn't safety - the response time talks. Bind the input so there is no branch to steer, whatever the clock says."
   },
   "target": {

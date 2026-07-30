@@ -17,6 +17,68 @@
       "language": "js",
       "code": "// VULNERABLE - input concatenated into SQL AND the raw DB error is handed to the user\ntry {\n  db.prepare(\"INSERT INTO promo_claims (callsign) VALUES ('\" + callsign + \"')\").run();\n  res.send('Callsign reserved');\n} catch (err) {\n  res.status(400).send(err.message); // leaks: \"UNIQUE constraint failed: promo_claims.callsign\"\n}"
     },
+    "vulnerableCodeVariants": [
+      {
+        "id": "node",
+        "label": "Node.js (pg / mysql2)",
+        "language": "js",
+        "code": "// VULNERABLE - callsign concatenated into the INSERT, and the raw DB error is echoed back\ntry {\n  await client.query(\n    \"INSERT INTO promo_claims (callsign) VALUES ('\" + callsign + \"')\",\n  );\n  res.send('Callsign reserved');\n} catch (err) {\n  res.status(400).send(err.message); // leaks \"...promo_claims...\" on a duplicate key\n}"
+      },
+      {
+        "id": "python",
+        "label": "Python (sqlite3 / psycopg2)",
+        "language": "python",
+        "code": "# VULNERABLE - callsign interpolated into the INSERT, and the raw error is returned to the caller\ntry:\n    cur.execute(f\"INSERT INTO promo_claims (callsign) VALUES ('{callsign}')\")\nexcept Exception as e:\n    return Response(str(e), status=400)  # leaks \"UNIQUE constraint failed: promo_claims.callsign\""
+      },
+      {
+        "id": "php-pdo",
+        "label": "PHP (PDO)",
+        "language": "php",
+        "code": "// VULNERABLE - $callsign interpolated into the INSERT, and the raw PDO error is echoed back\ntry {\n    $pdo->exec(\"INSERT INTO promo_claims (callsign) VALUES ('$callsign')\");\n    echo 'Callsign reserved';\n} catch (PDOException $e) {\n    http_response_code(400);\n    echo $e->getMessage(); // leaks \"...promo_claims...\" on a duplicate\n}"
+      },
+      {
+        "id": "java-jdbc",
+        "label": "Java (JDBC)",
+        "language": "java",
+        "code": "// VULNERABLE - callsign concatenated into the INSERT, and the raw SQLException is sent back\ntry (Statement st = conn.createStatement()) {\n    st.executeUpdate(\n        \"INSERT INTO promo_claims (callsign) VALUES ('\" + callsign + \"')\");\n} catch (SQLException e) {\n    resp.setStatus(400);\n    resp.getWriter().write(e.getMessage()); // leaks \"...promo_claims...\"\n}"
+      },
+      {
+        "id": "dotnet",
+        "label": "C# / .NET (ADO.NET)",
+        "language": "csharp",
+        "code": "// VULNERABLE - callsign concatenated into the INSERT, and the raw error is returned to the client\ntry {\n    using var cmd = new SqlCommand(\n        \"INSERT INTO promo_claims (callsign) VALUES ('\" + callsign + \"')\", conn);\n    cmd.ExecuteNonQuery();\n} catch (SqlException e) {\n    return StatusCode(400, e.Message); // leaks \"...promo_claims...\" on a duplicate key\n}"
+      },
+      {
+        "id": "go",
+        "label": "Go (database/sql)",
+        "language": "go",
+        "code": "// VULNERABLE - callsign concatenated into the INSERT, and the raw error is written to the response\n_, err := db.Exec(\n    \"INSERT INTO promo_claims (callsign) VALUES ('\" + callsign + \"')\",\n)\nif err != nil {\n    http.Error(w, err.Error(), http.StatusBadRequest) // leaks \"...promo_claims...\"\n}"
+      },
+      {
+        "id": "rails",
+        "label": "Ruby on Rails (ActiveRecord)",
+        "language": "ruby",
+        "code": "# VULNERABLE - callsign interpolated into the INSERT, and the raw error is rendered back\nbegin\n  ActiveRecord::Base.connection.execute(\n    \"INSERT INTO promo_claims (callsign) VALUES ('#{callsign}')\"\n  )\nrescue ActiveRecord::StatementInvalid => e\n  render plain: e.message, status: 400 # leaks \"...promo_claims...\"\nend"
+      },
+      {
+        "id": "laravel",
+        "label": "Laravel (Query Builder)",
+        "language": "php",
+        "code": "// VULNERABLE - $callsign interpolated into a raw INSERT, and the raw error is echoed back\ntry {\n    DB::insert(\"INSERT INTO promo_claims (callsign) VALUES ('$callsign')\");\n    return 'Callsign reserved';\n} catch (\\Illuminate\\Database\\QueryException $e) {\n    return response($e->getMessage(), 400); // leaks \"...promo_claims...\"\n}"
+      },
+      {
+        "id": "django",
+        "label": "Django (ORM)",
+        "language": "python",
+        "code": "# VULNERABLE - callsign interpolated into raw SQL, and the raw error is returned to the client\nfrom django.db import connection\ntry:\n    with connection.cursor() as cur:\n        cur.execute(f\"INSERT INTO promo_claims (callsign) VALUES ('{callsign}')\")\nexcept Exception as e:\n    return HttpResponse(str(e), status=400)  # leaks \"...promo_claims...\""
+      },
+      {
+        "id": "spring",
+        "label": "Spring Boot (JdbcTemplate)",
+        "language": "java",
+        "code": "// VULNERABLE - callsign concatenated into the INSERT, and the raw error is returned to the client\ntry {\n    jdbcTemplate.update(\n        \"INSERT INTO promo_claims (callsign) VALUES ('\" + callsign + \"')\");\n} catch (DataAccessException e) {\n    return ResponseEntity.status(400).body(e.getMessage()); // leaks \"...promo_claims...\"\n}"
+      }
+    ],
     "secureCode": {
       "language": "js",
       "code": "// SECURE - bind the value, and NEVER surface the raw DB error to the client\ntry {\n  db.prepare('INSERT INTO promo_claims (callsign) VALUES (?)').run(callsign);\n  res.send('Callsign reserved');\n} catch (err) {\n  logger.error('reserve_callsign_failed', err); // full detail stays server-side\n  res.status(409).send('That callsign is unavailable'); // generic message leaks no schema\n}"
@@ -24,21 +86,63 @@
     "secureCodeVariants": [
       {
         "id": "node",
-        "label": "Node.js - generic error",
+        "label": "Node.js (pg / mysql2)",
         "language": "js",
-        "code": "// Bind the value; log the real error, return a generic message\ntry {\n  db.prepare('INSERT INTO promo_claims (callsign) VALUES (?)').run(callsign);\n  res.send('Callsign reserved');\n} catch (err) {\n  logger.error('reserve_callsign_failed', err);\n  res.status(409).send('That callsign is unavailable');\n}"
+        "code": "// pg - bind the callsign (stops the injection) AND return a generic error (stops the schema leak)\ntry {\n  await client.query('INSERT INTO promo_claims (callsign) VALUES ($1)', [callsign]);\n  res.send('Callsign reserved');\n} catch (err) {\n  logger.error('reserve_callsign_failed', err); // real error stays server-side\n  res.status(409).send('That callsign is unavailable');\n}\n// mysql2: conn.execute('INSERT INTO promo_claims (callsign) VALUES (?)', [callsign])"
       },
       {
         "id": "python",
-        "label": "Python - generic error",
+        "label": "Python (sqlite3 / psycopg2)",
         "language": "python",
-        "code": "# Parameterize, log the real error, hand back a generic message\ntry:\n    cur.execute(\"INSERT INTO promo_claims (callsign) VALUES (?)\", (callsign,))\nexcept sqlite3.IntegrityError:\n    logger.exception(\"reserve_callsign_failed\")  # detail to the log, not the user\n    return Response(\"That callsign is unavailable\", status=409)"
+        "code": "# Bind the callsign (stops injection); log the detail, return a generic error (stops the schema leak)\ntry:\n    cur.execute(\"INSERT INTO promo_claims (callsign) VALUES (?)\", (callsign,))\nexcept sqlite3.IntegrityError:\n    logger.exception(\"reserve_callsign_failed\")  # detail to the log, not the user\n    return Response(\"That callsign is unavailable\", status=409)\n# psycopg2 uses %s: cur.execute(\"... VALUES (%s)\", (callsign,))"
       },
       {
-        "id": "java",
-        "label": "Java - generic error",
+        "id": "php-pdo",
+        "label": "PHP (PDO)",
+        "language": "php",
+        "code": "// PDO binds the callsign (stops injection); a generic error stops the schema leak\ntry {\n    $stmt = $pdo->prepare('INSERT INTO promo_claims (callsign) VALUES (?)');\n    $stmt->execute([$callsign]);\n} catch (PDOException $e) {\n    error_log($e->getMessage());        // detail stays in the server log\n    http_response_code(409);\n    echo 'That callsign is unavailable';\n}"
+      },
+      {
+        "id": "java-jdbc",
+        "label": "Java (JDBC)",
         "language": "java",
-        "code": "// PreparedStatement binds the value; the raw SQLException never reaches the client\ntry (PreparedStatement ps = conn.prepareStatement(\n        \"INSERT INTO promo_claims (callsign) VALUES (?)\")) {\n    ps.setString(1, callsign);\n    ps.executeUpdate();\n} catch (SQLException e) {\n    log.error(\"reserve_callsign_failed\", e);            // server-side only\n    return ResponseEntity.status(409).body(\"That callsign is unavailable\");\n}"
+        "code": "// PreparedStatement binds the callsign (stops injection); a generic reply stops the schema leak\ntry (PreparedStatement ps = conn.prepareStatement(\n        \"INSERT INTO promo_claims (callsign) VALUES (?)\")) {\n    ps.setString(1, callsign);\n    ps.executeUpdate();\n} catch (SQLException e) {\n    log.error(\"reserve_callsign_failed\", e);   // detail stays server-side\n    resp.sendError(409, \"That callsign is unavailable\"); // generic message only\n}"
+      },
+      {
+        "id": "dotnet",
+        "label": "C# / .NET (ADO.NET)",
+        "language": "csharp",
+        "code": "// Bind via SqlParameter (stops injection); return a generic error (stops the schema leak)\ntry {\n    using var cmd = new SqlCommand(\"INSERT INTO promo_claims (callsign) VALUES (@c)\", conn);\n    cmd.Parameters.Add(new SqlParameter(\"@c\", callsign));\n    cmd.ExecuteNonQuery();\n} catch (SqlException e) {\n    _logger.LogError(e, \"reserve_callsign_failed\"); // server-side only\n    return StatusCode(409, \"That callsign is unavailable\");\n}"
+      },
+      {
+        "id": "go",
+        "label": "Go (database/sql)",
+        "language": "go",
+        "code": "// Bind the callsign as $1 (stops injection); return a generic error (stops the schema leak)\n_, err := db.Exec(\"INSERT INTO promo_claims (callsign) VALUES ($1)\", callsign)\nif err != nil {\n    log.Printf(\"reserve_callsign_failed: %v\", err) // detail stays in the server log\n    http.Error(w, \"That callsign is unavailable\", http.StatusConflict)\n    return\n}\n// MySQL / SQLite drivers use a ? placeholder instead of $1."
+      },
+      {
+        "id": "rails",
+        "label": "Ruby on Rails (ActiveRecord)",
+        "language": "ruby",
+        "code": "# Bind the callsign (stops injection); log the detail, return a generic error (stops the schema leak)\nbegin\n  PromoClaim.create!(callsign: callsign)\nrescue ActiveRecord::RecordNotUnique => e\n  Rails.logger.error(\"reserve_callsign_failed: #{e.message}\") # detail server-side only\n  render plain: \"That callsign is unavailable\", status: 409\nend"
+      },
+      {
+        "id": "laravel",
+        "label": "Laravel (Query Builder)",
+        "language": "php",
+        "code": "// Query Builder binds the callsign (stops injection); a generic error stops the schema leak\ntry {\n    DB::table('promo_claims')->insert(['callsign' => $callsign]);\n    return 'Callsign reserved';\n} catch (\\Illuminate\\Database\\QueryException $e) {\n    Log::error('reserve_callsign_failed', ['error' => $e->getMessage()]); // server-side only\n    return response('That callsign is unavailable', 409);\n}"
+      },
+      {
+        "id": "django",
+        "label": "Django (ORM)",
+        "language": "python",
+        "code": "# ORM parameterizes the callsign (stops injection); a generic error stops the schema leak\ntry:\n    PromoClaim.objects.create(callsign=callsign)\nexcept IntegrityError:\n    logger.exception(\"reserve_callsign_failed\")  # detail to the log, not the user\n    return HttpResponse(\"That callsign is unavailable\", status=409)"
+      },
+      {
+        "id": "spring",
+        "label": "Spring Boot (JdbcTemplate)",
+        "language": "java",
+        "code": "// JdbcTemplate binds the callsign to ? (stops injection); a generic reply stops the schema leak\ntry {\n    jdbcTemplate.update(\"INSERT INTO promo_claims (callsign) VALUES (?)\", callsign);\n} catch (DataAccessException e) {\n    log.error(\"reserve_callsign_failed\", e);            // server-side only\n    return ResponseEntity.status(409).body(\"That callsign is unavailable\");\n}"
       }
     ],
     "takeaway": "Never let the back office talk to the customer. Log the real error, hand back a shrug - and parameterize, because a verbose error is a free map of your schema."

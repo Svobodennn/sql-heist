@@ -17,10 +17,134 @@
       "language": "js",
       "code": "// VULNERABLE - the code is concatenated into SQL; the page reveals only FOUND / NOT FOUND\nconst sql = \"SELECT id FROM reset_codes WHERE code = '\" + code + \"'\";\nconst found = db.prepare(sql).get() != null; // one bit - but that is all the attacker needs\nres.send(found ? 'Reset code is active' : 'No matching request');"
     },
+    "vulnerableCodeVariants": [
+      {
+        "id": "node",
+        "label": "Node.js (pg / mysql2)",
+        "language": "js",
+        "code": "// VULNERABLE - code is concatenated into SQL; the page reveals only FOUND / NOT FOUND\nconst { rows } = await client.query(\n  \"SELECT id FROM reset_codes WHERE code = '\" + code + \"'\",\n);\nres.send(rows.length > 0 ? 'Reset code is active' : 'No matching request'); // one bit is the oracle\n// mysql2: conn.query(\"... WHERE code = '\" + code + \"'\") - same flaw"
+      },
+      {
+        "id": "python",
+        "label": "Python (sqlite3 / psycopg2)",
+        "language": "python",
+        "code": "# VULNERABLE - code interpolated into SQL; the page reveals only FOUND / NOT FOUND\ncur.execute(f\"SELECT id FROM reset_codes WHERE code = '{code}'\")\nfound = cur.fetchone() is not None  # one bit - but that is all the attacker needs\nreturn 'Reset code is active' if found else 'No matching request'\n# psycopg2 %-format is the same flaw: \"... WHERE code = '%s'\" % code"
+      },
+      {
+        "id": "php-pdo",
+        "label": "PHP (PDO)",
+        "language": "php",
+        "code": "// VULNERABLE - $code interpolated into SQL; the page reveals only FOUND / NOT FOUND\n$sql = \"SELECT id FROM reset_codes WHERE code = '$code'\";\n$found = $pdo->query($sql)->fetch(PDO::FETCH_ASSOC) !== false;\necho $found ? 'Reset code is active' : 'No matching request'; // one bit is the oracle"
+      },
+      {
+        "id": "java-jdbc",
+        "label": "Java (JDBC)",
+        "language": "java",
+        "code": "// VULNERABLE - code concatenated into SQL; the page reveals only FOUND / NOT FOUND\nStatement st = conn.createStatement();\nResultSet rs = st.executeQuery(\n    \"SELECT id FROM reset_codes WHERE code = '\" + code + \"'\");\nboolean found = rs.next(); // one bit - but that is all the attacker needs\nresp.getWriter().write(found ? \"Reset code is active\" : \"No matching request\");"
+      },
+      {
+        "id": "dotnet",
+        "label": "C# / .NET (ADO.NET)",
+        "language": "csharp",
+        "code": "// VULNERABLE - code concatenated into SQL; the page reveals only FOUND / NOT FOUND\nusing var cmd = new SqlCommand(\n    \"SELECT id FROM reset_codes WHERE code = '\" + code + \"'\", conn);\nbool found = cmd.ExecuteScalar() != null; // one bit is the oracle\nreturn found ? \"Reset code is active\" : \"No matching request\";\n// String interpolation is just as unsafe: $\"... WHERE code = '{code}'\""
+      },
+      {
+        "id": "go",
+        "label": "Go (database/sql)",
+        "language": "go",
+        "code": "// VULNERABLE - code concatenated into SQL; the page reveals only FOUND / NOT FOUND\nerr := db.QueryRow(\n    \"SELECT id FROM reset_codes WHERE code = '\" + code + \"'\",\n).Scan(&id)\nfound := err == nil // one bit - but that is all the attacker needs\nif found { fmt.Fprint(w, \"Reset code is active\") } else { fmt.Fprint(w, \"No matching request\") }\n// fmt.Sprintf(\"... WHERE code = '%s'\", code) is the same flaw"
+      },
+      {
+        "id": "rails",
+        "label": "Ruby on Rails (ActiveRecord)",
+        "language": "ruby",
+        "code": "# VULNERABLE - code interpolated into SQL; the page reveals only FOUND / NOT FOUND\nfound = ResetCode.where(\"code = '#{code}'\").exists?\nrender plain: found ? 'Reset code is active' : 'No matching request' # one bit is the oracle\n# find_by_sql is just as unsafe: ResetCode.find_by_sql(\"... WHERE code = '#{code}'\")"
+      },
+      {
+        "id": "laravel",
+        "label": "Laravel (Query Builder)",
+        "language": "php",
+        "code": "// VULNERABLE - $code interpolated into a raw WHERE; the page reveals only FOUND / NOT FOUND\n$found = DB::table('reset_codes')\n    ->whereRaw(\"code = '$code'\")\n    ->exists();\nreturn $found ? 'Reset code is active' : 'No matching request'; // one bit is the oracle\n// DB::select(\"... WHERE code = '$code'\") is just as unsafe"
+      },
+      {
+        "id": "django",
+        "label": "Django (ORM)",
+        "language": "python",
+        "code": "# VULNERABLE - code interpolated into raw SQL, bypassing the ORM's binding\nrows = ResetCode.objects.raw(\n    f\"SELECT id FROM reset_codes WHERE code = '{code}'\"\n)\nfound = len(list(rows)) > 0  # page reveals only FOUND / NOT FOUND - one bit\nreturn HttpResponse('Reset code is active' if found else 'No matching request')\n# .extra(where=[f\"code = '{code}'\"]) is just as unsafe"
+      },
+      {
+        "id": "spring",
+        "label": "Spring Boot (JdbcTemplate)",
+        "language": "java",
+        "code": "// VULNERABLE - code concatenated into SQL; the page reveals only FOUND / NOT FOUND\nList<Long> ids = jdbcTemplate.queryForList(\n    \"SELECT id FROM reset_codes WHERE code = '\" + code + \"'\", Long.class);\nboolean found = !ids.isEmpty(); // one bit - but that is all the attacker needs\nreturn found ? \"Reset code is active\" : \"No matching request\";\n// JPA: em.createNativeQuery(\"... WHERE code = '\" + code + \"'\") is just as unsafe"
+      }
+    ],
     "secureCode": {
       "language": "js",
       "code": "// SECURE - bind the value; input can never become SQL, so there is no oracle to steer\nconst found = db.prepare('SELECT id FROM reset_codes WHERE code = ?').get(code) != null;\nres.send(found ? 'Reset code is active' : 'No matching request');\n// A generic response does NOT save a concatenated query - the fix is binding. Add least privilege:\n// the reset lookup's DB role should have no read access to vault_config in the first place."
     },
+    "secureCodeVariants": [
+      {
+        "id": "node",
+        "label": "Node.js (pg / mysql2)",
+        "language": "js",
+        "code": "// SECURE - bind the code as $1; input can never become SQL, so there is no oracle to steer\nconst { rows } = await client.query(\n  'SELECT id FROM reset_codes WHERE code = $1',\n  [code],\n);\nres.send(rows.length > 0 ? 'Reset code is active' : 'No matching request');\n// A generic response is NOT the fix - binding is. Least privilege: the reset-lookup\n// DB role should have no read access to vault_config. mysql2: '... code = ?', [code]"
+      },
+      {
+        "id": "python",
+        "label": "Python (sqlite3 / psycopg2)",
+        "language": "python",
+        "code": "# SECURE - the ? placeholder is bound; input is never parsed as SQL, so there is no oracle\ncur.execute(\"SELECT id FROM reset_codes WHERE code = ?\", (code,))\nfound = cur.fetchone() is not None\nreturn 'Reset code is active' if found else 'No matching request'\n# A generic response is NOT the fix - binding is. Least privilege: the reset-lookup\n# DB role should have no read access to vault_config. psycopg2: \"... code = %s\", (code,)"
+      },
+      {
+        "id": "php-pdo",
+        "label": "PHP (PDO)",
+        "language": "php",
+        "code": "// SECURE - prepared statement binds $code; it can never become SQL, so there is no oracle\n$stmt = $pdo->prepare('SELECT id FROM reset_codes WHERE code = ?');\n$stmt->execute([$code]);\n$found = $stmt->fetch(PDO::FETCH_ASSOC) !== false;\necho $found ? 'Reset code is active' : 'No matching request';\n// A generic response is NOT the fix - binding is. Least privilege: the reset-lookup\n// DB role should have no read access to vault_config at all."
+      },
+      {
+        "id": "java-jdbc",
+        "label": "Java (JDBC)",
+        "language": "java",
+        "code": "// SECURE - PreparedStatement binds code; it can never become SQL, so there is no oracle\nPreparedStatement ps = conn.prepareStatement(\n    \"SELECT id FROM reset_codes WHERE code = ?\");\nps.setString(1, code);\nboolean found = ps.executeQuery().next();\nresp.getWriter().write(found ? \"Reset code is active\" : \"No matching request\");\n// A generic response is NOT the fix - binding is. Least privilege: the reset-lookup\n// DB role should have no read access to vault_config at all."
+      },
+      {
+        "id": "dotnet",
+        "label": "C# / .NET (ADO.NET)",
+        "language": "csharp",
+        "code": "// SECURE - bind via SqlParameter; input is never parsed as SQL, so there is no oracle\nusing var cmd = new SqlCommand(\n    \"SELECT id FROM reset_codes WHERE code = @code\", conn);\ncmd.Parameters.Add(new SqlParameter(\"@code\", code));\nbool found = cmd.ExecuteScalar() != null;\nreturn found ? \"Reset code is active\" : \"No matching request\";\n// A generic response is NOT the fix - binding is. Least privilege: the reset-lookup\n// DB role should have no read access to vault_config at all."
+      },
+      {
+        "id": "go",
+        "label": "Go (database/sql)",
+        "language": "go",
+        "code": "// SECURE - code binds to the placeholder; it is never string-concatenated, so no oracle\nerr := db.QueryRow(\n    \"SELECT id FROM reset_codes WHERE code = $1\", code,\n).Scan(&id)\nfound := err == nil\nif found { fmt.Fprint(w, \"Reset code is active\") } else { fmt.Fprint(w, \"No matching request\") }\n// A generic response is NOT the fix - binding is. Least privilege: the reset-lookup\n// DB role should have no read access to vault_config. MySQL/SQLite use ? not $1."
+      },
+      {
+        "id": "rails",
+        "label": "Ruby on Rails (ActiveRecord)",
+        "language": "ruby",
+        "code": "# SECURE - placeholders are bound; input is never parsed as SQL, so there is no oracle\nfound = ResetCode.where(\"code = ?\", code).exists?\nrender plain: found ? 'Reset code is active' : 'No matching request'\n# A generic response is NOT the fix - binding is. Least privilege: the reset-lookup\n# DB role should have no read access to vault_config. Hash form binds too: where(code: code)"
+      },
+      {
+        "id": "laravel",
+        "label": "Laravel (Query Builder)",
+        "language": "php",
+        "code": "// SECURE - the value is bound, sent apart from the SQL, so there is no oracle to steer\n$found = DB::table('reset_codes')\n    ->where('code', $code)\n    ->exists();\nreturn $found ? 'Reset code is active' : 'No matching request';\n// A generic response is NOT the fix - binding is. Least privilege: the reset-lookup\n// DB role should have no read access to vault_config at all."
+      },
+      {
+        "id": "django",
+        "label": "Django (ORM)",
+        "language": "python",
+        "code": "# SECURE - the ORM parameterizes every lookup value, so input can never become SQL\nfound = ResetCode.objects.filter(code=code).exists()\nreturn HttpResponse('Reset code is active' if found else 'No matching request')\n# A generic response is NOT the fix - binding is. Least privilege: the reset-lookup\n# DB role should have no read access to vault_config. .raw() still binds: \"... code = %s\", [code]"
+      },
+      {
+        "id": "spring",
+        "label": "Spring Boot (JdbcTemplate)",
+        "language": "java",
+        "code": "// SECURE - args bind to the ? placeholder positionally, so input never becomes SQL\nList<Long> ids = jdbcTemplate.queryForList(\n    \"SELECT id FROM reset_codes WHERE code = ?\", Long.class, code);\nboolean found = !ids.isEmpty();\nreturn found ? \"Reset code is active\" : \"No matching request\";\n// A generic response is NOT the fix - binding is. Least privilege: the reset-lookup\n// DB role should have no read access to vault_config at all."
+      }
+    ],
     "takeaway": "A yes/no answer is still an answer. If typed input can steer the query, one bit at a time is enough - bind the value so there is no question to smuggle in."
   },
   "target": {

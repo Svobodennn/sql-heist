@@ -17,28 +17,132 @@
       "language": "js",
       "code": "// VULNERABLE - input concatenated in, and the call runs EVERY statement in the string\nconst sql = \"SELECT door, granted FROM door_acl WHERE badge = '\" + badge + \"'\";\ndb.exec(sql); // exec runs a batch: one ';' and the attacker's second statement rides along"
     },
+    "vulnerableCodeVariants": [
+      {
+        "id": "node",
+        "label": "Node.js (pg / mysql2)",
+        "language": "js",
+        "code": "// VULNERABLE - mysql2 multipleStatements:true lets a stacked ';' run a second command\nconst conn = await mysql.createConnection({ host, user, database, multipleStatements: true });\nconst sql = \"SELECT door, granted FROM door_acl WHERE badge = '\" + badge + \"'\";\nconst [results] = await conn.query(sql);\n// After the badge read, \"; UPDATE door_acl SET granted=1 WHERE door='VAULT'\" rides in as its own statement."
+      },
+      {
+        "id": "python",
+        "label": "Python (sqlite3 / psycopg2)",
+        "language": "python",
+        "code": "# VULNERABLE - executescript() runs the WHOLE string as a batch of statements\nsql = f\"SELECT door, granted FROM door_acl WHERE badge = '{badge}'\"\ncur.executescript(sql)\n# The stacked \"; UPDATE door_acl SET granted=1 WHERE door='VAULT'\" rides in as its own statement.\n# psycopg2: one execute() with ';'-separated text runs the batch too."
+      },
+      {
+        "id": "php-pdo",
+        "label": "PHP (PDO)",
+        "language": "php",
+        "code": "// VULNERABLE - exec() runs the entire string; emulated prepares also allow stacking\n$sql = \"SELECT door, granted FROM door_acl WHERE badge = '$badge'\";\n$pdo->exec($sql);\n// After the read, \"; UPDATE door_acl SET granted=1 WHERE door='VAULT'\" runs as a second statement."
+      },
+      {
+        "id": "java-jdbc",
+        "label": "Java (JDBC)",
+        "language": "java",
+        "code": "// VULNERABLE - Statement.execute() runs the concatenated string as a batch\nStatement st = conn.createStatement();\nst.execute(\n    \"SELECT door, granted FROM door_acl WHERE badge = '\" + badge + \"'\");\n// MySQL needs allowMultiQueries=true; then \"; UPDATE door_acl SET granted=1 ...\" rides in."
+      },
+      {
+        "id": "dotnet",
+        "label": "C# / .NET (ADO.NET)",
+        "language": "csharp",
+        "code": "// VULNERABLE - one SqlCommand text holds several statements; SQL Server runs them all\nusing var cmd = new SqlCommand(\n    \"SELECT door, granted FROM door_acl WHERE badge = '\" + badge + \"'\", conn);\nusing var reader = cmd.ExecuteReader();\n// The stacked \"; UPDATE door_acl SET granted=1 WHERE door='VAULT'\" rides in as its own statement."
+      },
+      {
+        "id": "go",
+        "label": "Go (database/sql)",
+        "language": "go",
+        "code": "// VULNERABLE - Exec() sends the concatenated string; batch-capable drivers run it all\nsql := \"SELECT door, granted FROM door_acl WHERE badge = '\" + badge + \"'\"\n_, err := db.Exec(sql)\n// The stacked \"; UPDATE door_acl SET granted=1 WHERE door='VAULT'\" rides in as its own statement."
+      },
+      {
+        "id": "rails",
+        "label": "Ruby on Rails (ActiveRecord)",
+        "language": "ruby",
+        "code": "# VULNERABLE - connection.execute runs the raw string, batch and all\nsql = \"SELECT door, granted FROM door_acl WHERE badge = '#{badge}'\"\nActiveRecord::Base.connection.execute(sql)\n# The stacked \"; UPDATE door_acl SET granted=1 WHERE door='VAULT'\" rides in as its own statement."
+      },
+      {
+        "id": "laravel",
+        "label": "Laravel (Query Builder)",
+        "language": "php",
+        "code": "// VULNERABLE - DB::unprepared() runs the raw string with no binding, batch and all\n$sql = \"SELECT door, granted FROM door_acl WHERE badge = '$badge'\";\nDB::unprepared($sql);\n// The stacked \"; UPDATE door_acl SET granted=1 WHERE door='VAULT'\" rides in as its own statement."
+      },
+      {
+        "id": "django",
+        "label": "Django (ORM)",
+        "language": "python",
+        "code": "# VULNERABLE - executescript() (sqlite backend) runs the whole string as a batch\nfrom django.db import connection\nsql = f\"SELECT door, granted FROM door_acl WHERE badge = '{badge}'\"\nconnection.cursor().executescript(sql)\n# The stacked \"; UPDATE door_acl SET granted=1 WHERE door='VAULT'\" rides in as its own statement."
+      },
+      {
+        "id": "spring",
+        "label": "Spring Boot (JdbcTemplate)",
+        "language": "java",
+        "code": "// VULNERABLE - JdbcTemplate.execute() runs the concatenated string as a batch\nString sql = \"SELECT door, granted FROM door_acl WHERE badge = '\" + badge + \"'\";\njdbcTemplate.execute(sql);\n// The stacked \"; UPDATE door_acl SET granted=1 WHERE door='VAULT'\" rides in as its own statement."
+      }
+    ],
     "secureCode": {
       "language": "js",
       "code": "// SECURE - bind the value AND use an API that runs exactly ONE statement\nconst rows = db.prepare('SELECT door, granted FROM door_acl WHERE badge = ?').all(badge);\n// prepare()/get()/all() execute a single statement - a stacked ';' becomes a syntax error, not a command.\n// Least privilege backs this up: the read path's DB role should hold SELECT only, never UPDATE."
     },
     "secureCodeVariants": [
       {
-        "id": "node-mysql2",
-        "label": "Node.js (mysql2) - single statement",
+        "id": "node",
+        "label": "Node.js (pg / mysql2)",
         "language": "js",
-        "code": "// mysql2: multipleStatements is OFF by default - keep it off, and bind the value\nconst conn = await mysql.createConnection({ host, user, database /* multipleStatements: false */ });\nconst [rows] = await conn.execute(\n  'SELECT door, granted FROM door_acl WHERE badge = ?', [badge]);\n// With multipleStatements:false the driver rejects a second ';' statement outright."
-      },
-      {
-        "id": "php-pdo",
-        "label": "PHP (PDO) - real prepared statement",
-        "language": "php",
-        "code": "// PDO: use real prepared statements; one prepare() runs one statement\n$pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);\n$stmt = $pdo->prepare('SELECT door, granted FROM door_acl WHERE badge = ?');\n$stmt->execute([$badge]); // a stacked ';' cannot smuggle a second command through"
+        "code": "// SECURE - multipleStatements stays OFF and the value is bound, so only ONE statement runs\nconst conn = await mysql.createConnection({ host, user, database /* multipleStatements: false */ });\nconst [rows] = await conn.execute(\n  'SELECT door, granted FROM door_acl WHERE badge = ?', [badge]);\n// A stacked ';' is now an inert literal inside the badge, not a second command."
       },
       {
         "id": "python",
-        "label": "Python (sqlite3) - execute(), not executescript()",
+        "label": "Python (sqlite3 / psycopg2)",
         "language": "python",
-        "code": "# sqlite3: cursor.execute() runs a SINGLE statement (executescript is the dangerous one)\ncur.execute(\"SELECT door, granted FROM door_acl WHERE badge = ?\", (badge,))\nrows = cur.fetchall()\n# Never build the SQL by concatenation, and never route user input into executescript()."
+        "code": "# SECURE - execute() runs a SINGLE statement and binds the value\ncur.execute(\"SELECT door, granted FROM door_acl WHERE badge = ?\", (badge,))\nrows = cur.fetchall()\n# The ';'-payload becomes an inert string; executescript() is the footgun to avoid.\n# psycopg2: cur.execute(\"... badge = %s\", (badge,)) is single-statement too."
+      },
+      {
+        "id": "php-pdo",
+        "label": "PHP (PDO)",
+        "language": "php",
+        "code": "// SECURE - a real prepared statement binds the value and runs exactly one statement\n$pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);\n$stmt = $pdo->prepare('SELECT door, granted FROM door_acl WHERE badge = ?');\n$stmt->execute([$badge]);\n// The stacked ';' is now an inert literal inside the badge, not a second command."
+      },
+      {
+        "id": "java-jdbc",
+        "label": "Java (JDBC)",
+        "language": "java",
+        "code": "// SECURE - PreparedStatement binds the value and runs a single statement\nPreparedStatement ps = conn.prepareStatement(\n    \"SELECT door, granted FROM door_acl WHERE badge = ?\");\nps.setString(1, badge);\nResultSet rs = ps.executeQuery();\n// The ';'-payload becomes an inert string literal, never a second command."
+      },
+      {
+        "id": "dotnet",
+        "label": "C# / .NET (ADO.NET)",
+        "language": "csharp",
+        "code": "// SECURE - bind via SqlParameter; the command runs a single parameterized statement\nusing var cmd = new SqlCommand(\n    \"SELECT door, granted FROM door_acl WHERE badge = @badge\", conn);\ncmd.Parameters.Add(new SqlParameter(\"@badge\", badge));\nusing var reader = cmd.ExecuteReader();\n// A stacked ';' rides inside @badge as data, never as a second command."
+      },
+      {
+        "id": "go",
+        "label": "Go (database/sql)",
+        "language": "go",
+        "code": "// SECURE - the value binds to a placeholder and one statement runs\nrows, err := db.Query(\n    \"SELECT door, granted FROM door_acl WHERE badge = ?\", badge)\n// The ';'-payload becomes an inert string literal, not a second command.\n// Postgres uses $1 instead of ?; either way the driver runs a single statement."
+      },
+      {
+        "id": "rails",
+        "label": "Ruby on Rails (ActiveRecord)",
+        "language": "ruby",
+        "code": "# SECURE - the placeholder binds the value; ActiveRecord runs a single query\nrows = DoorAcl.where(\"badge = ?\", badge).to_a\n# The stacked ';' stays an inert string inside the badge, never a second command.\n# Hash form binds too: DoorAcl.where(badge: badge)"
+      },
+      {
+        "id": "laravel",
+        "label": "Laravel (Query Builder)",
+        "language": "php",
+        "code": "// SECURE - the Query Builder binds the value and issues one prepared statement\n$rows = DB::table('door_acl')\n    ->where('badge', $badge)\n    ->get();\n// A stacked ';' is now an inert literal inside the badge, not a second command."
+      },
+      {
+        "id": "django",
+        "label": "Django (ORM)",
+        "language": "python",
+        "code": "# SECURE - the ORM parameterizes every lookup and runs a single query\nrows = DoorAcl.objects.filter(badge=badge)\n# The ';'-payload becomes an inert string; never route input into executescript().\n# .raw() still binds: DoorAcl.objects.raw(\"... WHERE badge = %s\", [badge])"
+      },
+      {
+        "id": "spring",
+        "label": "Spring Boot (JdbcTemplate)",
+        "language": "java",
+        "code": "// SECURE - JdbcTemplate binds the arg to a ? placeholder; one statement runs\nList<DoorAcl> rows = jdbcTemplate.query(\n    \"SELECT door, granted FROM door_acl WHERE badge = ?\",\n    doorRowMapper, badge);\n// The stacked ';' stays an inert literal inside the badge, never a second command."
       }
     ],
     "takeaway": "A question should ask one thing. Bind the value AND let the driver run a single statement - so a semicolon is a syntax error, not a to-do list."
