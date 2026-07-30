@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { starsForScore } from '@/lib/engine/scoring'
 import type { JobMeta } from '../levels'
 import { cx } from '../lib/cx'
-import { STAR_TIER_LABELS, type StarTier } from '../lib/narrative'
+import { useTranslation } from '@/app/i18n/useTranslation'
 import { IconArrowRight, IconCheck, IconLock, IconStar } from './icons'
 import styles from './JobCard.module.css'
 
@@ -24,7 +24,9 @@ export function JobCard({
   bestScore?: number
   prevJob?: string
 }) {
+  const { t } = useTranslation()
   const stars = bestScore != null ? starsForScore(bestScore) : 0
+  const starLabel = t(`game.stars.tier.${stars}`)
   const index = String(meta.order).padStart(2, '0')
 
   const body = (
@@ -34,7 +36,11 @@ export function JobCard({
         <span className={cx(styles.statusTag, styles[`tag--${state}`])}>
           {state === 'completed' && <IconCheck size={13} />}
           {state === 'locked' && <IconLock size={13} />}
-          {state === 'completed' ? 'Cleared' : state === 'active' ? 'Open' : 'Locked'}
+          {state === 'completed'
+            ? t('game.card.cleared')
+            : state === 'active'
+              ? t('game.card.open')
+              : t('game.card.locked')}
         </span>
       </div>
 
@@ -47,24 +53,26 @@ export function JobCard({
         <div className={styles.foot}>
           <span
             className={styles.stars}
-            aria-label={`${stars} of 3 stars — ${STAR_TIER_LABELS[stars as StarTier]}`}
+            aria-label={t('game.stars.aria', { stars, label: starLabel })}
           >
             {[1, 2, 3].map((n) => (
               <IconStar key={n} size={15} filled={n <= stars} />
             ))}
           </span>
-          <span className={styles.tierWord}>{STAR_TIER_LABELS[stars as StarTier]}</span>
+          <span className={styles.tierWord}>{starLabel}</span>
           <span className={cx('mono', styles.score)}>{bestScore}</span>
           <span className={styles.cta}>
-            Run it cleaner <IconArrowRight size={15} />
+            {t('game.card.runCleaner')} <IconArrowRight size={15} />
           </span>
         </div>
       ) : state === 'active' ? (
         <span className={styles.cta}>
-          Take job <IconArrowRight size={15} />
+          {t('game.card.take')} <IconArrowRight size={15} />
         </span>
       ) : (
-        <span className={styles.lockedNote}>Finish {prevJob ?? 'the previous job'} first</span>
+        <span className={styles.lockedNote}>
+          {t('game.card.finishFirst', { prev: prevJob ?? t('game.card.finishFallback') })}
+        </span>
       )}
     </>
   )
@@ -75,7 +83,11 @@ export function JobCard({
 
   return (
     <li className={cx('panel', styles.card, state === 'active' && styles.activeCard)}>
-      <Link href={`/jobs/${meta.id}`} className={styles.link} aria-label={`${meta.job} — ${state}`}>
+      <Link
+        href={`/jobs/${meta.id}`}
+        className={styles.link}
+        aria-label={t('game.card.ariaState', { job: meta.job, state })}
+      >
         {body}
       </Link>
     </li>

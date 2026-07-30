@@ -1,0 +1,364 @@
+{
+  "_meta": {
+    "_todo": "UNTRANSLATED STUB — machine clone of en.json. Every value below is still English. Replace values with Polish translations in a later pass; keep all keys and {placeholders} identical to en.json (English stays the key source of truth).",
+    "locale": "pl",
+    "status": "untranslated-stub"
+  },
+  "nav": {
+    "home": "Home",
+    "jobs": "Jobs",
+    "help": "Help",
+    "signIn": "Sign in",
+    "signInTitle": "Accounts are coming soon",
+    "brandAria": "SQL Heist — home",
+    "primaryAria": "Primary",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
+  },
+  "lang": {
+    "triggerAria": "Language: {language}",
+    "chooseAria": "Choose language"
+  },
+  "share": {
+    "share": "Share",
+    "copied": "Link copied",
+    "error": "Press to copy",
+    "srCopied": "Link copied to clipboard",
+    "srError": "Could not copy the link"
+  },
+  "footer": {
+    "aria": "Footer",
+    "tagline": "The database is real. The crime isn't. Learn the break-in, then learn the lock.",
+    "colPull": "Pull a job",
+    "colLearn": "Learn the trade",
+    "colFine": "The fine print",
+    "linkHome": "Home",
+    "linkBoard": "The board",
+    "linkHelp": "How it works",
+    "linkFaq": "FAQ",
+    "linkPrivacy": "Privacy",
+    "linkTerms": "Terms",
+    "linkContact": "Contact",
+    "note": "Runs entirely in your browser. No server, no net.",
+    "alsoTry": "also try",
+    "copyright": "© {year} SQL Heist"
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "Meridian Holdings · after hours",
+      "title": "SQL Heist",
+      "tagline": "Every system has a door somebody forgot to lock.",
+      "lede": "You find them. A real database is on the other side — no simulation, no safety net but the sandbox. Pull three jobs. Then learn how they should have stopped you.",
+      "primaryCta": "Take the first job",
+      "secondaryCta": "How it works"
+    },
+    "what": {
+      "eyebrow": "Case File · 001",
+      "stamp": "Classified",
+      "title": "Learn the break-in to learn the lock",
+      "lede": "SQL Heist is an educational SQL-injection game. You pull the attack against a real database, then study the code that should have stopped you — offence teaches defence better than any lecture.",
+      "facts": {
+        "0": {
+          "k": "Where",
+          "v": "100% in your browser. Nothing ever touches the network."
+        },
+        "1": {
+          "k": "Against",
+          "v": "A real SQLite engine, seeded fresh for every single run."
+        },
+        "2": {
+          "k": "Risk",
+          "v": "No real target — the only thing you can break is the sandbox."
+        }
+      },
+      "safe": "Safe by design — no accounts, no downloads, no setup."
+    },
+    "how": {
+      "eyebrow": "The Job",
+      "title": "Five moves, every time",
+      "lede": "Every job runs the same arc, so you always know exactly where you are in it."
+    },
+    "faq": {
+      "eyebrow": "Straight Answers",
+      "title": "Before your first job",
+      "more": "Read every answer the Fixer gives"
+    },
+    "closer": {
+      "fixerName": "The Fixer",
+      "fixerLine": "“Three jobs. You keep what you learn — Meridian keeps the bill.”",
+      "title": "The door is open. Walk through it.",
+      "cta": "Take the first job"
+    },
+    "loop": {
+      "0": {
+        "title": "Brief",
+        "blurb": "The Fixer names the mark and the take — never the method."
+      },
+      "1": {
+        "title": "Recon",
+        "blurb": "Case the target. Find where your input actually lands."
+      },
+      "2": {
+        "title": "Exploit",
+        "blurb": "Type into the form, watch the live query your input builds, then run it."
+      },
+      "3": {
+        "title": "Loot",
+        "blurb": "The take and your score. Nobody stopped you — that is the point."
+      },
+      "4": {
+        "title": "Debrief",
+        "blurb": "The vulnerable code beside the fix that closes it. This is defence."
+      }
+    },
+    "faqTeasers": {
+      "0": {
+        "q": "Is this legal?",
+        "a": "Yes. Every job runs entirely in your browser against a sandboxed SQLite database that ships with the game. No real systems, no network calls — nothing to break but the practice target."
+      },
+      "1": {
+        "q": "Do I need to install anything?",
+        "a": "No. It runs in a modern browser. The SQLite engine loads on demand the first time you need it — no accounts, no downloads, no setup."
+      },
+      "2": {
+        "q": "Do I need to know SQL already?",
+        "a": "It helps. The game assumes you can read a SELECT and roughly follow a WHERE clause. It teaches you injection — not SQL from zero."
+      },
+      "3": {
+        "q": "Are you teaching people to attack real websites?",
+        "a": "We teach how injection works so you can recognise it and close it — every job ends with the fix, not the break-in. Use it only on systems you own or are allowed to test."
+      }
+    },
+    "ticker": {
+      "0": "The door was never locked.",
+      "1": "Read the wire. Run the payload.",
+      "2": "Meridian keeps everyone's secrets but its own.",
+      "3": "Learn the break-in. Build the lock.",
+      "4": "No real target. No net but the sandbox.",
+      "5": "Every query is a door. Some are ajar."
+    }
+  },
+  "help": {
+    "eyebrow": "The Briefing",
+    "title": "How the job works",
+    "lead": "The Fixer doesn't repeat himself. Read it once, then go earn.",
+    "sectionBefore": "Before you touch anything",
+    "calloutSafe": "Safe by design",
+    "sectionMoves": "The five moves",
+    "sectionWire": "Reading the wire",
+    "sectionControls": "Controls",
+    "sectionStuck": "Stuck? Call the Fixer",
+    "sectionPoint": "The point",
+    "cta": "See the board"
+  },
+  "faq": {
+    "eyebrow": "Straight Answers",
+    "title": "Questions the Fixer answers once",
+    "lead": "No small talk. Here's what people ask before their first job.",
+    "srHeading": "Frequently asked questions",
+    "stillStuck": "Still stuck?"
+  },
+  "content": {
+    "updated": "Last updated"
+  },
+  "privacy": {
+    "eyebrow": "The Fine Print",
+    "title": "Privacy",
+    "lead": "Short version: we don't collect you. The long version is below, and it's still short."
+  },
+  "terms": {
+    "eyebrow": "The Fine Print",
+    "title": "Terms of Use",
+    "lead": "Play the game, learn the trade, keep it clean. The details:"
+  },
+  "contact": {
+    "eyebrow": "The Wire",
+    "title": "Reach the crew",
+    "lead": "No phone number. No front desk. Leave word and someone gets back to you."
+  },
+  "game": {
+    "phase": {
+      "brief": "Brief",
+      "recon": "Recon",
+      "exploit": "Exploit",
+      "loot": "Loot",
+      "debrief": "Debrief",
+      "progressAria": "Job progress",
+      "stage": "{phase} stage"
+    },
+    "topbar": {
+      "leave": "Leave the job — back to The Board",
+      "back": "Back to {label}",
+      "time": "Time on target {time}",
+      "score": "Score {score}",
+      "mute": "Mute",
+      "unmute": "Unmute"
+    },
+    "hint": {
+      "call": "Call the Fixer",
+      "unlocked": "{opened}/{total} unlocked",
+      "suggest": "Stuck? The Fixer's on the line.",
+      "tier": {
+        "0": "A word",
+        "1": "The method",
+        "2": "The play"
+      },
+      "tierFallback": "Tier {n}",
+      "locked": "Unlock the previous tier first.",
+      "confirmTitle": "Costs you {cost}. Still want it?",
+      "confirmBody": "comes straight off your final score for this job — no refunds this run.",
+      "notYet": "Not yet",
+      "makeCall": "Make the call"
+    },
+    "score": {
+      "base": "Base",
+      "attempts": "Attempts ({over} over {free} free)",
+      "hints": "Hints ({n})",
+      "timeBonus": "Time bonus",
+      "score": "Score"
+    },
+    "stars": {
+      "aria": "{stars} of 3 stars — {label}",
+      "tier": {
+        "1": "Loud",
+        "2": "Done",
+        "3": "Clean"
+      }
+    },
+    "board": {
+      "stamp": "THE BOARD",
+      "title": "Three jobs. One score.",
+      "sub": "Pull each one off with a SQL injection, then learn the fix. Progress stays on this device.",
+      "rank": "Rank"
+    },
+    "card": {
+      "cleared": "Cleared",
+      "open": "Open",
+      "locked": "Locked",
+      "runCleaner": "Run it cleaner",
+      "take": "Take job",
+      "finishFirst": "Finish {prev} first",
+      "finishFallback": "the previous job",
+      "ariaState": "{job} — {state}"
+    },
+    "brief": {
+      "caseFile": "Case File — {job}",
+      "difficulty": "Difficulty · {difficulty}",
+      "handler": "Handler",
+      "target": "Target",
+      "objective": "Objective",
+      "surfaceLabel": "surface ·",
+      "prepping": "prepping the gear…",
+      "takeJob": "Take the job"
+    },
+    "mimic": {
+      "signIn": "Sign in",
+      "search": "Search",
+      "submit": "Submit",
+      "reconNote": "This form talks to a query behind the counter. What happens if your input isn't treated as just a name?"
+    },
+    "recon": {
+      "stamp": "Recon",
+      "title": "Case the joint — {app}",
+      "notes": "Recon Notes",
+      "visibleSchema": "Visible schema",
+      "hypothesis": "Only what the target advertises is listed. If something is worth hiding, it won't be on this board — you'll have to make the database name it.",
+      "moveIn": "Make your move"
+    },
+    "exploit": {
+      "consoleAria": "Exploit console",
+      "heading": "Exploit — {app}",
+      "objective": "Objective",
+      "recap": "Recon recap ·",
+      "visibleSchema": "Visible schema",
+      "front": "The Front",
+      "wire": "The Wire",
+      "live": "live",
+      "reaches": "What actually reaches the mark",
+      "sendIt": "Send it",
+      "reset": "Reset",
+      "cameBack": "What came back"
+    },
+    "loot": {
+      "secured": "Loot secured",
+      "winningPayload": "Winning payload",
+      "extracted": "Extracted",
+      "seeSlipped": "See how they slipped"
+    },
+    "debrief": {
+      "stamp": "Debrief — Attack → Defense",
+      "fixerTag": "The Fixer",
+      "beat1": "① The move",
+      "beat1Text": "The payload you handed the front, on the wire:",
+      "beat2": "② Why it worked",
+      "beat3": "③ The fix",
+      "beat4": "④ Takeaway",
+      "continue": "Continue",
+      "runCleaner": "Run it cleaner",
+      "nextJob": "Next job's waiting",
+      "walkAway": "Walk away a ghost"
+    },
+    "compare": {
+      "vulnerable": "Vulnerable",
+      "secure": "Secure",
+      "vulnCaption": "Input is concatenated into the query — data becomes code.",
+      "secureCaption": "Input is bound as a parameter — it stays data.",
+      "langAria": "Code stack — language",
+      "fwAria": "Code stack — {name} framework"
+    },
+    "toast": {
+      "won": "Loot secured — moving to the score.",
+      "blocked": "Blocked by the filter: {terms}.",
+      "blockedFallback": "your payload",
+      "choked": "The mark choked on that — read what it spat back.",
+      "dismiss": "Dismiss"
+    },
+    "engine": {
+      "dead": "Line's dead.",
+      "deadBody": "Couldn't reach the job — check your connection and try the line again.",
+      "retry": "Try the line again",
+      "warming": "Prepping the gear…"
+    },
+    "notebook": {
+      "title": "Recon notebook",
+      "factsAria": "{n} facts logged",
+      "advertisedAria": "Advertised schema",
+      "advertised": "Advertised",
+      "priedAria": "Columns discovered from results",
+      "pried": "Pried out of results",
+      "empty": "Nothing yet. Make the database name a column it never advertised — it'll land here."
+    },
+    "badges": {
+      "aria": "Technique mastery: {earned} of {total}",
+      "mastery": "Mastery",
+      "itemAria": "{label} — {status}",
+      "mastered": "mastered",
+      "locked": "locked"
+    },
+    "signal": {
+      "timingOracle": "Timing oracle",
+      "fast": "fast",
+      "slow": "slow",
+      "threshold": "threshold {n} ms",
+      "errorLeak": "Error leak",
+      "structureExposed": "structure exposed",
+      "errorLeakedGloss": "The message spat back a name it should never reveal — that leak is the whole point.",
+      "errorGloss": "The mark choked. Read what it spat back; the error itself is the tell.",
+      "sideEffect": "Side effect"
+    },
+    "result": {
+      "running": "Running query",
+      "noRun": "No run yet — inject a payload and hit the wire.",
+      "errorHead": "ERROR READOUT",
+      "errorGloss": "The mark choked on that. Read what it spat back — it's telling you where you slipped.",
+      "nothing": "Nothing worth taking. It ran clean — you're reaching into the wrong drawer.",
+      "loot": "loot"
+    },
+    "waf": {
+      "blocked": "blocked:",
+      "cleaned": "cleaned",
+      "became": "→ your input became",
+      "empty": "(empty)"
+    }
+  }
+}

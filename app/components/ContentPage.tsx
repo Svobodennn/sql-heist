@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { getServerTranslator } from '@/app/i18n/server'
 import styles from './content.module.css'
 
 // Shared shell for the static content routes (Help, FAQ, Privacy, Terms,
@@ -18,6 +19,7 @@ export function ContentPage({
   updated?: string
   children: ReactNode
 }) {
+  const t = getServerTranslator()
   return (
     <main className={styles.page}>
       <header className={styles.hero}>
@@ -28,7 +30,7 @@ export function ContentPage({
             {lead && <p className={styles.lead}>{lead}</p>}
             {updated && (
               <p className={styles.updated}>
-                Last updated <time dateTime={updated}>{updated}</time>
+                {t('content.updated')} <time dateTime={updated}>{updated}</time>
               </p>
             )}
           </div>

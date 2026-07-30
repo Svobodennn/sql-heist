@@ -8,12 +8,13 @@ import { Logo } from './Logo'
 import { IconMenu, IconClose, IconUser } from './icons'
 import { ShareButton } from './ShareButton'
 import { LanguageSwitcher } from './LanguageSwitcher'
+import { useTranslation } from '@/app/i18n/useTranslation'
 import styles from './Navbar.module.css'
 
 const NAV_LINKS = [
-  { href: '/', label: 'Home' },
-  { href: '/jobs', label: 'Jobs' },
-  { href: '/help', label: 'Help' },
+  { href: '/', key: 'nav.home' },
+  { href: '/jobs', key: 'nav.jobs' },
+  { href: '/help', key: 'nav.help' },
 ] as const
 
 // Site chrome. Rendered once from app/layout.tsx so it wraps every route. It is
@@ -23,6 +24,7 @@ const NAV_LINKS = [
 // changes to the game shell (that in-game chrome is a separate track).
 export function Navbar() {
   const pathname = usePathname()
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
 
   // Close the mobile menu whenever the route changes.
@@ -45,8 +47,8 @@ export function Navbar() {
 
   return (
     <header className={styles.header}>
-      <nav className={cx('container', styles.nav)} aria-label="Primary">
-        <Link href="/" className={styles.brand} aria-label="SQL Heist — home">
+      <nav className={cx('container', styles.nav)} aria-label={t('nav.primaryAria')}>
+        <Link href="/" className={styles.brand} aria-label={t('nav.brandAria')}>
           <Logo size={26} />
           <span>SQL&nbsp;HEIST</span>
         </Link>
@@ -59,7 +61,7 @@ export function Navbar() {
                 className={cx(styles.link, isActive(link.href) && styles.linkActive)}
                 aria-current={isActive(link.href) ? 'page' : undefined}
               >
-                {link.label}
+                {t(link.key)}
               </Link>
             </li>
           ))}
@@ -69,9 +71,9 @@ export function Navbar() {
           <ShareButton />
           <LanguageSwitcher />
           {/* Stubbed auth entry point — accounts land in WS5. */}
-          <a href="#wip" className={styles.signin} title="Accounts are coming soon">
+          <a href="#wip" className={styles.signin} title={t('nav.signInTitle')}>
             <IconUser size={18} />
-            <span>Sign in</span>
+            <span>{t('nav.signIn')}</span>
           </a>
         </div>
 
@@ -80,7 +82,7 @@ export function Navbar() {
           className={styles.toggle}
           aria-expanded={open}
           aria-controls="nav-mobile"
-          aria-label={open ? 'Close menu' : 'Open menu'}
+          aria-label={open ? t('nav.closeMenu') : t('nav.openMenu')}
           onClick={() => setOpen((o) => !o)}
         >
           {open ? <IconClose size={22} /> : <IconMenu size={22} />}
@@ -97,7 +99,7 @@ export function Navbar() {
                 className={cx(styles.mobileLink, isActive(link.href) && styles.linkActive)}
                 aria-current={isActive(link.href) ? 'page' : undefined}
               >
-                {link.label}
+                {t(link.key)}
               </Link>
             </li>
           ))}
@@ -105,9 +107,9 @@ export function Navbar() {
         <div className={styles.mobileActions}>
           <ShareButton compact />
           <LanguageSwitcher />
-          <a href="#wip" className={styles.signin} title="Accounts are coming soon">
+          <a href="#wip" className={styles.signin} title={t('nav.signInTitle')}>
             <IconUser size={18} />
-            <span>Sign in</span>
+            <span>{t('nav.signIn')}</span>
           </a>
         </div>
       </div>

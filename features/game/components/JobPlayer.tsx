@@ -15,7 +15,8 @@ import { evaluate, toWinContext } from '@/lib/engine/winEvaluator'
 import { compose } from '@/lib/engine/queryComposer'
 import { deriveSignal } from '@/lib/engine/signal'
 import { shouldSuggestHint } from '@/lib/engine/scoring'
-import { PHASE_LABELS, makeInitialState, previousPhase, reducer } from '../lib/phaseMachine'
+import { makeInitialState, previousPhase, reducer } from '../lib/phaseMachine'
+import { useTranslation } from '@/app/i18n/useTranslation'
 import { useEngine } from '../lib/useEngine'
 import { useToasts } from '../lib/useToasts'
 import { recordWin } from '../lib/useProgress'
@@ -46,6 +47,7 @@ import styles from './JobPlayer.module.css'
 // LazyMotion only governs its own subtree.
 export function JobPlayer({ level, nextJobId }: { level: Level; nextJobId?: string }) {
   const router = useRouter()
+  const { t } = useTranslation()
   const reduce = useReducedMotion()
   const [state, dispatch] = useReducer(reducer, level, makeInitialState)
   const { status, run, reset, retry } = useEngine(level)
@@ -96,15 +98,16 @@ export function JobPlayer({ level, nextJobId }: { level: Level; nextJobId?: stri
     dispatch({ type: 'RUN', result, evaluation, signal })
 
     if (evaluation.won) {
-      push('success', 'Loot secured — moving to the score.')
+      push('success', t('game.toast.won'))
     } else if (result.filter?.mode === 'reject') {
-      push('error', `Blocked by the filter: ${result.filter.blocked.join(', ') || 'your payload'}.`)
+      const terms = result.filter.blocked.join(', ') || t('game.toast.blockedFallback')
+      push('error', t('game.toast.blocked', { terms }))
     } else if (result.error) {
-      push('error', 'The mark choked on that — read what it spat back.')
+      push('error', t('game.toast.choked'))
     } else {
       push('info', evaluation.reason)
     }
-  }, [run, state.inputs, level, push])
+  }, [run, state.inputs, level, push, t])
 
   const handleReset = useCallback(() => {
     reset()
@@ -146,7 +149,7 @@ export function JobPlayer({ level, nextJobId }: { level: Level; nextJobId?: stri
           muted={muted}
           onToggleMute={() => setMuted((prev) => !prev)}
           canBack={backTarget != null}
-          backLabel={backTarget ? PHASE_LABELS[backTarget] : null}
+          backLabel={backTarget ? t(`game.phase.${backTarget}`) : null}
           onBack={handleBack}
         />
 
@@ -154,7 +157,7 @@ export function JobPlayer({ level, nextJobId }: { level: Level; nextJobId?: stri
             swapping region below is NOT a live region (it would re-read the whole
             screen and nest the SqlPreview/beat live regions — §11 double-speak). */}
         <p className="sr-only" role="status" aria-live="polite">
-          {`${PHASE_LABELS[state.phase]} stage`}
+          {t('game.phase.stage', { phase: t(`game.phase.${state.phase}`) })}
         </p>
 
         <main className={styles.main} ref={mainRef}>
@@ -162,7 +165,7 @@ export function JobPlayer({ level, nextJobId }: { level: Level; nextJobId?: stri
             <m.div
               key={state.phase}
               role="region"
-              aria-label={`${PHASE_LABELS[state.phase]} stage`}
+              aria-label={t('game.phase.stage', { phase: t(`game.phase.${state.phase}`) })}
               initial={{ opacity: 0, x: reduce ? 0 : -6 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: reduce ? 0 : 6 }}

@@ -2,7 +2,7 @@
 
 import { DEFAULT_SCORING, hintPenalty } from '@/lib/engine/scoring'
 import { cx } from '../lib/cx'
-import { STAR_TIER_LABELS } from '../lib/narrative'
+import { useTranslation } from '@/app/i18n/useTranslation'
 import { IconStar } from './icons'
 import styles from './ScoreBreakdown.module.css'
 
@@ -24,20 +24,26 @@ export function ScoreBreakdown({
   score,
   stars,
 }: ScoreBreakdownProps) {
+  const { t } = useTranslation()
   const p = DEFAULT_SCORING
   const overAttempts = Math.max(0, failedRuns - p.freeAttempts)
   const attemptCost = p.attemptPenalty * overAttempts
   const hintCost = hintPenalty(openedTiers, p.hintCosts)
   const timeBonus = Math.min(p.timeBonusCap, Math.max(0, p.timeBonusRate * (p.parTimeSec - elapsedSec)))
+  const starLabel = t(`game.stars.tier.${stars}`)
 
   const rows: { label: string; value: number; tone: 'add' | 'sub' }[] = [
-    { label: 'Base', value: p.base, tone: 'add' },
+    { label: t('game.score.base'), value: p.base, tone: 'add' },
   ]
   if (attemptCost > 0) {
-    rows.push({ label: `Attempts (${overAttempts} over ${p.freeAttempts} free)`, value: -attemptCost, tone: 'sub' })
+    rows.push({
+      label: t('game.score.attempts', { over: overAttempts, free: p.freeAttempts }),
+      value: -attemptCost,
+      tone: 'sub',
+    })
   }
-  if (hintCost > 0) rows.push({ label: `Hints (${openedTiers})`, value: -hintCost, tone: 'sub' })
-  rows.push({ label: 'Time bonus', value: timeBonus, tone: 'add' })
+  if (hintCost > 0) rows.push({ label: t('game.score.hints', { n: openedTiers }), value: -hintCost, tone: 'sub' })
+  rows.push({ label: t('game.score.timeBonus'), value: timeBonus, tone: 'add' })
 
   return (
     <div className={styles.wrap}>
@@ -52,7 +58,7 @@ export function ScoreBreakdown({
           </li>
         ))}
         <li className={cx(styles.row, styles.total)}>
-          <span className={styles.label}>Score</span>
+          <span className={styles.label}>{t('game.score.score')}</span>
           <span className={cx('mono', styles.value)}>{score}</span>
         </li>
       </ol>
@@ -60,7 +66,7 @@ export function ScoreBreakdown({
       <div className={styles.rating}>
         <div
           className={styles.stars}
-          aria-label={`${stars} of 3 stars — ${STAR_TIER_LABELS[stars]}`}
+          aria-label={t('game.stars.aria', { stars, label: starLabel })}
         >
           {[1, 2, 3].map((n) => (
             <IconStar
@@ -71,7 +77,7 @@ export function ScoreBreakdown({
             />
           ))}
         </div>
-        <span className={styles.tierLabel}>{STAR_TIER_LABELS[stars]}</span>
+        <span className={styles.tierLabel}>{starLabel}</span>
       </div>
     </div>
   )

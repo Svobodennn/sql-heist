@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { ContentPage } from '@/app/components/ContentPage'
 import { Section } from '@/app/components/content-blocks'
 import { IconMail } from '@/app/components/icons'
+import { getServerTranslator } from '@/app/i18n/server'
 import styles from '@/app/components/content.module.css'
 
 export const metadata: Metadata = {
@@ -13,11 +14,12 @@ export const metadata: Metadata = {
 const EMAIL = 'melih.sarac@hotmail.com'
 
 export default function ContactPage() {
+  const t = getServerTranslator()
   return (
     <ContentPage
-      eyebrow="The Wire"
-      title="Reach the crew"
-      lead="No phone number. No front desk. Leave word and someone gets back to you."
+      eyebrow={t('contact.eyebrow')}
+      title={t('contact.title')}
+      lead={t('contact.lead')}
     >
       <Section title="Leave word">
         <p>

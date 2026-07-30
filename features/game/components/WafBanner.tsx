@@ -3,6 +3,7 @@
 import type { FilterOutcome } from '@/lib/engine/queryComposer'
 import { filterBanner } from '../lib/signalView'
 import { cx } from '../lib/cx'
+import { useTranslation } from '@/app/i18n/useTranslation'
 import { IconBlock, IconScissors } from './icons'
 import styles from './WafBanner.module.css'
 
@@ -14,6 +15,7 @@ import styles from './WafBanner.module.css'
 // it rides above the readout as its own banner. The effectiveInput is RAW player
 // text — rendered as an escaped text node (K7/XSS), never as markup.
 export function WafBanner({ filter }: { filter: FilterOutcome }) {
+  const { t } = useTranslation()
   const v = filterBanner(filter)
   const isReject = v.mode === 'reject'
   return (
@@ -27,16 +29,16 @@ export function WafBanner({ filter }: { filter: FilterOutcome }) {
       </span>
       {isReject ? (
         <p className={styles.text} aria-hidden="true">
-          <span className={styles.label}>blocked:</span>{' '}
+          <span className={styles.label}>{t('game.waf.blocked')}</span>{' '}
           <span className="mono">{v.terms.length > 0 ? v.terms.join(', ') : '—'}</span>
         </p>
       ) : (
         <p className={styles.text} aria-hidden="true">
-          <span className={styles.label}>cleaned</span> → your input became{' '}
+          <span className={styles.label}>{t('game.waf.cleaned')}</span> {t('game.waf.became')}{' '}
           {v.effectiveInput.length > 0 ? (
             <span className={cx('mono', styles.became)}>{v.effectiveInput}</span>
           ) : (
-            <span className={styles.empty}>(empty)</span>
+            <span className={styles.empty}>{t('game.waf.empty')}</span>
           )}
         </p>
       )}

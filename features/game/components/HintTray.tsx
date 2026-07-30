@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 're
 import type { Hint } from '@/lib/schema/level'
 import { DEFAULT_SCORING, canOpenHint } from '@/lib/engine/scoring'
 import { cx } from '../lib/cx'
-import { HINT_TIER_LABELS } from '../lib/narrative'
+import { useTranslation } from '@/app/i18n/useTranslation'
 import { Button } from './Button'
 import { Stamp } from './Stamp'
 import { IconBulb } from './icons'
@@ -25,6 +25,11 @@ export function HintTray({
   onOpen: (tier: number) => void
   suggest: boolean
 }) {
+  const { t } = useTranslation()
+  // Tier vocabulary (A word / The method / The play); a rare 4th+ hint falls back
+  // to a generic "Tier N".
+  const tierLabelFor = (index: number) =>
+    index < 3 ? t(`game.hint.tier.${index}`) : t('game.hint.tierFallback', { n: index + 1 })
   const [pendingTier, setPendingTier] = useState<number | null>(null)
   const restoreRef = useRef<HTMLElement | null>(null)
   const dialogRef = useRef<HTMLDivElement | null>(null)
@@ -101,23 +106,23 @@ export function HintTray({
     <div className={cx('panel', styles.tray)}>
       <div className={styles.head}>
         <Stamp>
-          <IconBulb size={13} /> Call the Fixer
+          <IconBulb size={13} /> {t('game.hint.call')}
         </Stamp>
         <span className={styles.count}>
-          {openedTiers}/{hints.length} unlocked
+          {t('game.hint.unlocked', { opened: openedTiers, total: hints.length })}
         </span>
       </div>
 
       {suggest && openedTiers === 0 && (
         <p className={styles.suggest} aria-live="polite">
-          Stuck? The Fixer&apos;s on the line.
+          {t('game.hint.suggest')}
         </p>
       )}
 
       <ol className={styles.slots}>
         {hints.map((hint, i) => {
           const tier = i + 1
-          const tierLabel = HINT_TIER_LABELS[i] ?? `Tier ${tier}`
+          const tierLabel = tierLabelFor(i)
           const isOpen = tier <= openedTiers
           const isNext = canOpenHint(openedTiers, tier, hints.length)
           return (
@@ -145,10 +150,10 @@ export function HintTray({
                 </p>
               ) : isNext ? (
                 <Button variant="ghost" onClick={() => openModal(tier)}>
-                  Call the Fixer
+                  {t('game.hint.call')}
                 </Button>
               ) : (
-                <p className={styles.lockedText}>Unlock the previous tier first.</p>
+                <p className={styles.lockedText}>{t('game.hint.locked')}</p>
               )}
             </li>
           )
@@ -167,18 +172,17 @@ export function HintTray({
             onKeyDown={trapTab}
           >
             <h2 id="hint-modal-title" className={styles.modalTitle}>
-              Costs you {cost(pendingTier)}. Still want it?
+              {t('game.hint.confirmTitle', { cost: cost(pendingTier) })}
             </h2>
             <p className={styles.modalBody}>
-              <strong>{HINT_TIER_LABELS[pendingTier - 1] ?? `Tier ${pendingTier}`}</strong> comes
-              straight off your final score for this job — no refunds this run.
+              <strong>{tierLabelFor(pendingTier - 1)}</strong> {t('game.hint.confirmBody')}
             </p>
             <div className={styles.modalActions}>
               <Button variant="ghost" onClick={closeModal}>
-                Not yet
+                {t('game.hint.notYet')}
               </Button>
               <Button autoFocus variant="primary" onClick={confirm}>
-                Make the call (−{cost(pendingTier)})
+                {t('game.hint.makeCall')} (−{cost(pendingTier)})
               </Button>
             </div>
           </div>

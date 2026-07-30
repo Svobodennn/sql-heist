@@ -3,6 +3,7 @@
 import { AnimatePresence, m, useReducedMotion } from 'framer-motion'
 import type { ToastItem } from '../lib/useToasts'
 import { cx } from '../lib/cx'
+import { useTranslation } from '@/app/i18n/useTranslation'
 import { IconAlert, IconCheck, IconTarget } from './icons'
 import styles from './Toast.module.css'
 
@@ -19,6 +20,7 @@ export function ToastStack({
   toasts: ToastItem[]
   onDismiss: (id: number) => void
 }) {
+  const { t } = useTranslation()
   const reduce = useReducedMotion()
 
   // No aria-live on the container: each toast is its OWN live region (role
@@ -45,7 +47,7 @@ export function ToastStack({
               <button
                 type="button"
                 className={styles.close}
-                aria-label="Dismiss"
+                aria-label={t('game.toast.dismiss')}
                 onClick={() => onDismiss(toast.id)}
               >
                 ×

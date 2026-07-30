@@ -11,6 +11,7 @@ import {
   selectSecureSnippets,
   selectVulnerableSnippets,
 } from '../lib/secureCode'
+import { useTranslation } from '@/app/i18n/useTranslation'
 import { Button } from './Button'
 import { CodeCompare } from './CodeCompare'
 import { SqlPreview } from './SqlPreview'
@@ -42,6 +43,7 @@ export function DebriefPanel({
   onNext,
   onReplay,
 }: DebriefPanelProps) {
+  const { t } = useTranslation()
   const composed = useMemo(
     () => compose(level.query.template, winningInputs),
     [level.query.template, winningInputs],
@@ -66,14 +68,14 @@ export function DebriefPanel({
   return (
     <section className={cx('container', styles.wrap)}>
       <header className={styles.header}>
-        <Stamp>Debrief — Attack → Defense</Stamp>
+        <Stamp>{t('game.debrief.stamp')}</Stamp>
         <h1 className={styles.title} data-phase-heading tabIndex={-1}>
           {level.title}
         </h1>
       </header>
 
       <p className={styles.fixerIntro}>
-        <span className={styles.fixerTag}>The Fixer</span>
+        <span className={styles.fixerTag}>{t('game.debrief.fixerTag')}</span>
         {DEBRIEF_INTRO}
       </p>
 
@@ -83,15 +85,15 @@ export function DebriefPanel({
       <ol className={styles.beats}>
         {revealed >= 1 && (
           <li className={styles.beat}>
-            <h2 className={styles.beatHead}>① The move</h2>
-            <p className={styles.beatText}>The payload you handed the front, on the wire:</p>
+            <h2 className={styles.beatHead}>{t('game.debrief.beat1')}</h2>
+            <p className={styles.beatText}>{t('game.debrief.beat1Text')}</p>
             <SqlPreview segments={composed.segments} />
           </li>
         )}
 
         {revealed >= 2 && (
           <li className={styles.beat}>
-            <h2 className={styles.beatHead}>② Why it worked</h2>
+            <h2 className={styles.beatHead}>{t('game.debrief.beat2')}</h2>
             {narrative && (
               <p className={cx('prose', styles.transition)}>{narrative.debrief.transition}</p>
             )}
@@ -101,14 +103,14 @@ export function DebriefPanel({
 
         {revealed >= 3 && (
           <li className={styles.beat}>
-            <h2 className={styles.beatHead}>③ The fix</h2>
+            <h2 className={styles.beatHead}>{t('game.debrief.beat3')}</h2>
             <CodeCompare vulnerableGroups={vulnerableGroups} secureGroups={secureGroups} />
           </li>
         )}
 
         {revealed >= 4 && (
           <li className={cx(styles.beat, styles.takeawayBeat)}>
-            <h2 className={styles.beatHead}>④ Takeaway</h2>
+            <h2 className={styles.beatHead}>{t('game.debrief.beat4')}</h2>
             <p className={styles.takeaway}>
               <IconCheck size={18} />
               <span>{level.debrief.takeaway}</span>
@@ -124,20 +126,20 @@ export function DebriefPanel({
             onClick={() => setRevealed((r) => Math.min(TOTAL_BEATS, r + 1))}
             iconRight={<IconArrowRight size={18} />}
           >
-            Continue
+            {t('game.debrief.continue')}
           </Button>
         ) : (
           <>
             <Button variant="ghost" onClick={onReplay}>
-              Run it cleaner
+              {t('game.debrief.runCleaner')}
             </Button>
             {hasNextJob ? (
               <Button variant="success" onClick={onNext} iconRight={<IconArrowRight size={18} />}>
-                Next job&apos;s waiting
+                {t('game.debrief.nextJob')}
               </Button>
             ) : (
               <Link href="/jobs" className="btn btn--success">
-                <span>Walk away a ghost</span>
+                <span>{t('game.debrief.walkAway')}</span>
                 <IconArrowRight size={18} />
               </Link>
             )}

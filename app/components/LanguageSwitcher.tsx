@@ -1,22 +1,19 @@
 'use client'
 
 import { useEffect, useId, useRef, useState } from 'react'
+import { LOCALES, LOCALE_LABELS, LOCALE_SHORT } from '@/app/i18n/config'
+import { useTranslation } from '@/app/i18n/useTranslation'
 import { cx } from './cx'
 import { IconGlobe, IconChevronDown, IconCheck } from './icons'
 import styles from './LanguageSwitcher.module.css'
 
-// PLACEHOLDER switcher. Real i18n is WS4 — here EN is the only live locale;
-// TR/PL are shown (so the surface is real) but disabled/no-op. This is a
-// disclosure (button + list), deliberately NOT an ARIA menu, because we don't
+// Live locale switcher wired to the client I18nProvider (WS4). Picking a language
+// updates the app locale, persists it to localStorage, and sets <html lang>. It is
+// a disclosure (button + list), deliberately NOT an ARIA menu, because we don't
 // implement roving arrow-key navigation — a disclosure keeps the a11y contract
-// honest.
-const LOCALES = [
-  { code: 'en', label: 'English', live: true },
-  { code: 'tr', label: 'Türkçe', live: false },
-  { code: 'pl', label: 'Polski', live: false },
-] as const
-
+// honest. Escape and outside-click close it.
 export function LanguageSwitcher({ className }: { className?: string }) {
+  const { locale, setLocale, t } = useTranslation()
   const [open, setOpen] = useState(false)
   const wrapRef = useRef<HTMLDivElement>(null)
   const listId = useId()
@@ -37,6 +34,11 @@ export function LanguageSwitcher({ className }: { className?: string }) {
     }
   }, [open])
 
+  const choose = (next: (typeof LOCALES)[number]) => {
+    setLocale(next)
+    setOpen(false)
+  }
+
   return (
     <div ref={wrapRef} className={cx(styles.wrap, className)}>
       <button
@@ -44,34 +46,32 @@ export function LanguageSwitcher({ className }: { className?: string }) {
         className={styles.trigger}
         aria-expanded={open}
         aria-controls={listId}
-        aria-label="Language: English"
+        aria-label={t('lang.triggerAria', { language: LOCALE_LABELS[locale] })}
         onClick={() => setOpen((o) => !o)}
       >
         <IconGlobe size={18} />
-        <span aria-hidden="true">EN</span>
+        <span aria-hidden="true">{LOCALE_SHORT[locale]}</span>
         <IconChevronDown size={14} className={cx(styles.caret, open && styles.caretOpen)} />
       </button>
 
       {open && (
-        <ul id={listId} className={styles.list} aria-label="Choose language">
-          {LOCALES.map((loc) => (
-            <li key={loc.code}>
-              <button
-                type="button"
-                className={styles.item}
-                disabled={!loc.live}
-                aria-current={loc.live ? 'true' : undefined}
-                onClick={() => setOpen(false)}
-              >
-                <span>{loc.label}</span>
-                {loc.live ? (
-                  <IconCheck size={16} className={styles.check} />
-                ) : (
-                  <span className={styles.soon}>Soon</span>
-                )}
-              </button>
-            </li>
-          ))}
+        <ul id={listId} className={styles.list} aria-label={t('lang.chooseAria')}>
+          {LOCALES.map((code) => {
+            const active = code === locale
+            return (
+              <li key={code}>
+                <button
+                  type="button"
+                  className={styles.item}
+                  aria-current={active ? 'true' : undefined}
+                  onClick={() => choose(code)}
+                >
+                  <span>{LOCALE_LABELS[code]}</span>
+                  {active && <IconCheck size={16} className={styles.check} />}
+                </button>
+              </li>
+            )
+          })}
         </ul>
       )}
     </div>

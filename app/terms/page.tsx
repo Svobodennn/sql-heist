@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ContentPage } from '@/app/components/ContentPage'
 import { Callout, LegalSection } from '@/app/components/content-blocks'
+import { getServerTranslator } from '@/app/i18n/server'
 
 export const metadata: Metadata = {
   title: 'Terms of Use — SQL Heist',
@@ -10,12 +11,13 @@ export const metadata: Metadata = {
 }
 
 export default function TermsPage() {
+  const t = getServerTranslator()
   return (
     <ContentPage
-      eyebrow="The Fine Print"
-      title="Terms of Use"
+      eyebrow={t('terms.eyebrow')}
+      title={t('terms.title')}
       updated="2026-07-30"
-      lead="Play the game, learn the trade, keep it clean. The details:"
+      lead={t('terms.lead')}
     >
       <Callout label="The short of it">
         <p>

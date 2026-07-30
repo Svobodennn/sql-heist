@@ -3,6 +3,7 @@
 import type { Level } from '@/lib/schema/level'
 import type { EngineStatus } from '../lib/useEngine'
 import { cx } from '../lib/cx'
+import { useTranslation } from '@/app/i18n/useTranslation'
 import { Button } from './Button'
 import { HandlerCard } from './HandlerCard'
 import { Stamp } from './Stamp'
@@ -21,11 +22,14 @@ export function BriefPanel({
   engineStatus: EngineStatus
   onTakeJob: () => void
 }) {
+  const { t } = useTranslation()
   return (
     <section className={cx('container', styles.wrap)}>
       <div className={styles.topline}>
-        <Stamp>Case File — {level.job}</Stamp>
-        <Stamp className={styles.difficulty}>Difficulty · {level.difficulty}</Stamp>
+        <Stamp>{t('game.brief.caseFile', { job: level.job })}</Stamp>
+        <Stamp className={styles.difficulty}>
+          {t('game.brief.difficulty', { difficulty: level.difficulty })}
+        </Stamp>
       </div>
 
       <h1 className={styles.screenHeading} data-phase-heading tabIndex={-1}>
@@ -37,14 +41,14 @@ export function BriefPanel({
 
         <aside className={cx('panel', styles.dossier)}>
           <div className={styles.dossierBlock}>
-            <Stamp>Target</Stamp>
+            <Stamp>{t('game.brief.target')}</Stamp>
             <p className={styles.appName}>{level.target.appName}</p>
             <p className={styles.meta}>
-              surface · <span className="mono">{level.target.surface}</span>
+              {t('game.brief.surfaceLabel')} <span className="mono">{level.target.surface}</span>
             </p>
           </div>
           <div className={styles.dossierBlock}>
-            <Stamp>Objective</Stamp>
+            <Stamp>{t('game.brief.objective')}</Stamp>
             <p className={styles.objective}>
               <IconTarget size={16} />
               <span>{level.brief.objective}</span>
@@ -56,11 +60,11 @@ export function BriefPanel({
       <div className={styles.actions}>
         {engineStatus === 'loading' && (
           <span className={styles.prep} aria-live="polite">
-            prepping the gear…
+            {t('game.brief.prepping')}
           </span>
         )}
         <Button variant="primary" onClick={onTakeJob} iconRight={<IconArrowRight size={18} />}>
-          Take the job
+          {t('game.brief.takeJob')}
         </Button>
       </div>
     </section>

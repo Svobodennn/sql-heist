@@ -3,6 +3,7 @@
 import type { ExecutionResult, SqlCell } from '@/lib/engine/sqlRunner'
 import type { WinCondition } from '@/lib/schema/level'
 import { cx } from '../lib/cx'
+import { useTranslation } from '@/app/i18n/useTranslation'
 import { IconAlert, IconLootTag } from './icons'
 import styles from './ResultGrid.module.css'
 
@@ -66,9 +67,10 @@ function computeLoot(
 }
 
 export function ResultGrid({ result, winCondition, loading, className }: ResultGridProps) {
+  const { t } = useTranslation()
   if (loading) {
     return (
-      <div className={cx(styles.wrap, className)} aria-busy="true" aria-label="Running query">
+      <div className={cx(styles.wrap, className)} aria-busy="true" aria-label={t('game.result.running')}>
         {[0, 1, 2].map((i) => (
           <div key={i} className={styles.skeletonRow}>
             <span className={styles.shimmer} />
@@ -81,7 +83,7 @@ export function ResultGrid({ result, winCondition, loading, className }: ResultG
   if (!result) {
     return (
       <div className={cx(styles.wrap, styles.empty, className)}>
-        <p className={styles.emptyText}>No run yet — inject a payload and hit the wire.</p>
+        <p className={styles.emptyText}>{t('game.result.noRun')}</p>
       </div>
     )
   }
@@ -91,12 +93,10 @@ export function ResultGrid({ result, winCondition, loading, className }: ResultG
       <div className={cx(styles.wrap, styles.error, className)} role="alert">
         <p className={styles.errorHead}>
           <IconAlert size={16} />
-          <span>ERROR READOUT</span>
+          <span>{t('game.result.errorHead')}</span>
         </p>
         <pre className={cx('mono', styles.errorMsg)}>{result.error}</pre>
-        <p className={styles.errorGloss}>
-          The mark choked on that. Read what it spat back — it&apos;s telling you where you slipped.
-        </p>
+        <p className={styles.errorGloss}>{t('game.result.errorGloss')}</p>
       </div>
     )
   }
@@ -104,9 +104,7 @@ export function ResultGrid({ result, winCondition, loading, className }: ResultG
   if (result.rowCount === 0) {
     return (
       <div className={cx(styles.wrap, styles.empty, className)}>
-        <p className={styles.emptyText}>
-          Nothing worth taking. It ran clean — you&apos;re reaching into the wrong drawer.
-        </p>
+        <p className={styles.emptyText}>{t('game.result.nothing')}</p>
       </div>
     )
   }
@@ -142,7 +140,7 @@ export function ResultGrid({ result, winCondition, loading, className }: ResultG
                         {isLootRow && c === 0 && (
                           <span className={styles.lootTag}>
                             <IconLootTag size={13} />
-                            loot
+                            {t('game.result.loot')}
                           </span>
                         )}
                       </td>

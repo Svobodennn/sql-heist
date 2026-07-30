@@ -27,6 +27,8 @@ export const DEBRIEF_INTRO =
   "Every job you just pulled, somebody left a door open. Here's how it should've been locked. Learn it — next time you might be the one guarding it."
 
 // §7 — "Call the Fixer" tray: 3 tiers, opened strictly in order.
+// WS4: the UI now renders these via the i18n catalog (messages → game.hint.tier /
+// game.stars.tier); these constants are kept as the English record of the copy.
 export const HINT_TIER_LABELS = ['A word', 'The method', 'The play'] as const
 
 // §7 — star-tier vocabulary (paired with the star icons so meaning never rides

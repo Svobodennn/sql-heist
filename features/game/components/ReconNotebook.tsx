@@ -3,6 +3,7 @@
 import type { ReconNotebook as Notebook } from '../lib/reconNotebook'
 import { notebookSize } from '../lib/reconNotebook'
 import { cx } from '../lib/cx'
+import { useTranslation } from '@/app/i18n/useTranslation'
 import { IconChevronDown, IconNotebook } from './icons'
 import styles from './ReconNotebook.module.css'
 
@@ -12,6 +13,7 @@ import styles from './ReconNotebook.module.css'
 // the ExploitConsole (features/game/lib/reconNotebook); this only renders it.
 // Column names are level/engine strings, but rendered as escaped text regardless.
 export function ReconNotebook({ notebook }: { notebook: Notebook }) {
+  const { t } = useTranslation()
   const size = notebookSize(notebook)
   const discovered = notebook.discoveredColumns
 
@@ -20,15 +22,18 @@ export function ReconNotebook({ notebook }: { notebook: Notebook }) {
       <summary className={styles.summary}>
         <IconChevronDown size={16} className={styles.chevron} />
         <IconNotebook size={16} />
-        <span className={styles.summaryText}>Recon notebook</span>
-        <span className={cx('mono', styles.count)} aria-label={`${size.columns} facts logged`}>
+        <span className={styles.summaryText}>{t('game.notebook.title')}</span>
+        <span
+          className={cx('mono', styles.count)}
+          aria-label={t('game.notebook.factsAria', { n: size.columns })}
+        >
           {size.columns}
         </span>
       </summary>
 
       <div className={styles.body}>
-        <section aria-label="Advertised schema">
-          <p className={styles.sectionHead}>Advertised</p>
+        <section aria-label={t('game.notebook.advertisedAria')}>
+          <p className={styles.sectionHead}>{t('game.notebook.advertised')}</p>
           <ul className={styles.tables}>
             {notebook.tables.map((tbl) => (
               <li key={tbl.table} className={styles.table}>
@@ -45,8 +50,8 @@ export function ReconNotebook({ notebook }: { notebook: Notebook }) {
           </ul>
         </section>
 
-        <section aria-label="Columns discovered from results">
-          <p className={styles.sectionHead}>Pried out of results</p>
+        <section aria-label={t('game.notebook.priedAria')}>
+          <p className={styles.sectionHead}>{t('game.notebook.pried')}</p>
           {discovered.length > 0 ? (
             <ul className={styles.discovered}>
               {discovered.map((col) => (
@@ -56,10 +61,7 @@ export function ReconNotebook({ notebook }: { notebook: Notebook }) {
               ))}
             </ul>
           ) : (
-            <p className={styles.emptyNote}>
-              Nothing yet. Make the database name a column it never advertised — it&apos;ll land
-              here.
-            </p>
+            <p className={styles.emptyNote}>{t('game.notebook.empty')}</p>
           )}
         </section>
       </div>

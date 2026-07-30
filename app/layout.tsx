@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { Geist, Geist_Mono, Space_Grotesk } from 'next/font/google'
 import { Navbar } from './components/Navbar'
 import { Footer } from './components/Footer'
+import { I18nProvider } from './i18n/I18nProvider'
 import styles from './layout.module.css'
 import './globals.css'
 
@@ -39,13 +40,15 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <a href="#main-content" className={styles.skipLink}>
           Skip to content
         </a>
-        <div className={styles.chrome}>
-          <Navbar />
-          <div id="main-content" tabIndex={-1} className={styles.main}>
-            {children}
+        <I18nProvider>
+          <div className={styles.chrome}>
+            <Navbar />
+            <div id="main-content" tabIndex={-1} className={styles.main}>
+              {children}
+            </div>
+            <Footer />
           </div>
-          <Footer />
-        </div>
+        </I18nProvider>
       </body>
     </html>
   )

@@ -5,6 +5,7 @@ import { cx } from '../lib/cx'
 import { groupByAct } from '../lib/actBoard'
 import { rankForScore } from '../lib/narrative'
 import { isUnlocked, useProgress } from '../lib/useProgress'
+import { useTranslation } from '@/app/i18n/useTranslation'
 import { BadgeStrip } from './BadgeStrip'
 import { Stamp } from './Stamp'
 import { JobCard, type JobCardState } from './JobCard'
@@ -16,6 +17,7 @@ import styles from './JobBoard.module.css'
 // sections; with only the 3 MVP levels present, Act II simply doesn't render until
 // the parent merges the advanced levels (groupByAct returns non-empty acts only).
 export function JobBoard({ jobs }: { jobs: JobMeta[] }) {
+  const { t } = useTranslation()
   const { records, ready } = useProgress()
   const orderedIds = jobs.map((j) => j.id)
   const sections = groupByAct(jobs)
@@ -34,17 +36,15 @@ export function JobBoard({ jobs }: { jobs: JobMeta[] }) {
     <section className={styles.wrap}>
       <header className={styles.header}>
         <div>
-          <Stamp>THE BOARD</Stamp>
-          {/* Heading text is asserted by tests/e2e/support.ts — keep it stable. */}
-          <h1 className={styles.title}>Three jobs. One score.</h1>
-          <p className={styles.sub}>
-            Pull each one off with a SQL injection, then learn the fix. Progress stays on this
-            device.
-          </p>
+          <Stamp>{t('game.board.stamp')}</Stamp>
+          {/* Heading text is asserted by tests/e2e/support.ts — the en catalog value
+              for game.board.title is pinned to "Three jobs. One score." for that. */}
+          <h1 className={styles.title}>{t('game.board.title')}</h1>
+          <p className={styles.sub}>{t('game.board.sub')}</p>
         </div>
         {totalScore > 0 && (
           <div className={styles.rank}>
-            <Stamp>Rank</Stamp>
+            <Stamp>{t('game.board.rank')}</Stamp>
             <p className={styles.rankName}>{rankForScore(totalScore).name}</p>
             <span className={cx('mono', styles.rankScore)}>Σ {totalScore}</span>
           </div>

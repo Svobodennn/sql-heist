@@ -4,6 +4,7 @@ import type { JobMeta } from '../levels'
 import type { ProgressMap } from '../lib/useProgress'
 import { badgeSummary, computeBadges } from '../lib/badges'
 import { cx } from '../lib/cx'
+import { useTranslation } from '@/app/i18n/useTranslation'
 import { IconAward, IconCheck } from './icons'
 import { Stamp } from './Stamp'
 import styles from './BadgeStrip.module.css'
@@ -15,14 +16,15 @@ import styles from './BadgeStrip.module.css'
 // locked until the parent merges them — degrades gracefully. Meaning rides on
 // icon + label + an "earned/locked" word, never on color alone (§11).
 export function BadgeStrip({ metas, records }: { metas: JobMeta[]; records: ProgressMap }) {
+  const { t } = useTranslation()
   const completed = new Set(Object.keys(records).filter((id) => records[id]?.completed))
   const badges = computeBadges(metas, completed)
   const { earned, total } = badgeSummary(badges)
 
   return (
-    <section className={styles.wrap} aria-label={`Technique mastery: ${earned} of ${total}`}>
+    <section className={styles.wrap} aria-label={t('game.badges.aria', { earned, total })}>
       <div className={styles.head}>
-        <Stamp>Mastery</Stamp>
+        <Stamp>{t('game.badges.mastery')}</Stamp>
         <span className={cx('mono', styles.tally)} aria-hidden="true">
           {earned}/{total}
         </span>
@@ -32,7 +34,10 @@ export function BadgeStrip({ metas, records }: { metas: JobMeta[]; records: Prog
           <li
             key={b.id}
             className={cx(styles.badge, b.earned ? styles.earned : styles.locked)}
-            aria-label={`${b.label} — ${b.earned ? 'mastered' : 'locked'}`}
+            aria-label={t('game.badges.itemAria', {
+              label: b.label,
+              status: b.earned ? t('game.badges.mastered') : t('game.badges.locked'),
+            })}
           >
             <span className={styles.icon} aria-hidden="true">
               {b.earned ? <IconCheck size={15} /> : <IconAward size={15} />}

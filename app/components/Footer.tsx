@@ -3,29 +3,30 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Logo } from './Logo'
+import { useTranslation } from '@/app/i18n/useTranslation'
 import styles from './Footer.module.css'
 
 const COLUMNS = [
   {
-    heading: 'Pull a job',
+    headingKey: 'footer.colPull',
     links: [
-      { href: '/', label: 'Home' },
-      { href: '/jobs', label: 'The board' },
+      { href: '/', key: 'footer.linkHome' },
+      { href: '/jobs', key: 'footer.linkBoard' },
     ],
   },
   {
-    heading: 'Learn the trade',
+    headingKey: 'footer.colLearn',
     links: [
-      { href: '/help', label: 'How it works' },
-      { href: '/faq', label: 'FAQ' },
+      { href: '/help', key: 'footer.linkHelp' },
+      { href: '/faq', key: 'footer.linkFaq' },
     ],
   },
   {
-    heading: 'The fine print',
+    headingKey: 'footer.colFine',
     links: [
-      { href: '/privacy', label: 'Privacy' },
-      { href: '/terms', label: 'Terms' },
-      { href: '/contact', label: 'Contact' },
+      { href: '/privacy', key: 'footer.linkPrivacy' },
+      { href: '/terms', key: 'footer.linkTerms' },
+      { href: '/contact', key: 'footer.linkContact' },
     ],
   },
 ] as const
@@ -35,6 +36,7 @@ const COLUMNS = [
 // board (/jobs) and every other route keep it.
 export function Footer() {
   const pathname = usePathname()
+  const { t } = useTranslation()
   if (/^\/jobs\/[^/]+/.test(pathname)) return null
 
   return (
@@ -46,20 +48,18 @@ export function Footer() {
               <Logo size={20} />
               SQL&nbsp;HEIST
             </span>
-            <p className={styles.tag}>
-              The database is real. The crime isn&apos;t. Learn the break-in, then learn the lock.
-            </p>
+            <p className={styles.tag}>{t('footer.tagline')}</p>
           </div>
 
-          <nav className={styles.cols} aria-label="Footer">
+          <nav className={styles.cols} aria-label={t('footer.aria')}>
             {COLUMNS.map((col) => (
-              <div key={col.heading} className={styles.col}>
-                <h2 className={styles.colHeading}>{col.heading}</h2>
+              <div key={col.headingKey} className={styles.col}>
+                <h2 className={styles.colHeading}>{t(col.headingKey)}</h2>
                 <ul>
                   {col.links.map((link) => (
                     <li key={link.href}>
                       <Link href={link.href} className={styles.link}>
-                        {link.label}
+                        {t(link.key)}
                       </Link>
                     </li>
                   ))}
@@ -70,15 +70,15 @@ export function Footer() {
         </div>
 
         <div className={styles.bottom}>
-          <span>&copy; {new Date().getFullYear()} SQL Heist</span>
-          <span className={styles.note}>Runs entirely in your browser. No server, no net.</span>
+          <span>{t('footer.copyright', { year: new Date().getFullYear() })}</span>
+          <span className={styles.note}>{t('footer.note')}</span>
           <a
             className={styles.alsoTry}
             href="https://www.sqlnoir.com"
             target="_blank"
             rel="noopener noreferrer"
           >
-            also try <strong>SQL&nbsp;Noir</strong> ↗
+            {t('footer.alsoTry')} <strong>SQL&nbsp;Noir</strong> ↗
           </a>
         </div>
       </div>

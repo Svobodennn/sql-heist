@@ -3,6 +3,7 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import type { InputField, SurfaceKind } from '@/lib/schema/level'
 import { cx } from '../lib/cx'
+import { useTranslation } from '@/app/i18n/useTranslation'
 import { Button } from './Button'
 import styles from './MimicSurface.module.css'
 
@@ -90,8 +91,13 @@ export function MimicSurface({
   interactive,
   className,
 }: MimicSurfaceProps) {
+  const { t } = useTranslation()
   const submitLabel =
-    surface === 'login-form' ? 'Sign in' : surface === 'search-box' ? 'Search' : 'Submit'
+    surface === 'login-form'
+      ? t('game.mimic.signIn')
+      : surface === 'search-box'
+        ? t('game.mimic.search')
+        : t('game.mimic.submit')
 
   return (
     <form
@@ -137,12 +143,7 @@ export function MimicSurface({
         {submitLabel}
       </Button>
 
-      {!interactive && (
-        <p className={styles.reconNote}>
-          This form talks to a query behind the counter. What happens if your input isn&apos;t
-          treated as just a name?
-        </p>
-      )}
+      {!interactive && <p className={styles.reconNote}>{t('game.mimic.reconNote')}</p>}
     </form>
   )
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from '@/app/i18n/useTranslation'
 import { cx } from './cx'
 import { IconShare, IconCheck, IconLink } from './icons'
 import styles from './ShareButton.module.css'
@@ -51,6 +52,7 @@ async function copyText(text: string): Promise<boolean> {
 // Deferred: needs the SEO/OG work-stream and a canonical deploy origin. This
 // button ships the link-share now; the card is additive and non-blocking.
 export function ShareButton({ className, compact = false }: { className?: string; compact?: boolean }) {
+  const { t } = useTranslation()
   const [status, setStatus] = useState<Status>('idle')
   const resetTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
@@ -80,7 +82,11 @@ export function ShareButton({ className, compact = false }: { className?: string
   }, [flash])
 
   const label =
-    status === 'copied' ? 'Link copied' : status === 'error' ? 'Press to copy' : 'Share'
+    status === 'copied'
+      ? t('share.copied')
+      : status === 'error'
+        ? t('share.error')
+        : t('share.share')
 
   const Icon = status === 'copied' ? IconCheck : compact ? IconLink : IconShare
 
@@ -95,7 +101,7 @@ export function ShareButton({ className, compact = false }: { className?: string
       <span>{label}</span>
       {/* Announce the copy result to assistive tech without moving focus. */}
       <span className="sr-only" role="status" aria-live="polite">
-        {status === 'copied' ? 'Link copied to clipboard' : status === 'error' ? 'Could not copy the link' : ''}
+        {status === 'copied' ? t('share.srCopied') : status === 'error' ? t('share.srError') : ''}
       </span>
     </button>
   )

@@ -11,6 +11,7 @@ import {
   type SignalTone,
 } from '../lib/signalView'
 import { cx } from '../lib/cx'
+import { useTranslation } from '@/app/i18n/useTranslation'
 import { ResultGrid } from './ResultGrid'
 import { IconAlert, IconCheck, IconStack, IconTimer, IconX } from './icons'
 import styles from './SignalPanel.module.css'
@@ -74,6 +75,7 @@ function OracleReadout({ signal }: { signal: Extract<RunSignal, { kind: 'oracle'
 }
 
 function TimingMeter({ signal }: { signal: Extract<RunSignal, { kind: 'timing' }> }) {
+  const { t } = useTranslation()
   const v = timingView(signal)
   return (
     <div
@@ -83,7 +85,7 @@ function TimingMeter({ signal }: { signal: Extract<RunSignal, { kind: 'timing' }
     >
       <p className={styles.head}>
         <IconTimer size={16} />
-        <span>Timing oracle</span>
+        <span>{t('game.signal.timingOracle')}</span>
         <span className={cx('mono', styles.headValue)}>
           {v.delayMs} ms · {v.word}
         </span>
@@ -99,15 +101,16 @@ function TimingMeter({ signal }: { signal: Extract<RunSignal, { kind: 'timing' }
         <span className={styles.meterMarker} />
       </div>
       <p className={styles.meterScale} aria-hidden="true">
-        <span>fast</span>
-        <span className="mono">threshold {v.threshold} ms</span>
-        <span>slow</span>
+        <span>{t('game.signal.fast')}</span>
+        <span className="mono">{t('game.signal.threshold', { n: v.threshold })}</span>
+        <span>{t('game.signal.slow')}</span>
       </p>
     </div>
   )
 }
 
 function ErrorLeak({ signal }: { signal: Extract<RunSignal, { kind: 'error' }> }) {
+  const { t } = useTranslation()
   const v = errorView(signal)
   return (
     <div
@@ -117,8 +120,8 @@ function ErrorLeak({ signal }: { signal: Extract<RunSignal, { kind: 'error' }> }
     >
       <p className={styles.head}>
         <IconAlert size={16} />
-        <span>Error leak</span>
-        {v.leaked && <span className={styles.leakTag}>structure exposed</span>}
+        <span>{t('game.signal.errorLeak')}</span>
+        {v.leaked && <span className={styles.leakTag}>{t('game.signal.structureExposed')}</span>}
       </p>
       <pre className={cx('mono', styles.errorMsg)}>
         {v.spans.map((span, i) =>
@@ -132,15 +135,14 @@ function ErrorLeak({ signal }: { signal: Extract<RunSignal, { kind: 'error' }> }
         )}
       </pre>
       <p className={styles.gloss}>
-        {v.leaked
-          ? 'The message spat back a name it should never reveal — that leak is the whole point.'
-          : 'The mark choked. Read what it spat back; the error itself is the tell.'}
+        {v.leaked ? t('game.signal.errorLeakedGloss') : t('game.signal.errorGloss')}
       </p>
     </div>
   )
 }
 
 function SideEffectReadout({ signal }: { signal: Extract<RunSignal, { kind: 'side-effect' }> }) {
+  const { t } = useTranslation()
   const v = sideEffectView(signal)
   return (
     <div
@@ -150,7 +152,7 @@ function SideEffectReadout({ signal }: { signal: Extract<RunSignal, { kind: 'sid
     >
       <p className={styles.head}>
         <IconStack size={16} />
-        <span>Side effect</span>
+        <span>{t('game.signal.sideEffect')}</span>
         <span className={cx('mono', styles.headValue)}>
           {v.statements} statement{v.statements === 1 ? '' : 's'}
         </span>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from 'react'
 import type { EngineStatus } from '../lib/useEngine'
+import { useTranslation } from '@/app/i18n/useTranslation'
 import { Button } from './Button'
 import { IconAlert } from './icons'
 import styles from './EngineLoader.module.css'
@@ -18,6 +19,7 @@ export function EngineLoader({
   onRetry: () => void
   children: ReactNode
 }) {
+  const { t } = useTranslation()
   const [showLoading, setShowLoading] = useState(false)
 
   useEffect(() => {
@@ -33,12 +35,10 @@ export function EngineLoader({
     return (
       <div className={styles.error} role="alert">
         <IconAlert size={20} />
-        <p className={styles.errorTitle}>Line&apos;s dead.</p>
-        <p className={styles.errorBody}>
-          Couldn&apos;t reach the job — check your connection and try the line again.
-        </p>
+        <p className={styles.errorTitle}>{t('game.engine.dead')}</p>
+        <p className={styles.errorBody}>{t('game.engine.deadBody')}</p>
         <Button variant="ghost" onClick={onRetry}>
-          Try the line again
+          {t('game.engine.retry')}
         </Button>
       </div>
     )
@@ -50,7 +50,7 @@ export function EngineLoader({
       {status === 'loading' && showLoading && (
         <p className={styles.warming} aria-live="polite">
           <span className={styles.spinner} aria-hidden="true" />
-          Prepping the gear…
+          {t('game.engine.warming')}
         </p>
       )}
     </>

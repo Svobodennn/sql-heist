@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import type { Phase } from '../lib/phaseMachine'
 import { cx } from '../lib/cx'
+import { useTranslation } from '@/app/i18n/useTranslation'
 import { IconArrowLeft, IconBoard, IconMute, IconStar, IconTimer, IconVolume } from './icons'
 import { PhaseStepper } from './PhaseStepper'
 import styles from './TopBar.module.css'
@@ -40,20 +41,21 @@ export function TopBar({
   backLabel,
   onBack,
 }: TopBarProps) {
+  const { t } = useTranslation()
   const timerActive = phase === 'exploit'
 
   return (
     <header className={styles.bar}>
       <div className={cx('container', styles.inner)}>
         <div className={styles.left}>
-          <Link href="/jobs" className={styles.iconBtn} aria-label="Leave the job — back to The Board">
+          <Link href="/jobs" className={styles.iconBtn} aria-label={t('game.topbar.leave')}>
             <IconBoard size={18} />
           </Link>
           {canBack && backLabel && (
             <button
               type="button"
               className={styles.iconBtn}
-              aria-label={`Back to ${backLabel}`}
+              aria-label={t('game.topbar.back', { label: backLabel })}
               onClick={onBack}
             >
               <IconArrowLeft size={18} />
@@ -71,14 +73,14 @@ export function TopBar({
         <div className={styles.right}>
           <span
             className={cx(styles.timer, timerActive && styles.timerActive)}
-            aria-label={`Time on target ${formatTime(elapsedSec)}`}
+            aria-label={t('game.topbar.time', { time: formatTime(elapsedSec) })}
           >
             <IconTimer size={15} />
             <span className="mono">{formatTime(elapsedSec)}</span>
           </span>
 
           {score != null && (
-            <span className={styles.score} aria-label={`Score ${score}`}>
+            <span className={styles.score} aria-label={t('game.topbar.score', { score })}>
               <IconStar size={15} filled />
               <span className="mono">{score}</span>
             </span>
@@ -88,7 +90,7 @@ export function TopBar({
             type="button"
             className={styles.iconBtn}
             aria-pressed={muted}
-            aria-label={muted ? 'Unmute' : 'Mute'}
+            aria-label={muted ? t('game.topbar.unmute') : t('game.topbar.mute')}
             onClick={onToggleMute}
           >
             {muted ? <IconMute size={18} /> : <IconVolume size={18} />}

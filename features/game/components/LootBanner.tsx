@@ -5,6 +5,7 @@ import type { Level } from '@/lib/schema/level'
 import type { ExecutionResult } from '@/lib/engine/sqlRunner'
 import { cx } from '../lib/cx'
 import { getJobNarrative } from '../lib/narrative'
+import { useTranslation } from '@/app/i18n/useTranslation'
 import { Button } from './Button'
 import { ResultGrid } from './ResultGrid'
 import { ScoreBreakdown } from './ScoreBreakdown'
@@ -38,10 +39,11 @@ export function LootBanner({
   stars,
   onDebrief,
 }: LootBannerProps) {
+  const { t } = useTranslation()
   const reduce = useReducedMotion()
   const payloadEntries = Object.entries(winningInputs).filter(([, v]) => v.trim().length > 0)
   const narrative = getJobNarrative(level.id)
-  const headline = narrative?.loot.headline ?? 'Loot secured'
+  const headline = narrative?.loot.headline ?? t('game.loot.secured')
   const starFlavor = narrative?.loot.stars[stars]
 
   return (
@@ -60,7 +62,7 @@ export function LootBanner({
         {narrative && <p className={cx('prose', styles.fixerLine)}>{narrative.loot.fixer}</p>}
 
         <div className={styles.block}>
-          <Stamp>Winning payload</Stamp>
+          <Stamp>{t('game.loot.winningPayload')}</Stamp>
           <ul className={styles.payload}>
             {payloadEntries.map(([field, value]) => (
               <li key={field} className="mono">
@@ -72,7 +74,7 @@ export function LootBanner({
         </div>
 
         <div className={styles.block}>
-          <Stamp>Extracted</Stamp>
+          <Stamp>{t('game.loot.extracted')}</Stamp>
           <ResultGrid result={result} winCondition={level.winCondition} />
         </div>
 
@@ -86,14 +88,14 @@ export function LootBanner({
 
         {starFlavor && (
           <p className={styles.starFlavor}>
-            <span className={styles.fixerTag}>The Fixer</span>
+            <span className={styles.fixerTag}>{t('game.debrief.fixerTag')}</span>
             {starFlavor}
           </p>
         )}
 
         <div className={styles.actions}>
           <Button variant="primary" onClick={onDebrief} iconRight={<IconArrowRight size={18} />}>
-            See how they slipped
+            {t('game.loot.seeSlipped')}
           </Button>
         </div>
       </m.div>

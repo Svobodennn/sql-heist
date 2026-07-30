@@ -1,8 +1,15 @@
 // Landing content + the one piece of marquee logic, kept out of the JSX so the
 // page component stays a thin, static Server Component and so the copy/loop
-// invariants are unit-testable in the node test env (no jsdom needed). Prose
-// lives here as plain strings and is rendered via {expressions}, which also
-// sidesteps react/no-unescaped-entities in page.tsx.
+// invariants are unit-testable in the node test env (no jsdom needed).
+//
+// WS4: the display copy now lives in the i18n catalog (messages/en.json → `home`)
+// and is read here at build time in the default locale. The landing is a Server
+// Component under `output: 'export'`, so it renders in the default locale (en) —
+// these structures stay the single shape the page consumes, now translation-ready.
+// Injection PAYLOADS stay literal here: they are SQL (code), never localized.
+import en from '@/messages/en.json'
+
+const H = en.home
 
 export type TickerKind = 'payload' | 'line'
 export type TickerItem = { text: string; kind: TickerKind }
@@ -10,20 +17,21 @@ export type TickerItem = { text: string; kind: TickerKind }
 // The wire never stops talking. Real injection payloads (crimson = ATTACK in the
 // Semantic Color Law) interleaved with in-world heist lines. The whole marquee
 // band is decorative (aria-hidden), so this is atmosphere, not page content.
+// Payloads are code (kept verbatim); the in-world lines come from the catalog.
 export const TICKER_ITEMS: readonly TickerItem[] = [
   { text: "' OR '1'='1' --", kind: 'payload' },
-  { text: 'The door was never locked.', kind: 'line' },
+  { text: H.ticker['0'], kind: 'line' },
   { text: 'UNION SELECT username, password FROM users --', kind: 'payload' },
-  { text: 'Read the wire. Run the payload.', kind: 'line' },
+  { text: H.ticker['1'], kind: 'line' },
   { text: "'; DROP TABLE sessions --", kind: 'payload' },
-  { text: "Meridian keeps everyone's secrets but its own.", kind: 'line' },
+  { text: H.ticker['2'], kind: 'line' },
   { text: "' UNION SELECT name, sql FROM sqlite_master --", kind: 'payload' },
-  { text: 'Learn the break-in. Build the lock.', kind: 'line' },
+  { text: H.ticker['3'], kind: 'line' },
   { text: "admin' --", kind: 'payload' },
-  { text: 'No real target. No net but the sandbox.', kind: 'line' },
+  { text: H.ticker['4'], kind: 'line' },
   { text: "1' AND '1'='2", kind: 'payload' },
-  { text: 'Every query is a door. Some are ajar.', kind: 'line' },
-] as const
+  { text: H.ticker['5'], kind: 'line' },
+]
 
 // A seamless CSS marquee renders the track twice and animates exactly -50%, so
 // the loop point is invisible. This helper guarantees the doubling that the
@@ -36,72 +44,60 @@ export type HeistStep = { title: string; blurb: string }
 
 // The five moves, mirrored from /help but tightened to one line each.
 export const HEIST_LOOP: readonly HeistStep[] = [
-  { title: 'Brief', blurb: 'The Fixer names the mark and the take — never the method.' },
-  { title: 'Recon', blurb: 'Case the target. Find where your input actually lands.' },
-  { title: 'Exploit', blurb: 'Type into the form, watch the live query your input builds, then run it.' },
-  { title: 'Loot', blurb: 'The take and your score. Nobody stopped you — that is the point.' },
-  { title: 'Debrief', blurb: 'The vulnerable code beside the fix that closes it. This is defence.' },
-] as const
+  { title: H.loop['0'].title, blurb: H.loop['0'].blurb },
+  { title: H.loop['1'].title, blurb: H.loop['1'].blurb },
+  { title: H.loop['2'].title, blurb: H.loop['2'].blurb },
+  { title: H.loop['3'].title, blurb: H.loop['3'].blurb },
+  { title: H.loop['4'].title, blurb: H.loop['4'].blurb },
+]
 
 export type FaqTeaser = { q: string; a: string }
 
 // A short teaser set; the full list lives on /faq.
 export const FAQ_TEASERS: readonly FaqTeaser[] = [
-  {
-    q: 'Is this legal?',
-    a: 'Yes. Every job runs entirely in your browser against a sandboxed SQLite database that ships with the game. No real systems, no network calls — nothing to break but the practice target.',
-  },
-  {
-    q: 'Do I need to install anything?',
-    a: 'No. It runs in a modern browser. The SQLite engine loads on demand the first time you need it — no accounts, no downloads, no setup.',
-  },
-  {
-    q: 'Do I need to know SQL already?',
-    a: 'It helps. The game assumes you can read a SELECT and roughly follow a WHERE clause. It teaches you injection — not SQL from zero.',
-  },
-  {
-    q: 'Are you teaching people to attack real websites?',
-    a: 'We teach how injection works so you can recognise it and close it — every job ends with the fix, not the break-in. Use it only on systems you own or are allowed to test.',
-  },
-] as const
+  { q: H.faqTeasers['0'].q, a: H.faqTeasers['0'].a },
+  { q: H.faqTeasers['1'].q, a: H.faqTeasers['1'].a },
+  { q: H.faqTeasers['2'].q, a: H.faqTeasers['2'].a },
+  { q: H.faqTeasers['3'].q, a: H.faqTeasers['3'].a },
+]
 
-// All landing prose in one place. Apostrophes are avoided in inline JSX literals
-// by routing text through here (rendered as expressions).
+// All landing prose in one place, sourced from the catalog and rendered via
+// {expressions} (which also sidesteps react/no-unescaped-entities in page.tsx).
 export const HOME_COPY = {
   hero: {
-    eyebrow: 'Meridian Holdings · after hours',
-    title: 'SQL Heist',
-    tagline: 'Every system has a door somebody forgot to lock.',
-    lede: 'You find them. A real database is on the other side — no simulation, no safety net but the sandbox. Pull three jobs. Then learn how they should have stopped you.',
-    primaryCta: 'Take the first job',
-    secondaryCta: 'How it works',
+    eyebrow: H.hero.eyebrow,
+    title: H.hero.title,
+    tagline: H.hero.tagline,
+    lede: H.hero.lede,
+    primaryCta: H.hero.primaryCta,
+    secondaryCta: H.hero.secondaryCta,
   },
   what: {
-    eyebrow: 'Case File · 001',
-    stamp: 'Classified',
-    title: 'Learn the break-in to learn the lock',
-    lede: 'SQL Heist is an educational SQL-injection game. You pull the attack against a real database, then study the code that should have stopped you — offence teaches defence better than any lecture.',
+    eyebrow: H.what.eyebrow,
+    stamp: H.what.stamp,
+    title: H.what.title,
+    lede: H.what.lede,
     facts: [
-      { k: 'Where', v: '100% in your browser. Nothing ever touches the network.' },
-      { k: 'Against', v: 'A real SQLite engine, seeded fresh for every single run.' },
-      { k: 'Risk', v: 'No real target — the only thing you can break is the sandbox.' },
+      { k: H.what.facts['0'].k, v: H.what.facts['0'].v },
+      { k: H.what.facts['1'].k, v: H.what.facts['1'].v },
+      { k: H.what.facts['2'].k, v: H.what.facts['2'].v },
     ],
-    safe: 'Safe by design — no accounts, no downloads, no setup.',
+    safe: H.what.safe,
   },
   how: {
-    eyebrow: 'The Job',
-    title: 'Five moves, every time',
-    lede: 'Every job runs the same arc, so you always know exactly where you are in it.',
+    eyebrow: H.how.eyebrow,
+    title: H.how.title,
+    lede: H.how.lede,
   },
   faq: {
-    eyebrow: 'Straight Answers',
-    title: 'Before your first job',
-    more: 'Read every answer the Fixer gives',
+    eyebrow: H.faq.eyebrow,
+    title: H.faq.title,
+    more: H.faq.more,
   },
   closer: {
-    fixerName: 'The Fixer',
-    fixerLine: '“Three jobs. You keep what you learn — Meridian keeps the bill.”',
-    title: 'The door is open. Walk through it.',
-    cta: 'Take the first job',
+    fixerName: H.closer.fixerName,
+    fixerLine: H.closer.fixerLine,
+    title: H.closer.title,
+    cta: H.closer.cta,
   },
-} as const
+}

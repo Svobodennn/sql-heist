@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ContentPage } from '@/app/components/ContentPage'
 import { Callout, LegalSection } from '@/app/components/content-blocks'
+import { getServerTranslator } from '@/app/i18n/server'
 
 export const metadata: Metadata = {
   title: 'Privacy — SQL Heist',
@@ -10,12 +11,13 @@ export const metadata: Metadata = {
 }
 
 export default function PrivacyPage() {
+  const t = getServerTranslator()
   return (
     <ContentPage
-      eyebrow="The Fine Print"
-      title="Privacy"
+      eyebrow={t('privacy.eyebrow')}
+      title={t('privacy.title')}
       updated="2026-07-30"
-      lead="Short version: we don't collect you. The long version is below, and it's still short."
+      lead={t('privacy.lead')}
     >
       <Callout label="At a glance">
         <p>

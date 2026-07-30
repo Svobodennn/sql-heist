@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react'
 import type { CodeSnippet } from '@/lib/schema/level'
 import { nextTabIndex, type LanguageGroup } from '../lib/secureCode'
 import { cx } from '../lib/cx'
+import { useTranslation } from '@/app/i18n/useTranslation'
 import { IconLock, IconLockBroken } from './icons'
 import { LangIcon } from './langIcons'
 import styles from './CodeCompare.module.css'
@@ -65,6 +66,7 @@ export function CodeCompare({
   vulnerableGroups: LanguageGroup[]
   secureGroups: LanguageGroup[]
 }) {
+  const { t } = useTranslation()
   const baseId = useId()
   const [lang, setLang] = useState(0) // first language default-selected
   const [fw, setFw] = useState(0) // its first framework default-selected
@@ -154,7 +156,7 @@ export function CodeCompare({
               <div
                 ref={scrollerRef}
                 role="tablist"
-                aria-label="Code stack — language"
+                aria-label={t('game.compare.langAria')}
                 aria-orientation="horizontal"
                 className={styles.langScroller}
                 onKeyDown={onLangKeyDown}
@@ -193,7 +195,7 @@ export function CodeCompare({
           {multiFw && (
             <div
               role="tablist"
-              aria-label={`Code stack — ${group?.name ?? ''} framework`}
+              aria-label={t('game.compare.fwAria', { name: group?.name ?? '' })}
               aria-orientation="horizontal"
               className={styles.fwBar}
               onKeyDown={onFwKeyDown}
@@ -225,7 +227,7 @@ export function CodeCompare({
         <div className={cx(styles.panel, styles.vuln)}>
           <p className={styles.head}>
             <IconLockBroken size={16} />
-            <span>Vulnerable</span>
+            <span>{t('game.compare.vulnerable')}</span>
             {vulnSnippet && <span className={styles.lang}>{vulnSnippet.language}</span>}
           </p>
           {vulnSnippet && (
@@ -238,15 +240,13 @@ export function CodeCompare({
               <CodeBlock code={vulnSnippet.code} />
             </div>
           )}
-          <p className={styles.caption}>
-            Input is concatenated into the query — data becomes code.
-          </p>
+          <p className={styles.caption}>{t('game.compare.vulnCaption')}</p>
         </div>
 
         <div className={cx(styles.panel, styles.secure)}>
           <p className={styles.head}>
             <IconLock size={16} />
-            <span>Secure</span>
+            <span>{t('game.compare.secure')}</span>
             {secureSnippet && <span className={styles.lang}>{secureSnippet.language}</span>}
           </p>
           {secureSnippet && (
@@ -259,7 +259,7 @@ export function CodeCompare({
               <CodeBlock code={secureSnippet.code} />
             </div>
           )}
-          <p className={styles.caption}>Input is bound as a parameter — it stays data.</p>
+          <p className={styles.caption}>{t('game.compare.secureCaption')}</p>
         </div>
       </div>
     </div>

@@ -1,6 +1,7 @@
 'use client'
 
 import { cx } from '../lib/cx'
+import { useTranslation } from '@/app/i18n/useTranslation'
 import { Stamp } from './Stamp'
 import styles from './HandlerCard.module.css'
 
@@ -17,12 +18,13 @@ export function HandlerCard({
   text: string
   className?: string
 }) {
+  const { t } = useTranslation()
   return (
     <div className={cx('panel', styles.card, className)}>
       <div className={styles.head}>
         <span className={styles.avatar} aria-hidden="true" />
         <div>
-          <Stamp>Handler</Stamp>
+          <Stamp>{t('game.brief.handler')}</Stamp>
           <p className={styles.codename}>{handler}</p>
         </div>
       </div>

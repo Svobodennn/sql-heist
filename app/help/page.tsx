@@ -4,6 +4,7 @@ import { ContentPage } from '@/app/components/ContentPage'
 import { Callout, Section } from '@/app/components/content-blocks'
 import { IconArrowRight } from '@/app/components/icons'
 import { cx } from '@/app/components/cx'
+import { getServerTranslator } from '@/app/i18n/server'
 import styles from '@/app/components/content.module.css'
 
 export const metadata: Metadata = {
@@ -36,20 +37,17 @@ const MOVES: { title: string; body: string }[] = [
 ]
 
 export default function HelpPage() {
+  const t = getServerTranslator()
   return (
-    <ContentPage
-      eyebrow="The Briefing"
-      title="How the job works"
-      lead="The Fixer doesn't repeat himself. Read it once, then go earn."
-    >
-      <Section title="Before you touch anything">
+    <ContentPage eyebrow={t('help.eyebrow')} title={t('help.title')} lead={t('help.lead')}>
+      <Section title={t('help.sectionBefore')}>
         <p>
           Every job points you at Meridian &mdash; a data broker that got rich holding other
           people&apos;s secrets. Behind each of its doors is a <strong>real SQLite database</strong>,
           running in your browser. No simulation, no scripted answers. You break in with a genuine SQL
           injection, then you learn exactly how they should have stopped you.
         </p>
-        <Callout label="Safe by design">
+        <Callout label={t('help.calloutSafe')}>
           <p>
             Nothing here reaches the network. The engine loads on demand, the database is seeded fresh
             for every run, and the only thing you can break is the practice target.
@@ -57,7 +55,7 @@ export default function HelpPage() {
         </Callout>
       </Section>
 
-      <Section title="The five moves">
+      <Section title={t('help.sectionMoves')}>
         <p>Every job runs the same arc. You always know where you are in it.</p>
         <ol className={styles.steps}>
           {MOVES.map((move) => (
@@ -75,7 +73,7 @@ export default function HelpPage() {
         </ol>
       </Section>
 
-      <Section title="Reading the wire">
+      <Section title={t('help.sectionWire')}>
         <p>
           The Exploit screen shows two faces of the same moment. On the left, the ordinary form the
           victim sees. On the right, the raw SQL your input becomes. Colour carries meaning &mdash; and
@@ -106,7 +104,7 @@ export default function HelpPage() {
         </ul>
       </Section>
 
-      <Section title="Controls">
+      <Section title={t('help.sectionControls')}>
         <ul className={styles.keyRows}>
           <li className={styles.keyRow}>
             <span>Run your payload with</span>
@@ -131,7 +129,7 @@ export default function HelpPage() {
         </ul>
       </Section>
 
-      <Section title="Stuck? Call the Fixer">
+      <Section title={t('help.sectionStuck')}>
         <p>
           Every job carries three hints, opened in order: a word, then the method, then the play. They
           cost score, so spend them like they&apos;re yours. Guessing blind is for amateurs and dead
@@ -139,7 +137,7 @@ export default function HelpPage() {
         </p>
       </Section>
 
-      <Section title="The point">
+      <Section title={t('help.sectionPoint')}>
         <p>
           This isn&apos;t a game about pulling off crimes. It&apos;s a game about seeing the one flaw
           that makes them possible &mdash; so you recognise it in the wild and shut it. You learn the
@@ -147,7 +145,7 @@ export default function HelpPage() {
         </p>
         <div className={styles.ctaRow}>
           <Link href="/jobs" className="btn btn--primary">
-            <span>See the board</span>
+            <span>{t('help.cta')}</span>
             <IconArrowRight size={18} />
           </Link>
         </div>
