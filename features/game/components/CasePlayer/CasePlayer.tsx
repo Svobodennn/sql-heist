@@ -26,8 +26,8 @@ import {
   useCaseProgress,
 } from '../../lib/useCaseProgress'
 import { useToasts } from '../../lib/useToasts'
-import { firstIncompleteIndex, objectiveAsLevel } from '../../lib/caseView'
-import { accrueDiscovered, initNotebook } from '../../lib/reconNotebook'
+import { firstIncompleteIndex, objectiveAsLevel, pullDetail } from '../../lib/caseView'
+import { accrueDiscovered, initNotebook, recordPull } from '../../lib/reconNotebook'
 import { BriefingGate } from '../BriefingGate'
 import { ObjectiveBanner } from '../ObjectiveBanner'
 import { ObjectivePayoff } from '../ObjectivePayoff'
@@ -177,6 +177,9 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
         const next = new Set(completedIds)
         next.add(obj.id)
         setCompletedIds(next)
+        // Log what this objective pulled so the notebook carries the loot forward —
+        // the "I got this, now I can do the next thing" thread across the case.
+        setNotebook((nb) => recordPull(nb, obj.payoff?.got ?? obj.goal, pullDetail(obj, result)))
       }
       // No silent auto-advance: land on the payoff for THIS objective (selectedIndex
       // stays put) — its winning run stays in uiByObjective for the "what we pulled".

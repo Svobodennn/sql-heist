@@ -1,5 +1,6 @@
 import type { Case, Objective } from '@/lib/schema/case'
 import type { Level, TechniqueId } from '@/lib/schema/level'
+import type { RunResult } from '@/lib/engine/sqlRunner'
 import { BADGE_TECHNIQUES } from './badges'
 
 // Pure case/objective view helpers (no React) — the case twin of the small
@@ -46,6 +47,27 @@ export function objectiveAsLevel(gameCase: Case, objective: Objective): Level {
 const TECHNIQUE_LABEL = new Map<TechniqueId, string>(
   BADGE_TECHNIQUES.map((b) => [b.id, b.label]),
 )
+// The notebook line an objective records on a win — a short, technique-aware note
+// of what it pulled (the loot flag, the oracle answer, the write that landed).
+export function pullDetail(objective: Objective, result: RunResult): string {
+  const win = objective.winCondition
+  switch (win.type) {
+    case 'flag-in-result':
+      return win.flag
+    case 'row-match':
+      return 'target row surfaced'
+    case 'blind-boolean':
+    case 'blind-timing':
+      return 'confirmed by the oracle'
+    case 'error-based':
+      return 'leaked through the error'
+    case 'stacked-queries':
+      return 'the stacked write landed'
+    case 'rows-returned':
+      return `${result.rowCount} row${result.rowCount === 1 ? '' : 's'} pulled`
+  }
+}
+
 export function techniqueLabel(id: TechniqueId): string {
   return TECHNIQUE_LABEL.get(id) ?? id
 }

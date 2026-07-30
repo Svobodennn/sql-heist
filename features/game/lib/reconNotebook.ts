@@ -17,6 +17,13 @@ export interface DiscoveredTable {
   columns: string[]
 }
 
+// A concrete thing an objective PULLED — the loot/data you now carry (a discovered
+// table name, a leaked PIN, an opened vault). Deduped by label (one per objective).
+export interface PulledFact {
+  label: string
+  detail: string
+}
+
 export interface ReconNotebook {
   // Advertised table names (lowercased), kept ONLY to decide what is genuinely new.
   // NEVER rendered — the recap already shows visibleSchema.
@@ -24,13 +31,23 @@ export interface ReconNotebook {
   // Tables (+ their columns) discovered from result VALUES, first-seen order, deduped
   // by table. This is the notebook's whole purpose: schema recon never listed.
   discovered: DiscoveredTable[]
+  // What each solved objective pulled — the ledger the player carries forward.
+  pulled: PulledFact[]
 }
 
 export function initNotebook(visibleSchema: VisibleTable[]): ReconNotebook {
   return {
     advertised: visibleSchema.map((t) => t.table.toLowerCase()),
     discovered: [],
+    pulled: [],
   }
+}
+
+// Record what an objective pulled (called on a win). Deduped by label so revisiting
+// a solved objective doesn't double-log. Returns the same ref when nothing is new.
+export function recordPull(nb: ReconNotebook, label: string, detail: string): ReconNotebook {
+  if (nb.pulled.some((p) => p.label === label)) return nb
+  return { ...nb, pulled: [...nb.pulled, { label, detail }] }
 }
 
 // Fold a clean run's result ROWS into the notebook. Scans every string cell for CREATE
@@ -60,9 +77,9 @@ export function accrueDiscovered(
 }
 
 // Distinct facts pried loose — drives the notebook's a11y summary count.
-export function notebookSize(nb: ReconNotebook): { tables: number; columns: number } {
+export function notebookSize(nb: ReconNotebook): { tables: number; columns: number; pulled: number } {
   const columns = nb.discovered.reduce((sum, t) => sum + t.columns.length, 0)
-  return { tables: nb.discovered.length, columns }
+  return { tables: nb.discovered.length, columns, pulled: nb.pulled.length }
 }
 
 // ── CREATE TABLE extraction ───────────────────────────────────────────────────────

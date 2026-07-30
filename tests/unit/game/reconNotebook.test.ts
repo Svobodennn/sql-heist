@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import type { VisibleTable } from '@/lib/schema/level'
-import { accrueDiscovered, initNotebook, notebookSize } from '@/features/game/lib/reconNotebook'
+import {
+  accrueDiscovered,
+  initNotebook,
+  notebookSize,
+  recordPull,
+} from '@/features/game/lib/reconNotebook'
 
 const visible: VisibleTable[] = [{ table: 'articles', columns: ['id', 'title', 'body'] }]
 
@@ -21,6 +26,32 @@ describe('initNotebook', () => {
     const nb = initNotebook(visible)
     expect(nb.advertised).toEqual(['articles'])
     expect(nb.discovered).toEqual([])
+    expect(nb.pulled).toEqual([])
+  })
+})
+
+describe('recordPull', () => {
+  it('appends a pulled fact and never mutates the input', () => {
+    const before = initNotebook(visible)
+    const after = recordPull(before, 'The staff roster', '5 rows pulled')
+    expect(after).not.toBe(before)
+    expect(before.pulled).toEqual([])
+    expect(after.pulled).toEqual([{ label: 'The staff roster', detail: '5 rows pulled' }])
+  })
+
+  it('dedupes by label (revisiting a solved objective) and returns the same reference', () => {
+    const first = recordPull(initNotebook(visible), "The manager's PIN", 'leaked through the error')
+    const second = recordPull(first, "The manager's PIN", 'leaked through the error')
+    expect(second).toBe(first)
+  })
+
+  it('keeps first-seen order across distinct pulls', () => {
+    const nb = recordPull(
+      recordPull(initNotebook(visible), 'A', 'first'),
+      'B',
+      'second',
+    )
+    expect(nb.pulled.map((p) => p.label)).toEqual(['A', 'B'])
   })
 })
 
@@ -91,10 +122,19 @@ describe('accrueDiscovered', () => {
 describe('notebookSize', () => {
   it('counts discovered tables and their columns for the a11y summary', () => {
     const nb = accrueDiscovered(initNotebook(visible), sqliteMasterRows)
-    expect(notebookSize(nb)).toEqual({ tables: 1, columns: 3 })
+    expect(notebookSize(nb)).toEqual({ tables: 1, columns: 3, pulled: 0 })
+  })
+
+  it('counts pulled facts alongside discovered schema', () => {
+    const nb = recordPull(
+      accrueDiscovered(initNotebook(visible), sqliteMasterRows),
+      'The blueprint registry',
+      '3 rows pulled',
+    )
+    expect(notebookSize(nb)).toEqual({ tables: 1, columns: 3, pulled: 1 })
   })
 
   it('is zero when nothing has been pried loose', () => {
-    expect(notebookSize(initNotebook(visible))).toEqual({ tables: 0, columns: 0 })
+    expect(notebookSize(initNotebook(visible))).toEqual({ tables: 0, columns: 0, pulled: 0 })
   })
 })

@@ -17,8 +17,9 @@ import styles from './ReconNotebook.module.css'
 export function ReconNotebook({ notebook }: { notebook: Notebook }) {
   const { t } = useTranslation()
   const size = notebookSize(notebook)
-  const facts = size.tables + size.columns
+  const facts = size.tables + size.columns + size.pulled
   const discovered = notebook.discovered
+  const pulled = notebook.pulled
 
   return (
     <details className={styles.wrap}>
@@ -35,9 +36,23 @@ export function ReconNotebook({ notebook }: { notebook: Notebook }) {
       </summary>
 
       <div className={styles.body}>
-        <section aria-label={t('game.notebook.priedAria')}>
-          <p className={styles.sectionHead}>{t('game.notebook.pried')}</p>
-          {discovered.length > 0 ? (
+        {pulled.length > 0 && (
+          <section aria-label="Data pulled this case">
+            <p className={styles.sectionHead}>Pulled</p>
+            <ul className={styles.pulledList}>
+              {pulled.map((fact) => (
+                <li key={fact.label} className={styles.pulledItem}>
+                  <span className={cx('mono', styles.pulledLabel)}>{fact.label}</span>
+                  <span className={styles.pulledDetail}>{fact.detail}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {discovered.length > 0 && (
+          <section aria-label={t('game.notebook.priedAria')}>
+            <p className={styles.sectionHead}>{t('game.notebook.pried')}</p>
             <ul className={styles.tables}>
               {discovered.map((tbl) => (
                 <li key={tbl.table} className={styles.table}>
@@ -52,10 +67,12 @@ export function ReconNotebook({ notebook }: { notebook: Notebook }) {
                 </li>
               ))}
             </ul>
-          ) : (
-            <p className={styles.emptyNote}>{t('game.notebook.empty')}</p>
-          )}
-        </section>
+          </section>
+        )}
+
+        {discovered.length === 0 && pulled.length === 0 && (
+          <p className={styles.emptyNote}>{t('game.notebook.empty')}</p>
+        )}
       </div>
     </details>
   )
