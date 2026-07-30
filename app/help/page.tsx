@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ContentPage } from '@/app/components/ContentPage'
-import { Callout, Section } from '@/app/components/content-blocks'
+import { Callout, Section } from '@/app/components/ContentPage/content-blocks'
 import { IconArrowRight } from '@/app/components/icons'
 import { cx } from '@/app/components/cx'
 import { getServerTranslator } from '@/i18n/server'
-import styles from '@/app/components/content.module.css'
+import styles from '@/app/components/ContentPage/content.module.css'
 
 export const metadata: Metadata = {
   title: 'How the job works — SQL Heist',

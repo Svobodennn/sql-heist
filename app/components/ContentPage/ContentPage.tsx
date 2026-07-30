@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { getServerTranslator } from '@/i18n/server'
-import { Logo } from './Logo'
+import { Logo } from '../Logo'
 import styles from './content.module.css'
 
 // Shared shell for the static content routes (Help, FAQ, Privacy, Terms,

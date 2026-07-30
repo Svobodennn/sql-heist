@@ -1,10 +1,10 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ContentPage } from '@/app/components/ContentPage'
-import { Section } from '@/app/components/content-blocks'
+import { Section } from '@/app/components/ContentPage/content-blocks'
 import { IconMail } from '@/app/components/icons'
 import { getServerTranslator } from '@/i18n/server'
-import styles from '@/app/components/content.module.css'
+import styles from '@/app/components/ContentPage/content.module.css'
 
 export const metadata: Metadata = {
   title: 'Contact — SQL Heist',

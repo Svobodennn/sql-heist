@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { ContentPage } from '@/app/components/ContentPage'
-import { Callout, LegalSection } from '@/app/components/content-blocks'
+import { Callout, LegalSection } from '@/app/components/ContentPage/content-blocks'
 import { getServerTranslator } from '@/i18n/server'
 
 export const metadata: Metadata = {

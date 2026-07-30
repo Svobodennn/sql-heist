@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { ContentPage } from '@/app/components/ContentPage'
 import { getServerTranslator } from '@/i18n/server'
-import styles from '@/app/components/content.module.css'
+import styles from '@/app/components/ContentPage/content.module.css'
 
 export const metadata: Metadata = {
   title: 'FAQ — SQL Heist',

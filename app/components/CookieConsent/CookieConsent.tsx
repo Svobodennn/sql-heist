@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from '@/i18n/useTranslation'
-import { IconCheck } from './icons'
+import { IconCheck } from '../icons'
 import styles from './CookieConsent.module.css'
 
 // Persisted acknowledgement flag. Deliberately distinct from the locale/progress
