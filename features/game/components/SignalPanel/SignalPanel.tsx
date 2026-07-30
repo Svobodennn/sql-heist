@@ -1,7 +1,7 @@
 'use client'
 
 import type { RunSignal } from '@/lib/engine/signal'
-import type { RunResult } from '@/lib/engine/levelSession'
+import type { RunResult } from '@/lib/engine/sqlRunner'
 import type { WinCondition } from '@/lib/schema/level'
 import {
   errorView,

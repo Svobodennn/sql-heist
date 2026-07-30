@@ -3,8 +3,7 @@ import type { VisibleTable } from '@/lib/schema/level'
 import type { Case } from '@/lib/schema/case'
 import { loadSqlJs, type LoadSqlJsOptions } from '@/lib/engine/sqlLoader'
 import { compose } from '@/lib/engine/queryComposer'
-import { exec, type ExecutionResult } from '@/lib/engine/sqlRunner'
-import type { RunResult } from '@/lib/engine/levelSession'
+import { exec, type ExecutionResult, type RunResult } from '@/lib/engine/sqlRunner'
 
 // Case lifecycle wrapper (docs/cases-design.md — Model A). Unlike a LevelSession
 // (fresh DB per level), a CaseSession holds ONE database for the whole case and

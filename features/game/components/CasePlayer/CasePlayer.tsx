@@ -11,7 +11,7 @@ import {
 } from 'framer-motion'
 import Link from 'next/link'
 import type { Case, Objective } from '@/lib/schema/case'
-import type { RunResult } from '@/lib/engine/levelSession'
+import type { RunResult } from '@/lib/engine/sqlRunner'
 import type { RunSignal } from '@/lib/engine/signal'
 import { compose } from '@/lib/engine/queryComposer'
 import { deriveSignal } from '@/lib/engine/signal'

@@ -3,7 +3,7 @@
 import { useMemo, type KeyboardEvent } from 'react'
 import type { Objective } from '@/lib/schema/case'
 import type { VisibleTable } from '@/lib/schema/level'
-import type { RunResult } from '@/lib/engine/levelSession'
+import type { RunResult } from '@/lib/engine/sqlRunner'
 import type { RunSignal } from '@/lib/engine/signal'
 import { compose } from '@/lib/engine/queryComposer'
 import type { EngineStatus } from '../../lib/useCaseEngine'

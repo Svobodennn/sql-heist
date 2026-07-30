@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, type ReactNode } from 'react'
-import type { EngineStatus } from '../../lib/useEngine'
+import type { EngineStatus } from '../../lib/engineStatus'
 import { useTranslation } from '@/i18n/useTranslation'
 import { Button } from '../Button'
 import { IconAlert } from '../icons'

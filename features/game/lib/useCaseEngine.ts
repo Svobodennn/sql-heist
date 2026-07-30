@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Case } from '@/lib/schema/case'
 import type { CaseSession } from '@/lib/engine/caseSession'
-import type { RunResult } from '@/lib/engine/levelSession'
-import type { EngineStatus } from './useEngine'
+import type { RunResult } from '@/lib/engine/sqlRunner'
+import type { EngineStatus } from './engineStatus'
 
 // Client-only case-engine lifecycle — the case twin of useEngine (docs/
 // 01-architecture.md §2.1, §7.1 + docs/cases-design.md "persistent case-session").

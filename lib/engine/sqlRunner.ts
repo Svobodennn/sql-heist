@@ -1,4 +1,5 @@
 import type { SqlCell } from '@/lib/schema/level'
+import type { FilterOutcome } from './queryComposer'
 
 export type { SqlCell }
 
@@ -26,6 +27,10 @@ export interface ExecutionResult {
   // hand-built ExecutionResult literals stay valid.
   resultSetCount?: number
 }
+
+// The run result surfaced to sessions: an ExecutionResult plus (only when an
+// inputFilter ran) what the WAF did. Shared by the level + case sessions.
+export type RunResult = ExecutionResult & { filter?: FilterOutcome }
 
 function now(): number {
   return typeof performance !== 'undefined' ? performance.now() : Date.now()
