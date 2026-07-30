@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "id": "the-confession",
+  "order": 6,
+  "job": "The Confession",
+  "title": "The Confession",
+  "technique": "error-based",
+  "difficulty": "medium",
+  "brief": {
+    "handler": "The Fixer",
+    "text": "Meridian's promo desk looks buttoned up. You submit a callsign, it either takes it or spits back whatever the back office grumbled - word for word. Nobody thought to gag the back office.\n\nHere's the play. Hand it a callsign that's already been claimed - a house name like ADMIN - and the machine chokes on the duplicate. In the middle of choking, it'll blurt out the name of the drawer it keeps those claims in. A drawer that's on none of our maps.\n\nMake it complain. Read what it lets slip.",
+    "objective": "Force a duplicate error so the desk names the hidden table it stores claims in."
+  },
+  "debrief": {
+    "explanation": "Two mistakes stacked on top of each other: the desk builds its SQL by concatenation, AND it forwards the database's raw complaint straight to you. Submit a callsign that already exists and SQLite refuses the duplicate with 'UNIQUE constraint failed: promo_claims.callsign' - a message that names the exact table and column you were never shown. The error itself is the leak. HONEST NOTE: SQLite leaks STRUCTURE this way (identifiers - table and column names), not row data. The classic MySQL version of this technique goes further, abusing functions like extractvalue()/updatexml() to smuggle actual DATA into the error text; SQLite has no such trick, so it won't spill row contents through errors. But a verbose error is still a free map of your schema.",
+    "vulnerableCode": {
+      "language": "js",
+      "code": "// VULNERABLE - input concatenated into SQL AND the raw DB error is handed to the user\ntry {\n  db.prepare(\"INSERT INTO promo_claims (callsign) VALUES ('\" + callsign + \"')\").run();\n  res.send('Callsign reserved');\n} catch (err) {\n  res.status(400).send(err.message); // leaks: \"UNIQUE constraint failed: promo_claims.callsign\"\n}"
+    },
+    "secureCode": {
+      "language": "js",
+      "code": "// SECURE - bind the value, and NEVER surface the raw DB error to the client\ntry {\n  db.prepare('INSERT INTO promo_claims (callsign) VALUES (?)').run(callsign);\n  res.send('Callsign reserved');\n} catch (err) {\n  logger.error('reserve_callsign_failed', err); // full detail stays server-side\n  res.status(409).send('That callsign is unavailable'); // generic message leaks no schema\n}"
+    },
+    "secureCodeVariants": [
+      {
+        "id": "node",
+        "label": "Node.js - generic error",
+        "language": "js",
+        "code": "// Bind the value; log the real error, return a generic message\ntry {\n  db.prepare('INSERT INTO promo_claims (callsign) VALUES (?)').run(callsign);\n  res.send('Callsign reserved');\n} catch (err) {\n  logger.error('reserve_callsign_failed', err);\n  res.status(409).send('That callsign is unavailable');\n}"
+      },
+      {
+        "id": "python",
+        "label": "Python - generic error",
+        "language": "python",
+        "code": "# Parameterize, log the real error, hand back a generic message\ntry:\n    cur.execute(\"INSERT INTO promo_claims (callsign) VALUES (?)\", (callsign,))\nexcept sqlite3.IntegrityError:\n    logger.exception(\"reserve_callsign_failed\")  # detail to the log, not the user\n    return Response(\"That callsign is unavailable\", status=409)"
+      },
+      {
+        "id": "java",
+        "label": "Java - generic error",
+        "language": "java",
+        "code": "// PreparedStatement binds the value; the raw SQLException never reaches the client\ntry (PreparedStatement ps = conn.prepareStatement(\n        \"INSERT INTO promo_claims (callsign) VALUES (?)\")) {\n    ps.setString(1, callsign);\n    ps.executeUpdate();\n} catch (SQLException e) {\n    log.error(\"reserve_callsign_failed\", e);            // server-side only\n    return ResponseEntity.status(409).body(\"That callsign is unavailable\");\n}"
+      }
+    ],
+    "takeaway": "Never let the back office talk to the customer. Log the real error, hand back a shrug - and parameterize, because a verbose error is a free map of your schema."
+  },
+  "target": {
+    "appName": "Meridian Promo Desk",
+    "surface": "search-box",
+    "fields": [
+      {
+        "name": "callsign",
+        "label": "Claim your callsign",
+        "type": "text",
+        "placeholder": "e.g. NOVA-77"
+      }
+    ]
+  },
+  "database": {
+    "schemaSql": "CREATE TABLE promotions (id INTEGER PRIMARY KEY, title TEXT, active INTEGER); CREATE TABLE promo_claims (id INTEGER PRIMARY KEY, callsign TEXT UNIQUE, reward TEXT);",
+    "seedSql": "INSERT INTO promotions (title,active) VALUES ('Summer Access Pass',1),('Founders Reward',0); INSERT INTO promo_claims (callsign,reward) VALUES ('ADMIN','house'),('FIXER','house'),('MERIDIAN','house');",
+    "visibleSchema": [{ "table": "promotions", "columns": ["id", "title", "active"] }]
+  },
+  "query": {
+    "template": "INSERT INTO promo_claims (callsign) VALUES ('{{input:callsign}}')",
+    "description": "Reserve a promo callsign (raw DB errors are shown to the user)"
+  },
+  "winCondition": {
+    "type": "error-based",
+    "errorContains": "promo_claims",
+    "reason": "The desk choked and named its own hidden drawer: promo_claims. The error was the leak."
+  },
+  "hints": [
+    {
+      "id": "h1",
+      "text": "A form that shows you the database's own complaint is a form that will tell on itself. You don't need it to succeed - you need it to FAIL loudly. Feed it something it has to reject.",
+      "cost": 50
+    },
+    {
+      "id": "h2",
+      "text": "The desk enforces unique callsigns. Submit one that's already taken and the database refuses the duplicate - and its refusal names the table.column it enforced the rule on. House names like ADMIN are always reserved.",
+      "cost": 150,
+      "revealAfterAttempts": 2
+    },
+    {
+      "id": "h3",
+      "text": "Type  ADMIN  and submit. The response is 'UNIQUE constraint failed: promo_claims.callsign' - there's the hidden table (promo_claims) and its column, confessed by the error itself.",
+      "cost": 300,
+      "revealAfterAttempts": 4
+    }
+  ],
+  "expectedSolution": {
+    "inputs": { "callsign": "ADMIN" },
+    "note": "ADMIN is already claimed, so the INSERT trips SQLite's UNIQUE constraint and the raw error names the hidden table promo_claims. A fresh callsign (e.g. NOVA-77) inserts cleanly and reveals nothing; a different error (e.g. a value-count mismatch) is not the targeted confession."
+  },
+  "tags": ["error-based", "information-disclosure", "verbose-errors", "act-ii"]
+}

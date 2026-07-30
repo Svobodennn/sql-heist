@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "id": "the-double-tap",
+  "order": 7,
+  "job": "The Double Tap",
+  "title": "The Double Tap",
+  "technique": "stacked-queries",
+  "difficulty": "hard",
+  "brief": {
+    "handler": "The Fixer",
+    "text": "The access desk reads one badge at a time and tells you which doors it opens. Reads it straight off what you punch in - and it never checks whether you punched in one instruction or two.\n\nSo give it two. Let it read your badge like always. Then, in the same breath, slip it a second order it was never meant to take: flip the vault door to OPEN. Close with a quick look at the result so you know the order landed.\n\nOne punch. Two moves.",
+    "objective": "Stack a second command onto the badge read and force the vault door open."
+  },
+  "debrief": {
+    "explanation": "Two failures again: your badge is concatenated into the SQL, and the desk runs the whole string as a batch - so a semicolon ends the app's read and starts a statement of your own. After 'B-1001' you close the quote, add ; UPDATE door_acl SET granted = 1 WHERE door = 'VAULT' (the real damage), then a second SELECT to verify, and -- to swallow the leftover quote. SQLite executes all of it in order: the harmless read, your write, and the confirming read. The extra result set is the proof the stacked statement ran.",
+    "vulnerableCode": {
+      "language": "js",
+      "code": "// VULNERABLE - input concatenated in, and the call runs EVERY statement in the string\nconst sql = \"SELECT door, granted FROM door_acl WHERE badge = '\" + badge + \"'\";\ndb.exec(sql); // exec runs a batch: one ';' and the attacker's second statement rides along"
+    },
+    "secureCode": {
+      "language": "js",
+      "code": "// SECURE - bind the value AND use an API that runs exactly ONE statement\nconst rows = db.prepare('SELECT door, granted FROM door_acl WHERE badge = ?').all(badge);\n// prepare()/get()/all() execute a single statement - a stacked ';' becomes a syntax error, not a command.\n// Least privilege backs this up: the read path's DB role should hold SELECT only, never UPDATE."
+    },
+    "secureCodeVariants": [
+      {
+        "id": "node-mysql2",
+        "label": "Node.js (mysql2) - single statement",
+        "language": "js",
+        "code": "// mysql2: multipleStatements is OFF by default - keep it off, and bind the value\nconst conn = await mysql.createConnection({ host, user, database /* multipleStatements: false */ });\nconst [rows] = await conn.execute(\n  'SELECT door, granted FROM door_acl WHERE badge = ?', [badge]);\n// With multipleStatements:false the driver rejects a second ';' statement outright."
+      },
+      {
+        "id": "php-pdo",
+        "label": "PHP (PDO) - real prepared statement",
+        "language": "php",
+        "code": "// PDO: use real prepared statements; one prepare() runs one statement\n$pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);\n$stmt = $pdo->prepare('SELECT door, granted FROM door_acl WHERE badge = ?');\n$stmt->execute([$badge]); // a stacked ';' cannot smuggle a second command through"
+      },
+      {
+        "id": "python",
+        "label": "Python (sqlite3) - execute(), not executescript()",
+        "language": "python",
+        "code": "# sqlite3: cursor.execute() runs a SINGLE statement (executescript is the dangerous one)\ncur.execute(\"SELECT door, granted FROM door_acl WHERE badge = ?\", (badge,))\nrows = cur.fetchall()\n# Never build the SQL by concatenation, and never route user input into executescript()."
+      }
+    ],
+    "takeaway": "A question should ask one thing. Bind the value AND let the driver run a single statement - so a semicolon is a syntax error, not a to-do list."
+  },
+  "target": {
+    "appName": "Meridian Access Control",
+    "surface": "profile-lookup",
+    "fields": [
+      {
+        "name": "badge",
+        "label": "Badge ID",
+        "type": "text",
+        "placeholder": "e.g. B-1001"
+      }
+    ]
+  },
+  "database": {
+    "schemaSql": "CREATE TABLE door_acl (id INTEGER PRIMARY KEY, badge TEXT, door TEXT, granted INTEGER);",
+    "seedSql": "INSERT INTO door_acl (badge,door,granted) VALUES ('B-1001','LOBBY',1),('B-1001','VAULT',0),('B-2002','LOBBY',1),('B-2002','ARCHIVE',1);",
+    "visibleSchema": [{ "table": "door_acl", "columns": ["id", "badge", "door", "granted"] }]
+  },
+  "query": {
+    "template": "SELECT door, granted FROM door_acl WHERE badge = '{{input:badge}}'",
+    "description": "Badge access lookup (the whole input string is executed as a batch)"
+  },
+  "winCondition": {
+    "type": "stacked-queries",
+    "minResultSets": 2,
+    "reason": "A second statement rode in behind the badge read - the vault door flipped to OPEN and the verify read proved it."
+  },
+  "hints": [
+    {
+      "id": "h1",
+      "text": "This desk doesn't just read your badge - it runs whatever you hand it, top to bottom. A single lookup is polite. Nothing's stopping you from being impolite and handing it a second instruction.",
+      "cost": 50
+    },
+    {
+      "id": "h2",
+      "text": "Close the quote, end the read with a semicolon, then write your own statement: UPDATE door_acl to set granted = 1 on the VAULT door. Add one more SELECT so the change shows up as a result, and finish with -- to comment out the trailing quote.",
+      "cost": 150,
+      "revealAfterAttempts": 2
+    },
+    {
+      "id": "h3",
+      "text": "In the badge box:  B-1001'; UPDATE door_acl SET granted = 1 WHERE door = 'VAULT'; SELECT door, granted FROM door_acl WHERE door = 'VAULT' --   The UPDATE is the break-in; the final SELECT is your receipt.",
+      "cost": 300,
+      "revealAfterAttempts": 4
+    }
+  ],
+  "expectedSolution": {
+    "inputs": {
+      "badge": "B-1001'; UPDATE door_acl SET granted = 1 WHERE door = 'VAULT'; SELECT door, granted FROM door_acl WHERE door = 'VAULT' -- "
+    },
+    "note": "Three statements run: the app's read (rows), your UPDATE (the side effect - VAULT granted flips 0 -> 1), and a verify SELECT (rows). Two row-producing statements => an extra result set surfaces => win. A plain badge like B-1001 runs one statement and changes nothing."
+  },
+  "tags": ["stacked-queries", "batched-statements", "side-effect", "act-ii"]
+}

@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "id": "the-stopwatch",
+  "order": 5,
+  "job": "The Stopwatch",
+  "title": "The Stopwatch",
+  "technique": "blind-timing",
+  "difficulty": "medium",
+  "brief": {
+    "handler": "The Fixer",
+    "text": "This one's a stone. Meridian's gate service answers every knock the exact same way: 'processing.' No green light, no red. Nothing on its face to read.\n\nSo don't read its face. Read its clock. Feed it a question that makes it do a mountain of work only when the answer is yes - then time how long it takes to come back. A short wait is a no. A long, dragging pause is a yes it never meant to give you.\n\nThe company swears there's no OMEGA clearance on the books. Make the gate take its sweet time telling you it's real.",
+    "objective": "Confirm the hidden OMEGA clearance exists by forcing a slow (TRUE) response."
+  },
+  "debrief": {
+    "explanation": "The gate concatenates your token into its SQL, and it always sends back the same 'processing' - no visible tell at all. So you build a different oracle: a CASE WHEN <condition> branch that only does the expensive work when your condition is true. When OMEGA staff exist the branch fires, the response drags, and that DELAY is the yes. When they don't, it snaps back fast - a no. You read a secret through time instead of output. (Honest note: real engines pair the true branch with SLEEP()/pg_sleep()/heavy work; SQLite has no sleep and WASM here is synchronous, so this trainer MODELS the delay - the injection shape and the read-through-timing idea are the real lesson.)",
+    "vulnerableCode": {
+      "language": "js",
+      "code": "// VULNERABLE - token concatenated into SQL; every response looks identical to the user...\nconst sql = \"SELECT id FROM sessions WHERE token = '\" + token + \"'\";\ndb.prepare(sql).get(); // ...but a CASE WHEN branch makes the DB slow ONLY when a condition holds\nres.send('processing'); // real engines: ... THEN pg_sleep(3) - the wait leaks the answer"
+    },
+    "secureCode": {
+      "language": "js",
+      "code": "// SECURE - bind the token; input never becomes SQL, so no branch can be steered\ndb.prepare('SELECT id FROM sessions WHERE token = ?').get(token);\nres.send('processing');\n// You cannot patch a timing side channel by hiding output - the answer leaks through the clock.\n// Keep input OUT of the SQL (bind), and apply least privilege so a session check cannot read staff."
+    },
+    "takeaway": "If the query still runs attacker-controlled logic, silence isn't safety - the response time talks. Bind the input so there is no branch to steer, whatever the clock says."
+  },
+  "target": {
+    "appName": "Meridian Gate Service",
+    "surface": "url-param",
+    "fields": [
+      {
+        "name": "token",
+        "label": "session token",
+        "type": "text",
+        "placeholder": "?token=..."
+      }
+    ]
+  },
+  "database": {
+    "schemaSql": "CREATE TABLE sessions (id INTEGER PRIMARY KEY, token TEXT); CREATE TABLE staff (id INTEGER PRIMARY KEY, name TEXT, clearance TEXT);",
+    "seedSql": "INSERT INTO sessions (token) VALUES ('sess-a91f'),('sess-b7d2'),('sess-c3e8'); INSERT INTO staff (name,clearance) VALUES ('R. Vane','OMEGA'),('T. Poll','BETA'),('S. Okoro','BETA');",
+    "visibleSchema": [
+      { "table": "sessions", "columns": ["id", "token"] },
+      { "table": "staff", "columns": ["id", "name", "clearance"] }
+    ]
+  },
+  "query": {
+    "template": "SELECT id FROM sessions WHERE token = '{{input:token}}'",
+    "description": "Gate session probe (always returns 'processing')"
+  },
+  "winCondition": {
+    "type": "blind-timing",
+    "thresholdMs": 750,
+    "slowDelayMs": 3000,
+    "reason": "The gate dragged its feet - the slow branch fired, which means your condition held TRUE."
+  },
+  "hints": [
+    {
+      "id": "h1",
+      "text": "The gate says 'processing' no matter what - so output tells you nothing. What it can't hide is how LONG it thinks. Give it a question that only makes it sweat when the answer is yes.",
+      "cost": 50
+    },
+    {
+      "id": "h2",
+      "text": "Close the quote and OR in a condition built from CASE WHEN (a check on the staff table) THEN <true> ELSE <false>. Word it so the whole lookup returns rows - the slow branch - only when the OMEGA clearance actually exists. A wrong guess stays fast.",
+      "cost": 150,
+      "revealAfterAttempts": 2
+    },
+    {
+      "id": "h3",
+      "text": "In the token box try:  ' OR (SELECT CASE WHEN COUNT(*)>0 THEN 1 ELSE 0 END FROM staff WHERE clearance='OMEGA')=1 --   A drag/slow response = OMEGA exists (TRUE). Swap 'OMEGA' for 'ZULU' and it snaps back fast = FALSE.",
+      "cost": 300,
+      "revealAfterAttempts": 4
+    }
+  ],
+  "expectedSolution": {
+    "inputs": {
+      "token": "' OR (SELECT CASE WHEN COUNT(*)>0 THEN 1 ELSE 0 END FROM staff WHERE clearance='OMEGA')=1 -- "
+    },
+    "note": "TRUE branch fires because an OMEGA row exists -> modeled slow response (>= threshold) -> win. A benign token, or the same probe with a clearance that does not exist (e.g. 'ZULU'), stays fast = FALSE."
+  },
+  "tags": ["blind-timing", "time-based-sqli", "case-when", "act-ii"]
+}

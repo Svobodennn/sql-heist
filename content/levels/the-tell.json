@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "id": "the-tell",
+  "order": 4,
+  "job": "The Tell",
+  "title": "The Tell",
+  "technique": "blind-boolean",
+  "difficulty": "medium",
+  "brief": {
+    "handler": "The Fixer",
+    "text": "Meridian's reset desk won't hand you a thing. You type a code, it lights one of two ways: green if the code's live, dark if it isn't. That's the whole conversation — yes, or no.\n\nBut a yes-or-no man is still a man who talks. There's a master PIN locked in the back office, and the desk will confirm any guess you feed it — one character at a time — if you word the question right.\n\nDon't ask for the PIN. Ask whether its first digit is a seven, and read the light. Then you know one digit. Then you ask again.",
+    "objective": "Make the desk confirm a character of the master PIN by its yes/no tell."
+  },
+  "debrief": {
+    "explanation": "The desk pastes your code straight into its SQL and then leaks a single bit back: a row came back (green) or it didn't (dark). No data is ever printed - but that one bit is an oracle. By closing the quote and adding OR (a subquery that reads the hidden PIN), you make the whole lookup return rows only when your guess about the PIN is correct. Green means TRUE, dark means FALSE. Repeat the question character by character and you read a secret you were never shown - blind.",
+    "vulnerableCode": {
+      "language": "js",
+      "code": "// VULNERABLE - the code is concatenated into SQL; the page reveals only FOUND / NOT FOUND\nconst sql = \"SELECT id FROM reset_codes WHERE code = '\" + code + \"'\";\nconst found = db.prepare(sql).get() != null; // one bit - but that is all the attacker needs\nres.send(found ? 'Reset code is active' : 'No matching request');"
+    },
+    "secureCode": {
+      "language": "js",
+      "code": "// SECURE - bind the value; input can never become SQL, so there is no oracle to steer\nconst found = db.prepare('SELECT id FROM reset_codes WHERE code = ?').get(code) != null;\nres.send(found ? 'Reset code is active' : 'No matching request');\n// A generic response does NOT save a concatenated query - the fix is binding. Add least privilege:\n// the reset lookup's DB role should have no read access to vault_config in the first place."
+    },
+    "takeaway": "A yes/no answer is still an answer. If typed input can steer the query, one bit at a time is enough - bind the value so there is no question to smuggle in."
+  },
+  "target": {
+    "appName": "Meridian Account Recovery",
+    "surface": "search-box",
+    "fields": [
+      {
+        "name": "code",
+        "label": "Reset code",
+        "type": "text",
+        "placeholder": "e.g. RC-4417"
+      }
+    ]
+  },
+  "database": {
+    "schemaSql": "CREATE TABLE reset_codes (id INTEGER PRIMARY KEY, code TEXT, account_id INTEGER); CREATE TABLE vault_config (id INTEGER PRIMARY KEY, master_pin TEXT);",
+    "seedSql": "INSERT INTO reset_codes (code,account_id) VALUES ('RC-8823',2),('RC-1290',3),('RC-4417',4); INSERT INTO vault_config (id,master_pin) VALUES (1,'7731');",
+    "visibleSchema": [
+      { "table": "reset_codes", "columns": ["id", "code", "account_id"] },
+      { "table": "vault_config", "columns": ["id", "master_pin"] }
+    ]
+  },
+  "query": {
+    "template": "SELECT id FROM reset_codes WHERE code = '{{input:code}}'",
+    "description": "Password-reset code check (returns found / not found)"
+  },
+  "winCondition": {
+    "type": "blind-boolean",
+    "reason": "The desk lit green - your guess about the PIN held TRUE. That is the oracle answering."
+  },
+  "hints": [
+    {
+      "id": "h1",
+      "text": "You will never see the PIN printed. Stop trying to read it. The only thing this desk gives you is green or dark - so make green MEAN something. Ask it a true-or-false question whose answer depends on the PIN.",
+      "cost": 50
+    },
+    {
+      "id": "h2",
+      "text": "Close the quote and add an always-checked condition: ' OR (a subquery that pulls one character of vault_config.master_pin) = 'your guess'. If the guess is right the whole lookup turns true and rows come back (green). Wrong guess, dark. Use substr(master_pin,1,1) for the first character.",
+      "cost": 150,
+      "revealAfterAttempts": 2
+    },
+    {
+      "id": "h3",
+      "text": "In the code box try:  ' OR (SELECT substr(master_pin,1,1) FROM vault_config WHERE id=1)='7' --   Green = the first digit is 7. Change '7' to walk the alphabet/digits, then substr(...,2,1) for the next character.",
+      "cost": 300,
+      "revealAfterAttempts": 4
+    }
+  ],
+  "expectedSolution": {
+    "inputs": {
+      "code": "' OR (SELECT substr(master_pin,1,1) FROM vault_config WHERE id=1)='7' -- "
+    },
+    "note": "Proof-of-concept: this pins the FIRST character of master_pin as '7' (green = TRUE). A wrong guess like ='0' stays dark (FALSE). Walk substr(master_pin,N,1) across positions to read the whole PIN - the trainer counts pinning a decisive bit as the win."
+  },
+  "tags": ["blind-boolean", "blind-sqli", "boolean-oracle", "act-ii"]
+}

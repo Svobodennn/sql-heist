@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "id": "the-doorman",
+  "order": 8,
+  "job": "The Doorman",
+  "title": "The Doorman",
+  "technique": "waf-bypass",
+  "difficulty": "hard",
+  "brief": {
+    "handler": "The Fixer",
+    "text": "Since the Blueprint job, Meridian wised up - a little. They bolted a doorman onto the archive search with a list of forbidden phrases. Say 'UNION SELECT' out loud and the door slams in your face. They think the list is a wall.\n\nIt isn't. It's a doorman who only knows the words he was taught, spelled exactly the way he was taught them. Break the phrase across a comment and he hears gibberish - but the desk behind him reads it clean.\n\nSame archive. Same ledger you're after. Just get the phrase past the man at the door.",
+    "objective": "Slip a blocked phrase past the keyword filter and lift the ledger's loot."
+  },
+  "debrief": {
+    "explanation": "The doorman is a blocklist: it scans your raw input for literal phrases like 'UNION SELECT' and rejects the request if it finds one. But it's matching TEXT, while SQLite parses TOKENS. An inline comment /**/ is just characters to the filter - enough to break the phrase 'UNION SELECT' so the substring check misses - yet to SQLite a comment is whitespace, so 'UNION/**/SELECT' parses as the very keyword the filter meant to stop. Blocklists are brittle by nature: comments, extra whitespace, case, and encodings all route around them, and the query underneath is still built by concatenation.",
+    "vulnerableCode": {
+      "language": "js",
+      "code": "// VULNERABLE - a keyword blocklist bolted in front of a still-concatenated query\nconst BLOCK = [/union\\s+select/i, /union\\s+all\\s+select/i];\nif (BLOCK.some((re) => re.test(q))) return res.status(403).send('blocked');\nconst sql = \"SELECT title, body FROM notices WHERE title LIKE '%\" + q + \"%'\";\nconst rows = db.prepare(sql).all(); // 'UNION/**/SELECT' sails straight past the filter"
+    },
+    "secureCode": {
+      "language": "js",
+      "code": "// SECURE - bind the pattern; the injection never forms, so there is no phrase to filter\nconst rows = db\n  .prepare('SELECT title, body FROM notices WHERE title LIKE ?')\n  .all('%' + q + '%');\n// A WAF / keyword blocklist is defense-in-depth, NEVER the fix. Parameterize first;\n// prefer an allowlist (what input is permitted) over a blocklist (guessing every bad word)."
+    },
+    "takeaway": "A list of forbidden words is just a list of words the attacker hasn't disguised yet. A WAF is not a fix - bind the query and the phrase stops mattering."
+  },
+  "target": {
+    "appName": "Meridian Press Archive",
+    "surface": "search-box",
+    "fields": [
+      {
+        "name": "q",
+        "label": "Search the archive",
+        "type": "search",
+        "placeholder": "Search notices"
+      }
+    ]
+  },
+  "database": {
+    "schemaSql": "CREATE TABLE notices (id INTEGER PRIMARY KEY, title TEXT, body TEXT); CREATE TABLE archive_ledger (id INTEGER PRIMARY KEY, schematic TEXT, loot TEXT);",
+    "seedSql": "INSERT INTO notices (id,title,body) VALUES (1,'Lobby Renovation','Closed through Q2.'),(2,'Badge Reissue','All staff re-enroll by Friday.'); INSERT INTO archive_ledger (id,schematic,loot) VALUES (1,'BP-VAULT-DOOR','LOOT-DOORMAN-5B1E9F0C'),(2,'BP-SUB-BASEMENT','sublevel-plan-C');",
+    "visibleSchema": [
+      { "table": "notices", "columns": ["id", "title", "body"] },
+      { "table": "archive_ledger", "columns": ["id", "schematic", "loot"] }
+    ]
+  },
+  "query": {
+    "template": "SELECT title, body FROM notices WHERE title LIKE '%{{input:q}}%'",
+    "description": "Archive search, fronted by a keyword blocklist",
+    "inputFilter": {
+      "blocklist": ["UNION SELECT", "UNION ALL SELECT"],
+      "mode": "reject",
+      "message": "⛔ blocked: that phrase is on the doorman's list."
+    }
+  },
+  "winCondition": {
+    "type": "flag-in-result",
+    "flag": "LOOT-DOORMAN-5B1E9F0C",
+    "caseSensitive": true,
+    "reason": "The phrase walked past the doorman and the ledger's loot surfaced in the results."
+  },
+  "hints": [
+    {
+      "id": "h1",
+      "text": "You already know the move from the Vault - a two-column pull from the ledger. The only new problem is the man at the door blocking the phrase. Don't invent a new attack. Disguise the old one.",
+      "cost": 50
+    },
+    {
+      "id": "h2",
+      "text": "The doorman matches the phrase letter-for-letter, so break it up with something SQLite treats as blank space. An inline comment /**/ between the two words does exactly that: the filter sees a different string, the database sees the keyword.",
+      "cost": 150,
+      "revealAfterAttempts": 2
+    },
+    {
+      "id": "h3",
+      "text": "The blocked  ' UNION SELECT schematic, loot FROM archive_ledger --  becomes  ' UNION/**/SELECT schematic, loot FROM archive_ledger --  . Same query underneath; the /**/ splits the banned phrase so the filter never matches it.",
+      "cost": 300,
+      "revealAfterAttempts": 4
+    }
+  ],
+  "expectedSolution": {
+    "inputs": {
+      "q": "' UNION/**/SELECT schematic, loot FROM archive_ledger -- "
+    },
+    "note": "The naive ' UNION SELECT ... is rejected by the blocklist. Splitting UNION SELECT with an inline comment (/**/ = whitespace to SQLite) slips past the literal match while still parsing as UNION SELECT, and the ledger loot surfaces."
+  },
+  "tags": ["waf-bypass", "union-extraction", "filter-evasion", "act-ii"]
+}
