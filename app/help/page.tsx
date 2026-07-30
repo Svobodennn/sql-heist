@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ContentPage } from '@/app/components/ContentPage'
-import { Callout, Section, TableOfContents } from '@/app/components/content-blocks'
+import { Callout, Section } from '@/app/components/content-blocks'
 import { IconArrowRight } from '@/app/components/icons'
 import { cx } from '@/app/components/cx'
 import { getServerTranslator } from '@/app/i18n/server'
@@ -38,21 +38,8 @@ const MOVES: { title: string; body: string }[] = [
 
 export default function HelpPage() {
   const t = getServerTranslator()
-  const toc = [
-    { href: '#before', label: t('help.sectionBefore') },
-    { href: '#moves', label: t('help.sectionMoves') },
-    { href: '#wire', label: t('help.sectionWire') },
-    { href: '#controls', label: t('help.sectionControls') },
-    { href: '#stuck', label: t('help.sectionStuck') },
-    { href: '#point', label: t('help.sectionPoint') },
-  ]
   return (
-    <ContentPage
-      eyebrow={t('help.eyebrow')}
-      title={t('help.title')}
-      lead={t('help.lead')}
-      aside={<TableOfContents items={toc} />}
-    >
+    <ContentPage eyebrow={t('help.eyebrow')} title={t('help.title')} lead={t('help.lead')}>
       <Section id="before" title={t('help.sectionBefore')}>
         <p>
           Every job points you at Meridian &mdash; a data broker that got rich holding other

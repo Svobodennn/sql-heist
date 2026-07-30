@@ -1,9 +1,11 @@
 /* Static content routes (Help, FAQ, Privacy, Terms, Contact).
  * Server-rendered, ZERO client JS — noir "real product" page shell:
- * a full-bleed hero header + one readable measure column (~68ch) that hosts
- * prose, a step timeline, a colour legend, numbered legal sections and the
- * contact card. Generic prose element rules are wrapped in :where(...) so their
- * specificity stays at (0,0,1) and every component class below always wins. */
+ * a full-bleed CENTRED hero header + ONE centred reading column held to a
+ * comfortable measure (~64ch). Prose is left-aligned WITHIN that centred column
+ * for comfortable reading, while the hero (mark, eyebrow, title, lead) is
+ * centred to match the landing hero — so nothing hugs the left edge with dead
+ * space on the right. Generic prose element rules are wrapped in :where(...) so
+ * their specificity stays at (0,0,1) and every component class below wins. */
 
 /* ---------- Page + hero ---------- */
 .page {
@@ -16,13 +18,13 @@
   border-bottom: 1px solid var(--border);
   overflow: hidden;
 }
-/* Brass wash bleeds to the viewport edges; the text stays in the measure. */
+/* Brass wash bleeds to the viewport edges; centred behind the centred title. */
 .hero::before {
   content: '';
   position: absolute;
   inset: 0;
   background: radial-gradient(
-    100% 72% at 12% -28%,
+    100% 72% at 50% -28%,
     color-mix(in srgb, var(--primary) 12%, transparent),
     transparent 62%
   );
@@ -30,11 +32,12 @@
 }
 .heroInner {
   position: relative;
-  max-width: 60rem;
+  max-width: 44rem;
   margin-inline: auto;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  text-align: center;
   gap: var(--space-4);
 }
 .heroMark {
@@ -50,7 +53,7 @@
   text-wrap: balance;
 }
 .lead {
-  max-width: 48ch;
+  max-width: 52ch;
   color: var(--text-secondary);
   font-size: clamp(1.0625rem, 2.4vw, 1.1875rem);
   line-height: 1.6;
@@ -77,32 +80,15 @@
   color: var(--text-secondary);
 }
 
-/* ---------- Body: reading column + right rail ----------
- * A shared 60rem measure centres the whole content block in the wide shell, so
- * the hero and the reading column share one left edge instead of hugging left
- * with dead space. On wide viewports the freed right column carries a rail
- * (an "On this page" nav for the long docs, helper cards elsewhere). */
-.layout {
-  max-width: 60rem;
-  margin-inline: auto;
-  margin-top: var(--space-10);
-}
+/* ---------- Body: one centred reading column ----------
+ * A single measure centred in the wide shell — the hero and the column share
+ * the same centre line, so body text never sits in a left half with dead space.
+ * Prose inside stays left-aligned for a comfortable read. */
 .main {
-  max-width: 68ch;
+  max-width: 64ch;
+  margin-inline: auto;
+  margin-top: var(--space-12);
   counter-reset: legal;
-}
-@media (min-width: 60rem) {
-  .layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 16rem;
-    column-gap: var(--space-10);
-    align-items: start;
-  }
-  .main {
-    grid-column: 1;
-    grid-row: 1;
-    max-width: none;
-  }
 }
 :where(.main) h2 {
   font-family: var(--font-display);
@@ -163,9 +149,12 @@
   color: var(--text);
 }
 
-/* ---------- Generic section ---------- */
+/* ---------- Generic section ----------
+ * Generous space BEFORE each heading (space-12) versus a tight space-3 after,
+ * so a heading clearly belongs to the content beneath it and never touches the
+ * paragraph above. */
 .section {
-  margin-top: var(--space-10);
+  margin-top: var(--space-12);
   scroll-margin-top: var(--space-8);
 }
 .section:first-child {
@@ -184,6 +173,11 @@
   border-radius: var(--radius-md);
   background: var(--surface);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+/* When the callout leads the column (Privacy/Terms), the hero→column gap on
+   .main already provides the space — don't double it. */
+.main > .callout:first-child {
+  margin-top: 0;
 }
 .calloutLabel {
   display: block;
@@ -322,9 +316,11 @@
   line-height: 1.6;
 }
 
-/* ---------- Legal (auto-numbered + anchored) ---------- */
+/* ---------- Legal (auto-numbered + anchored) ----------
+ * Same rhythm as .section: a generous space-12 before every numbered clause so
+ * the "01/02/03…" headings breathe and never jam the paragraph above. */
 .legalSection {
-  margin-top: var(--space-10);
+  margin-top: var(--space-12);
   scroll-margin-top: var(--space-8);
   counter-increment: legal;
 }
@@ -368,7 +364,6 @@
 
 /* ---------- FAQ accordion (native <details>, no JS) ---------- */
 .faqList {
-  margin-top: var(--space-6);
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
@@ -519,33 +514,26 @@
   line-height: 1.6;
 }
 
-/* ---------- Right rail (ToC + helper/secondary cards) ----------
- * The second grid column on wide viewports. Below 60rem it collapses to a
- * stacked block under the reading column; the ToC variant hides entirely there
- * (it is a convenience jump-nav — every section stays reachable by scrolling). */
-.rail {
+/* ---------- Follow-up blocks (centred, in normal flow) ----------
+ * Supplementary content that used to sit in a left-biasing right rail — FAQ's
+ * "still stuck" helper and the Contact notes — now stacks in the centred
+ * reading column below the main content, separated with the section rhythm. */
+.followUp {
+  margin-top: var(--space-12);
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  margin-top: var(--space-10);
 }
-@media (min-width: 60rem) {
-  .rail {
-    grid-column: 2;
-    grid-row: 1;
-    margin-top: 0;
-    position: sticky;
-    top: var(--space-8);
-    align-self: start;
-    max-height: calc(100dvh - var(--space-12));
-    overflow-y: auto;
-    overscroll-behavior: contain;
-  }
+.miniCard {
+  padding: var(--space-6);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
-@media (max-width: 59.999rem) {
-  .railToc {
-    display: none;
-  }
+.miniCard h2 {
+  margin-bottom: var(--space-2);
+  font-size: 1.0625rem;
 }
 .miniCard p {
   color: var(--text-secondary);
@@ -561,56 +549,6 @@
 .miniCard p a:hover {
   color: var(--primary-hover);
   text-decoration-color: currentColor;
-}
-
-/* "On this page" table of contents */
-.tocTitle {
-  margin-bottom: var(--space-2);
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-.tocList {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  border-left: 1px solid var(--border);
-}
-.tocLink {
-  display: flex;
-  align-items: center;
-  min-height: 44px;
-  margin-left: -1px;
-  padding: var(--space-1) var(--space-3);
-  border-left: 2px solid transparent;
-  color: var(--text-secondary);
-  font-size: 0.875rem;
-  line-height: 1.35;
-  text-decoration: none;
-  transition:
-    color var(--dur-fast) var(--ease-out),
-    border-color var(--dur-fast) var(--ease-out);
-}
-.tocLink:hover {
-  color: var(--primary);
-  border-left-color: color-mix(in srgb, var(--primary) 55%, transparent);
-}
-
-/* Secondary / helper cards (Contact notes, FAQ "still stuck") */
-.miniCard {
-  padding: var(--space-6);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--surface);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-}
-.miniCard h2 {
-  margin-bottom: var(--space-2);
-  font-size: 1.0625rem;
 }
 
 /* ---------- CTA row ---------- */

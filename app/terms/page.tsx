@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { ContentPage } from '@/app/components/ContentPage'
-import { Callout, LegalSection, TableOfContents } from '@/app/components/content-blocks'
+import { Callout, LegalSection } from '@/app/components/content-blocks'
 import { getServerTranslator } from '@/app/i18n/server'
 
 export const metadata: Metadata = {
@@ -11,9 +11,8 @@ export const metadata: Metadata = {
     'The terms for using SQL Heist: an educational game. Use the skills only on systems you own or are authorised to test.',
 }
 
-// One source of truth for the numbered clauses: the reading column maps it to
-// <LegalSection>s and the sticky rail maps it to an "On this page" jump-nav, so
-// the two can never drift apart.
+// One source of truth for the numbered clauses: the centred reading column maps
+// each to a <LegalSection> (auto-numbered 01, 02, … with a deep-link anchor).
 const SECTIONS: { id: string; title: string; body: ReactNode }[] = [
   {
     id: 'the-deal',
@@ -96,7 +95,6 @@ export default function TermsPage() {
       title={t('terms.title')}
       updated="2026-07-30"
       lead={t('terms.lead')}
-      aside={<TableOfContents items={SECTIONS.map((s) => ({ href: `#${s.id}`, label: s.title }))} />}
     >
       <Callout label="The short of it">
         <p>

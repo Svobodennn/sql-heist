@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react'
-import { cx } from './cx'
 import styles from './content.module.css'
 
 // Presentational building blocks for the static content routes. Server
@@ -7,7 +6,7 @@ import styles from './content.module.css'
 // help/legal pages compose consistent structure instead of hand-rolling markup.
 
 // Plain headed section (Help, FAQ footer, Contact intros). An optional `id`
-// makes the section a deep-link/jump-nav target (see TableOfContents).
+// makes the section a deep-link target (URL hash / scroll anchor).
 export function Section({
   id,
   title,
@@ -22,29 +21,6 @@ export function Section({
       <h2>{title}</h2>
       {children}
     </section>
-  )
-}
-
-// Sticky "On this page" jump-nav that fills the freed right column on the long
-// content routes (Help + the legal pages). Pure anchors — no scroll-spy JS, so
-// it stays a zero-JS Server Component and static-export safe. Hidden below the
-// two-column breakpoint (every target is still reachable by scrolling).
-export function TableOfContents({ items }: { items: { href: string; label: string }[] }) {
-  return (
-    <aside className={cx(styles.rail, styles.railToc)}>
-      <nav aria-label="On this page">
-        <p className={styles.tocTitle}>On this page</p>
-        <ol className={styles.tocList}>
-          {items.map((item) => (
-            <li key={item.href}>
-              <a className={styles.tocLink} href={item.href}>
-                {item.label}
-              </a>
-            </li>
-          ))}
-        </ol>
-      </nav>
-    </aside>
   )
 }
 

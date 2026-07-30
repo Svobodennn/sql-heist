@@ -89,22 +89,7 @@ const FAQS: { q: string; a: ReactNode }[] = [
 export default function FaqPage() {
   const t = getServerTranslator()
   return (
-    <ContentPage
-      eyebrow={t('faq.eyebrow')}
-      title={t('faq.title')}
-      lead={t('faq.lead')}
-      aside={
-        <aside className={styles.rail}>
-          <div className={styles.miniCard}>
-            <h2>{t('faq.stillStuck')}</h2>
-            <p>
-              The <Link href="/help">how-it-works page</Link> walks through a full job, or{' '}
-              <Link href="/contact">leave word</Link> and we&apos;ll get back to you.
-            </p>
-          </div>
-        </aside>
-      }
-    >
+    <ContentPage eyebrow={t('faq.eyebrow')} title={t('faq.title')} lead={t('faq.lead')}>
       <h2 className="sr-only">{t('faq.srHeading')}</h2>
       <div className={styles.faqList}>
         {FAQS.map((item, i) => (
@@ -116,6 +101,16 @@ export default function FaqPage() {
             <div className={styles.faqAnswer}>{item.a}</div>
           </details>
         ))}
+      </div>
+
+      <div className={styles.followUp}>
+        <div className={styles.miniCard}>
+          <h2>{t('faq.stillStuck')}</h2>
+          <p>
+            The <Link href="/help">how-it-works page</Link> walks through a full job, or{' '}
+            <Link href="/contact">leave word</Link> and we&apos;ll get back to you.
+          </p>
+        </div>
       </div>
     </ContentPage>
   )
