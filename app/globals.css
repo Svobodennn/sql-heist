@@ -108,6 +108,10 @@
 
 html {
   color-scheme: dark;
+  /* In-page anchors (e.g. "How it works") glide instead of jumping. The
+     reduced-motion block below forces this back to `auto`. */
+  scroll-behavior: smooth;
+  scroll-padding-top: var(--space-8);
 }
 
 body {

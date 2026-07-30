@@ -437,6 +437,24 @@
   color: var(--text-secondary);
   line-height: 1.7;
 }
+/* Smooth open/close for the native <details> panel. Progressive enhancement:
+   browsers with ::details-content + interpolate-size glide the height both ways;
+   others get the instant native toggle. Reduced motion is honored by the global
+   guard (it force-kills transition-duration). The plus→minus icon already
+   transitions, so the affordance stays smooth even on the fallback. */
+.faq {
+  interpolate-size: allow-keywords;
+}
+.faq::details-content {
+  block-size: 0;
+  overflow: hidden;
+  transition:
+    block-size var(--dur-normal) var(--ease-out),
+    content-visibility var(--dur-normal) allow-discrete;
+}
+.faq[open]::details-content {
+  block-size: auto;
+}
 .faqMore {
   max-width: 46rem;
   margin-inline: auto;
