@@ -6,7 +6,7 @@ import type { Level } from '@/lib/schema/level'
 import { compose } from '@/lib/engine/queryComposer'
 import { cx } from '../lib/cx'
 import { DEBRIEF_INTRO, getJobNarrative } from '../lib/narrative'
-import { selectSecureSnippets } from '../lib/secureCode'
+import { groupSecureSnippets, selectSecureSnippets } from '../lib/secureCode'
 import { Button } from './Button'
 import { CodeCompare } from './CodeCompare'
 import { SqlPreview } from './SqlPreview'
@@ -43,7 +43,12 @@ export function DebriefPanel({
     [level.query.template, winningInputs],
   )
   const narrative = getJobNarrative(level.id)
-  const secureTabs = selectSecureSnippets(level.debrief)
+  // Two-level secure selector: flat tabs -> language groups (each with its
+  // framework/driver options). Memoized on the (stable) debrief.
+  const secureGroups = useMemo(
+    () => groupSecureSnippets(selectSecureSnippets(level.debrief)),
+    [level.debrief],
+  )
   const [revealed, setRevealed] = useState(isReplay ? TOTAL_BEATS : 1)
   const allRevealed = revealed >= TOTAL_BEATS
 
@@ -86,7 +91,7 @@ export function DebriefPanel({
         {revealed >= 3 && (
           <li className={styles.beat}>
             <h2 className={styles.beatHead}>③ The fix</h2>
-            <CodeCompare vulnerable={level.debrief.vulnerableCode} secureTabs={secureTabs} />
+            <CodeCompare vulnerable={level.debrief.vulnerableCode} secureGroups={secureGroups} />
           </li>
         )}
 

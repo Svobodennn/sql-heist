@@ -59,7 +59,6 @@ export function TopBar({
               <IconArrowLeft size={18} />
             </button>
           )}
-          <span className={styles.logo}>SQL HEIST</span>
           <span className={styles.crumb}>
             {jobTitle} · <span className={styles.phaseName}>{phase}</span>
           </span>

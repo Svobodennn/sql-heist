@@ -25,6 +25,83 @@ export function selectSecureSnippets(debrief: DebriefSecure): SecureSnippet[] {
   return tabs.map((t) => ({ stack: t.label, snippet: { language: t.language, code: t.code } }))
 }
 
+// ── Two-level selector model (docs/04-frontend-ux.md §7.2) ──────────────────
+// The debrief secure fix is chosen in two steps: LANGUAGE (JavaScript / Python /
+// PHP / …) then, only when a language ships more than one driver, the FRAMEWORK
+// (PDO vs Laravel, JDBC vs Spring Boot, …). Grouping + label shortening are pure
+// so they unit-test in the node suite; the component owns only presentation
+// (icons, horizontal scroll, keyboard). Everything is DERIVED from the engine's
+// SecureSnippet — no new level-JSON contract.
+
+export interface FrameworkOption {
+  label: string // original tab label, e.g. "PHP (PDO)"
+  shortLabel: string // language-prefix stripped, e.g. "PDO" / "Laravel"
+  snippet: CodeSnippet // { language, code }
+}
+
+export interface LanguageGroup {
+  language: string // engine language code, e.g. "php"
+  name: string // display category, e.g. "PHP"
+  options: FrameworkOption[]
+}
+
+// Engine language code -> human category. Unknown/legacy codes fall back to a
+// capitalized code so a new language can never break (or empty) the selector.
+const LANGUAGE_NAMES: Record<string, string> = {
+  js: 'JavaScript',
+  python: 'Python',
+  php: 'PHP',
+  java: 'Java',
+  csharp: 'C#',
+  go: 'Go',
+  ruby: 'Ruby',
+}
+
+export function languageName(code: string): string {
+  return LANGUAGE_NAMES[code] ?? (code ? code[0].toUpperCase() + code.slice(1) : code)
+}
+
+// Shorten a driver label by dropping the redundant language prefix:
+//   "PHP (PDO)"                 -> "PDO"            (prefix matches -> unwrap parens)
+//   "Python (sqlite3 / psycopg2)" -> "sqlite3 / psycopg2"
+//   "Laravel (Query Builder)"   -> "Laravel"       (real framework -> drop qualifier)
+//   "Django (ORM)"              -> "Django"
+// Falls back to the full label when neither rule applies.
+export function shortFrameworkLabel(label: string, category: string): string {
+  const trimmed = label.trim()
+  if (category && trimmed.toLowerCase().startsWith(category.toLowerCase())) {
+    const rest = trimmed.slice(category.length).trim()
+    const wrapped = rest.match(/^\((.+)\)$/)
+    if (wrapped) return wrapped[1].trim()
+  }
+  const head = trimmed.replace(/\s*\([^()]*\)\s*$/, '').trim()
+  return head || trimmed
+}
+
+// Fold the flat tab list into ordered language groups. First-appearance order is
+// preserved for BOTH languages and their drivers (tab order follows the data,
+// never a sort — same guarantee selectSecureSnippets makes). A legacy single
+// snippet yields one group with one option.
+export function groupSecureSnippets(tabs: SecureSnippet[]): LanguageGroup[] {
+  const groups: LanguageGroup[] = []
+  const byCode = new Map<string, LanguageGroup>()
+  for (const tab of tabs) {
+    const code = tab.snippet.language
+    let group = byCode.get(code)
+    if (!group) {
+      group = { language: code, name: languageName(code), options: [] }
+      byCode.set(code, group)
+      groups.push(group)
+    }
+    group.options.push({
+      label: tab.stack,
+      shortLabel: shortFrameworkLabel(tab.stack, group.name),
+      snippet: tab.snippet,
+    })
+  }
+  return groups
+}
+
 // Roving-tabindex keyboard model for the secure tablist. Pure, so it unit-tests
 // in the node vitest suite. Non-navigation keys return `current` unchanged.
 export function nextTabIndex(current: number, key: string, count: number): number {

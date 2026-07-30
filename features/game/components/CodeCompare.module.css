@@ -52,17 +52,37 @@
   text-transform: none;
 }
 
-/* Per-stack secure tabs (pill style avoids a double border-bottom under .head) */
-.tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-4);
+/* Secure selector zone: a subtly raised surface between the head and the code,
+   holding level 1 (language) and, when present, level 2 (framework). One divider
+   sits below the whole zone; level 2 is separated from level 1 by its own top rule. */
+.selector {
+  background: var(--surface);
   border-bottom: 1px solid var(--border);
 }
-.tab {
+
+/* ── Level 1 — language: single row, scrolls horizontally on overflow ── */
+.langBar {
+  position: relative;
+}
+.langScroller {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth; /* auto under prefers-reduced-motion (globals.css) */
+  -webkit-overflow-scrolling: touch; /* iOS momentum */
+  overscroll-behavior-x: contain;
+  scrollbar-width: none; /* hidden but keyboard/pointer scrollable (Firefox) */
+}
+.langScroller::-webkit-scrollbar {
+  display: none; /* hidden but keyboard/pointer scrollable (WebKit) */
+}
+.langTab {
   display: inline-flex;
   align-items: center;
+  gap: var(--space-2);
+  flex: 0 0 auto; /* never shrink -> row overflows -> scrolls right, no wrap */
   min-height: 40px;
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--border);
@@ -70,22 +90,94 @@
   background: transparent;
   color: var(--text-secondary);
   font-family: var(--font-sans);
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 600;
-  letter-spacing: 0.02em;
+  white-space: nowrap;
   cursor: pointer;
   transition:
     color var(--dur-fast) var(--ease-out),
     background-color var(--dur-fast) var(--ease-out),
     border-color var(--dur-fast) var(--ease-out);
 }
-.tab:hover {
+.langGlyph {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.langTab:hover {
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+.langTab:hover .langGlyph {
+  color: var(--text-secondary);
+}
+.langTabActive,
+.langTabActive:hover {
+  color: var(--success);
+  background: var(--success-subtle);
+  border-color: color-mix(in srgb, var(--success) 45%, var(--border));
+}
+.langTabActive .langGlyph {
+  color: var(--success);
+}
+
+/* Right/left scroll affordance — fades in only when the row continues offscreen. */
+.fade {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2.75rem;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-normal) var(--ease-out);
+}
+.fadeStart {
+  left: 0;
+  background: linear-gradient(to right, var(--surface), transparent);
+}
+.fadeEnd {
+  right: 0;
+  background: linear-gradient(to left, var(--surface), transparent);
+}
+.fadeOn {
+  opacity: 1;
+}
+
+/* ── Level 2 — framework/driver: segmented chips, only when a language has >1 ── */
+.fwBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--border);
+}
+.fwChip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+.fwChip:hover {
   color: var(--success);
   border-color: color-mix(in srgb, var(--success) 30%, var(--border));
 }
-.tabActive {
+.fwChipActive,
+.fwChipActive:hover {
   color: var(--success);
-  background: var(--success-subtle);
+  background: color-mix(in srgb, var(--success) 12%, transparent);
   border-color: color-mix(in srgb, var(--success) 45%, var(--border));
 }
 
