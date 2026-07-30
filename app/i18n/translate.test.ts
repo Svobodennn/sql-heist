@@ -61,10 +61,10 @@ describe('real catalogs', () => {
     expect(tEn('game.board.title')).toBe('Three jobs. One score.')
   })
 
-  it('tr/pl are en-cloned stubs for now (identical rendered values)', () => {
-    expect(tTr('nav.home')).toBe('Home')
-    expect(tPl('nav.home')).toBe('Home')
-    expect(tTr('game.board.title')).toBe('Three jobs. One score.')
-    expect(tPl('game.exploit.sendIt')).toBe('Send it')
+  it('tr/pl now carry real translations (diverge from en)', () => {
+    expect(tTr('nav.home')).not.toBe('Home')
+    expect(tPl('nav.home')).not.toBe('Home')
+    expect(tTr('game.board.title')).not.toBe('Three jobs. One score.')
+    expect(tPl('game.exploit.sendIt')).not.toBe('Send it')
   })
 })
