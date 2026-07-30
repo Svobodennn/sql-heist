@@ -1,5 +1,6 @@
 import type { Level } from '@/lib/schema/level'
-import type { ExecutionResult } from '@/lib/engine/sqlRunner'
+import type { RunResult } from '@/lib/engine/levelSession'
+import type { RunSignal } from '@/lib/engine/signal'
 import type { WinEvaluation } from '@/lib/engine/winEvaluator'
 import { canOpenHint, computeJobScore, starsForScore } from '@/lib/engine/scoring'
 
@@ -28,7 +29,11 @@ export const PHASE_LABELS: Record<Phase, string> = {
 export interface GameState {
   phase: Phase
   inputs: Record<string, string>
-  lastResult: ExecutionResult | null
+  // WS3: the run result carries the optional WAF FilterOutcome; the derived
+  // technique-adaptive signal (deriveSignal) rides alongside so THE WIRE can
+  // switch its render without re-running the engine.
+  lastResult: RunResult | null
+  lastSignal: RunSignal | null
   failedRuns: number
   openedHintTiers: number
   elapsedSec: number
@@ -42,7 +47,9 @@ export type GameAction =
   | { type: 'ADVANCE' } // brief -> recon -> exploit (linear forward)
   | { type: 'BACK' } // exploit -> recon -> brief (session-preserving)
   | { type: 'SET_INPUT'; field: string; value: string }
-  | { type: 'RUN'; result: ExecutionResult; evaluation: WinEvaluation }
+  // `signal` is optional so pure reducer tests can dispatch a RUN without wiring
+  // the engine's deriveSignal — the UI always supplies it.
+  | { type: 'RUN'; result: RunResult; evaluation: WinEvaluation; signal?: RunSignal }
   | { type: 'RESET_ATTEMPT' }
   | { type: 'RESTART' } // "run it back" — replay the job to improve the score
   | { type: 'OPEN_HINT'; tier: number }
@@ -56,6 +63,7 @@ export function makeInitialState(level: Level): GameState {
     phase: 'brief',
     inputs,
     lastResult: null,
+    lastSignal: null,
     failedRuns: 0,
     openedHintTiers: 0,
     elapsedSec: 0,
@@ -112,7 +120,7 @@ export function reducer(state: GameState, action: GameAction): GameState {
     }
 
     case 'RUN': {
-      const base = { ...state, lastResult: action.result }
+      const base = { ...state, lastResult: action.result, lastSignal: action.signal ?? null }
       if (!action.evaluation.won) {
         return { ...base, failedRuns: state.failedRuns + 1 }
       }
@@ -134,7 +142,7 @@ export function reducer(state: GameState, action: GameAction): GameState {
     case 'RESET_ATTEMPT': {
       // DB reset is the session's job; here we only clear the surface. Cumulative
       // counters (attempts, hints, time) survive — they drive the eventual score.
-      return { ...state, inputs: emptyInputs(state.inputs), lastResult: null }
+      return { ...state, inputs: emptyInputs(state.inputs), lastResult: null, lastSignal: null }
     }
 
     case 'RESTART': {
@@ -145,6 +153,7 @@ export function reducer(state: GameState, action: GameAction): GameState {
         phase: 'exploit',
         inputs: emptyInputs(state.inputs),
         lastResult: null,
+        lastSignal: null,
         failedRuns: 0,
         openedHintTiers: 0,
         elapsedSec: 0,

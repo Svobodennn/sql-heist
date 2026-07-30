@@ -2,8 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Level } from '@/lib/schema/level'
-import type { LevelSession } from '@/lib/engine/levelSession'
-import type { ExecutionResult } from '@/lib/engine/sqlRunner'
+import type { LevelSession, RunResult } from '@/lib/engine/levelSession'
 
 // Client-only engine lifecycle (docs/01-architecture.md §2.1, §7.1). The WASM
 // engine is imported DYNAMICALLY inside the effect so it is code-split away from
@@ -16,7 +15,10 @@ export type EngineStatus = 'loading' | 'ready' | 'error'
 
 export interface UseEngine {
   status: EngineStatus
-  run: (inputs: Record<string, string>) => ExecutionResult | null
+  // WS3: RunResult = ExecutionResult (+ optional WAF FilterOutcome). Widened from
+  // ExecutionResult so the UI can read `.filter`; existing ExecutionResult readers
+  // are unaffected (structural superset).
+  run: (inputs: Record<string, string>) => RunResult | null
   reset: () => void
   retry: () => void
 }
@@ -56,7 +58,7 @@ export function useEngine(level: Level): UseEngine {
     }
   }, [level, attempt])
 
-  const run = useCallback((inputs: Record<string, string>): ExecutionResult | null => {
+  const run = useCallback((inputs: Record<string, string>): RunResult | null => {
     return sessionRef.current ? sessionRef.current.run(inputs) : null
   }, [])
 

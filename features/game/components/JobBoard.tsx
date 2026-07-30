@@ -2,18 +2,23 @@
 
 import type { JobMeta } from '../levels'
 import { cx } from '../lib/cx'
+import { groupByAct } from '../lib/actBoard'
 import { rankForScore } from '../lib/narrative'
 import { isUnlocked, useProgress } from '../lib/useProgress'
+import { BadgeStrip } from './BadgeStrip'
 import { Stamp } from './Stamp'
 import { JobCard, type JobCardState } from './JobCard'
 import styles from './JobBoard.module.css'
 
-// Crew HQ / Job Board (docs/04-frontend-ux.md §8). Client component: reads
-// localStorage progress to derive completed/active/locked. Linear unlock. Until
-// hydration completes it renders the locked-but-first baseline (no SSR mismatch).
+// Crew HQ / Job Board (docs/04-frontend-ux.md §8, ws3-design.md: "Board shows
+// Act I / Act II"). Client component: reads localStorage progress to derive
+// completed/active/locked (linear unlock). Jobs are grouped into headed Act
+// sections; with only the 3 MVP levels present, Act II simply doesn't render until
+// the parent merges the advanced levels (groupByAct returns non-empty acts only).
 export function JobBoard({ jobs }: { jobs: JobMeta[] }) {
   const { records, ready } = useProgress()
   const orderedIds = jobs.map((j) => j.id)
+  const sections = groupByAct(jobs)
 
   const totalScore = jobs.reduce((sum, j) => sum + (records[j.id]?.bestScore ?? 0), 0)
 
@@ -30,6 +35,7 @@ export function JobBoard({ jobs }: { jobs: JobMeta[] }) {
       <header className={styles.header}>
         <div>
           <Stamp>THE BOARD</Stamp>
+          {/* Heading text is asserted by tests/e2e/support.ts — keep it stable. */}
           <h1 className={styles.title}>Three jobs. One score.</h1>
           <p className={styles.sub}>
             Pull each one off with a SQL injection, then learn the fix. Progress stays on this
@@ -45,17 +51,30 @@ export function JobBoard({ jobs }: { jobs: JobMeta[] }) {
         )}
       </header>
 
-      <ul className={styles.grid}>
-        {jobs.map((job, i) => (
-          <JobCard
-            key={job.id}
-            meta={job}
-            state={cardState(job)}
-            bestScore={records[job.id]?.bestScore}
-            prevJob={i > 0 ? jobs[i - 1].job : undefined}
-          />
-        ))}
-      </ul>
+      <BadgeStrip metas={jobs} records={records} />
+
+      {sections.map((sec) => (
+        <section key={sec.act} className={styles.act} aria-label={sec.title}>
+          <div className={styles.actHead}>
+            <h2 className={styles.actTitle}>{sec.title}</h2>
+            <p className={styles.actTagline}>{sec.tagline}</p>
+          </div>
+          <ul className={styles.grid}>
+            {sec.jobs.map((job) => {
+              const globalIndex = orderedIds.indexOf(job.id)
+              return (
+                <JobCard
+                  key={job.id}
+                  meta={job}
+                  state={cardState(job)}
+                  bestScore={records[job.id]?.bestScore}
+                  prevJob={globalIndex > 0 ? jobs[globalIndex - 1].job : undefined}
+                />
+              )
+            })}
+          </ul>
+        </section>
+      ))}
     </section>
   )
 }
