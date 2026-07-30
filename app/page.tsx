@@ -26,6 +26,7 @@ export default function HomePage() {
         <div className={styles.heroScan} aria-hidden="true" />
 
         <div className={styles.heroInner}>
+          <Logo size={72} className={styles.heroLogo} />
           <span className="stamp">{hero.eyebrow}</span>
 
           <h1 className={styles.title}>{hero.title}</h1>
