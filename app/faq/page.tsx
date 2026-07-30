@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { ContentPage } from '@/app/components/ContentPage'
+import { Section } from '@/app/components/content-blocks'
 import styles from '@/app/components/content.module.css'
 
 export const metadata: Metadata = {
@@ -55,8 +56,8 @@ const FAQS: { q: string; a: ReactNode }[] = [
     a: (
       <p>
         On this device, in your browser&apos;s local storage. There&apos;s no account and no server,
-        so we never see it. Clear your browser data &mdash; or open the game somewhere else &mdash;
-        and you start fresh.
+        so we never see it. Clear your browser data &mdash; or open the game somewhere else &mdash; and
+        you start fresh.
       </p>
     ),
   },
@@ -65,7 +66,7 @@ const FAQS: { q: string; a: ReactNode }[] = [
     a: <p>No. It&apos;s free to play.</p>,
   },
   {
-    q: 'The engine won&apos;t load / something looks broken.',
+    q: 'The engine won’t load, or something looks broken.',
     a: (
       <p>
         Refresh first. If it still won&apos;t start, your browser may be blocking WebAssembly or
@@ -92,22 +93,25 @@ export default function FaqPage() {
       title="Questions the Fixer answers once"
       lead="No small talk. Here's what people ask before their first job."
     >
+      <h2 className="sr-only">Frequently asked questions</h2>
       <div className={styles.faqList}>
         {FAQS.map((item, i) => (
           <details key={i} className={styles.faq}>
-            <summary className={styles.faqSummary}>{item.q}</summary>
+            <summary className={styles.faqSummary}>
+              <span>{item.q}</span>
+              <span className={styles.faqIcon} aria-hidden="true" />
+            </summary>
             <div className={styles.faqAnswer}>{item.a}</div>
           </details>
         ))}
       </div>
 
-      <section>
-        <h2>Still stuck?</h2>
+      <Section title="Still stuck?">
         <p>
           The <Link href="/help">how-it-works page</Link> walks through a full job, or{' '}
           <Link href="/contact">leave word</Link> and we&apos;ll get back to you.
         </p>
-      </section>
+      </Section>
     </ContentPage>
   )
 }
