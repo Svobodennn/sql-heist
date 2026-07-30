@@ -1,0 +1,155 @@
+/* Adaptive signal panels (docs/ws3-design.md). Shared shell mirrors ResultGrid's
+   bordered surface so switching render by kind never jumps the layout. Tone maps
+   to a semantic token via a CSS var (--tone) — icon + word carry the same meaning,
+   so color is never the sole channel (§11, WCAG 1.4.1). */
+
+.panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.toneDefense {
+  --tone: var(--success);
+  --tone-subtle: var(--success-subtle);
+}
+.toneAttack {
+  --tone: var(--danger);
+  --tone-subtle: var(--danger-subtle);
+}
+.toneInfo {
+  --tone: var(--info);
+  --tone-subtle: var(--info-subtle);
+}
+.toneNeutral {
+  --tone: var(--text-secondary);
+  --tone-subtle: var(--surface-raised);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--tone);
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.headValue {
+  margin-left: auto;
+  font-size: 0.8125rem;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-secondary);
+}
+
+/* ---- oracle: a bold TRUE / FALSE readout ---- */
+.oracle {
+  align-items: flex-start;
+  border-color: color-mix(in srgb, var(--tone) 40%, var(--border));
+  background: color-mix(in srgb, var(--tone) 7%, var(--surface));
+}
+.oracleWord {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--tone);
+  font-family: var(--font-display);
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+.basis {
+  color: var(--text-secondary);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+/* ---- timing: a fast <-> slow latency meter ---- */
+.meter {
+  position: relative;
+  height: 12px;
+  border-radius: var(--radius-full);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.meterFill {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  background: var(--tone);
+  transition: transform var(--dur-normal) var(--ease-out);
+}
+/* Threshold marker (pinned by --marker); overflow-clipped to the track. */
+.meterMarker {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  left: var(--marker);
+  width: 2px;
+  background: var(--text);
+  opacity: 0.7;
+}
+.meterScale {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  color: var(--text-muted);
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+}
+.meterScale .mono {
+  color: var(--text-secondary);
+}
+
+/* ---- error: crimson leak panel ---- */
+.error {
+  border-color: var(--danger-solid);
+  background: var(--danger-subtle);
+}
+.leakTag {
+  margin-left: auto;
+  padding: 1px 8px;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--danger) 18%, transparent);
+  color: var(--danger);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.errorMsg {
+  margin: 0;
+  color: var(--danger);
+  font-size: 0.9375rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+/* Leaked token: tint + underline so it stands out WITHOUT relying on color. */
+.leaked {
+  background: color-mix(in srgb, var(--danger) 26%, transparent);
+  color: var(--text);
+  padding: 0 3px;
+  border-radius: 3px;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+  font-weight: 700;
+}
+.gloss {
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+}
+
+/* ---- side-effect: state-change readout ---- */
+.summary {
+  color: var(--text-secondary);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}

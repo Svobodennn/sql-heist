@@ -1,0 +1,112 @@
+/* Collapsible recon ledger — mirrors ExploitConsole's recap disclosure so the two
+   read as one family. Chevron rotates on open; summary is a 44px touch target. */
+.wrap {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+.summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  min-height: 44px;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  list-style: none;
+}
+.summary::-webkit-details-marker {
+  display: none;
+}
+.summaryText {
+  font-weight: 600;
+}
+.chevron {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.wrap[open] .chevron {
+  transform: rotate(180deg);
+}
+.count {
+  margin-left: auto;
+  padding: 1px 8px;
+  border-radius: var(--radius-full);
+  background: var(--surface-raised);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: 0 var(--space-4) var(--space-4);
+}
+.sectionHead {
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: var(--space-2);
+}
+
+.tables {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.table {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.tableName {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--info);
+}
+.cols {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.col {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  padding: 1px 8px;
+  border-radius: var(--radius-full);
+  background: var(--surface-raised);
+}
+
+.discovered {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+/* Discovered columns read as loot — jade tint, matching the "you pried this out"
+   win language elsewhere. */
+.discoveredCol {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--success);
+  padding: 1px 8px;
+  border-radius: var(--radius-full);
+  background: var(--success-subtle);
+  border: 1px solid color-mix(in srgb, var(--success) 30%, transparent);
+}
+.emptyNote {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}

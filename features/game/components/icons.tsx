@@ -137,3 +137,52 @@ export const IconLootTag = (p: IconProps) => (
     <circle cx="15.5" cy="8.5" r="1.4" />
   </Base>
 )
+
+// Plain X — oracle FALSE (paired with the word "FALSE", never color-only).
+export const IconX = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M6 6l12 12M18 6 6 18" />
+  </Base>
+)
+
+// Prohibition / no-entry — the WAF REJECT banner (semantic stand-in for ⛔,
+// honoring the codebase anti-emoji policy).
+export const IconBlock = (p: IconProps) => (
+  <Base {...p}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="m5.6 5.6 12.8 12.8" />
+  </Base>
+)
+
+// Scissors — the WAF STRIP banner ("cleaned → your input became …").
+export const IconScissors = (p: IconProps) => (
+  <Base {...p}>
+    <circle cx="6" cy="6" r="2.5" />
+    <circle cx="6" cy="18" r="2.5" />
+    <path d="M8 8l12 8M8 16 20 8" />
+  </Base>
+)
+
+// Stacked layers — the stacked-queries side-effect readout.
+export const IconStack = (p: IconProps) => (
+  <Base {...p}>
+    <path d="m12 3 9 5-9 5-9-5 9-5Z" />
+    <path d="m3 13 9 5 9-5" />
+  </Base>
+)
+
+// Open notebook — the recon discovery ledger.
+export const IconNotebook = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M12 6c-2-1.4-4.5-1.4-7-1v13c2.5-.4 5-.4 7 1 2-1.4 4.5-1.4 7-1V5c-2.5-.4-5-.4-7 1Z" />
+    <path d="M12 6v14" />
+  </Base>
+)
+
+// Award medal — the per-technique mastery badges.
+export const IconAward = (p: IconProps) => (
+  <Base {...p}>
+    <circle cx="12" cy="9" r="5" />
+    <path d="M9 13.5 7.5 21 12 18.5 16.5 21 15 13.5" />
+  </Base>
+)

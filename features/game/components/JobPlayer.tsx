@@ -12,6 +12,8 @@ import {
 import { useRouter } from 'next/navigation'
 import type { Level } from '@/lib/schema/level'
 import { evaluate, toWinContext } from '@/lib/engine/winEvaluator'
+import { compose } from '@/lib/engine/queryComposer'
+import { deriveSignal } from '@/lib/engine/signal'
 import { shouldSuggestHint } from '@/lib/engine/scoring'
 import { PHASE_LABELS, makeInitialState, previousPhase, reducer } from '../lib/phaseMachine'
 import { useEngine } from '../lib/useEngine'
@@ -85,17 +87,24 @@ export function JobPlayer({ level, nextJobId }: { level: Level; nextJobId?: stri
   const handleRun = useCallback(() => {
     const result = run(state.inputs)
     if (!result) return // engine not ready yet
+    // deriveSignal is the frozen engine's PURE read of what this run produced —
+    // recomposed with the same inputFilter the session applied, so THE WIRE can
+    // switch its render (rows / oracle / timing / error / side-effect) per level.
+    const composed = compose(level.query.template, state.inputs, level.query.inputFilter)
+    const signal = deriveSignal(level, composed, result)
     const evaluation = evaluate(level.winCondition, toWinContext(result, state.inputs))
-    dispatch({ type: 'RUN', result, evaluation })
+    dispatch({ type: 'RUN', result, evaluation, signal })
 
     if (evaluation.won) {
       push('success', 'Loot secured — moving to the score.')
+    } else if (result.filter?.mode === 'reject') {
+      push('error', `Blocked by the filter: ${result.filter.blocked.join(', ') || 'your payload'}.`)
     } else if (result.error) {
       push('error', 'The mark choked on that — read what it spat back.')
     } else {
       push('info', evaluation.reason)
     }
-  }, [run, state.inputs, level.winCondition, push])
+  }, [run, state.inputs, level, push])
 
   const handleReset = useCallback(() => {
     reset()
@@ -176,6 +185,7 @@ export function JobPlayer({ level, nextJobId }: { level: Level; nextJobId?: stri
                   level={level}
                   inputs={state.inputs}
                   lastResult={state.lastResult}
+                  signal={state.lastSignal}
                   engineStatus={status}
                   hints={level.hints}
                   openedTiers={state.openedHintTiers}
