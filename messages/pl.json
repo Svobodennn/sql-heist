@@ -144,14 +144,129 @@
     "sectionControls": "Sterowanie",
     "sectionStuck": "Utknąłeś? Zadzwoń do The Fixer",
     "sectionPoint": "Sedno",
-    "cta": "Zobacz tablicę"
+    "cta": "Zobacz tablicę",
+    "before": {
+      "introPre": "Każda robota kieruje cię na Meridian — brokera danych, który wzbogacił się, przechowując cudze sekrety. Za każdymi z jego drzwi kryje się ",
+      "introStrong": "prawdziwa baza danych SQLite",
+      "introPost": ", działająca w twojej przeglądarce. Żadnej symulacji, żadnych ustawionych odpowiedzi. Włamujesz się prawdziwym wstrzyknięciem SQL, a potem uczysz się dokładnie, jak powinni byli cię powstrzymać.",
+      "calloutBody": "Nic tutaj nie sięga sieci. Silnik ładuje się na żądanie, baza danych jest zasiewana od nowa przy każdym podejściu, a jedyne, co możesz zepsuć, to cel treningowy."
+    },
+    "moves": {
+      "intro": "Każda robota biegnie tym samym łukiem. Zawsze wiesz, gdzie w nim jesteś.",
+      "items": {
+        "0": {
+          "title": "Odprawa",
+          "body": "The Fixer wskazuje cel i łup — nigdy metodę. Pokazuje drzwi; zamek rozgryzasz sam."
+        },
+        "1": {
+          "title": "Rozpoznanie",
+          "body": "Zbadaj fasadę celu. Znajdź, gdzie naprawdę lądują twoje dane wejściowe. Schemat, który widzisz, nigdy nie jest całym budynkiem."
+        },
+        "2": {
+          "title": "Atak",
+          "body": "Sedno sprawy. Wpisz coś w formularz celu i patrz, jak twoje dane wejściowe budują prawdziwe zapytanie — na żywo, na linii — a potem je uruchom."
+        },
+        "3": {
+          "title": "Łup",
+          "body": "Łup, twój wynik i jak czysto ci poszło. Nikt cię nie powstrzymał. O to właśnie chodzi."
+        },
+        "4": {
+          "title": "Podsumowanie",
+          "body": "Druga strona roboty: podatny kod obok poprawki, która go zamyka. To ta część, która czyni cię groźnym w obronie."
+        }
+      }
+    },
+    "wire": {
+      "intro": "Ekran Ataku pokazuje dwie twarze tej samej chwili. Po lewej zwykły formularz, który widzi ofiara. Po prawej surowy SQL, w który zamienia się twoje dane wejściowe. Kolor niesie znaczenie — i nigdy nie polega wyłącznie na kolorze:",
+      "legend": {
+        "0": {
+          "term": "Karmazyn",
+          "rest": " to twoje dane wejściowe, odczytane jako kod — wyłamanie, chwila, w której dane przestają być danymi."
+        },
+        "1": {
+          "term": "Stalowy błękit",
+          "rest": " to własne słowa kluczowe zapytania — struktura, którą napisał system."
+        },
+        "2": {
+          "term": "Przygaszone i przekreślone",
+          "rest": " to fragment, który zabił twój komentarz. Jeśli jest szary, nigdy się nie wykonał."
+        }
+      }
+    },
+    "controls": {
+      "run": {
+        "pre": "Uruchom swój ładunek za pomocą",
+        "cmd": "⌘",
+        "ctrl": "Ctrl",
+        "enter": "Enter",
+        "mid": ", lub",
+        "button": "Wstrzyknij / Uruchom",
+        "post": "przyciskiem."
+      },
+      "reset": {
+        "name": "Reset",
+        "text": "czyści twoje dane wejściowe i zasiewa bazę na nowo. Każde podejście i tak zaczyna się na czysto."
+      },
+      "keys": {
+        "pre": "Pełna nawigacja klawiaturą w całej grze.",
+        "esc": "Esc",
+        "post": "zamyka każde okno dialogowe."
+      }
+    },
+    "stuck": {
+      "body": "Każda robota niesie trzy podpowiedzi, otwierane po kolei: słowo, potem metoda, potem zagranie. Kosztują wynik, więc wydawaj je jak własne. Zgadywanie w ciemno jest dla amatorów i trupów — ale szturchnięcie bije gapienie się."
+    },
+    "point": {
+      "body": "To nie jest gra o popełnianiu przestępstw. To gra o dostrzeganiu tej jednej luki, która je umożliwia — żebyś rozpoznał ją na wolności i ją zamknął. Uczysz się włamania, żeby móc zbudować zamek."
+    }
   },
   "faq": {
     "eyebrow": "Prosto z mostu",
     "title": "Pytania, na które The Fixer odpowiada raz",
     "lead": "Bez pogaduszek. Oto, o co ludzie pytają przed pierwszą robotą.",
     "srHeading": "Często zadawane pytania",
-    "stillStuck": "Nadal utknąłeś?"
+    "stillStuck": "Nadal utknąłeś?",
+    "items": {
+      "0": {
+        "q": "Czy to legalne?",
+        "a": "Tak. Każda robota działa w całości w twojej przeglądarce, na bazie SQLite w piaskownicy dostarczanej z grą. Po drugiej stronie nie ma prawdziwych systemów, żadnych połączeń sieciowych, a jedyne, co możesz zepsuć, to cel treningowy."
+      },
+      "1": {
+        "q": "Czy muszę coś instalować?",
+        "a": "Nie. Działa w nowoczesnej przeglądarce. Silnik bazy danych (SQLite skompilowany do WebAssembly) ładuje się na żądanie, gdy pierwszy raz go potrzebujesz — bez kont, bez pobierania, bez konfiguracji."
+      },
+      "2": {
+        "q": "Czy muszę już znać SQL?",
+        "a": "Pomaga. Gra zakłada, że umiesz odczytać SELECT i z grubsza nadążyć za klauzulą WHERE. Uczy wstrzykiwania — nie SQL-a od zera. Jeśli zapytania są dla ciebie zupełnie nowe, poznaj najpierw podstawy, a potem przyjdź na robotę."
+      },
+      "3": {
+        "q": "Czy uczycie ludzi atakować prawdziwe strony?",
+        "a": "Uczymy, jak działa wstrzykiwanie, żebyś umiał je rozpoznać i zamknąć — każda robota kończy się poprawką, nie włamaniem. Używaj tego, czego się nauczysz, tylko na systemach, które są twoje albo na które masz wyraźne pozwolenie na testy. Wszędzie indziej to przestępstwo — i to na twoją odpowiedzialność."
+      },
+      "4": {
+        "q": "Gdzie zapisywany jest mój postęp?",
+        "a": "Na tym urządzeniu, w pamięci lokalnej twojej przeglądarki. Nie ma konta ani serwera, więc nigdy tego nie widzimy. Wyczyść dane przeglądarki — albo otwórz grę gdzie indziej — i zaczynasz od nowa."
+      },
+      "5": {
+        "q": "Czy to coś kosztuje?",
+        "a": "Nie. Gra jest darmowa."
+      },
+      "6": {
+        "q": "Silnik się nie ładuje albo coś wygląda na zepsute.",
+        "a": "Najpierw odśwież. Jeśli nadal się nie uruchamia, twoja przeglądarka może blokować WebAssembly albo działać w trybie ograniczonym — spróbuj aktualnej wersji przeglądarki Chrome, Firefox lub Safari z domyślnymi ustawieniami."
+      },
+      "7": {
+        "q": "Czy mogę grać w moim języku?",
+        "a": "Angielski, turecki i polski. Użyj przełącznika języka w nawigacji — cała strona i interfejs gry podążają za nim."
+      }
+    },
+    "followUp": {
+      "pre": "Nasza ",
+      "helpLink": "strona jak to działa",
+      "mid": " przeprowadza przez całą robotę albo ",
+      "contactLink": "zostaw wiadomość",
+      "post": " i odezwiemy się."
+    }
   },
   "content": {
     "updated": "Ostatnia aktualizacja"
@@ -165,17 +280,96 @@
   "privacy": {
     "eyebrow": "Drobny druk",
     "title": "Prywatność",
-    "lead": "Wersja krótka: nie zbieramy cię. Wersja długa jest niżej i wciąż jest krótka."
+    "lead": "Wersja krótka: nie zbieramy cię. Wersja długa jest niżej i wciąż jest krótka.",
+    "glanceLabel": "W skrócie",
+    "glanceBody": "Brak kont. Brak śledzenia. Brak analityki w tej wersji. Twój postęp znajduje się w pamięci lokalnej przeglądarki na twoim urządzeniu — nie mamy serwera, który mógłby go odczytać.",
+    "sections": {
+      "0": {
+        "title": "Co zbieramy",
+        "body": "Niczego, co pozwala cię zidentyfikować. SQL Heist nie ma w tej wersji systemu kont, rejestracji ani logowania (link „Zaloguj się” to element zastępczy przewidziany na przyszłe wydanie). Nie prosimy o twoje imię, adres e-mail ani o nic innego, aby grać."
+      },
+      "1": {
+        "title": "Co zostaje na twoim urządzeniu",
+        "body": "Twój postęp — które roboty ukończyłeś i twoje najlepsze wyniki — jest zapisywany w pamięci lokalnej przeglądarki, na twoim urządzeniu. Nigdy nie opuszcza przeglądarki i nie mamy możliwości jego odczytania. Wyczyszczenie danych przeglądarki usuwa go."
+      },
+      "2": {
+        "title": "Pliki cookie i śledzenie",
+        "body": "Gra nie ustawia żadnych plików cookie służących śledzeniu ani reklamie i nie zawiera w tej wersji analityki zewnętrznych podmiotów. Jeśli kiedykolwiek się to zmieni, zaktualizujemy tę stronę i tę datę, zanim to nastąpi."
+      },
+      "3": {
+        "title": "Podmioty zewnętrzne",
+        "body": "Gra jest witryną statyczną. Czcionki są dołączane na etapie kompilacji, a silnik bazy danych działa lokalnie w twojej przeglądarce, więc zwykła gra nie wysyła żadnych żądań do podmiotów zewnętrznych. Podmiot hostujący witrynę może przechowywać standardowe logi serwera (takie jak adresy IP) na potrzeby bezpieczeństwa i działania; takie przetwarzanie podlega własnym zasadom tego podmiotu."
+      },
+      "4": {
+        "title": "Dzieci",
+        "body": "SQL Heist to narzędzie edukacyjne skierowane do programistów. Nie jest przeznaczone dla dzieci poniżej 13 roku życia i nie zbiera świadomie ich danych."
+      },
+      "5": {
+        "title": "Zmiany",
+        "body": "Jeśli zaktualizujemy sposób działania którejkolwiek z tych rzeczy, zmienimy tę stronę oraz widniejącą powyżej datę „ostatniej aktualizacji”. Pytania? ",
+        "link": "Skontaktuj się z ekipą"
+      }
+    }
   },
   "terms": {
     "eyebrow": "Drobny druk",
     "title": "Warunki korzystania",
-    "lead": "Graj, poznaj fach, trzymaj się czysto. Szczegóły:"
+    "lead": "Graj, poznaj fach, trzymaj się czysto. Szczegóły:",
+    "shortLabel": "Krótko mówiąc",
+    "shortBody": "Darmowa, edukacyjna gra. Używaj tego, czego uczy, wyłącznie na systemach, które są twoje lub do których masz upoważnienie do testowania — wszystko inne to przestępstwo, i to na twoją odpowiedzialność.",
+    "sections": {
+      "0": {
+        "title": "Umowa",
+        "body": "SQL Heist to darmowa, edukacyjna gra o tym, jak działa wstrzykiwanie SQL i jak się przed nim bronić. Korzystając z niej, akceptujesz niniejsze warunki. Jeśli ich nie akceptujesz, nie korzystaj z gry."
+      },
+      "1": {
+        "title": "Dopuszczalne użycie",
+        "body": "Techniki te są nauczane w celu zrozumienia obrony. Zgadzasz się używać ich wyłącznie wobec systemów, które są twoją własnością lub co do których masz wyraźne, udokumentowane pozwolenie na testy. Atakowanie systemów bez autoryzacji jest w większości miejsc nielegalne, a za to, co zrobisz z tym, czego się nauczysz, odpowiadasz wyłącznie ty.",
+        "body2": "Nie próbuj nadużywać, przeciążać ani odtwarzać wstecznie samej gry, aby dotrzeć do czegokolwiek poza dostarczaną z nią zawartością treningową."
+      },
+      "2": {
+        "title": "Brak gwarancji",
+        "body": "Gra i jej zawartość są dostarczane „w stanie takim, w jakim są”, bez jakichkolwiek gwarancji. To narzędzie dydaktyczne, a nie profesjonalna porada z zakresu bezpieczeństwa, i nie obiecujemy, że jest wolne od błędów ani przydatne do jakiegokolwiek konkretnego celu. Prawdziwe systemy są bardziej skomplikowane niż cel treningowy."
+      },
+      "3": {
+        "title": "Ograniczenie odpowiedzialności",
+        "body": "W najszerszym zakresie dozwolonym przez prawo twórcy SQL Heist nie ponoszą odpowiedzialności za jakiekolwiek szkody wynikające z korzystania przez ciebie z gry lub z umiejętności, których uczy."
+      },
+      "4": {
+        "title": "Treść",
+        "body": "Teksty, postacie, grafika i kod gry należą do nas, o ile nie zaznaczono inaczej. SQL to SQL — język i koncepcje należą do wszystkich. Nie przepakowuj gry jako własnej."
+      },
+      "5": {
+        "title": "Zmiany",
+        "body": "Możemy aktualizować niniejsze warunki; gdy to zrobimy, zmienimy widniejącą powyżej datę. Dalsze granie po zmianie oznacza jej akceptację. Pytania? ",
+        "link": "Skontaktuj się z ekipą"
+      }
+    }
   },
   "contact": {
     "eyebrow": "Linia",
     "title": "Złap ekipę",
-    "lead": "Żadnego numeru telefonu. Żadnej recepcji. Zostaw wiadomość, a ktoś się odezwie."
+    "lead": "Żadnego numeru telefonu. Żadnej recepcji. Zostaw wiadomość, a ktoś się odezwie.",
+    "leaveWord": {
+      "title": "Zostaw wiadomość",
+      "body": "Ta wersja nie ma formularza kontaktowego — cała gra działa po stronie klienta, więc nie ma tu serwera, który przyjąłby wiadomość. Dopóki linia nie działa jak należy, kanałem jest e-mail:"
+    },
+    "card": {
+      "label": "Napisz do ekipy",
+      "hint": "Jedna skrzynka, czyta ją człowiek. Kroki do odtworzenia zawsze biją mgliste „nie działa”."
+    },
+    "holes": {
+      "title": "Znalazłeś dziurę w naszej grze zamiast w ich systemie?",
+      "body": "Dobrze. Jeśli coś jest zepsute, podatne na atak albo po prostu nie tak, powiedz nam tą samą drogą. Wolimy usłyszeć to od ciebie, niż przeczytać o tym później."
+    },
+    "answers": {
+      "title": "Szukasz odpowiedzi, a nie człowieka?",
+      "pre": "Większość pierwszych pytań ma już odpowiedź. Wypróbuj ",
+      "faqLink": "FAQ",
+      "mid": " lub ",
+      "helpLink": "stronę jak to działa",
+      "post": " — pewnie szybciej wrócisz do roboty."
+    }
   },
   "game": {
     "phase": {

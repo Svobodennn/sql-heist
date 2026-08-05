@@ -144,14 +144,129 @@
     "sectionControls": "Kontroller",
     "sectionStuck": "Sıkıştın mı? The Fixer'ı ara",
     "sectionPoint": "Mesele",
-    "cta": "Panoyu gör"
+    "cta": "Panoyu gör",
+    "before": {
+      "introPre": "Her iş seni Meridian'a yönlendirir — başkalarının sırlarını tutarak zengin olmuş bir veri simsarı. Kapılarının her birinin ardında ",
+      "introStrong": "gerçek bir SQLite veritabanı",
+      "introPost": ", tarayıcında çalışan. Simülasyon yok, senaryolu cevap yok. İçeri hakiki bir SQL enjeksiyonuyla girersin, sonra seni tam olarak nasıl durdurmaları gerektiğini öğrenirsin.",
+      "calloutBody": "Buradaki hiçbir şey ağa dokunmaz. Motor istek üzerine yüklenir, veritabanı her çalıştırma için sıfırdan tohumlanır ve kırabileceğin tek şey pratik hedefidir."
+    },
+    "moves": {
+      "intro": "Her iş aynı yayı izler. İçinde nerede olduğunu her an bilirsin.",
+      "items": {
+        "0": {
+          "title": "Brifing",
+          "body": "The Fixer hedefi ve vurgunu söyler — yöntemi asla. Kapıyı işaret eder; kilidi sen çözersin."
+        },
+        "1": {
+          "title": "Keşif",
+          "body": "Hedefin Vitrinini kolaçan et. Girdinin gerçekte nereye düştüğünü bul. Sana gösterilen şema asla binanın tamamı değildir."
+        },
+        "2": {
+          "title": "İstismar",
+          "body": "İşin kalbi. Hedefin formuna yaz ve girdinin oluşturduğu gerçek sorguyu izle — canlı, hat üzerinde — sonra çalıştır."
+        },
+        "3": {
+          "title": "Ganimet",
+          "body": "Vurgun, puanın ve ne kadar temiz olduğun. Kimse seni durdurmadı. Bütün mesele bu."
+        },
+        "4": {
+          "title": "Değerlendirme",
+          "body": "İşin öteki yüzü: onu kapatan düzeltmenin yanındaki savunmasız kod. Seni savunmada tehlikeli yapan kısım bu."
+        }
+      }
+    },
+    "wire": {
+      "intro": "İstismar ekranı, aynı anın iki yüzünü gösterir. Solda, kurbanın gördüğü sıradan form. Sağda, girdinin dönüştüğü ham SQL. Renk anlam taşır — ve asla yalnızca renge bel bağlamaz:",
+      "legend": {
+        "0": {
+          "term": "Kızıl",
+          "rest": " senin girdin, kod olarak okunuyor — kaçış anı, verinin veri olmaktan çıktığı an."
+        },
+        "1": {
+          "term": "Çelik mavisi",
+          "rest": " sorgunun kendi anahtar kelimeleri — sistemin yazdığı yapı."
+        },
+        "2": {
+          "term": "Soluk ve üstü çizili",
+          "rest": " yorumunun öldürdüğü şey. Griyse, hiç çalışmadı."
+        }
+      }
+    },
+    "controls": {
+      "run": {
+        "pre": "Yükünü çalıştır:",
+        "cmd": "⌘",
+        "ctrl": "Ctrl",
+        "enter": "Enter",
+        "mid": ", ya da",
+        "button": "Enjekte / Çalıştır",
+        "post": "düğmesi."
+      },
+      "reset": {
+        "name": "Sıfırla",
+        "text": "girdini siler ve veritabanını sıfırdan tohumlar. Zaten her çalıştırma temiz başlar."
+      },
+      "keys": {
+        "pre": "Baştan sona tam klavye ile gezinme.",
+        "esc": "Esc",
+        "post": "her iletişim kutusunu kapatır."
+      }
+    },
+    "stuck": {
+      "body": "Her iş üç ipucu taşır, sırayla açılır: bir kelime, sonra yöntem, sonra hamle. Puana mal olurlar, o yüzden kendininmiş gibi harca. Körlemesine tahmin amatörlere ve ölülere göredir — ama küçük bir dürtme, boş boş bakmaktan iyidir."
+    },
+    "point": {
+      "body": "Bu, suç işlemekle ilgili bir oyun değil. Onları mümkün kılan o tek açığı görmekle ilgili bir oyun — ki onu sahada tanıyıp kapatasın. Soygunu öğrenirsin ki kilidi kurabilesin."
+    }
   },
   "faq": {
     "eyebrow": "Dobra Cevaplar",
     "title": "The Fixer'ın bir kez cevapladığı sorular",
     "lead": "Lafı dolandırmak yok. İnsanların ilk işinden önce sorduğu şeyler.",
     "srHeading": "Sıkça sorulan sorular",
-    "stillStuck": "Hâlâ sıkıştın mı?"
+    "stillStuck": "Hâlâ sıkıştın mı?",
+    "items": {
+      "0": {
+        "q": "Bu yasal mı?",
+        "a": "Evet. Her iş tamamen tarayıcında, oyunla birlikte gelen korumalı bir SQLite veritabanına karşı çalışır. Karşı tarafta gerçek sistem yok, ağ çağrısı yok ve pratik hedefinden başka kıracak bir şey de yok."
+      },
+      "1": {
+        "q": "Bir şey kurmam gerekiyor mu?",
+        "a": "Hayır. Modern bir tarayıcıda çalışır. Veritabanı motoru (WebAssembly'ye derlenmiş SQLite), ilk ihtiyaç duyduğunda istek üzerine yüklenir — hesap yok, indirme yok, kurulum yok."
+      },
+      "2": {
+        "q": "Zaten SQL biliyor olmam gerekiyor mu?",
+        "a": "İşe yarar. Oyun, bir SELECT okuyabildiğini ve bir WHERE yan tümcesini kabaca takip edebildiğini varsayar. Sana enjeksiyonu öğretir — sıfırdan SQL değil. Sorgular senin için yepyeniyse, önce temelleri öğren, sonra gelip bir iş çevir."
+      },
+      "3": {
+        "q": "İnsanlara gerçek web sitelerine saldırmayı mı öğretiyorsunuz?",
+        "a": "Enjeksiyonun nasıl çalıştığını öğretiyoruz ki onu tanıyıp kapatabilesin — her iş soygunla değil, düzeltmeyle biter. Öğrendiklerini yalnızca sana ait olan ya da test etmek için açık iznin olan sistemlerde kullan. Başka her yer suçtur ve sorumlusu sensin."
+      },
+      "4": {
+        "q": "İlerlemem nerede kaydediliyor?",
+        "a": "Bu cihazda, tarayıcının yerel depolamasında. Hesap ve sunucu olmadığından onu asla görmeyiz. Tarayıcı verilerini temizle — ya da oyunu başka bir yerde aç — ve baştan başlarsın."
+      },
+      "5": {
+        "q": "Herhangi bir ücreti var mı?",
+        "a": "Hayır. Oynaması ücretsiz."
+      },
+      "6": {
+        "q": "Motor yüklenmiyor ya da bir şey bozuk görünüyor.",
+        "a": "Önce sayfayı yenile. Hâlâ başlamıyorsa, tarayıcın WebAssembly'yi engelliyor ya da kısıtlı bir modda çalışıyor olabilir — Chrome, Firefox ya da Safari'nin güncel bir sürümünü varsayılan ayarlarla dene."
+      },
+      "7": {
+        "q": "Kendi dilimde oynayabilir miyim?",
+        "a": "İngilizce, Türkçe ve Lehçe. Gezinme çubuğundaki dil seçiciyi kullan — tüm site ve oyun arayüzü buna uyar."
+      }
+    },
+    "followUp": {
+      "pre": "Tüm bir işi ",
+      "helpLink": "nasıl çalışır sayfası",
+      "mid": " baştan sona anlatır, ya da ",
+      "contactLink": "haber bırak",
+      "post": " ve sana döneriz."
+    }
   },
   "content": {
     "updated": "Son güncelleme"
@@ -165,17 +280,96 @@
   "privacy": {
     "eyebrow": "Küçük Yazılar",
     "title": "Gizlilik",
-    "lead": "Kısa versiyon: seni toplamıyoruz. Uzun versiyon aşağıda, o da yine kısa."
+    "lead": "Kısa versiyon: seni toplamıyoruz. Uzun versiyon aşağıda, o da yine kısa.",
+    "glanceLabel": "Bir bakışta",
+    "glanceBody": "Hesap yok. Takip yok. Bu sürümde analitik yok. İlerlemen, cihazındaki tarayıcının yerel depolamasında durur — onu okuyabilecek bir sunucumuz yok.",
+    "sections": {
+      "0": {
+        "title": "Ne topluyoruz",
+        "body": "Seni tanımlayan hiçbir şey. SQL Heist'in bu sürümde hesap sistemi, kayıt ve giriş yok (“Giriş yap” bağlantısı, gelecekteki bir sürüm için yer tutucudur). Oynaman için adını, e-postanı ya da başka bir şeyi istemeyiz."
+      },
+      "1": {
+        "title": "Cihazında ne kalır",
+        "body": "İlerlemen — hangi işleri bitirdiğin ve en iyi puanların — cihazında, tarayıcının yerel depolamasına kaydedilir. Tarayıcıdan asla çıkmaz ve onu okumanın bir yolu bizde yok. Tarayıcı verilerini temizlemen onu siler."
+      },
+      "2": {
+        "title": "Çerezler ve takip",
+        "body": "Oyun, bu sürümde hiçbir takip ya da reklam çerezi ayarlamaz ve üçüncü taraf analitiği içermez. Bu durum bir gün değişirse, değişmeden önce bu sayfayı ve bu tarihi güncelleriz."
+      },
+      "3": {
+        "title": "Üçüncü taraflar",
+        "body": "Oyun, statik bir sitedir. Yazı tipleri derleme sırasında paket içine gömülür ve veritabanı motoru tarayıcında yerel olarak çalışır, dolayısıyla olağan oyun hiçbir üçüncü taraf isteği yapmaz. Siteyi barındıran taraf, güvenlik ve operasyon amacıyla standart sunucu günlükleri (IP adresleri gibi) tutabilir; bu işleme, barındırıcının kendi politikalarına tabidir."
+      },
+      "4": {
+        "title": "Çocuklar",
+        "body": "SQL Heist, geliştiricilere yönelik bir öğrenme aracıdır. 13 yaşın altındaki çocuklara yönelik değildir ve bilerek onların verilerini toplamaz."
+      },
+      "5": {
+        "title": "Değişiklikler",
+        "body": "Bunların herhangi birinin işleyişini güncellersek, bu sayfayı ve yukarıdaki “son güncelleme” tarihini gözden geçiririz. Soru mu var? ",
+        "link": "Ekibe ulaş"
+      }
+    }
   },
   "terms": {
     "eyebrow": "Küçük Yazılar",
     "title": "Kullanım Koşulları",
-    "lead": "Oyunu oyna, mesleği öğren, temiz kal. Detaylar:"
+    "lead": "Oyunu oyna, mesleği öğren, temiz kal. Detaylar:",
+    "shortLabel": "Kısacası",
+    "shortBody": "Ücretsiz, eğitici bir oyun. Öğrettiklerini yalnızca sana ait olan ya da test etmeye yetkili olduğun sistemlerde kullan — geri kalan her şey suçtur ve sorumlusu sensin.",
+    "sections": {
+      "0": {
+        "title": "Anlaşma",
+        "body": "SQL Heist, SQL enjeksiyonunun nasıl çalıştığı ve ona karşı nasıl savunulacağı hakkında ücretsiz, eğitici bir oyundur. Onu kullanarak bu koşulları kabul edersin. Kabul etmiyorsan, kullanma."
+      },
+      "1": {
+        "title": "Kabul edilebilir kullanım",
+        "body": "Buradaki teknikler, savunma amaçlı anlayış için öğretilir. Bunları yalnızca sana ait olan ya da test etmek için açık ve belgelenmiş iznin olan sistemlere karşı kullanmayı kabul edersin. Yetkisiz sistemlere saldırmak çoğu yerde yasa dışıdır ve öğrendiklerinle ne yaptığından yalnızca sen sorumlusun.",
+        "body2": "Oyunun kendisini, birlikte geldiği pratik içeriğinin dışında bir şeye ulaşmak için kötüye kullanmaya, aşırı yüklemeye ya da tersine mühendislik yapmaya çalışma."
+      },
+      "2": {
+        "title": "Garanti yok",
+        "body": "Oyun ve içeriği “olduğu gibi”, hiçbir türde garanti verilmeden sunulur. Bu bir öğretim aracıdır, profesyonel güvenlik tavsiyesi değil ve hatasız olduğunu ya da belirli bir amaca uygun olduğunu vaat etmeyiz. Gerçek sistemler, bir pratik hedeften daha karmaşıktır."
+      },
+      "3": {
+        "title": "Sorumluluğun sınırlandırılması",
+        "body": "Yasanın izin verdiği azami ölçüde, SQL Heist'in yapımcıları, oyunu ya da öğrettiği becerileri kullanmandan doğan hiçbir zarardan sorumlu değildir."
+      },
+      "4": {
+        "title": "İçerik",
+        "body": "Aksi belirtilmedikçe oyunun metni, karakterleri, sanatı ve kodu bize aittir. SQL, SQL'dir — dil ve kavramlar herkese aittir. Oyunu kendininmiş gibi yeniden paketleme."
+      },
+      "5": {
+        "title": "Değişiklikler",
+        "body": "Bu koşulları güncelleyebiliriz; güncellediğimizde yukarıdaki tarihi gözden geçiririz. Bir değişiklikten sonra oynamayı sürdürmen, onu kabul ettiğin anlamına gelir. Soru mu var? ",
+        "link": "Ekibe ulaş"
+      }
+    }
   },
   "contact": {
     "eyebrow": "Hat",
     "title": "Ekibe ulaş",
-    "lead": "Telefon numarası yok. Danışma yok. Haber bırak, biri sana döner."
+    "lead": "Telefon numarası yok. Danışma yok. Haber bırak, biri sana döner.",
+    "leaveWord": {
+      "title": "Haber bırak",
+      "body": "Bu sürüm bir iletişim formu olmadan geliyor — oyunun tamamı tarayıcıda çalışıyor, yani burada mesaj alacak bir sunucu yok. Hat düzgünce devreye girene kadar, iletişim kanalı e-posta:"
+    },
+    "card": {
+      "label": "Ekibe e-posta gönder",
+      "hint": "Tek bir gelen kutusu, bir insan tarafından okunuyor. Yeniden üretme adımları, muğlak bir “çalışmıyor” ifadesinden her zaman iyidir."
+    },
+    "holes": {
+      "title": "Onlarınki yerine bizim oyunumuzda bir açık mı buldun?",
+      "body": "Güzel. Bir şey bozuksa, istismar edilebilirse ya da yalnızca yanlışsa, aynı yoldan bize bildir. Bunu sonradan bir yerde okumaktansa senden duymayı tercih ederiz."
+    },
+    "answers": {
+      "title": "Bir insan değil, cevap mı arıyorsun?",
+      "pre": "İlk soruların çoğu zaten yanıtlanmış. Şuna göz at: ",
+      "faqLink": "SSS",
+      "mid": " ya da ",
+      "helpLink": "nasıl çalışır sayfası",
+      "post": " — muhtemelen daha hızlı bir işe dönersin."
+    }
   },
   "game": {
     "phase": {
