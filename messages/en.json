@@ -120,14 +120,129 @@
     "sectionControls": "Controls",
     "sectionStuck": "Stuck? Call the Fixer",
     "sectionPoint": "The point",
-    "cta": "See the board"
+    "cta": "See the board",
+    "before": {
+      "introPre": "Every job points you at Meridian — a data broker that got rich holding other people's secrets. Behind each of its doors is a ",
+      "introStrong": "real SQLite database",
+      "introPost": ", running in your browser. No simulation, no scripted answers. You break in with a genuine SQL injection, then you learn exactly how they should have stopped you.",
+      "calloutBody": "Nothing here reaches the network. The engine loads on demand, the database is seeded fresh for every run, and the only thing you can break is the practice target."
+    },
+    "moves": {
+      "intro": "Every job runs the same arc. You always know where you are in it.",
+      "items": {
+        "0": {
+          "title": "Brief",
+          "body": "The Fixer names the mark and the take — never the method. He points at the door; you work out the lock."
+        },
+        "1": {
+          "title": "Recon",
+          "body": "Case the target's front. Find where your input actually lands. The schema you're shown is never the whole building."
+        },
+        "2": {
+          "title": "Exploit",
+          "body": "The heart of it. Type into the mark's form and watch the real query your input builds — live, on the wire — then run it."
+        },
+        "3": {
+          "title": "Loot",
+          "body": "The take, your score, and how clean you were. Nobody stopped you. That is the whole point."
+        },
+        "4": {
+          "title": "Debrief",
+          "body": "The other side of the job: the vulnerable code beside the fix that closes it. This is the part that makes you dangerous on defence."
+        }
+      }
+    },
+    "wire": {
+      "intro": "The Exploit screen shows two faces of the same moment. On the left, the ordinary form the victim sees. On the right, the raw SQL your input becomes. Colour carries meaning — and it never rides on colour alone:",
+      "legend": {
+        "0": {
+          "term": "Crimson",
+          "rest": " is your input, read as code — the break-out, the moment data stops being data."
+        },
+        "1": {
+          "term": "Steel blue",
+          "rest": " is the query's own keywords — the structure the system wrote."
+        },
+        "2": {
+          "term": "Dimmed and struck through",
+          "rest": " is what your comment killed. If it's grey, it never ran."
+        }
+      }
+    },
+    "controls": {
+      "run": {
+        "pre": "Run your payload with",
+        "cmd": "⌘",
+        "ctrl": "Ctrl",
+        "enter": "Enter",
+        "mid": ", or the",
+        "button": "Inject / Run",
+        "post": "button."
+      },
+      "reset": {
+        "name": "Reset",
+        "text": "wipes your input and reseeds the database. Every run starts clean anyway."
+      },
+      "keys": {
+        "pre": "Full keyboard navigation throughout.",
+        "esc": "Esc",
+        "post": "closes any dialog."
+      }
+    },
+    "stuck": {
+      "body": "Every job carries three hints, opened in order: a word, then the method, then the play. They cost score, so spend them like they're yours. Guessing blind is for amateurs and dead men — but a nudge beats staring."
+    },
+    "point": {
+      "body": "This isn't a game about pulling off crimes. It's a game about seeing the one flaw that makes them possible — so you recognise it in the wild and shut it. You learn the break-in so you can build the lock."
+    }
   },
   "faq": {
     "eyebrow": "Straight Answers",
     "title": "Questions the Fixer answers once",
     "lead": "No small talk. Here's what people ask before their first job.",
     "srHeading": "Frequently asked questions",
-    "stillStuck": "Still stuck?"
+    "stillStuck": "Still stuck?",
+    "items": {
+      "0": {
+        "q": "Is this legal?",
+        "a": "Yes. Every job runs entirely in your browser against a sandboxed SQLite database that ships with the game. There are no real systems on the other side, no network calls, and nothing to break but the practice target."
+      },
+      "1": {
+        "q": "Do I need to install anything?",
+        "a": "No. It runs in a modern browser. The database engine (SQLite compiled to WebAssembly) loads on demand the first time you need it — no accounts, no downloads, no setup."
+      },
+      "2": {
+        "q": "Do I need to know SQL already?",
+        "a": "It helps. The game assumes you can read a SELECT and roughly follow a WHERE clause. It teaches you injection — not SQL from zero. If queries are brand new to you, learn the basics first, then come pull a job."
+      },
+      "3": {
+        "q": "Are you teaching people to attack real websites?",
+        "a": "We teach how injection works so you can recognise it and close it — every job ends with the fix, not the break-in. Use what you learn only on systems you own or have explicit permission to test. Anywhere else is a crime, and that's on you."
+      },
+      "4": {
+        "q": "Where is my progress saved?",
+        "a": "On this device, in your browser's local storage. There's no account and no server, so we never see it. Clear your browser data — or open the game somewhere else — and you start fresh."
+      },
+      "5": {
+        "q": "Does it cost anything?",
+        "a": "No. It's free to play."
+      },
+      "6": {
+        "q": "The engine won’t load, or something looks broken.",
+        "a": "Refresh first. If it still won't start, your browser may be blocking WebAssembly or running in a locked-down mode — try a current version of Chrome, Firefox, or Safari with default settings."
+      },
+      "7": {
+        "q": "Can I play in my language?",
+        "a": "English, Turkish, and Polish. Use the language switch in the nav — the whole site and game chrome follow."
+      }
+    },
+    "followUp": {
+      "pre": "The ",
+      "helpLink": "how-it-works page",
+      "mid": " walks through a full job, or ",
+      "contactLink": "leave word",
+      "post": " and we'll get back to you."
+    }
   },
   "content": {
     "updated": "Last updated"
@@ -141,17 +256,96 @@
   "privacy": {
     "eyebrow": "The Fine Print",
     "title": "Privacy",
-    "lead": "Short version: we don't collect you. The long version is below, and it's still short."
+    "lead": "Short version: we don't collect you. The long version is below, and it's still short.",
+    "glanceLabel": "At a glance",
+    "glanceBody": "No accounts. No tracking. No analytics in this build. Your progress lives in your browser's local storage on your device — we have no server that can read it.",
+    "sections": {
+      "0": {
+        "title": "What we collect",
+        "body": "Nothing that identifies you. SQL Heist has no account system in this build, no sign-up, and no login (the “Sign in” link is a placeholder for a future release). We don't ask for your name, email, or anything else to play."
+      },
+      "1": {
+        "title": "What stays on your device",
+        "body": "Your progress — which jobs you've finished and your best scores — is saved in your browser's local storage, on your device. It never leaves the browser and we have no way to read it. Clearing your browser data removes it."
+      },
+      "2": {
+        "title": "Cookies and tracking",
+        "body": "The game sets no tracking or advertising cookies and includes no third-party analytics in this build. If that ever changes, we'll update this page and this date before it does."
+      },
+      "3": {
+        "title": "Third parties",
+        "body": "The game is a static site. Fonts are bundled at build time and the database engine runs locally in your browser, so ordinary play makes no third-party requests. Whoever hosts the site may keep standard server logs (such as IP addresses) for security and operations; that handling is governed by the host's own policies."
+      },
+      "4": {
+        "title": "Children",
+        "body": "SQL Heist is a learning tool aimed at developers. It isn't directed at children under 13 and doesn't knowingly collect their data."
+      },
+      "5": {
+        "title": "Changes",
+        "body": "If we update how any of this works, we'll revise this page and the “last updated” date above. Questions? ",
+        "link": "Reach the crew"
+      }
+    }
   },
   "terms": {
     "eyebrow": "The Fine Print",
     "title": "Terms of Use",
-    "lead": "Play the game, learn the trade, keep it clean. The details:"
+    "lead": "Play the game, learn the trade, keep it clean. The details:",
+    "shortLabel": "The short of it",
+    "shortBody": "A free, educational game. Use what it teaches only on systems you own or are authorised to test — everything else is a crime, and it's on you.",
+    "sections": {
+      "0": {
+        "title": "The deal",
+        "body": "SQL Heist is a free, educational game about how SQL injection works and how to defend against it. By using it, you agree to these terms. If you don't, don't use it."
+      },
+      "1": {
+        "title": "Acceptable use",
+        "body": "The techniques here are taught for defensive understanding. You agree to use them only against systems you own or have explicit, documented permission to test. Attacking systems without authorisation is illegal in most places, and you alone are responsible for what you do with what you learn.",
+        "body2": "Don't try to abuse, overload, or reverse the game itself to reach anything other than the practice content it ships with."
+      },
+      "2": {
+        "title": "No warranty",
+        "body": "The game and its content are provided “as is,” without warranties of any kind. It's a teaching tool, not professional security advice, and we don't promise it is error-free or fit for any particular purpose. Real systems are more complicated than a practice target."
+      },
+      "3": {
+        "title": "Limitation of liability",
+        "body": "To the fullest extent allowed by law, the makers of SQL Heist aren't liable for any damages arising from your use of the game or the skills it teaches."
+      },
+      "4": {
+        "title": "Content",
+        "body": "The game's writing, characters, art, and code are ours unless noted otherwise. SQL is SQL — the language and the concepts belong to everyone. Don't repackage the game as your own."
+      },
+      "5": {
+        "title": "Changes",
+        "body": "We may update these terms; when we do, we'll revise the date above. Continuing to play after a change means you accept it. Questions? ",
+        "link": "Reach the crew"
+      }
+    }
   },
   "contact": {
     "eyebrow": "The Wire",
     "title": "Reach the crew",
-    "lead": "No phone number. No front desk. Leave word and someone gets back to you."
+    "lead": "No phone number. No front desk. Leave word and someone gets back to you.",
+    "leaveWord": {
+      "title": "Leave word",
+      "body": "This build ships without a contact form — the whole game runs client-side, so there's no server here to take a message. Until the wire is properly live, email is the channel:"
+    },
+    "card": {
+      "label": "Email the crew",
+      "hint": "One inbox, read by a person. Steps to reproduce beat a vague “it doesn't work” every time."
+    },
+    "holes": {
+      "title": "Found a hole in our game instead of theirs?",
+      "body": "Good. If something's broken, exploitable, or just wrong, tell us the same way. We'd rather hear it from you than read about it later."
+    },
+    "answers": {
+      "title": "Looking for answers, not a person?",
+      "pre": "Most first questions are already handled. Try the ",
+      "faqLink": "FAQ",
+      "mid": " or the ",
+      "helpLink": "how-it-works page",
+      "post": " — you'll probably be back on a job faster."
+    }
   },
   "game": {
     "phase": {

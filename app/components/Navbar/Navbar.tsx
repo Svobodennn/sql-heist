@@ -9,6 +9,7 @@ import { IconMenu, IconClose, IconUser, IconHome, IconBoard, IconHelpCircle } fr
 import { ShareButton } from '../ShareButton'
 import { LanguageSwitcher } from '../LanguageSwitcher'
 import { useTranslation } from '@/i18n/useTranslation'
+import { localeHref } from '@/app/localeMeta'
 import styles from './Navbar.module.css'
 
 // Icons are decorative (aria-hidden in <Base>); the translated text stays the
@@ -26,7 +27,7 @@ const NAV_LINKS = [
 // changes to the game shell (that in-game chrome is a separate track).
 export function Navbar() {
   const pathname = usePathname()
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
   const [open, setOpen] = useState(false)
 
   // Close the mobile menu whenever the route changes.
@@ -44,30 +45,35 @@ export function Navbar() {
     return () => document.removeEventListener('keydown', onKey)
   }, [open])
 
+  // isActive compares against LOCALE-RESOLVED hrefs (e.g. /tr/help on the tr site).
+  const home = localeHref('/', locale)
   const isActive = (href: string) =>
-    href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`)
+    href === home ? pathname === home : pathname === href || pathname.startsWith(`${href}/`)
 
   return (
     <header className={styles.header}>
       <nav className={cx('container', styles.nav)} aria-label={t('nav.primaryAria')}>
-        <Link href="/" className={styles.brand} aria-label={t('nav.brandAria')}>
+        <Link href={home} className={styles.brand} aria-label={t('nav.brandAria')}>
           <Logo size={26} />
           <span>SQL&nbsp;HEIST</span>
         </Link>
 
         <ul className={styles.links}>
-          {NAV_LINKS.map((link) => (
-            <li key={link.href}>
-              <Link
-                href={link.href}
-                className={cx(styles.link, isActive(link.href) && styles.linkActive)}
-                aria-current={isActive(link.href) ? 'page' : undefined}
-              >
-                <link.Icon size={16} />
-                {t(link.key)}
-              </Link>
-            </li>
-          ))}
+          {NAV_LINKS.map((link) => {
+            const href = localeHref(link.href, locale)
+            return (
+              <li key={link.href}>
+                <Link
+                  href={href}
+                  className={cx(styles.link, isActive(href) && styles.linkActive)}
+                  aria-current={isActive(href) ? 'page' : undefined}
+                >
+                  <link.Icon size={16} />
+                  {t(link.key)}
+                </Link>
+              </li>
+            )
+          })}
         </ul>
 
         <div className={styles.actions}>
@@ -95,18 +101,21 @@ export function Navbar() {
       {/* Mobile panel: same destinations + controls, revealed by the toggle. */}
       <div id="nav-mobile" className={cx(styles.mobile, open && styles.mobileOpen)} hidden={!open}>
         <ul className={styles.mobileLinks}>
-          {NAV_LINKS.map((link) => (
-            <li key={link.href}>
-              <Link
-                href={link.href}
-                className={cx(styles.mobileLink, isActive(link.href) && styles.linkActive)}
-                aria-current={isActive(link.href) ? 'page' : undefined}
-              >
-                <link.Icon size={18} />
-                {t(link.key)}
-              </Link>
-            </li>
-          ))}
+          {NAV_LINKS.map((link) => {
+            const href = localeHref(link.href, locale)
+            return (
+              <li key={link.href}>
+                <Link
+                  href={href}
+                  className={cx(styles.mobileLink, isActive(href) && styles.linkActive)}
+                  aria-current={isActive(href) ? 'page' : undefined}
+                >
+                  <link.Icon size={18} />
+                  {t(link.key)}
+                </Link>
+              </li>
+            )
+          })}
         </ul>
         <div className={styles.mobileActions}>
           <ShareButton compact />

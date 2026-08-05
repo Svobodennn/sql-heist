@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useId, useRef, useState } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
 import { LOCALES, LOCALE_LABELS, LOCALE_SHORT } from '@/i18n/config'
 import { useTranslation } from '@/i18n/useTranslation'
 import { cx } from '@/ui/cx'
@@ -14,6 +15,8 @@ import styles from './LanguageSwitcher.module.css'
 // honest. Escape and outside-click close it.
 export function LanguageSwitcher({ className }: { className?: string }) {
   const { locale, setLocale, t } = useTranslation()
+  const router = useRouter()
+  const pathname = usePathname() ?? '/'
   const [open, setOpen] = useState(false)
   const wrapRef = useRef<HTMLDivElement>(null)
   const listId = useId()
@@ -35,8 +38,17 @@ export function LanguageSwitcher({ className }: { className?: string }) {
   }, [open])
 
   const choose = (next: (typeof LOCALES)[number]) => {
-    setLocale(next)
     setOpen(false)
+    setLocale(next) // remember the choice: drives the game chrome + seeds the switcher
+
+    // Marketing pages are statically generated per locale, so switching = navigating
+    // between /, /tr, /pl variants of the SAME path. The game (/cases) has no
+    // per-locale URL — there setLocale alone re-renders its (client) chrome.
+    const parts = pathname.split('/')
+    if (parts[1] === 'cases') return
+    const hasPrefix = parts[1] === 'tr' || parts[1] === 'pl'
+    const rest = (hasPrefix ? parts.slice(2) : parts.slice(1)).join('/')
+    router.push(next === 'en' ? `/${rest}` : `/${next}${rest ? `/${rest}` : ''}`)
   }
 
   return (

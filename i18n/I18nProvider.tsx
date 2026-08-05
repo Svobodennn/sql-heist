@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { usePathname } from 'next/navigation'
 import { DEFAULT_LOCALE, LOCALE_STORAGE_KEY, isLocale, type Locale } from './config'
 import { EN_MESSAGES, getMessages } from './messages'
 import { createTranslator, type Translator } from './translate'
@@ -20,33 +21,65 @@ export const I18nContext = createContext<I18nContextValue>({
   t: createTranslator(EN_MESSAGES, EN_MESSAGES),
 })
 
+// The URL prefix is the source of truth for locale on the per-locale static routes
+// (/tr, /pl → those languages). Anything else resolves to the DEFAULT here; the game
+// routes (/cases) additionally fall back to the client's stored choice, since their
+// chrome is client-rendered and has no per-locale URL. See LanguageSwitcher: it
+// navigates between prefixes on marketing pages and only setLocale()s on the game.
+function urlLocaleOf(pathname: string): Locale | null {
+  const seg = pathname.split('/')[1]
+  return seg === 'tr' || seg === 'pl' ? seg : null
+}
+function isGamePath(pathname: string): boolean {
+  return pathname.split('/')[1] === 'cases'
+}
+
 // Client locale provider. Mounted once in the root layout, wrapping every route's
-// (server-rendered) children — React context flows to all Client Components below,
-// even across Server Component boundaries.
+// (server-rendered) children — React context flows to all Client Components below.
 //
-// Hydration safety: the initial render ALWAYS uses DEFAULT_LOCALE, matching the
-// statically exported HTML. Only AFTER mount do we read the persisted choice from
-// localStorage and (if different) re-render — so there is never a server/client
-// markup mismatch, and the default-locale export stays byte-identical.
+// Hydration safety: `stored` starts at DEFAULT on both the static prerender and the
+// first client render, so markup matches; only AFTER mount do we read the persisted
+// choice. The resolved locale is a pure function of the pathname (known identically
+// at prerender and hydration via usePathname), so the prerendered /tr, /pl chrome
+// and its hydration agree.
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE)
+  const pathname = usePathname() ?? '/'
+  const urlLocale = urlLocaleOf(pathname)
+  const game = isGamePath(pathname)
+
+  // The client's remembered choice — used only where the URL doesn't pin a locale
+  // (the game routes), and to seed the switcher.
+  const [stored, setStored] = useState<Locale>(DEFAULT_LOCALE)
+
+  const locale: Locale = urlLocale ?? (game ? stored : DEFAULT_LOCALE)
 
   useEffect(() => {
     try {
-      const stored = window.localStorage.getItem(LOCALE_STORAGE_KEY)
-      if (isLocale(stored) && stored !== locale) {
-        setLocaleState(stored)
-        document.documentElement.lang = stored
-      }
+      const s = window.localStorage.getItem(LOCALE_STORAGE_KEY)
+      if (isLocale(s)) setStored(s)
     } catch {
-      // Private mode / storage disabled — silently keep the default locale.
+      // Private mode / storage disabled — keep the default.
     }
-    // Run once on mount; `locale` is the default here by construction.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // Browsing a per-locale URL (/tr, /pl) is itself a language choice — remember it
+  // so the unprefixed game routes (/cases) follow the same language afterwards.
+  useEffect(() => {
+    if (!urlLocale) return
+    setStored(urlLocale)
+    try {
+      window.localStorage.setItem(LOCALE_STORAGE_KEY, urlLocale)
+    } catch {
+      // ignore persistence failures
+    }
+  }, [urlLocale])
+
+  useEffect(() => {
+    document.documentElement.lang = locale
+  }, [locale])
+
   const setLocale = useCallback((next: Locale) => {
-    setLocaleState(next)
+    setStored(next)
     try {
       window.localStorage.setItem(LOCALE_STORAGE_KEY, next)
     } catch {

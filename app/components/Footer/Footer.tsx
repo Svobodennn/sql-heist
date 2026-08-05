@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Logo } from '../Logo'
 import { useTranslation } from '@/i18n/useTranslation'
+import { localeHref } from '@/app/localeMeta'
 import styles from './Footer.module.css'
 
 const COLUMNS = [
@@ -36,7 +37,7 @@ const COLUMNS = [
 // board (/jobs) and every other route keep it.
 export function Footer() {
   const pathname = usePathname()
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
   if (/^\/cases\/[^/]+/.test(pathname)) return null
 
   return (
@@ -58,7 +59,7 @@ export function Footer() {
                 <ul>
                   {col.links.map((link) => (
                     <li key={link.href}>
-                      <Link href={link.href} className={styles.link}>
+                      <Link href={localeHref(link.href, locale)} className={styles.link}>
                         {t(link.key)}
                       </Link>
                     </li>

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import type { Locale } from '@/i18n/config'
 import { getServerTranslator } from '@/i18n/server'
 import { Logo } from '../Logo'
 import styles from './content.module.css'
@@ -14,15 +15,20 @@ export function ContentPage({
   title,
   lead,
   updated,
+  locale = 'en',
   children,
 }: {
   eyebrow: string
   title: string
   lead?: string
   updated?: string
+  // Only the "last updated" label is translated in-component; everything else
+  // arrives pre-translated as props. Callers that render `updated` MUST pass their
+  // locale or the label falls back to English.
+  locale?: Locale
   children: ReactNode
 }) {
-  const t = getServerTranslator()
+  const t = getServerTranslator(locale)
   return (
     <main className={styles.page}>
       <header className={styles.hero}>

@@ -1,64 +1,59 @@
 import { describe, it, expect } from 'vitest'
-import {
-  TICKER_ITEMS,
-  FAQ_TEASERS,
-  HEIST_LOOP,
-  HOME_COPY,
-  buildTickerTrack,
-} from '@/app/homeContent'
+import { buildHomeContent, buildTickerTrack } from '@/app/homeContent'
+
+const en = buildHomeContent('en')
 
 describe('homeContent', () => {
-  it('ticker carries the signature injection payloads', () => {
-    const payloads = TICKER_ITEMS.filter((i) => i.kind === 'payload').map((i) => i.text)
+  it('ticker carries the signature injection payloads (verbatim, never localized)', () => {
+    const payloads = en.ticker.filter((i) => i.kind === 'payload').map((i) => i.text)
     expect(payloads.some((p) => p.includes("OR '1'='1'"))).toBe(true)
     expect(payloads.some((p) => p.includes('UNION SELECT'))).toBe(true)
     expect(payloads.some((p) => p.includes('DROP TABLE'))).toBe(true)
     expect(payloads.some((p) => p.includes('sqlite_master'))).toBe(true)
   })
 
-  it('the heist loop is exactly the five canonical moves in order', () => {
-    expect(HEIST_LOOP.map((s) => s.title)).toEqual([
-      'Brief',
-      'Recon',
-      'Exploit',
-      'Loot',
-      'Debrief',
-    ])
-    for (const step of HEIST_LOOP) {
-      expect(step.blurb.trim().length).toBeGreaterThan(0)
-    }
+  it('the heist loop is exactly the five canonical moves in order (en)', () => {
+    expect(en.loop.map((s) => s.title)).toEqual(['Brief', 'Recon', 'Exploit', 'Loot', 'Debrief'])
+    for (const step of en.loop) expect(step.blurb.trim().length).toBeGreaterThan(0)
   })
 
   it('the faq teaser is a short 3-5 set with unique, non-empty entries', () => {
-    expect(FAQ_TEASERS.length).toBeGreaterThanOrEqual(3)
-    expect(FAQ_TEASERS.length).toBeLessThanOrEqual(5)
-    const questions = FAQ_TEASERS.map((f) => f.q)
+    expect(en.faqTeasers.length).toBeGreaterThanOrEqual(3)
+    expect(en.faqTeasers.length).toBeLessThanOrEqual(5)
+    const questions = en.faqTeasers.map((f) => f.q)
     expect(new Set(questions).size).toBe(questions.length)
-    for (const item of FAQ_TEASERS) {
+    for (const item of en.faqTeasers) {
       expect(item.q.trim().length).toBeGreaterThan(0)
       expect(item.a.trim().length).toBeGreaterThan(0)
     }
   })
 
   it('buildTickerTrack doubles the list so the -50% loop has no seam', () => {
-    const track = buildTickerTrack(TICKER_ITEMS)
-    expect(track).toHaveLength(TICKER_ITEMS.length * 2)
-    // Both halves must equal the source, or the loop would visibly jump.
-    expect(track.slice(0, TICKER_ITEMS.length)).toEqual([...TICKER_ITEMS])
-    expect(track.slice(TICKER_ITEMS.length)).toEqual([...TICKER_ITEMS])
+    const track = buildTickerTrack(en.ticker)
+    expect(track).toHaveLength(en.ticker.length * 2)
+    expect(track.slice(0, en.ticker.length)).toEqual([...en.ticker])
+    expect(track.slice(en.ticker.length)).toEqual([...en.ticker])
   })
 
-  it('buildTickerTrack does not mutate its input', () => {
-    const snapshot = [...TICKER_ITEMS]
-    buildTickerTrack(TICKER_ITEMS)
-    expect([...TICKER_ITEMS]).toEqual(snapshot)
+  it('copy has a primary CTA and every section heading for the landing', () => {
+    expect(en.copy.hero.primaryCta.trim().length).toBeGreaterThan(0)
+    expect(en.copy.what.title.trim().length).toBeGreaterThan(0)
+    expect(en.copy.how.title.trim().length).toBeGreaterThan(0)
+    expect(en.copy.faq.title.trim().length).toBeGreaterThan(0)
+    expect(en.copy.closer.cta.trim().length).toBeGreaterThan(0)
   })
 
-  it('copy has a primary CTA and both section headings for the landing', () => {
-    expect(HOME_COPY.hero.primaryCta.trim().length).toBeGreaterThan(0)
-    expect(HOME_COPY.what.title.trim().length).toBeGreaterThan(0)
-    expect(HOME_COPY.how.title.trim().length).toBeGreaterThan(0)
-    expect(HOME_COPY.faq.title.trim().length).toBeGreaterThan(0)
-    expect(HOME_COPY.closer.cta.trim().length).toBeGreaterThan(0)
+  it('localizes tr/pl: prose differs from en but payloads + structure hold', () => {
+    const enPayloads = en.ticker.filter((i) => i.kind === 'payload').map((i) => i.text)
+    for (const loc of ['tr', 'pl'] as const) {
+      const c = buildHomeContent(loc)
+      expect(c.ticker).toHaveLength(en.ticker.length)
+      expect(c.loop).toHaveLength(5)
+      expect(c.faqTeasers).toHaveLength(en.faqTeasers.length)
+      // Payloads are SQL (code) — identical across every locale.
+      expect(c.ticker.filter((i) => i.kind === 'payload').map((i) => i.text)).toEqual(enPayloads)
+      // Prose is translated — the tagline is no longer the English one.
+      expect(c.copy.hero.tagline).not.toBe(en.copy.hero.tagline)
+    }
   })
 })
