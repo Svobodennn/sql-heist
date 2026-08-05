@@ -12,8 +12,14 @@ export default defineConfig({
       '@': root,
     },
   },
+  // Match Next's automatic JSX runtime so .tsx compiles without an explicit
+  // `import React` (components don't import it).
+  esbuild: { jsx: 'automatic' },
   test: {
+    // Node by default (engine/schema suites load the sql.js WASM under Node); only
+    // the component suite needs a DOM, so it opts into jsdom by path.
     environment: 'node',
+    environmentMatchGlobs: [['tests/components/**', 'jsdom']],
     globals: true,
     include: ['**/*.{test,spec}.{ts,tsx}'],
     exclude: [...configDefaults.exclude, '.claude/**', 'out/**', '.next/**'],
