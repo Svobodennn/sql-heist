@@ -1,17 +1,12 @@
 {
-  "_meta": {
-    "_note": "Full Turkish translation in The Fixer's noir voice — informal 2nd person (sen), terse, street-smart. Placeholders ({year}, {app}, {cost}, …), brand/world names (SQL Heist, Meridian, The Fixer) and SQL tokens (SELECT, WHERE, UNION, …) kept verbatim. Reviewer: native TR speaker.",
-    "locale": "tr",
-    "status": "translated"
-  },
   "nav": {
-    "home": "Ana Sayfa",
+    "home": "Ana sayfa",
     "jobs": "İşler",
     "help": "Yardım",
     "signIn": "Giriş yap",
-    "signInTitle": "Hesaplar çok yakında",
+    "signInTitle": "Hesaplar çok yakında geliyor",
     "brandAria": "SQL Heist — ana sayfa",
-    "primaryAria": "Ana gezinme",
+    "primaryAria": "Birincil",
     "openMenu": "Menüyü aç",
     "closeMenu": "Menüyü kapat"
   },
@@ -30,16 +25,16 @@
     "aria": "Alt bilgi",
     "tagline": "Veritabanı gerçek. Suç değil. Önce soygunu öğren, sonra kilidi.",
     "colPull": "Bir iş çevir",
-    "colLearn": "Zanaatı öğren",
-    "colFine": "İnce yazı",
-    "linkHome": "Ana Sayfa",
+    "colLearn": "Mesleği öğren",
+    "colFine": "Küçük Yazılar",
+    "linkHome": "Ana sayfa",
     "linkBoard": "Pano",
-    "linkHelp": "Nasıl işliyor",
+    "linkHelp": "Nasıl çalışır",
     "linkFaq": "SSS",
     "linkPrivacy": "Gizlilik",
     "linkTerms": "Koşullar",
     "linkContact": "İletişim",
-    "note": "Tamamen tarayıcında çalışır. Sunucu yok, internet yok.",
+    "note": "Tamamen tarayıcında çalışır. Sunucu yok, ağ yok.",
     "alsoTry": "ayrıca dene",
     "copyright": "© {year} SQL Heist"
   },
@@ -47,76 +42,100 @@
     "hero": {
       "eyebrow": "Meridian Holdings · mesai sonrası",
       "title": "SQL Heist",
-      "tagline": "Her sistemin, birinin kilitlemeyi unuttuğu bir kapısı vardır.",
-      "lede": "Sen bulursun. Ötede gerçek bir veritabanı var — simülasyon değil; tek güvenlik ağın sandbox. Üç iş çevir. Sonra seni nasıl durdurmaları gerektiğini gör.",
-      "primaryCta": "İlk işi kap",
-      "secondaryCta": "Nasıl işliyor"
+      "tagline": "Her sistemde birinin kilitlemeyi unuttuğu bir kapı vardır.",
+      "lede": "Onları sen bulursun. Diğer tarafta gerçek bir veritabanı var — simülasyon yok, korumalı alandan başka güvenlik ağı da yok. Üç iş çevir. Sonra seni nasıl durdurmaları gerektiğini öğren.",
+      "primaryCta": "İlk işi al",
+      "secondaryCta": "Nasıl çalışır"
     },
     "what": {
-      "eyebrow": "Dava Dosyası · 001",
+      "eyebrow": "İş Dosyası · 001",
       "stamp": "Gizli",
       "title": "Kilidi öğrenmek için soygunu öğren",
-      "lede": "SQL Heist, eğitim amaçlı bir SQL-injection oyunu. Saldırıyı gerçek bir veritabanına karşı sen çekersin, sonra seni durdurması gereken kodu incelersin — hücum, savunmayı her dersten iyi öğretir.",
+      "lede": "SQL Heist, eğitici bir SQL enjeksiyonu oyunudur. Saldırıyı gerçek bir veritabanına karşı çevirir, sonra seni durdurması gereken kodu incelersin — saldırı, savunmayı her dersten iyi öğretir.",
       "facts": {
-        "0": { "k": "Nerede", "v": "%100 tarayıcında. Hiçbir şey ağa dokunmaz." },
-        "1": { "k": "Neye karşı", "v": "Gerçek bir SQLite motoru, her çalıştırmada sıfırdan doldurulur." },
-        "2": { "k": "Risk", "v": "Gerçek hedef yok — kırabileceğin tek şey sandbox." }
+        "0": {
+          "k": "Nerede",
+          "v": "%100 tarayıcında. Hiçbir şey asla ağa dokunmaz."
+        },
+        "1": {
+          "k": "Neye karşı",
+          "v": "Gerçek bir SQLite motoru; her çalıştırma için sıfırdan tohumlanır."
+        },
+        "2": {
+          "k": "Risk",
+          "v": "Gerçek hedef yok — kırabileceğin tek şey korumalı alan."
+        }
       },
       "safe": "Tasarımı gereği güvenli — hesap yok, indirme yok, kurulum yok."
     },
     "how": {
       "eyebrow": "İş",
       "title": "Her seferinde beş hamle",
-      "lede": "Her iş aynı yayı izler; böylece nerede olduğunu hep tam bilirsin."
+      "lede": "Her iş aynı yayı izler, böylece nerede olduğunu her an tam bilirsin."
     },
     "faq": {
-      "eyebrow": "Net Cevaplar",
+      "eyebrow": "Dobra Cevaplar",
       "title": "İlk işinden önce",
       "more": "The Fixer'ın verdiği her cevabı oku"
     },
     "closer": {
       "fixerName": "The Fixer",
-      "fixerLine": "“Üç iş. Öğrendiğin sende kalır — hesabı Meridian öder.”",
-      "title": "Kapı açık. İçeri gir.",
-      "cta": "İlk işi kap"
+      "fixerLine": "“Üç iş. Öğrendiğin sende kalır — fatura Meridian'a kalır.”",
+      "title": "Kapı açık. Geç içeri.",
+      "cta": "İlk işi al"
     },
     "loop": {
-      "0": { "title": "Brifing", "blurb": "The Fixer hedefi ve vurgunu söyler — yöntemi asla." },
-      "1": { "title": "Keşif", "blurb": "Hedefi kolaçan et. Girdinin gerçekte nereye düştüğünü bul." },
-      "2": { "title": "Sızma", "blurb": "Forma yaz, girdinin kurduğu canlı sorguyu izle, sonra çalıştır." },
-      "3": { "title": "Ganimet", "blurb": "Vurgun ve puanın. Kimse seni durdurmadı — bütün mesele bu." },
-      "4": { "title": "Değerlendirme", "blurb": "Açık veren kod, onu kapatan düzeltmenin yanında. İşte savunma bu." }
+      "0": {
+        "title": "Brifing",
+        "blurb": "The Fixer hedefi ve vurgunu söyler — yöntemi asla."
+      },
+      "1": {
+        "title": "Keşif",
+        "blurb": "Hedefi kolaçan et. Girdinin gerçekte nereye düştüğünü bul."
+      },
+      "2": {
+        "title": "İstismar",
+        "blurb": "Forma yaz, girdinin oluşturduğu canlı sorguyu izle, sonra çalıştır."
+      },
+      "3": {
+        "title": "Ganimet",
+        "blurb": "Vurgun ve puanın. Kimse seni durduramadı — mesele de bu."
+      },
+      "4": {
+        "title": "Değerlendirme",
+        "blurb": "Açığı kapatan düzeltmenin yanında savunmasız kod. İşte savunma bu."
+      }
     },
     "faqTeasers": {
       "0": {
         "q": "Bu yasal mı?",
-        "a": "Evet. Her iş tamamen tarayıcında, oyunla birlikte gelen sandbox'lı bir SQLite veritabanına karşı çalışır. Gerçek sistem yok, ağ çağrısı yok — pratik hedefinden başka kırabileceğin bir şey yok."
+        "a": "Evet. Her iş tamamen tarayıcında, oyunla birlikte gelen korumalı bir SQLite veritabanına karşı çalışır. Gerçek sistem yok, ağ çağrısı yok — pratik hedefinden başka kıracak bir şey de yok."
       },
       "1": {
         "q": "Bir şey kurmam gerekiyor mu?",
-        "a": "Hayır. Modern bir tarayıcıda çalışır. SQLite motoru, ilk ihtiyaç duyduğunda anında yüklenir — hesap yok, indirme yok, kurulum yok."
+        "a": "Hayır. Modern bir tarayıcıda çalışır. SQLite motoru ilk ihtiyaç duyduğunda, istek üzerine yüklenir — hesap yok, indirme yok, kurulum yok."
       },
       "2": {
-        "q": "SQL bilmem şart mı?",
-        "a": "İşine yarar. Oyun, bir SELECT'i okuyabildiğini ve bir WHERE cümlesini kabaca takip edebildiğini varsayar. Sana injection öğretir — sıfırdan SQL değil."
+        "q": "SQL biliyor olmam gerekiyor mu?",
+        "a": "İşe yarar. Oyun, bir SELECT okuyabildiğini ve bir WHERE yan tümcesini kabaca takip edebildiğini varsayar. Sana enjeksiyonu öğretir — sıfırdan SQL değil."
       },
       "3": {
-        "q": "İnsanlara gerçek siteleri saldırmayı mı öğretiyorsunuz?",
-        "a": "Injection'ın nasıl çalıştığını, onu tanıyıp kapatabilesin diye öğretiyoruz — her iş soygunla değil, düzeltmeyle biter. Yalnızca sahip olduğun ya da test etmene izin verilen sistemlerde kullan."
+        "q": "İnsanlara gerçek web sitelerine saldırmayı mı öğretiyorsunuz?",
+        "a": "Enjeksiyonun nasıl çalıştığını öğretiyoruz ki onu tanıyıp kapatabilesin — her iş soygunla değil, düzeltmeyle biter. Bunu yalnızca sana ait olan ya da test etmene izin verilen sistemlerde kullan."
       }
     },
     "ticker": {
       "0": "Kapı hiç kilitli değildi.",
-      "1": "Hattı oku. Payload'ı çalıştır.",
-      "2": "Meridian, kendisininki hariç herkesin sırrını saklar.",
+      "1": "Hattı oku. Yükü çalıştır.",
+      "2": "Meridian herkesin sırrını tutar, kendininki hariç.",
       "3": "Soygunu öğren. Kilidi kur.",
-      "4": "Gerçek hedef yok. Sandbox'tan başka ağ yok.",
+      "4": "Gerçek hedef yok. Korumalı alandan başka güvenlik ağı yok.",
       "5": "Her sorgu bir kapıdır. Bazıları aralık."
     }
   },
   "help": {
     "eyebrow": "Brifing",
-    "title": "İş nasıl yürür",
+    "title": "İş nasıl işler",
     "lead": "The Fixer kendini tekrar etmez. Bir kez oku, sonra git kazan.",
     "sectionBefore": "Hiçbir şeye dokunmadan önce",
     "calloutSafe": "Tasarımı gereği güvenli",
@@ -124,14 +143,14 @@
     "sectionWire": "Hattı okumak",
     "sectionControls": "Kontroller",
     "sectionStuck": "Sıkıştın mı? The Fixer'ı ara",
-    "sectionPoint": "Bütün mesele",
+    "sectionPoint": "Mesele",
     "cta": "Panoyu gör"
   },
   "faq": {
-    "eyebrow": "Net Cevaplar",
-    "title": "The Fixer'ın bir kez yanıtladığı sorular",
-    "lead": "Lafı dolandırmak yok. İlk işinden önce herkesin sorduğu şeyler bunlar.",
-    "srHeading": "Sık sorulan sorular",
+    "eyebrow": "Dobra Cevaplar",
+    "title": "The Fixer'ın bir kez cevapladığı sorular",
+    "lead": "Lafı dolandırmak yok. İnsanların ilk işinden önce sorduğu şeyler.",
+    "srHeading": "Sıkça sorulan sorular",
     "stillStuck": "Hâlâ sıkıştın mı?"
   },
   "content": {
@@ -140,38 +159,38 @@
   "consent": {
     "aria": "Depolama bildirimi",
     "title": "Bu oyun yerel depolama kullanır",
-    "body": "SQL Heist; ilerlemeni ve dil tercihini tarayıcının yerel depolamasında (local storage) tutar. Takip yok, analiz yok, reklam çerezi yok — ve hiçbir şey cihazından dışarı çıkmaz.",
+    "body": "SQL Heist, ilerlemeni ve dil seçimini tarayıcının yerel depolamasında tutar. Takip yok, analitik yok, reklam çerezi yok — ve hiçbir şey asla cihazından çıkmaz.",
     "accept": "Anladım"
   },
   "privacy": {
-    "eyebrow": "İnce Yazı",
+    "eyebrow": "Küçük Yazılar",
     "title": "Gizlilik",
     "lead": "Kısa versiyon: seni toplamıyoruz. Uzun versiyon aşağıda, o da yine kısa."
   },
   "terms": {
-    "eyebrow": "İnce Yazı",
+    "eyebrow": "Küçük Yazılar",
     "title": "Kullanım Koşulları",
-    "lead": "Oyunu oyna, zanaatı öğren, temiz kal. Detaylar:"
+    "lead": "Oyunu oyna, mesleği öğren, temiz kal. Detaylar:"
   },
   "contact": {
     "eyebrow": "Hat",
     "title": "Ekibe ulaş",
-    "lead": "Telefon yok. Danışma yok. Haber bırak, biri sana döner."
+    "lead": "Telefon numarası yok. Danışma yok. Haber bırak, biri sana döner."
   },
   "game": {
     "phase": {
       "brief": "Brifing",
       "recon": "Keşif",
-      "exploit": "Sızma",
+      "exploit": "İstismar",
       "loot": "Ganimet",
       "debrief": "Değerlendirme",
       "progressAria": "İş ilerlemesi",
       "stage": "{phase} aşaması"
     },
     "topbar": {
-      "leave": "İşi bırak — Pano'ya dön",
-      "back": "Geri: {label}",
-      "time": "Hedefte geçen süre {time}",
+      "leave": "İşi bırak — Panoya dön",
+      "back": "{label} sayfasına dön",
+      "time": "Hedefteki süre {time}",
       "score": "Puan {score}",
       "mute": "Sesi kapat",
       "unmute": "Sesi aç"
@@ -180,72 +199,80 @@
       "call": "The Fixer'ı ara",
       "unlocked": "{opened}/{total} açıldı",
       "suggest": "Sıkıştın mı? The Fixer hatta.",
-      "tier": { "0": "Bir kelime", "1": "Yöntem", "2": "Hamle" },
+      "tier": {
+        "0": "Bir kelime",
+        "1": "Yöntem",
+        "2": "Hamle"
+      },
       "tierFallback": "Kademe {n}",
       "locked": "Önce bir önceki kademeyi aç.",
-      "confirmTitle": "Sana {cost} puana patlar. Yine de ister misin?",
-      "confirmBody": "bu işteki nihai puanından doğrudan düşer — bu turda iade yok.",
-      "notYet": "Şimdi değil",
+      "confirmTitle": "Maliyeti {cost}. Yine de ister misin?",
+      "confirmBody": "bu işteki nihai puanından doğrudan düşülür — bu turda iade yok.",
+      "notYet": "Henüz değil",
       "makeCall": "Aramayı yap"
     },
     "score": {
       "base": "Taban",
-      "attempts": "Denemeler (bedava {free}, fazladan {over})",
+      "attempts": "Denemeler ({free} ücretsizden {over} fazla)",
       "hints": "İpuçları ({n})",
       "timeBonus": "Süre bonusu",
       "score": "Puan"
     },
     "stars": {
       "aria": "3 yıldızdan {stars} — {label}",
-      "tier": { "1": "Gürültülü", "2": "Tamam", "3": "Temiz" }
+      "tier": {
+        "1": "Gürültülü",
+        "2": "Tamam",
+        "3": "Temiz"
+      }
     },
     "board": {
       "stamp": "PANO",
       "title": "Üç iş. Tek puan.",
-      "sub": "Her birini bir SQL injection ile çevir, sonra düzeltmeyi öğren. İlerlemen bu cihazda kalır.",
+      "sub": "Her birini bir SQL enjeksiyonuyla çevir, sonra düzeltmeyi öğren. İlerleme bu cihazda kalır.",
       "rank": "Rütbe"
     },
     "card": {
       "cleared": "Halledildi",
       "open": "Açık",
       "locked": "Kilitli",
-      "runCleaner": "Daha temiz çevir",
+      "runCleaner": "Daha temiz çek",
       "take": "İşi al",
-      "finishFirst": "Önce {prev} bitmeli",
+      "finishFirst": "Önce {prev} bitir",
       "finishFallback": "önceki iş",
       "ariaState": "{job} — {state}"
     },
     "brief": {
-      "caseFile": "Dava Dosyası — {job}",
+      "caseFile": "İş Dosyası — {job}",
       "difficulty": "Zorluk · {difficulty}",
       "handler": "İrtibat",
       "target": "Hedef",
       "objective": "Amaç",
       "surfaceLabel": "yüzey ·",
-      "prepping": "ekipman hazırlanıyor…",
+      "prepping": "teçhizat hazırlanıyor…",
       "takeJob": "İşi al"
     },
     "mimic": {
       "signIn": "Giriş yap",
       "search": "Ara",
       "submit": "Gönder",
-      "reconNote": "Bu form, kasanın arkasındaki bir sorguyla konuşur. Ya girdin sadece bir isim gibi işlenmezse ne olur?"
+      "reconNote": "Bu form, tezgâhın arkasındaki bir sorguyla konuşuyor. Ya girdin sadece bir isim gibi ele alınmazsa ne olur?"
     },
     "recon": {
       "stamp": "Keşif",
       "title": "Mekânı kolaçan et — {app}",
       "notes": "Keşif Notları",
-      "visibleSchema": "Görünür şema",
-      "hypothesis": "Yalnızca hedefin reklamını yaptığı şeyler listelenir. Saklamaya değer bir şey varsa bu panoda olmaz — onu veritabanına söyletmen gerekir.",
+      "visibleSchema": "Görünen şema",
+      "hypothesis": "Yalnızca hedefin ilan ettiği şeyler listelenir. Saklamaya değer bir şey varsa bu listede olmaz — onu veritabanına söyletmen gerekecek.",
       "moveIn": "Hamleni yap"
     },
     "exploit": {
-      "consoleAria": "Sızma konsolu",
-      "heading": "Sızma — {app}",
+      "consoleAria": "İstismar konsolu",
+      "heading": "İstismar — {app}",
       "objective": "Amaç",
       "recap": "Keşif özeti ·",
-      "visibleSchema": "Görünür şema",
-      "front": "Cephe",
+      "visibleSchema": "Görünen şema",
+      "front": "Vitrin",
       "wire": "Hat",
       "live": "canlı",
       "reaches": "Hedefe gerçekte ne ulaşıyor",
@@ -254,56 +281,56 @@
       "cameBack": "Ne geri geldi"
     },
     "loot": {
-      "secured": "Ganimet cebde",
-      "winningPayload": "Kazanan payload",
-      "extracted": "Çekilenler",
-      "seeSlipped": "Nerede açık verdiler, gör"
+      "secured": "Ganimet güvende",
+      "winningPayload": "Kazanan yük",
+      "extracted": "Çıkarılan",
+      "seeSlipped": "Nerede açık verdiklerini gör"
     },
     "debrief": {
       "stamp": "Değerlendirme — Saldırı → Savunma",
       "fixerTag": "The Fixer",
       "beat1": "① Hamle",
-      "beat1Text": "Cepheye uzattığın payload, hatta:",
+      "beat1Text": "Vitrine uzattığın yük, hatta:",
       "beat2": "② Neden işe yaradı",
       "beat3": "③ Düzeltme",
       "beat4": "④ Çıkarım",
       "continue": "Devam",
-      "runCleaner": "Daha temiz çevir",
+      "runCleaner": "Daha temiz çek",
       "nextJob": "Sıradaki iş bekliyor",
-      "walkAway": "Hayalet gibi çek git"
+      "walkAway": "Sırra kadem bas"
     },
     "compare": {
       "vulnerable": "Savunmasız",
       "secure": "Güvenli",
-      "vulnCaption": "Girdi sorguya doğrudan eklenir — veri, koda dönüşür.",
-      "secureCaption": "Girdi parametre olarak bağlanır — veri olarak kalır.",
+      "vulnCaption": "Girdi sorguya eklenip birleştiriliyor — veri, koda dönüşüyor.",
+      "secureCaption": "Girdi parametre olarak bağlanıyor — veri olarak kalıyor.",
       "langAria": "Kod yığını — dil",
-      "fwAria": "Kod yığını — {name} çatısı"
+      "fwAria": "Kod yığını — {name} çerçevesi"
     },
     "toast": {
-      "won": "Ganimet cebde — puana geçiliyor.",
+      "won": "Ganimet güvende — puana geçiliyor.",
       "blocked": "Filtreye takıldı: {terms}.",
-      "blockedFallback": "payload'ın",
-      "choked": "Hedef bunu yutamadı — geri kustuğunu oku.",
+      "blockedFallback": "yükün",
+      "choked": "Hedef buna tıkandı — geri ne kustuğuna bak.",
       "dismiss": "Kapat"
     },
     "engine": {
-      "dead": "Hat kesik.",
-      "deadBody": "İşe ulaşılamadı — bağlantını kontrol et ve hattı yeniden dene.",
-      "retry": "Hattı yeniden dene",
-      "warming": "Ekipman hazırlanıyor…"
+      "dead": "Hat düştü.",
+      "deadBody": "İşe ulaşılamadı — bağlantını kontrol et ve hattı tekrar dene.",
+      "retry": "Hattı tekrar dene",
+      "warming": "Teçhizat hazırlanıyor…"
     },
     "notebook": {
       "title": "Keşif defteri",
       "factsAria": "{n} bulgu kaydedildi",
       "advertisedAria": "İlan edilen şema",
       "advertised": "İlan edilen",
-      "priedAria": "Sonuçlardan keşfedilen kolonlar",
-      "pried": "Sonuçlardan sökülenler",
-      "empty": "Henüz bir şey yok. Veritabanına, hiç ilan etmediği bir kolonu söylet — buraya düşecek."
+      "priedAria": "Sonuçlardan keşfedilen sütunlar",
+      "pried": "Sonuçlardan sökülen",
+      "empty": "Henüz bir şey yok. Veritabanına, hiç ilan etmediği bir sütunun adını söylet — burada belirir."
     },
     "badges": {
-      "aria": "Teknik ustalığı: {total} içinde {earned}",
+      "aria": "Teknik ustalığı: {total} üzerinden {earned}",
       "mastery": "Ustalık",
       "itemAria": "{label} — {status}",
       "mastered": "ustalaşıldı",
@@ -316,16 +343,16 @@
       "threshold": "eşik {n} ms",
       "errorLeak": "Hata sızıntısı",
       "structureExposed": "yapı açığa çıktı",
-      "errorLeakedGloss": "Mesaj, asla açık etmemesi gereken bir ismi geri tükürdü — bütün mesele o sızıntı.",
-      "errorGloss": "Hedef boğuldu. Geri kustuğunu oku; asıl ipucu hatanın kendisi.",
+      "errorLeakedGloss": "Mesaj, asla açığa vurmaması gereken bir adı geri kustu — bütün mesele o sızıntı.",
+      "errorGloss": "Hedef tıkandı. Geri ne kustuğuna bak; asıl işaret hatanın kendisi.",
       "sideEffect": "Yan etki"
     },
     "result": {
-      "running": "Sorgu çalışıyor",
-      "noRun": "Henüz çalıştırma yok — bir payload enjekte et ve hatta yolla.",
+      "running": "Sorgu çalıştırılıyor",
+      "noRun": "Henüz çalıştırma yok — bir yük enjekte et ve hattı ateşle.",
       "errorHead": "HATA ÇIKTISI",
-      "errorGloss": "Hedef bunu yutamadı. Geri kustuğunu oku — nerede kaydığını sana söylüyor.",
-      "nothing": "Alınacak bir şey yok. Sorgu temiz döndü — yanlış çekmeceye uzanıyorsun.",
+      "errorGloss": "Hedef buna tıkandı. Geri ne kustuğuna bak — nerede açık verdiğini söylüyor.",
+      "nothing": "Alınmaya değer bir şey yok. Temiz çalıştı — yanlış çekmeceyi karıştırıyorsun.",
       "loot": "ganimet"
     },
     "waf": {

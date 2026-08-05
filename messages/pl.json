@@ -1,9 +1,4 @@
 {
-  "_meta": {
-    "_note": "Polish translation in The Fixer's noir voice — informal 2nd person, terse, street-smart. NEEDS A NATIVE POLISH REVIEW BEFORE LAUNCH (best-effort, machine-assisted; check declension/aspect and the crime-slang word choices, e.g. robota / łup / włam / linia). Placeholders ({year}, {app}, {cost}, …), brand/world names (SQL Heist, Meridian, The Fixer) and SQL tokens (SELECT, WHERE, UNION, …) kept verbatim.",
-    "locale": "pl",
-    "status": "needs-native-review"
-  },
   "nav": {
     "home": "Start",
     "jobs": "Roboty",
@@ -11,7 +6,7 @@
     "signIn": "Zaloguj się",
     "signInTitle": "Konta już wkrótce",
     "brandAria": "SQL Heist — strona główna",
-    "primaryAria": "Nawigacja główna",
+    "primaryAria": "Główna",
     "openMenu": "Otwórz menu",
     "closeMenu": "Zamknij menu"
   },
@@ -21,15 +16,15 @@
   },
   "share": {
     "share": "Udostępnij",
-    "copied": "Skopiowano link",
+    "copied": "Link skopiowany",
     "error": "Naciśnij, aby skopiować",
-    "srCopied": "Skopiowano link do schowka",
+    "srCopied": "Link skopiowany do schowka",
     "srError": "Nie udało się skopiować linku"
   },
   "footer": {
     "aria": "Stopka",
-    "tagline": "Baza danych jest prawdziwa. Przestępstwo nie. Najpierw poznaj włam, potem zamek.",
-    "colPull": "Weź robotę",
+    "tagline": "Baza jest prawdziwa. Przestępstwo nie. Naucz się włamania, potem naucz się zamka.",
+    "colPull": "Zrób robotę",
     "colLearn": "Poznaj fach",
     "colFine": "Drobny druk",
     "linkHome": "Start",
@@ -37,159 +32,187 @@
     "linkHelp": "Jak to działa",
     "linkFaq": "FAQ",
     "linkPrivacy": "Prywatność",
-    "linkTerms": "Regulamin",
+    "linkTerms": "Warunki",
     "linkContact": "Kontakt",
-    "note": "Działa w całości w Twojej przeglądarce. Bez serwera, bez sieci.",
-    "alsoTry": "zobacz też",
+    "note": "Działa w całości w twojej przeglądarce. Bez serwera, bez sieci.",
+    "alsoTry": "sprawdź też",
     "copyright": "© {year} SQL Heist"
   },
   "home": {
     "hero": {
       "eyebrow": "Meridian Holdings · po godzinach",
       "title": "SQL Heist",
-      "tagline": "Każdy system ma drzwi, które ktoś zapomniał zamknąć.",
-      "lede": "Ty je znajdujesz. Po drugiej stronie prawdziwa baza danych — żadnej symulacji, żadnej siatki bezpieczeństwa poza sandboxem. Zrób trzy roboty. Potem naucz się, jak powinni cię byli powstrzymać.",
-      "primaryCta": "Bierz pierwszą robotę",
+      "tagline": "Każdy system ma drzwi, których ktoś zapomniał zamknąć.",
+      "lede": "Ty je znajdujesz. Po drugiej stronie prawdziwa baza — żadnej symulacji, żadnej siatki bezpieczeństwa poza piaskownicą. Zrób trzy roboty. Potem naucz się, jak powinni cię byli powstrzymać.",
+      "primaryCta": "Weź pierwszą robotę",
       "secondaryCta": "Jak to działa"
     },
     "what": {
       "eyebrow": "Akta sprawy · 001",
       "stamp": "Poufne",
-      "title": "Poznaj włam, by poznać zamek",
-      "lede": "SQL Heist to edukacyjna gra o SQL injection. Przeprowadzasz atak na prawdziwą bazę danych, a potem studiujesz kod, który powinien cię był zatrzymać — atak uczy obrony lepiej niż każdy wykład.",
+      "title": "Poznaj włamanie, by poznać zamek",
+      "lede": "SQL Heist to edukacyjna gra o wstrzykiwaniu SQL. Przeprowadzasz atak na prawdziwą bazę, a potem studiujesz kod, który powinien cię był powstrzymać — atak uczy obrony lepiej niż jakikolwiek wykład.",
       "facts": {
-        "0": { "k": "Gdzie", "v": "W 100% w Twojej przeglądarce. Nic nigdy nie trafia do sieci." },
-        "1": { "k": "Przeciw czemu", "v": "Prawdziwy silnik SQLite, zasiewany od nowa przy każdym uruchomieniu." },
-        "2": { "k": "Ryzyko", "v": "Żadnego prawdziwego celu — jedyne, co możesz zepsuć, to sandbox." }
+        "0": {
+          "k": "Gdzie",
+          "v": "100% w twojej przeglądarce. Nic nigdy nie dotyka sieci."
+        },
+        "1": {
+          "k": "Przeciw",
+          "v": "Prawdziwy silnik SQLite, zasiewany od nowa przy każdym uruchomieniu."
+        },
+        "2": {
+          "k": "Ryzyko",
+          "v": "Żadnego prawdziwego celu — jedyne, co możesz zepsuć, to piaskownica."
+        }
       },
-      "safe": "Bezpieczne z założenia — bez kont, bez pobierania, bez instalacji."
+      "safe": "Bezpieczne z założenia — bez kont, bez pobierania, bez konfiguracji."
     },
     "how": {
       "eyebrow": "Robota",
       "title": "Pięć ruchów, za każdym razem",
-      "lede": "Każda robota przebiega tym samym łukiem, więc zawsze wiesz dokładnie, na jakim jesteś etapie."
+      "lede": "Każda robota przebiega tym samym łukiem, więc zawsze dokładnie wiesz, na którym jesteś etapie."
     },
     "faq": {
-      "eyebrow": "Konkretne odpowiedzi",
-      "title": "Przed pierwszą robotą",
-      "more": "Przeczytaj każdą odpowiedź The Fixera"
+      "eyebrow": "Prosto z mostu",
+      "title": "Zanim weźmiesz pierwszą robotę",
+      "more": "Przeczytaj każdą odpowiedź The Fixer"
     },
     "closer": {
       "fixerName": "The Fixer",
-      "fixerLine": "„Trzy roboty. To, czego się nauczysz, zostaje z tobą — rachunek zostaje Meridianowi.”",
-      "title": "Drzwi są otwarte. Wejdź.",
-      "cta": "Bierz pierwszą robotę"
+      "fixerLine": "„Trzy roboty. Ty zatrzymujesz wiedzę — Meridian zostaje z rachunkiem.”",
+      "title": "Drzwi są otwarte. Przejdź przez nie.",
+      "cta": "Weź pierwszą robotę"
     },
     "loop": {
-      "0": { "title": "Odprawa", "blurb": "The Fixer wskazuje cel i łup — nigdy metodę." },
-      "1": { "title": "Zwiad", "blurb": "Rozpracuj cel. Znajdź, gdzie naprawdę ląduje twój input." },
-      "2": { "title": "Włam", "blurb": "Wpisz coś w formularz, patrz, jak twój input buduje zapytanie na żywo, potem je odpal." },
-      "3": { "title": "Łup", "blurb": "Zdobycz i twój wynik. Nikt cię nie zatrzymał — o to właśnie chodzi." },
-      "4": { "title": "Rozliczenie", "blurb": "Podatny kod obok poprawki, która go domyka. To jest obrona." }
+      "0": {
+        "title": "Odprawa",
+        "blurb": "The Fixer wskazuje cel i łup — nigdy metodę."
+      },
+      "1": {
+        "title": "Rozpoznanie",
+        "blurb": "Rozpracuj cel. Znajdź, gdzie naprawdę trafia twój wpis."
+      },
+      "2": {
+        "title": "Atak",
+        "blurb": "Wpisz coś w formularz, patrz, jak twój wpis buduje zapytanie na żywo, a potem je uruchom."
+      },
+      "3": {
+        "title": "Łup",
+        "blurb": "Łup i twój wynik. Nikt cię nie powstrzymał — o to właśnie chodzi."
+      },
+      "4": {
+        "title": "Podsumowanie",
+        "blurb": "Podatny kod obok poprawki, która go zamyka. To jest obrona."
+      }
     },
     "faqTeasers": {
       "0": {
         "q": "Czy to legalne?",
-        "a": "Tak. Każda robota działa w całości w Twojej przeglądarce, przeciw sandboxowej bazie SQLite dostarczanej z grą. Żadnych prawdziwych systemów, żadnych połączeń sieciowych — nie ma czego zepsuć poza celem treningowym."
+        "a": "Tak. Każda robota działa w całości w twojej przeglądarce, na osadzonej w piaskownicy bazie SQLite dołączonej do gry. Żadnych prawdziwych systemów, żadnych połączeń sieciowych — nie ma czego zepsuć poza celem treningowym."
       },
       "1": {
-        "q": "Czy muszę coś instalować?",
-        "a": "Nie. Działa w nowoczesnej przeglądarce. Silnik SQLite ładuje się na żądanie, gdy tylko go potrzebujesz — bez kont, bez pobierania, bez instalacji."
+        "q": "Czy muszę cokolwiek instalować?",
+        "a": "Nie. Działa w nowoczesnej przeglądarce. Silnik SQLite ładuje się na żądanie, gdy pierwszy raz go potrzebujesz — bez kont, bez pobierania, bez konfiguracji."
       },
       "2": {
         "q": "Czy muszę już znać SQL?",
-        "a": "To pomaga. Gra zakłada, że potrafisz przeczytać SELECT i z grubsza śledzić klauzulę WHERE. Uczy cię injection — nie SQL-a od zera."
+        "a": "To pomaga. Gra zakłada, że umiesz przeczytać SELECT i z grubsza ogarnąć klauzulę WHERE. Uczy cię wstrzykiwania — nie SQL od zera."
       },
       "3": {
         "q": "Czy uczycie ludzi atakować prawdziwe strony?",
-        "a": "Uczymy, jak działa injection, żebyś umiał go rozpoznać i domknąć — każda robota kończy się poprawką, nie włamem. Używaj tego tylko na systemach, które są twoje albo które wolno ci testować."
+        "a": "Uczymy, jak działa wstrzykiwanie, żebyś umiał je rozpoznać i zamknąć — każda robota kończy się poprawką, nie włamaniem. Używaj tego tylko na systemach, które posiadasz lub które wolno ci testować."
       }
     },
     "ticker": {
-      "0": "Te drzwi nigdy nie były zamknięte.",
-      "1": "Czytaj linię. Odpal payload.",
-      "2": "Meridian strzeże cudzych sekretów, tylko nie swoich.",
-      "3": "Poznaj włam. Zbuduj zamek.",
-      "4": "Żadnego prawdziwego celu. Żadnej sieci poza sandboxem.",
+      "0": "Drzwi nigdy nie były zamknięte.",
+      "1": "Czytaj linię. Odpal ładunek.",
+      "2": "Meridian pilnuje cudzych sekretów, tylko nie swoich.",
+      "3": "Naucz się włamania. Zbuduj zamek.",
+      "4": "Żadnego prawdziwego celu. Żadnej siatki poza piaskownicą.",
       "5": "Każde zapytanie to drzwi. Niektóre są uchylone."
     }
   },
   "help": {
     "eyebrow": "Odprawa",
     "title": "Jak działa robota",
-    "lead": "The Fixer się nie powtarza. Przeczytaj raz i idź zarobić.",
+    "lead": "The Fixer się nie powtarza. Przeczytaj raz i idź zarabiać.",
     "sectionBefore": "Zanim czegokolwiek dotkniesz",
     "calloutSafe": "Bezpieczne z założenia",
     "sectionMoves": "Pięć ruchów",
-    "sectionWire": "Jak czytać linię",
+    "sectionWire": "Czytanie linii",
     "sectionControls": "Sterowanie",
-    "sectionStuck": "Utknąłeś? Wezwij The Fixera",
-    "sectionPoint": "O co chodzi",
+    "sectionStuck": "Utknąłeś? Zadzwoń do The Fixer",
+    "sectionPoint": "Sedno",
     "cta": "Zobacz tablicę"
   },
   "faq": {
-    "eyebrow": "Konkretne odpowiedzi",
+    "eyebrow": "Prosto z mostu",
     "title": "Pytania, na które The Fixer odpowiada raz",
-    "lead": "Bez pogaduszek. Oto, o co pytają przed pierwszą robotą.",
-    "srHeading": "Najczęściej zadawane pytania",
-    "stillStuck": "Wciąż utknąłeś?"
+    "lead": "Bez pogaduszek. Oto, o co ludzie pytają przed pierwszą robotą.",
+    "srHeading": "Często zadawane pytania",
+    "stillStuck": "Nadal utknąłeś?"
   },
   "content": {
     "updated": "Ostatnia aktualizacja"
   },
   "consent": {
-    "aria": "Informacja o pamięci",
+    "aria": "Informacja o pamięci lokalnej",
     "title": "Ta gra korzysta z pamięci lokalnej",
-    "body": "SQL Heist trzyma Twój postęp i wybór języka w pamięci lokalnej przeglądarki (local storage). Żadnego śledzenia, żadnej analityki, żadnych ciasteczek reklamowych — i nic nie opuszcza Twojego urządzenia.",
-    "accept": "Rozumiem"
+    "body": "SQL Heist przechowuje twój postęp i wybór języka w pamięci lokalnej przeglądarki. Bez śledzenia, bez analityki, bez ciasteczek reklamowych — i nic nigdy nie opuszcza twojego urządzenia.",
+    "accept": "Jasne"
   },
   "privacy": {
     "eyebrow": "Drobny druk",
     "title": "Prywatność",
-    "lead": "Wersja krótka: nie zbieramy ciebie. Wersja długa jest niżej i też jest krótka."
+    "lead": "Wersja krótka: nie zbieramy cię. Wersja długa jest niżej i wciąż jest krótka."
   },
   "terms": {
     "eyebrow": "Drobny druk",
     "title": "Warunki korzystania",
-    "lead": "Graj, poznawaj fach, rób to czysto. Szczegóły:"
+    "lead": "Graj, poznaj fach, trzymaj się czysto. Szczegóły:"
   },
   "contact": {
     "eyebrow": "Linia",
-    "title": "Skontaktuj się z ekipą",
+    "title": "Złap ekipę",
     "lead": "Żadnego numeru telefonu. Żadnej recepcji. Zostaw wiadomość, a ktoś się odezwie."
   },
   "game": {
     "phase": {
       "brief": "Odprawa",
-      "recon": "Zwiad",
-      "exploit": "Włam",
+      "recon": "Rozpoznanie",
+      "exploit": "Atak",
       "loot": "Łup",
-      "debrief": "Rozliczenie",
+      "debrief": "Podsumowanie",
       "progressAria": "Postęp roboty",
-      "stage": "Etap: {phase}"
+      "stage": "Etap {phase}"
     },
     "topbar": {
-      "leave": "Rzuć robotę — z powrotem na Tablicę",
-      "back": "Powrót do: {label}",
+      "leave": "Porzuć robotę — powrót do Tablicy",
+      "back": "Powrót do {label}",
       "time": "Czas na celu {time}",
       "score": "Wynik {score}",
       "mute": "Wycisz",
       "unmute": "Włącz dźwięk"
     },
     "hint": {
-      "call": "Wezwij The Fixera",
+      "call": "Zadzwoń do The Fixer",
       "unlocked": "{opened}/{total} odblokowane",
-      "suggest": "Utknąłeś? The Fixer jest na linii.",
-      "tier": { "0": "Słówko", "1": "Metoda", "2": "Zagranie" },
+      "suggest": "Utknąłeś? The Fixer czeka na linii.",
+      "tier": {
+        "0": "Słówko",
+        "1": "Metoda",
+        "2": "Zagranie"
+      },
       "tierFallback": "Poziom {n}",
       "locked": "Najpierw odblokuj poprzedni poziom.",
-      "confirmTitle": "Kosztuje cię {cost}. Nadal chcesz?",
-      "confirmBody": "schodzi wprost z twojego końcowego wyniku za tę robotę — w tym podejściu bez zwrotów.",
+      "confirmTitle": "Kosztuje {cost}. Nadal chcesz?",
+      "confirmBody": "schodzi prosto z twojego końcowego wyniku za tę robotę — w tym podejściu bez zwrotów.",
       "notYet": "Jeszcze nie",
       "makeCall": "Dzwoń"
     },
     "score": {
-      "base": "Baza",
+      "base": "Podstawa",
       "attempts": "Próby ({over} ponad {free} darmowych)",
       "hints": "Podpowiedzi ({n})",
       "timeBonus": "Bonus za czas",
@@ -197,12 +220,16 @@
     },
     "stars": {
       "aria": "{stars} z 3 gwiazdek — {label}",
-      "tier": { "1": "Głośno", "2": "Zrobione", "3": "Czysto" }
+      "tier": {
+        "1": "Głośno",
+        "2": "Zrobione",
+        "3": "Czysto"
+      }
     },
     "board": {
       "stamp": "TABLICA",
       "title": "Trzy roboty. Jeden wynik.",
-      "sub": "Każdą rozegraj przez SQL injection, potem poznaj poprawkę. Postęp zostaje na tym urządzeniu.",
+      "sub": "Każdą rozpracuj wstrzyknięciem SQL, potem poznaj poprawkę. Postęp zostaje na tym urządzeniu.",
       "rank": "Ranga"
     },
     "card": {
@@ -210,8 +237,8 @@
       "open": "Otwarte",
       "locked": "Zablokowane",
       "runCleaner": "Rozegraj czyściej",
-      "take": "Bierz robotę",
-      "finishFirst": "Najpierw skończ: {prev}",
+      "take": "Weź robotę",
+      "finishFirst": "Najpierw skończ {prev}",
       "finishFallback": "poprzednią robotę",
       "ariaState": "{job} — {state}"
     },
@@ -222,116 +249,116 @@
       "target": "Cel",
       "objective": "Zadanie",
       "surfaceLabel": "powierzchnia ·",
-      "prepping": "przygotowuję sprzęt…",
-      "takeJob": "Bierz robotę"
+      "prepping": "szykuję sprzęt…",
+      "takeJob": "Weź robotę"
     },
     "mimic": {
       "signIn": "Zaloguj się",
       "search": "Szukaj",
       "submit": "Wyślij",
-      "reconNote": "Ten formularz rozmawia z zapytaniem na zapleczu. Co się stanie, jeśli twój input nie zostanie potraktowany tylko jako nazwa?"
+      "reconNote": "Ten formularz rozmawia z zapytaniem za ladą. Co się stanie, jeśli twój wpis nie zostanie potraktowany tylko jako nazwa?"
     },
     "recon": {
-      "stamp": "Zwiad",
+      "stamp": "Rozpoznanie",
       "title": "Rozpracuj lokal — {app}",
-      "notes": "Notatki ze zwiadu",
+      "notes": "Notatki z rozpoznania",
       "visibleSchema": "Widoczny schemat",
-      "hypothesis": "Wypisane jest tylko to, co cel reklamuje. Jeśli coś warto ukryć, nie będzie na tej tablicy — musisz zmusić bazę, żeby to nazwała.",
+      "hypothesis": "Wypisane jest tylko to, co cel sam ogłasza. Jeśli coś warto ukryć, nie znajdziesz tego na tej liście — musisz zmusić bazę, żeby to nazwała.",
       "moveIn": "Zrób swój ruch"
     },
     "exploit": {
-      "consoleAria": "Konsola włamu",
-      "heading": "Włam — {app}",
+      "consoleAria": "Konsola ataku",
+      "heading": "Atak — {app}",
       "objective": "Zadanie",
-      "recap": "Podsumowanie zwiadu ·",
+      "recap": "Rozpoznanie w skrócie ·",
       "visibleSchema": "Widoczny schemat",
       "front": "Fasada",
       "wire": "Linia",
       "live": "na żywo",
       "reaches": "Co naprawdę dociera do celu",
-      "sendIt": "Odpal",
-      "reset": "Resetuj",
+      "sendIt": "Wyślij",
+      "reset": "Wyczyść",
       "cameBack": "Co wróciło"
     },
     "loot": {
       "secured": "Łup zabezpieczony",
-      "winningPayload": "Zwycięski payload",
+      "winningPayload": "Zwycięski ładunek",
       "extracted": "Wyciągnięte",
       "seeSlipped": "Zobacz, gdzie się potknęli"
     },
     "debrief": {
-      "stamp": "Rozliczenie — Atak → Obrona",
+      "stamp": "Podsumowanie — Atak → Obrona",
       "fixerTag": "The Fixer",
       "beat1": "① Ruch",
-      "beat1Text": "Payload, który podałeś fasadzie, na linii:",
+      "beat1Text": "Ładunek, który podałeś fasadzie, na linii:",
       "beat2": "② Dlaczego zadziałało",
       "beat3": "③ Poprawka",
       "beat4": "④ Wniosek",
       "continue": "Dalej",
       "runCleaner": "Rozegraj czyściej",
       "nextJob": "Czeka następna robota",
-      "walkAway": "Odejdź jak duch"
+      "walkAway": "Zniknij jak duch"
     },
     "compare": {
       "vulnerable": "Podatny",
       "secure": "Bezpieczny",
-      "vulnCaption": "Input jest sklejany z zapytaniem — dane stają się kodem.",
-      "secureCaption": "Input jest wiązany jako parametr — pozostaje danymi.",
+      "vulnCaption": "Wpis jest sklejany z zapytaniem — dane stają się kodem.",
+      "secureCaption": "Wpis jest wiązany jako parametr — pozostaje danymi.",
       "langAria": "Stos kodu — język",
       "fwAria": "Stos kodu — framework {name}"
     },
     "toast": {
       "won": "Łup zabezpieczony — przechodzę do wyniku.",
       "blocked": "Zablokowane przez filtr: {terms}.",
-      "blockedFallback": "twój payload",
-      "choked": "Cel się tym zakrztusił — przeczytaj, co wypluł.",
+      "blockedFallback": "twój ładunek",
+      "choked": "Cel się tym zakrztusił — czytaj, co wypluł.",
       "dismiss": "Zamknij"
     },
     "engine": {
-      "dead": "Linia głucha.",
+      "dead": "Linia padła.",
       "deadBody": "Nie udało się połączyć z robotą — sprawdź połączenie i spróbuj linii jeszcze raz.",
       "retry": "Spróbuj linii jeszcze raz",
-      "warming": "Przygotowuję sprzęt…"
+      "warming": "Szykuję sprzęt…"
     },
     "notebook": {
-      "title": "Notatnik ze zwiadu",
-      "factsAria": "Zapisane fakty: {n}",
-      "advertisedAria": "Reklamowany schemat",
-      "advertised": "Reklamowane",
+      "title": "Notatnik rozpoznania",
+      "factsAria": "{n} zapisanych faktów",
+      "advertisedAria": "Ogłoszony schemat",
+      "advertised": "Ogłoszony",
       "priedAria": "Kolumny odkryte z wyników",
-      "pried": "Wydłubane z wyników",
-      "empty": "Na razie nic. Zmuś bazę, żeby nazwała kolumnę, której nigdy nie reklamowała — wyląduje tutaj."
+      "pried": "Wyłuskane z wyników",
+      "empty": "Jeszcze nic. Zmuś bazę, żeby nazwała kolumnę, której nigdy nie ogłosiła — wyląduje tutaj."
     },
     "badges": {
       "aria": "Opanowanie technik: {earned} z {total}",
-      "mastery": "Mistrzostwo",
+      "mastery": "Opanowanie",
       "itemAria": "{label} — {status}",
       "mastered": "opanowane",
       "locked": "zablokowane"
     },
     "signal": {
-      "timingOracle": "Wyrocznia czasu",
+      "timingOracle": "Wyrocznia czasowa",
       "fast": "szybko",
       "slow": "wolno",
       "threshold": "próg {n} ms",
       "errorLeak": "Wyciek błędu",
       "structureExposed": "struktura odsłonięta",
-      "errorLeakedGloss": "Komunikat wypluł nazwę, której nigdy nie powinien zdradzić — o ten wyciek właśnie chodzi.",
-      "errorGloss": "Cel się zakrztusił. Przeczytaj, co wypluł; sam błąd jest wskazówką.",
+      "errorLeakedGloss": "Komunikat wypluł nazwę, której nigdy nie powinien ujawnić — właśnie o ten wyciek chodzi.",
+      "errorGloss": "Cel się zakrztusił. Czytaj, co wypluł; sam błąd jest wskazówką.",
       "sideEffect": "Efekt uboczny"
     },
     "result": {
-      "running": "Wykonuję zapytanie",
-      "noRun": "Jeszcze nic nie uruchomiono — wstrzyknij payload i puść go na linię.",
+      "running": "Uruchamianie zapytania",
+      "noRun": "Jeszcze nic nie uruchomiono — wstrzyknij ładunek i puść go w linię.",
       "errorHead": "ODCZYT BŁĘDU",
-      "errorGloss": "Cel się tym zakrztusił. Przeczytaj, co wypluł — mówi ci, gdzie się potknąłeś.",
-      "nothing": "Nic wartego zabrania. Poszło czysto — sięgasz do złej szuflady.",
+      "errorGloss": "Cel się tym zakrztusił. Czytaj, co wypluł — mówi ci, gdzie się potknąłeś.",
+      "nothing": "Nic wartego wzięcia. Poszło czysto — sięgasz do złej szuflady.",
       "loot": "łup"
     },
     "waf": {
       "blocked": "zablokowane:",
       "cleaned": "wyczyszczone",
-      "became": "→ twój input stał się",
+      "became": "→ twój wpis stał się",
       "empty": "(puste)"
     }
   }
