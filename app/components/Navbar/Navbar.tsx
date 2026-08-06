@@ -9,7 +9,7 @@ import { IconMenu, IconClose, IconUser, IconHome, IconBoard, IconHelpCircle } fr
 import { ShareButton } from '../ShareButton'
 import { LanguageSwitcher } from '../LanguageSwitcher'
 import { useTranslation } from '@/i18n/useTranslation'
-import { localeHref } from '@/app/localeMeta'
+import { localeHref } from '@/i18n/localeHref'
 import styles from './Navbar.module.css'
 
 // Icons are decorative (aria-hidden in <Base>); the translated text stays the

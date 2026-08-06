@@ -2,6 +2,8 @@
 
 import { useMemo } from 'react'
 import Link from 'next/link'
+import { useTranslation } from '@/i18n/useTranslation'
+import { localeHref } from '@/i18n/localeHref'
 import type { Case, Objective } from '@/lib/schema/case'
 import { compose } from '@/lib/engine/queryComposer'
 import { cx } from '@/ui/cx'
@@ -24,6 +26,7 @@ import styles from './CasePlayer.module.css'
 // canonical expectedSolution, composed through the frozen composer) → the flaw → the fix →
 // the takeaway. Read-only, all revealed at once.
 export function CaseClosed({ gameCase, onReplay }: { gameCase: Case; onReplay: () => void }) {
+  const { locale } = useTranslation()
   const { caseClosed } = gameCase
   return (
     <section className={styles.closed}>
@@ -55,7 +58,7 @@ export function CaseClosed({ gameCase, onReplay }: { gameCase: Case; onReplay: (
         <button type="button" className="btn btn--ghost" onClick={onReplay}>
           <span>Play this case again</span>
         </button>
-        <Link href="/cases" className="btn btn--success">
+        <Link href={localeHref('/cases', locale)} className="btn btn--success">
           <span>Back to the board</span>
           <IconArrowRight size={18} />
         </Link>

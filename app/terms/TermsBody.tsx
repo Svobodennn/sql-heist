@@ -3,7 +3,7 @@ import type { Locale } from '@/i18n/config'
 import { ContentPage } from '@/app/components/ContentPage'
 import { Callout, LegalSection } from '@/app/components/ContentPage/content-blocks'
 import { getServerTranslator } from '@/i18n/server'
-import { localeHref } from '@/app/localeMeta'
+import { localeHref } from '@/i18n/localeHref'
 
 // Terms body (Server Component, no client JS). Shared by the unprefixed en route
 // (app/terms/page.tsx) and a future per-locale export; the `locale` prop selects

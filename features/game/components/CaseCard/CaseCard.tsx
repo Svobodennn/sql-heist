@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import type { CaseMeta } from '../../cases'
 import { cx } from '@/ui/cx'
+import { useTranslation } from '@/i18n/useTranslation'
+import { localeHref } from '@/i18n/localeHref'
 import { techniqueLabel } from '../../lib/caseView'
 import { IconArrowRight, IconCheck } from '../icons'
 import styles from './CaseCard.module.css'
@@ -16,6 +18,7 @@ export type CaseCardState = 'cleared' | 'in-progress' | 'new'
 // always a link; the state only reflects how far the player got. `done` is the
 // count of cleared objectives, passed by the client CaseBoard from localStorage.
 export function CaseCard({ meta, done }: { meta: CaseMeta; done: number }) {
+  const { locale } = useTranslation()
   const total = meta.objectiveCount
   const state: CaseCardState =
     done >= total && total > 0 ? 'cleared' : done > 0 ? 'in-progress' : 'new'
@@ -27,7 +30,7 @@ export function CaseCard({ meta, done }: { meta: CaseMeta; done: number }) {
   return (
     <li className={cx('panel', styles.card, state === 'cleared' && styles.clearedCard)}>
       <Link
-        href={`/cases/${meta.id}`}
+        href={localeHref(`/cases/${meta.id}`, locale)}
         className={styles.link}
         aria-label={`Case ${meta.number} — ${meta.title} (${statusLabel}, ${done} of ${total} objectives)`}
       >

@@ -5,7 +5,7 @@ import { Logo } from '@/app/components/Logo'
 import { JsonLd } from '@/app/components/JsonLd'
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from './siteConfig'
 import { buildHomeContent, buildTickerTrack } from './homeContent'
-import { localeHref } from '@/app/localeMeta'
+import { localeHref } from '@/i18n/localeHref'
 import styles from './page.module.css'
 
 // Landing body (Server Component, fully static — no "use client", zero client JS).
@@ -67,7 +67,7 @@ export function HomeBody({ locale }: { locale: Locale }) {
           </pre>
 
           <div className={styles.heroCtas}>
-            <Link href="/cases" className="btn btn--primary">
+            <Link href={localeHref('/cases', locale)} className="btn btn--primary">
               <span>{hero.primaryCta}</span>
               <IconArrowRight size={18} />
             </Link>
@@ -194,7 +194,7 @@ export function HomeBody({ locale }: { locale: Locale }) {
             <h2 id="closer-heading" className={styles.closerTitle}>
               {closer.title}
             </h2>
-            <Link href="/cases" className="btn btn--primary">
+            <Link href={localeHref('/cases', locale)} className="btn btn--primary">
               <span>{closer.cta}</span>
               <IconArrowRight size={18} />
             </Link>

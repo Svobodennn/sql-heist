@@ -19,6 +19,7 @@ import { evaluate, toWinContext } from '@/lib/engine/winEvaluator'
 import { canOpenHint, shouldSuggestHint } from '@/lib/engine/scoring'
 import { cx } from '@/ui/cx'
 import { useTranslation } from '@/i18n/useTranslation'
+import { localeHref } from '@/i18n/localeHref'
 import { useCaseEngine } from '../../lib/useCaseEngine'
 import {
   completedObjectiveIds,
@@ -84,7 +85,7 @@ function clearedInputs(inputs: Record<string, string>): Record<string, string> {
 }
 
 export function CasePlayer({ gameCase }: { gameCase: Case }) {
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
   const reduce = useReducedMotion()
   const objectives = gameCase.objectives
   const { status, run, commit, reset, retry } = useCaseEngine(gameCase)
@@ -325,7 +326,7 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
                   resetKey={replayCount}
                 />
               )}
-              <Link href="/cases" className={styles.backLink}>
+              <Link href={localeHref('/cases', locale)} className={styles.backLink}>
                 <IconArrowLeft size={16} />
                 <span>The board</span>
               </Link>

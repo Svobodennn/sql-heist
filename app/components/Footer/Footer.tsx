@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Logo } from '../Logo'
 import { useTranslation } from '@/i18n/useTranslation'
-import { localeHref } from '@/app/localeMeta'
+import { localeHref } from '@/i18n/localeHref'
 import styles from './Footer.module.css'
 
 const COLUMNS = [

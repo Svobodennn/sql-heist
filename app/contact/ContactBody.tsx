@@ -4,7 +4,7 @@ import { ContentPage } from '@/app/components/ContentPage'
 import { Section } from '@/app/components/ContentPage/content-blocks'
 import { IconMail } from '@/app/components/icons'
 import { getServerTranslator } from '@/i18n/server'
-import { localeHref } from '@/app/localeMeta'
+import { localeHref } from '@/i18n/localeHref'
 import styles from '@/app/components/ContentPage/content.module.css'
 
 // Contact body (Server Component, no client JS). Shared by the unprefixed en

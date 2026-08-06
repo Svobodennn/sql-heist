@@ -3,7 +3,7 @@ import type { Locale } from '@/i18n/config'
 import { ContentPage } from '@/app/components/ContentPage'
 import { JsonLd } from '@/app/components/JsonLd'
 import { getServerTranslator } from '@/i18n/server'
-import { localeHref } from '@/app/localeMeta'
+import { localeHref } from '@/i18n/localeHref'
 import styles from '@/app/components/ContentPage/content.module.css'
 
 // FAQ body (Server Component, no client JS). Shared by the unprefixed en route
