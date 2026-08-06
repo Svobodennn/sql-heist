@@ -1,12 +1,13 @@
 import type { Metadata } from 'next'
 import { getCaseMetas } from '@/features/game/cases'
 import { CaseBoard } from '@/features/game/components/CaseBoard'
+import { pageAlternates } from '../localeMeta'
 
 export const metadata: Metadata = {
   title: 'Cases',
   description:
     'The SQL Heist case board — three themed breaches of one target system, eight hands-on SQL-injection objectives from authentication bypass to blind, error-based, stacked, and WAF-bypass. Pick a case and pull it off.',
-  alternates: { canonical: '/cases' },
+  alternates: pageAlternates('/cases', 'en'),
 }
 
 // Case board (Server Component, static). Loads validated case metadata — no SQL,

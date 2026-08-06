@@ -1,8 +1,8 @@
 import type { Locale } from '@/i18n/config'
 
-// Paths that have per-locale static variants (see app/[locale]/**). The game
-// (/cases) is NOT here — it stays unprefixed and reads the locale client-side.
-const LOCALIZED_ROOTS = new Set(['', 'help', 'faq', 'privacy', 'terms', 'contact'])
+// Paths that have per-locale static variants (see app/[locale]/**) — including the
+// game (/cases, /cases/[caseId]), whose content is server-rendered per locale.
+const LOCALIZED_ROOTS = new Set(['', 'help', 'faq', 'privacy', 'terms', 'contact', 'cases'])
 
 // Rewrite an internal href for the current locale so navigation STAYS in-language:
 // on /tr, `/help` → `/tr/help`, `/` → `/tr`. Leaves en unprefixed, and leaves

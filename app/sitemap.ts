@@ -5,38 +5,38 @@ import { SITE_URL } from './siteConfig'
 // Required for metadata routes under `output: 'export'`.
 export const dynamic = 'force-static'
 
-// Static sitemap — under `output: 'export'` Next emits /sitemap.xml at build.
-// The marketing/legal pages are statically generated per locale (en at the root,
-// /tr and /pl variants), so each lists its language alternates (hreflang). The game
-// shell (/cases + case routes) has no per-locale URL — its chrome is client-localized.
+// Static sitemap — under `output: 'export'` Next emits /sitemap.xml at build. Every
+// page is statically generated per locale (en at the root, /tr + /pl variants), so
+// each entry lists its language alternates (hreflang) — the marketing/legal pages
+// and the whole game (board + each case).
 export default function sitemap(): MetadataRoute.Sitemap {
-  const localized = ['', '/help', '/faq', '/privacy', '/terms', '/contact']
-  const enOnly = ['/cases']
+  const languages = (path: string) => ({
+    en: `${SITE_URL}${path}`,
+    tr: `${SITE_URL}/tr${path}`,
+    pl: `${SITE_URL}/pl${path}`,
+  })
 
-  const localizedEntries = localized.map((path) => ({
+  const marketing = ['', '/help', '/faq', '/privacy', '/terms', '/contact']
+  const marketingEntries = marketing.map((path) => ({
     url: `${SITE_URL}${path}`,
     changeFrequency: 'monthly' as const,
     priority: path === '' ? 1 : 0.6,
-    alternates: {
-      languages: {
-        en: `${SITE_URL}${path}`,
-        tr: `${SITE_URL}/tr${path}`,
-        pl: `${SITE_URL}/pl${path}`,
-      },
-    },
+    alternates: { languages: languages(path) },
   }))
 
-  const enOnlyEntries = enOnly.map((path) => ({
-    url: `${SITE_URL}${path}`,
+  const board = {
+    url: `${SITE_URL}/cases`,
     changeFrequency: 'monthly' as const,
-    priority: 0.6,
-  }))
+    priority: 0.8,
+    alternates: { languages: languages('/cases') },
+  }
 
   const cases = CASE_IDS.map((id) => ({
     url: `${SITE_URL}/cases/${id}`,
     changeFrequency: 'monthly' as const,
     priority: 0.8,
+    alternates: { languages: languages(`/cases/${id}`) },
   }))
 
-  return [...localizedEntries, ...enOnlyEntries, ...cases]
+  return [...marketingEntries, board, ...cases]
 }

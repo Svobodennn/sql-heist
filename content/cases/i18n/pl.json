@@ -1,1 +1,236 @@
-{}
+{
+  "the-front-door": {
+    "title": "Frontowe Drzwi",
+    "briefing": "Meridian Holdings. Wchodzimy od frontu — panel admina witryny sklepu. Dostań się do środka, zmapuj zaplecze i wyjdź z pierwszym łupem. Trzy ruchy: drzwi, plan budynku, manifest.",
+    "caseClosed": {
+      "headline": "JESTEŚMY W ŚRODKU.",
+      "fixer": "Drzwi, plan budynku, pierwszy łup — czysto. Meridian nawet nie wie, że tu byliśmy. Teraz ciche skrzydło."
+    },
+    "objectives": {
+      "front-door": {
+        "goal": "Dostań się do środka jako administrator.",
+        "why": "Konsola administratora to drzwi do wszystkiego innego w Meridian.",
+        "doneWhen": "Wraca wiersz z is_admin = 1 — jesteś zalogowany jako personel.",
+        "hints": {
+          "h1": "Zamek sprawdza tylko to, co mu podasz. A gdyby to, co mu podajesz, nie było tylko nazwą — gdyby zamknęło cudzysłów i zmieniło pytanie?",
+          "h2": "Dwa pomysły: uczyń warunek zawsze prawdziwym (OR plus równość, która jest zawsze prawdziwa) albo utnij linię za pomocą --. Cudzysłów może wcześnie zakończyć ciąg.",
+          "h3": "W polu nazwy użytkownika spróbuj  admin' --   lub  ' OR '1'='1' -- . Końcowe -- wykomentowuje sprawdzanie hasła."
+        },
+        "payoff": {
+          "got": "DOSTĘP ADMINA",
+          "fixer": "Odznaka admina na piersi. Teraz możemy obejść cały plan budynku — znaleźć to, czego nie ma na liście."
+        },
+        "debrief": {
+          "explanation": "Twoje dane wejściowe są sklejane wprost w łańcuch SQL, więc zamykający cudzysłów przestaje być danymi i staje się kodem: przedwcześnie kończy ciąg nazwy użytkownika, a końcowe -- wykomentowuje resztę zapytania, w tym sprawdzenie hasła. Zawsze prawdziwe OR '1'='1' pasuje wtedy do każdego wiersza.",
+          "takeaway": "Przestań doklejać to, co ludzie wpisują, do swoich zapytań. Zwiąż to jako parametr — a „lub jeden równa się jeden” znów jest po prostu kiepską nazwą użytkownika."
+        },
+        "fields": {
+          "username": {
+            "label": "Nazwa użytkownika",
+            "placeholder": "np. j.marlow"
+          },
+          "password": {
+            "label": "Hasło",
+            "placeholder": "Hasło"
+          }
+        },
+        "approach": "Logowanie sprawdza tylko tekst, który mu podasz. Potraktuj pole nazwy użytkownika jako sposób na przepisanie PYTANIA, które zadaje baza — nie tylko jako nazwę — a wejdziesz jako personel, nawet nie znając hasła."
+      },
+      "blueprint": {
+        "goal": "Wypisz pomieszczenia, które Meridian trzyma poza własnym planem budynku.",
+        "why": "Nie okradniesz pomieszczenia, którego nie potrafisz nazwać — odczytaj własny indeks budynku i znajdź to, czego rozpoznanie nigdy nie wypisało.",
+        "doneWhen": "Katalog zwraca tabelę, której rozpoznanie nigdy ci nie pokazało: offshore_accounts.",
+        "hints": {
+          "h1": "Masz już sztuczkę z Sejfu. Czego nie masz, to numeru pomieszczenia. Przestań zgadywać — budynek trzyma listę własnych pomieszczeń. Najpierw poproś go o tę listę.",
+          "h2": "Nie zgaduj nazwy tabeli — baza danych trzyma własny katalog: sqlite_master. Wyciągnij name i sql; kolumna sql pokazuje kolumny. Ta robota to 2 kolumny.",
+          "h3": "Wyszukiwarka artykułów zwraca 2 kolumny, więc dopasuj się:  ' UNION SELECT name, sql FROM sqlite_master --   Kolumna name wypisuje każdą tabelę — w tym offshore_accounts, pomieszczenie, które okradniesz jako następne."
+        },
+        "payoff": {
+          "got": "UKRYTE POMIESZCZENIA ZMAPOWANE",
+          "fixer": "Dwa pomieszczenia trzymane poza planem budynku — skrytka z planami i zagraniczny rejestr. Mając nazwy, sięgniemy prosto do rejestru."
+        },
+        "debrief": {
+          "explanation": "Nie znasz nazwy ukrytej tabeli, więc odczytujesz własny katalog bazy danych — sqlite_master — przez UNION. Jego wiersze wypisują każdą tabelę plus instrukcję CREATE, która wyszczególnia kolumny każdej z nich. Zapytanie aplikacji zwraca 2 kolumny, więc UNION musi dostarczyć dokładnie 2 (tutaj name i sql). Ten indeks to jedyne miejsce, gdzie zapisano offshore_accounts — rozpoznanie nigdy tego nie ujęło.",
+          "takeaway": "Najmniejsze uprawnienia i parametry wiązane: pole wyszukiwania powinno wyłącznie wyszukiwać."
+        },
+        "fields": {
+          "q": {
+            "label": "Przeszukaj archiwum",
+            "placeholder": "Szukaj artykułów"
+          }
+        },
+        "approach": "Rozpoznanie pokazuje tylko część bazy. Pokój, którego szukasz, nie jest na tej mapie — więc najpierw każ bazie wydać własną listę tabel, a potem odczytaj tę ukrytą, której rozpoznanie ci nie pokazało."
+      },
+      "vault": {
+        "goal": "Wyciągnij zagraniczny rejestr, który przed chwilą zmapowałeś, ze strony sklepowej.",
+        "why": "Masz teraz jej nazwę — offshore_accounts, pomieszczenie, które ukryło rozpoznanie. To konto to pierwszy łup.",
+        "doneWhen": "Znacznik manifestu sejfu pojawia się w siatce wyników.",
+        "hints": {
+          "h1": "Tego pomieszczenia nie ma na planie budynku — jego nazwę zmapowałeś krok temu. Najpierw dowiedz się, jak szerokie jest to wyszukiwanie: ile kolumn wraca, żeby drugie pytanie mogło wyjechać na tej samej tacy.",
+          "h2": "Najpierw ustal, ile kolumn wraca: ORDER BY 1, 2, 3 ... aż się wysypie; ostatnia, która działa, to liczba kolumn. Potem UNION SELECT z tyloma wartościami — drugie zapytanie musi pasować do liczby kolumn.",
+          "h3": "To 3 kolumny. Spróbuj  ' UNION SELECT holder_name, account_ref, balance_usd FROM offshore_accounts -- "
+        },
+        "payoff": {
+          "got": "ZAGRANICZNY MANIFEST",
+          "fixer": "Konto, które nie ma czego szukać w sklepie — zgarnięte. Pierwszy łup zaliczony."
+        },
+        "debrief": {
+          "explanation": "Szukana fraza jest sklejana we wzorzec LIKE, więc zamykający cudzysłów kończy ciąg wyszukiwania i pozwala dopisać UNION SELECT. UNION zszywa drugie zapytanie — z niepowiązanej tabeli — z tym samym zbiorem wyników; jedynym wymogiem jest zgodna liczba kolumn, dlatego krok rozpoznania polega na odkryciu, że zapytanie zwraca 3 kolumny.",
+          "takeaway": "Jeśli kształt zapytania nie może się zmienić, nie wjedzie na nim żadne drugie pytanie."
+        },
+        "fields": {
+          "q": {
+            "label": "Szukaj produktów",
+            "placeholder": "Przeszukaj katalog"
+          }
+        },
+        "approach": "Krok wcześniej namierzyłeś ukryty rejestr kont. To wyszukiwanie produktów zwraca odpowiedź tylko w jednym kształcie — wyślij tym samym kanałem drugie pytanie i wyciągnij wiersze tej ukrytej tabeli na stronę."
+      }
+    }
+  },
+  "the-quiet-room": {
+    "title": "Cichy Pokój",
+    "briefing": "To skrzydło Meridian ledwo mówi. Zielono albo ciemno. Szybko albo wolno. Zdławiony błąd. Ale nic, co odpowiada, nie jest naprawdę nieme — trzeba tylko zapytać we właściwy sposób. Odczytaj to, co wycieka.",
+    "caseClosed": {
+      "headline": "PRZEMÓWIŁ.",
+      "fixer": "Tak/nie, stoper, przejęzyczenie — cichy pokój wyśpiewał wszystko. Zostały ostatnie drzwi."
+    },
+    "objectives": {
+      "the-tell": {
+        "goal": "Odczytaj jedną cyfrę głównego PIN-u z sygnału tak/nie.",
+        "why": "Okienko nigdy nie wyświetla PIN-u — ale potwierdzi twój strzał.",
+        "doneWhen": "Okienko zapala się na zielono: twój strzał co do PIN-u okazał się trafny.",
+        "hints": {
+          "h1": "Nigdy nie zobaczysz wyświetlonego PIN-u. Przestań próbować go odczytać. Jedyne, co daje ci to okienko, to zielono albo ciemno — więc spraw, żeby zielono COŚ ZNACZYŁO. Zadaj mu pytanie prawda-czy-fałsz, którego odpowiedź zależy od PIN-u.",
+          "h2": "Zamknij cudzysłów i dodaj zawsze sprawdzany warunek: ' OR (podzapytanie, które wyciąga jeden znak z vault_config.master_pin) = 'twój strzał'. Jeśli strzał jest trafny, całe wyszukanie staje się prawdziwe i wracają wiersze (zielono). Zły strzał — ciemno. Użyj substr(master_pin,1,1) dla pierwszego znaku.",
+          "h3": "W polu kodu spróbuj:  ' OR (SELECT substr(master_pin,1,1) FROM vault_config WHERE id=1)='7' --   Zielono = pierwsza cyfra to 7. Zmieniaj '7', żeby przejść przez litery/cyfry, potem substr(...,2,1) dla kolejnego znaku."
+        },
+        "payoff": {
+          "got": "GŁÓWNY PIN",
+          "fixer": "Okienko potwierdziło PIN cyfra po cyfrze — masz numer. Teraz udowodnij, że brama sejfu go honoruje."
+        },
+        "debrief": {
+          "explanation": "Okienko wkleja twój kod wprost do swojego SQL, a potem wypuszcza z powrotem jeden bit: wiersz wrócił (zielono) albo nie (ciemno). Żadne dane nigdy nie są wyświetlane — ale ten jeden bit to wyrocznia. Zamykając cudzysłów i dodając OR (podzapytanie, które odczytuje ukryty PIN), sprawiasz, że całe wyszukanie zwraca wiersze tylko wtedy, gdy twój strzał co do PIN-u jest trafny. Zielono znaczy PRAWDA, ciemno znaczy FAŁSZ. Powtarzaj pytanie znak po znaku, a odczytasz sekret, którego nigdy ci nie pokazano — na ślepo.",
+          "takeaway": "Odpowiedź tak/nie to wciąż odpowiedź. Jeśli wpisany tekst może sterować zapytaniem, wystarczy bit po bicie — zwiąż wartość, żeby nie było pytania do przemycenia."
+        },
+        "fields": {
+          "code": {
+            "label": "Kod resetu",
+            "placeholder": "np. RC-4417"
+          }
+        },
+        "approach": "Okienko nigdy nie wypisze głównego PIN-u — ale pole kodu resetu po cichu odpowiada na każdy strzał: wiersz oznacza tak, nic oznacza nie. Zadawaj mu pytania prawda/fałsz o PIN i czytaj to tak/nie, by wyciągać cyfry po jednej."
+      },
+      "the-stopwatch": {
+        "goal": "Udowodnij, że wyłuskany PIN jest żywy — odczytaj to z zegara bramy sejfu.",
+        "why": "Wyłuskany numer to tylko strzał, dopóki zamek go nie uzna. Brama nie powie tak ani nie, ale zwleka tylko wtedy, gdy PIN jest tym prawdziwym.",
+        "doneWhen": "Brama się ociąga — wolna gałąź odpala tylko wtedy, gdy master_pin pasuje do tego, co wyłuskałeś.",
+        "hints": {
+          "h1": "Wyłuskałeś PIN z okienka resetów. Ta brama to inny zamek i nie wyświetli tak ani nie — spraw, żeby odpowiedziała CZASEM. Daj jej sprawdzenie, które działa wolno tylko wtedy, gdy PIN jest tym prawdziwym.",
+          "h2": "Zamknij cudzysłów i dołóż przez OR warunek zbudowany na zapisanym master_pin. Porównaj go z numerem, który wyłuskałeś; gdy się zgadzają, całe wyszukanie zwraca wiersze — wolna gałąź. Zły PIN pozostaje szybki.",
+          "h3": "W polu tokena spróbuj:  ' OR (SELECT master_pin FROM vault_config WHERE id=1)='7731' --   Brama zwleka tylko dlatego, że 7731 to żywy PIN; podstaw zły numer, a od razu przyspiesza."
+        },
+        "payoff": {
+          "got": "PIN POTWIERDZONY JAKO ŻYWY",
+          "fixer": "Brama zwlekała — ten PIN jest tym żywym. Sejf go uzna."
+        },
+        "debrief": {
+          "explanation": "Brama skleja twój token ze swoim SQL i zawsze odpowiada tak samo, więc nie ma widocznego sygnału. Zamiast tego budujesz wyrocznię czasową: OR-em wstawiasz sprawdzenie, które porównuje zapisany master_pin z PIN-em, który już wyłuskałeś. Gdy się zgadzają, wyszukanie zwraca wiersze i odpowiedź się wlecze — to OPÓŹNIENIE jest owym tak; zły PIN nie zwraca nic i od razu przyspiesza. To jest ścisłe ogniwo tej sprawy: brama potwierdza wyłącznie dokładnie ten sekret, który wyciekł w poprzednim kroku. (Szczera uwaga: prawdziwe silniki łączą prawdziwą gałąź ze SLEEP()/pg_sleep(); SQLite nie ma funkcji sleep, a WASM jest tu synchroniczny, więc ten trener MODELUJE opóźnienie — prawdziwą lekcją są kształt wstrzyknięcia i pomysł odczytu przez pomiar czasu.)",
+          "takeaway": "Jeśli zapytanie wciąż wykonuje logikę kontrolowaną przez atakującego, cisza nie oznacza bezpieczeństwa — czas odpowiedzi mówi. Zwiąż dane wejściowe, żeby nie było gałęzi do sterowania, cokolwiek pokaże zegar."
+        },
+        "fields": {
+          "token": {
+            "label": "token sesji",
+            "placeholder": "?token=..."
+          }
+        },
+        "approach": "Ta bramka odpowiada tak samo, cokolwiek zrobisz — jedyne, czego nie ukryje, to JAK DŁUGO to trwa. Spraw, żeby wykonywała wolną pracę tylko wtedy, gdy wcześniej wydobyty PIN jest prawdziwy, a potem odczytaj odpowiedź z opóźnienia."
+      },
+      "the-confession": {
+        "goal": "Wymuś błąd duplikatu, który nazwie ukrytą tabelę zgłoszeń.",
+        "why": "Okienko ukrywa swoją tabelę — spraw, żeby wypaplało nazwę w błędzie.",
+        "doneWhen": "Błąd nazywa własną szufladę: promo_claims.",
+        "hints": {
+          "h1": "Formularz, który pokazuje ci własną skargę bazy danych, to formularz, który sam na siebie doniesie. Nie potrzebujesz, żeby mu się udało — potrzebujesz, żeby GŁOŚNO ZAWIÓDŁ. Nakarm go czymś, co musi odrzucić.",
+          "h2": "Okienko wymusza unikalne znaki wywoławcze. Zgłoś taki, który jest już zajęty, a baza danych odrzuci duplikat — a jej odmowa wskaże table.column, na której wymusiła regułę. Firmowe znaki jak ADMIN są zawsze zarezerwowane.",
+          "h3": "Wpisz  ADMIN  i zatwierdź. Odpowiedź to 'UNIQUE constraint failed: promo_claims.callsign' — oto ukryta tabela (promo_claims) i jej kolumna, wyznane przez sam błąd."
+        },
+        "payoff": {
+          "got": "WYCIEK NAZWY TABELI",
+          "fixer": "Zakrztusiło się i nazwało własną szufladę: promo_claims. Cichy pokój nie jest taki cichy."
+        },
+        "debrief": {
+          "explanation": "Dwa błędy spiętrzone jeden na drugim: okienko buduje swój SQL przez sklejanie ORAZ przekazuje ci surową skargę bazy danych wprost. Zgłoś znak wywoławczy, który już istnieje, a SQLite odrzuci duplikat komunikatem 'UNIQUE constraint failed: promo_claims.callsign' — wiadomością, która nazywa dokładnie tabelę i kolumnę, których nigdy ci nie pokazano. Sam błąd jest wyciekiem. SZCZERA UWAGA: SQLite wycieka w ten sposób STRUKTURĘ (identyfikatory — nazwy tabel i kolumn), nie dane wierszy. Klasyczna wersja tej techniki w MySQL idzie dalej, nadużywając funkcji takich jak extractvalue()/updatexml() do przemycenia prawdziwych DANYCH w tekst błędu; SQLite nie ma takiej sztuczki, więc nie wyleje zawartości wierszy przez błędy. Ale gadatliwy błąd to i tak darmowa mapa twojego schematu.",
+          "takeaway": "Nigdy nie pozwól, by zaplecze rozmawiało z klientem. Zaloguj prawdziwy błąd, a klientowi odpowiedz wzruszeniem ramion — i parametryzuj, bo gadatliwy błąd to darmowa mapa twojego schematu."
+        },
+        "fields": {
+          "callsign": {
+            "label": "Zastrzeż swój znak wywoławczy",
+            "placeholder": "np. NOVA-77"
+          }
+        },
+        "approach": "Okienko ukrywa nazwę szuflady, do której zapisuje zgłoszenia. Podaj mu coś, czego nie może przyjąć, a wypapla nazwę tej tabeli w błędzie, który odrzuci — sam błąd jest wyciekiem."
+      }
+    }
+  },
+  "the-vault": {
+    "title": "Sejf",
+    "briefing": "Ostatnie drzwi. Odźwierny od słów kluczowych z przodu, za nim zaryglowany sejf. Przegadaj odźwiernego, a potem jednym tchem odsuń rygiel. To jest ten łup.",
+    "caseClosed": {
+      "headline": "SEJF OTWARTY.",
+      "fixer": "Odźwierny minięty, rygiel odsunięty, rejestr nasz. Robota zrobiona. A teraz — oto jak każde z tych drzwi powinno było być zaryglowane."
+    },
+    "objectives": {
+      "the-doorman": {
+        "goal": "Przemyć zablokowaną frazę obok odźwiernego i podwędź klucz do drzwi sejfu.",
+        "why": "ID ACL sejfu nie widnieje na żadnym szyldzie — rejestr to jedyne miejsce, gdzie je zapisano.",
+        "doneWhen": "ID ACL drzwi sejfu przechodzi obok filtra do wyników.",
+        "hints": {
+          "h1": "Znasz już ruch z Sejfu — dwukolumnowe wyciągnięcie z rejestru. Jedyny nowy problem to człowiek przy drzwiach blokujący frazę. Nie wymyślaj nowego ataku. Zamaskuj stary.",
+          "h2": "Odźwierny dopasowuje frazę litera po literze, więc rozbij ją czymś, co SQLite traktuje jak pusty odstęp. Wewnątrzwierszowy komentarz /**/ między dwoma słowami robi dokładnie to: filtr widzi inny ciąg, baza danych widzi słowo kluczowe.",
+          "h3": "Zablokowane  ' UNION SELECT schematic, loot FROM archive_ledger --  staje się  ' UNION/**/SELECT schematic, loot FROM archive_ledger --  . Pod spodem to samo zapytanie; /**/ rozdziela zakazaną frazę, więc filtr nigdy jej nie dopasuje."
+        },
+        "payoff": {
+          "got": "KLUCZ DO DRZWI SEJFU",
+          "fixer": "Oto ID ACL sejfu — VLT-DOOR-3E9A. Teraz jednym tchem przerzuć jego rygiel."
+        },
+        "debrief": {
+          "explanation": "Odźwierny to czarna lista: skanuje twoje surowe dane wejściowe w poszukiwaniu dosłownych fraz takich jak 'UNION SELECT' i odrzuca żądanie, jeśli którąś znajdzie. Ale dopasowuje TEKST, podczas gdy SQLite parsuje TOKENY. Wewnątrzwierszowy komentarz /**/ dla filtra to tylko znaki — na tyle, by rozbić frazę 'UNION SELECT', przez co sprawdzenie podciągu chybia — lecz dla SQLite komentarz to biały znak, więc 'UNION/**/SELECT' parsuje się jako dokładnie to słowo kluczowe, które filtr miał zatrzymać. Czarne listy są z natury kruche: komentarze, dodatkowe białe znaki, wielkość liter i kodowania — wszystko je omija, a zapytanie pod spodem wciąż budowane jest przez sklejanie.",
+          "takeaway": "Lista zakazanych słów to tylko lista słów, których atakujący jeszcze nie zamaskował. WAF to nie poprawka — zwiąż zapytanie, a fraza przestaje mieć znaczenie."
+        },
+        "fields": {
+          "q": {
+            "label": "Przeszukaj archiwum",
+            "placeholder": "Szukaj ogłoszeń"
+          }
+        },
+        "approach": "Strażnik z przodu odrzuca oczywiste słowa ataku. Ruch pod spodem to ten sam odczyt rejestru, który już znasz — musisz tylko przebrać zakazane słowa tak, by strażnik je przepuścił, a baza wciąż czytała je jako polecenie."
+      },
+      "the-double-tap": {
+        "goal": "Doklej zapis do odczytu odznaki i przerzuć ACL sejfu na OTWARTY.",
+        "why": "Podwędziłeś ID drzwi z rejestru — teraz, jednym tchem z odczytem odznaki, przestaw ich granted na 1.",
+        "doneWhen": "Dodatkowy zbiór wyników dowodzi, że doklejony zapis trafił w VLT-DOOR-3E9A — rygiel przerzucony.",
+        "hints": {
+          "h1": "To okienko nie tylko odczytuje twoją odznakę — wykonuje wszystko, co mu podasz, od góry do dołu. Pojedyncze wyszukanie jest grzeczne. Nic nie stoi na przeszkodzie, żebyś był niegrzeczny i podał mu drugą instrukcję.",
+          "h2": "Zamknij cudzysłów, zakończ odczyt średnikiem, potem napisz własne polecenie: UPDATE door_acl, aby ustawić granted = 1 na ID drzwi, które podwędziłeś (VLT-DOOR-3E9A). Dodaj jeszcze jeden SELECT, żeby zmiana pojawiła się jako wynik, i zakończ na --, aby wykomentować końcowy cudzysłów.",
+          "h3": "W polu odznaki:  B-1001'; UPDATE door_acl SET granted = 1 WHERE door = 'VLT-DOOR-3E9A'; SELECT door, granted FROM door_acl WHERE door = 'VLT-DOOR-3E9A' --   UPDATE to włamanie; końcowy SELECT to twój kwit."
+        },
+        "payoff": {
+          "got": "SEJF OTWARTY",
+          "fixer": "Dwa ruchy, jeden oddech — ACL sejfu przerzucony na OTWARTY. Robota zrobiona."
+        },
+        "debrief": {
+          "explanation": "Znów dwie porażki: twoja odznaka jest sklejana z SQL, a okienko wykonuje cały ciąg jako wsad — więc średnik kończy odczyt aplikacji i rozpoczyna twoje własne polecenie. Po 'B-1001' zamykasz cudzysłów, dodajesz ; UPDATE door_acl SET granted = 1 WHERE door = 'VLT-DOOR-3E9A' (prawdziwa szkoda — to ID pochodzi z rejestru, który podwędziłeś), potem drugi SELECT do weryfikacji i --, aby połknąć pozostały cudzysłów. SQLite wykonuje wszystko po kolei: nieszkodliwy odczyt, twój zapis i potwierdzający odczyt. Dodatkowy zbiór wyników to dowód, że doklejone polecenie się wykonało.",
+          "takeaway": "Pytanie powinno pytać o jedną rzecz. Zwiąż wartość ORAZ pozwól sterownikowi wykonać jedno polecenie — żeby średnik był błędem składni, a nie listą zadań."
+        },
+        "fields": {
+          "badge": {
+            "label": "ID odznaki",
+            "placeholder": "np. B-1001"
+          }
+        },
+        "approach": "Id drzwi sejfu wyciągnąłeś krok wcześniej z rejestru. To okienko odznak wykonuje wszystko, co mu podasz, od początku do końca — doczep za odczytem odznaki DRUGIE polecenie, które przestawi dostęp tych drzwi na otwarte, a potem odczytaj z powrotem, by udowodnić, że rygiel drgnął."
+      }
+    }
+  }
+}

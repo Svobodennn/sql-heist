@@ -41,11 +41,9 @@ export function LanguageSwitcher({ className }: { className?: string }) {
     setOpen(false)
     setLocale(next) // remember the choice: drives the game chrome + seeds the switcher
 
-    // Marketing pages are statically generated per locale, so switching = navigating
-    // between /, /tr, /pl variants of the SAME path. The game (/cases) has no
-    // per-locale URL — there setLocale alone re-renders its (client) chrome.
+    // Every localizable route (marketing AND the game) is statically generated per
+    // locale, so switching = navigating between /, /tr, /pl variants of the SAME path.
     const parts = pathname.split('/')
-    if (parts[1] === 'cases') return
     const hasPrefix = parts[1] === 'tr' || parts[1] === 'pl'
     const rest = (hasPrefix ? parts.slice(2) : parts.slice(1)).join('/')
     router.push(next === 'en' ? `/${rest}` : `/${next}${rest ? `/${rest}` : ''}`)

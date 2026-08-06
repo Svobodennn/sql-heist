@@ -1,1 +1,236 @@
-{}
+{
+  "the-front-door": {
+    "title": "Vitrin Kapısı",
+    "briefing": "Meridian Holdings. Önden gireceğiz — vitrindeki admin paneli. İçeri sız, arkada ne varsa haritasını çıkar ve ilk vurgunla çık. Üç hamle: kapı, kat planı, manifesto.",
+    "caseClosed": {
+      "headline": "İÇERİDEYİZ.",
+      "fixer": "Kapı, kat planı, ilk vurgun — temiz. Meridian uğradığımızı bile bilmiyor. Sıra sessiz kanatta."
+    },
+    "objectives": {
+      "front-door": {
+        "goal": "Yönetici olarak içeri gir.",
+        "why": "Admin konsolu, Meridian'daki geri kalan her şeyin kapısı.",
+        "doneWhen": "is_admin = 1 olan bir satır dönerse — personel olarak giriş yaptın.",
+        "hints": {
+          "h1": "Kilit yalnızca ona verdiğini kontrol eder. Ya ona verdiğin şey sadece bir isim değilse — ya tırnağı kapatıp soruyu değiştiriyorsa?",
+          "h2": "İki fikir: koşulu her zaman doğru yap (OR artı her zaman doğru olan bir eşitlik) ya da satırı -- ile kısa kes. Bir tırnak, metni erkenden bitirebilir.",
+          "h3": "Kullanıcı adına  admin' --   ya da  ' OR '1'='1' --  dene. Sondaki -- parola kontrolünü yorum satırına alır."
+        },
+        "payoff": {
+          "got": "ADMIN ERİŞİMİ",
+          "fixer": "Admin rozeti göğsünde. Artık tüm kat planını dolaşabiliriz — listelemedikleri şeyi bul."
+        },
+        "debrief": {
+          "explanation": "Girdin doğrudan SQL metnine ekleniyor, bu yüzden kapatan bir tırnak artık veri olmaktan çıkıp koda dönüşüyor: kullanıcı adı metnini erkenden bitiriyor ve sondaki -- ifadenin geri kalanını, parola kontrolü dahil, yorum satırına alıyor. Her zaman doğru olan OR '1'='1' de her satırla eşleşiyor.",
+          "takeaway": "İnsanların yazdıklarını sorularına yapıştırmayı bırak. Onu bağla (bind) — o zaman \"ya da bir eşittir bir\" yine sadece kötü bir kullanıcı adı olur."
+        },
+        "fields": {
+          "username": {
+            "label": "Kullanıcı Adı",
+            "placeholder": "örn. j.marlow"
+          },
+          "password": {
+            "label": "Parola",
+            "placeholder": "Parola"
+          }
+        },
+        "approach": "Giriş yalnızca ona verdiğin metni kontrol eder. Kullanıcı adı kutusunu sadece bir isim değil, veritabanının sorduğu SORUYU yeniden yazmanın bir yolu gibi düşün — o zaman parolayı hiç bilmeden personel olarak içeri girebilirsin."
+      },
+      "blueprint": {
+        "goal": "Meridian'ın kendi kat planından gizlediği odaları listele.",
+        "why": "Adını bilmediğin bir odayı soyamazsın — binanın kendi dizinini oku ve keşfin hiç listelemediğini bul.",
+        "doneWhen": "Katalog, keşfin sana hiç göstermediği bir tabloyu geri veriyor: offshore_accounts.",
+        "hints": {
+          "h1": "Numarayı Kasa'dan biliyorsun. Bilmediğin şey oda numarası. Tahmin etmeyi bırak — bina kendi odalarının bir listesini tutuyor. Önce o listeyi iste.",
+          "h2": "Tablo adını tahmin etme - veritabanı kendi kataloğunu tutuyor: sqlite_master. name ve sql'i çek; sql sütunu, sütunları gösterir. Bu iş 2 sütun.",
+          "h3": "articles araması 2 sütun döndürüyor, o yüzden ona uydur:  ' UNION SELECT name, sql FROM sqlite_master --   name sütunu her tabloyu listeler — offshore_accounts dahil, yani sıradaki soyacağın oda."
+        },
+        "payoff": {
+          "got": "GİZLİ ODALAR HARİTALANDI",
+          "fixer": "Kat planından gizledikleri iki oda — bir plan deposu ve bir offshore defter. İsimler elimizde, artık doğrudan deftere uzanabiliriz."
+        },
+        "debrief": {
+          "explanation": "Gizli tablonun adını bilmiyorsun, bu yüzden veritabanının kendi kataloğunu — sqlite_master — UNION üzerinden okuyorsun. Satırları her tabloyu ve her birinin sütunlarını açık açık yazan CREATE ifadesini listeler. Uygulama sorgusu 2 sütun döndürüyor, dolayısıyla UNION tam olarak 2 tane sağlamalı (burada name ve sql). offshore_accounts'un yazılı olduğu tek yer o dizin — keşif onu hiç listelemedi.",
+          "takeaway": "En az ayrıcalık ve bağlı parametreler: bir arama kutusu yalnızca arama yapmalı."
+        },
+        "fields": {
+          "q": {
+            "label": "Arşivde ara",
+            "placeholder": "Makalelerde ara"
+          }
+        },
+        "approach": "Keşif veritabanının yalnızca bir kısmını listeler. Peşinde olduğun oda o haritada yok — önce veritabanına kendi tablo listesini çıkarttır, sonra keşfin sana hiç göstermediği gizli olanı oku."
+      },
+      "vault": {
+        "goal": "Az önce haritaladığın offshore defteri alışveriş sayfasından çek.",
+        "why": "Artık adı elinde — offshore_accounts, keşfin sakladığı oda. O hesap ilk vurgun.",
+        "doneWhen": "Kasa manifesto etiketi sonuç ızgarasında beliriyor.",
+        "hints": {
+          "h1": "Oda kat planında yok — adını bir adım önce haritaladın. Önce bu aramanın ne kadar geniş olduğunu öğren: kaç sütun geri dönüyor, ki ikinci bir soru aynı tepside dışarı çıkabilsin.",
+          "h2": "Önce kaç sütun döndüğünü bul: ORDER BY 1, 2, 3 ... kırılana kadar; işe yarayan sonuncusu sayıyı verir. Sonra o kadar değeri UNION SELECT et - ikinci sorgu sütun sayısıyla eşleşmeli.",
+          "h3": "3 sütun. Şunu dene:  ' UNION SELECT holder_name, account_ref, balance_usd FROM offshore_accounts -- "
+        },
+        "payoff": {
+          "got": "OFFSHORE MANİFESTO",
+          "fixer": "Bir vitrinde işi olmayan hesap — cepte. İlk vurgun tamam."
+        },
+        "debrief": {
+          "explanation": "Arama terimi LIKE kalıbına ekleniyor, bu yüzden kapatan bir tırnak arama metnini bitiriyor ve UNION SELECT eklemene izin veriyor. UNION, ikinci bir sorguyu - alakasız bir tablodan - aynı sonuç kümesine zımbalıyor; tek şart eşleşen bir sütun sayısı, keşif adımının sorgunun 3 sütun döndürdüğünü bulması da bu yüzden.",
+          "takeaway": "Sorgunun şekli değişemiyorsa, üstüne ikinci bir soru binemez."
+        },
+        "fields": {
+          "q": {
+            "label": "Ürünlerde ara",
+            "placeholder": "Katalogda ara"
+          }
+        },
+        "approach": "Bir adım önce gizli bir hesap defterini haritaladın. Bu ürün araması yalnızca tek biçimde cevap döner — aynı kanaldan ikinci bir soru gönder ve o gizli tablonun satırlarını sayfaya çek."
+      }
+    }
+  },
+  "the-quiet-room": {
+    "title": "Sessiz Oda",
+    "briefing": "Meridian'ın bu kanadı neredeyse hiç konuşmuyor. Yeşil ya da karanlık. Hızlı ya da yavaş. Boğulmuş bir hata. Ama cevap veren hiçbir şey gerçekten sessiz değildir — sadece doğru şekilde sorman gerek. Neyi sızdırdığını oku.",
+    "caseClosed": {
+      "headline": "KONUŞTU.",
+      "fixer": "Bir evet/hayır, bir kronometre, bir dil sürçmesi — sessiz oda her şeyi verdi. Bir kapı kaldı."
+    },
+    "objectives": {
+      "the-tell": {
+        "goal": "Ana PIN'in bir hanesini bir evet/hayır belirtisinden oku.",
+        "why": "Masa PIN'i asla yazdırmaz — ama bir tahmini doğrular.",
+        "doneWhen": "Masa yeşile dönüyor: PIN hakkındaki tahminin doğru çıktı.",
+        "hints": {
+          "h1": "PIN'in yazdırıldığını asla görmeyeceksin. Onu okumaya çalışmayı bırak. Bu masanın sana verdiği tek şey yeşil ya da karanlık - o yüzden yeşili bir ANLAMA büründür. Ona cevabı PIN'e bağlı olan bir doğru-yanlış sorusu sor.",
+          "h2": "Tırnağı kapat ve her zaman kontrol edilen bir koşul ekle: ' OR (vault_config.master_pin'in bir karakterini çeken bir alt sorgu) = 'tahminin'. Tahmin doğruysa tüm sorgu doğru olur ve satırlar geri döner (yeşil). Yanlış tahmin, karanlık. İlk karakter için substr(master_pin,1,1) kullan.",
+          "h3": "Kod kutusuna şunu dene:  ' OR (SELECT substr(master_pin,1,1) FROM vault_config WHERE id=1)='7' --   Yeşil = ilk hane 7. Alfabede/rakamlarda gezinmek için '7'yi değiştir, sonraki karakter için substr(...,2,1)."
+        },
+        "payoff": {
+          "got": "ANA PIN",
+          "fixer": "Masa PIN'i birer hane doğruladı — sayı elinde. Şimdi kasa geçidinin onu kabul ettiğini kanıtla."
+        },
+        "debrief": {
+          "explanation": "Masa kodunu doğrudan SQL'ine yapıştırıyor ve sonra tek bir bit sızdırıyor: bir satır döndü (yeşil) ya da dönmedi (karanlık). Hiçbir veri yazdırılmıyor - ama o tek bit bir kâhin. Tırnağı kapatıp OR (gizli PIN'i okuyan bir alt sorgu) ekleyerek, tüm sorgunun yalnızca PIN hakkındaki tahminin doğruyken satır döndürmesini sağlıyorsun. Yeşil DOĞRU demek, karanlık YANLIŞ demek. Soruyu karakter karakter tekrarla, sana hiç gösterilmemiş bir sırrı okursun - körlemesine.",
+          "takeaway": "Bir evet/hayır cevabı da cevaptır. Yazılan girdi sorguyu yönlendirebiliyorsa, birer bit yeter - değeri bağla (bind) ki içeri kaçırılacak bir soru kalmasın."
+        },
+        "fields": {
+          "code": {
+            "label": "Sıfırlama kodu",
+            "placeholder": "örn. RC-4417"
+          }
+        },
+        "approach": "Masa ana PIN'i asla yazdırmaz — ama reset-kodu kutusu her tahmine sessizce cevap verir: evet için bir satır döner, hayır için hiçbir şey. PIN hakkında doğru/yanlış sorular sor ve o evet/hayır'ı okuyarak haneleri tek tek dışarı çek."
+      },
+      "the-stopwatch": {
+        "goal": "Söktüğün PIN'in geçerli olduğunu kanıtla — kasa geçidinin saatinden oku.",
+        "why": "Sökülmüş bir sayı, kilit onu kabul edene kadar sadece bir tahmindir. Geçit evet ya da hayır demeyecek, ama yalnızca PIN gerçek olanı olduğunda duraksar.",
+        "doneWhen": "Geçit ayak sürüyor — yavaş dal yalnızca master_pin söktüğün şeyle eşleştiğinde ateşleniyor.",
+        "hints": {
+          "h1": "PIN'i sıfırlama masasından söktün. Bu geçit farklı bir kilit ve evet ya da hayır yazdırmayacak — ona ZAMANLA cevap verdir. Ona yalnızca PIN gerçek olanı olduğunda yavaş çalışan bir kontrol ver.",
+          "h2": "Tırnağı kapat ve saklanan master_pin üzerine kurulu bir koşulu OR ile ekle. Onu söktüğün sayıyla karşılaştır; eşleştiklerinde tüm sorgu satır döndürür — yavaş dal. Yanlış PIN hızlı kalır.",
+          "h3": "Token kutusuna şunu dene:  ' OR (SELECT master_pin FROM vault_config WHERE id=1)='7731' --   Geçit yalnızca 7731 canlı PIN olduğu için ayak sürüyor; yanlış bir sayı koy, hemen hızlanır."
+        },
+        "payoff": {
+          "got": "PIN CANLI ONAYLANDI",
+          "fixer": "Geçit duraksadı — o PIN canlı olanı. Kasa onu kabul edecek."
+        },
+        "debrief": {
+          "explanation": "Geçit token'ını SQL'ine ekliyor ve hep aynı cevabı veriyor, yani görünür bir belirti yok. Onun yerine bir zamanlama kâhini kuruyorsun: saklanan master_pin'i çoktan söktüğün PIN'le karşılaştıran bir kontrolü OR ile ekle. Eşleştiklerinde sorgu satır döndürür ve yanıt uzar — o GECİKME evet demektir; yanlış PIN hiçbir şey döndürmez ve hemen hızlanır. Bu, işteki sıkı halka: geçit yalnızca bir önceki adımın sızdırdığı tam sırrı doğrular. (Dürüst not: gerçek motorlar doğru dalı SLEEP()/pg_sleep() ile eşler; SQLite'ta sleep yok ve buradaki WASM senkron, bu yüzden bu eğitim aracı gecikmeyi MODELLER — asıl ders, enjeksiyon şekli ve zamanlama üzerinden okuma fikri.)",
+          "takeaway": "Sorgu hâlâ saldırganın kontrol ettiği mantığı çalıştırıyorsa, sessizlik güvenlik değildir - yanıt süresi konuşur. Girdiyi bağla (bind) ki saat ne derse desin yönlendirilecek bir dal kalmasın."
+        },
+        "fields": {
+          "token": {
+            "label": "oturum token'ı",
+            "placeholder": "?token=..."
+          }
+        },
+        "approach": "Bu geçit ne olursa olsun aynı cevabı verir — gizleyemediği tek şey NE KADAR sürdüğü. Yalnızca daha önce söktüğün PIN doğruyken yavaş iş yapmasını sağla, sonra cevabı gecikmeden oku."
+      },
+      "the-confession": {
+        "goal": "Gizli talepler tablosunun adını söyleten bir yinelenme hatası tetikle.",
+        "why": "Masa tablosunu gizliyor — adını bir hatada ağzından kaçırmasını sağla.",
+        "doneWhen": "Hata kendi çekmecesinin adını veriyor: promo_claims.",
+        "hints": {
+          "h1": "Sana veritabanının kendi şikâyetini gösteren bir form, kendini ele verecek bir formdur. Başarılı olmasına gerek yok - yüksek sesle BAŞARISIZ olmasını istiyorsun. Ona reddetmek zorunda olduğu bir şey ver.",
+          "h2": "Masa çağrı kodlarının benzersiz olmasını şart koşuyor. Zaten alınmış birini gönder, veritabanı yinelenmeyi reddeder - ve reddi, kuralı dayattığı table.column'un adını verir. ADMIN gibi kurum isimleri her zaman rezervedir.",
+          "h3": "ADMIN yaz ve gönder. Yanıt 'UNIQUE constraint failed: promo_claims.callsign' - işte gizli tablo (promo_claims) ve sütunu, hatanın bizzat itirafı."
+        },
+        "payoff": {
+          "got": "TABLO ADI SIZDI",
+          "fixer": "Boğuldu ve kendi çekmecesinin adını verdi: promo_claims. Sessiz oda o kadar da sessiz değilmiş."
+        },
+        "debrief": {
+          "explanation": "Üst üste binmiş iki hata: masa SQL'ini birleştirerek kuruyor VE veritabanının ham şikâyetini doğrudan sana iletiyor. Zaten var olan bir çağrı kodu gönder, SQLite yinelenmeyi 'UNIQUE constraint failed: promo_claims.callsign' ile reddeder - sana hiç gösterilmemiş tam tablo ve sütun adını veren bir mesaj. Hatanın kendisi sızıntıdır. DÜRÜST NOT: SQLite bu yolla YAPIYI sızdırır (tanımlayıcılar - tablo ve sütun adları), satır verisini değil. Bu tekniğin klasik MySQL sürümü daha ileri gider ve gerçek VERİYİ hata metnine kaçırmak için extractvalue()/updatexml() gibi fonksiyonları kötüye kullanır; SQLite'ta böyle bir numara yok, o yüzden satır içeriğini hatalar üzerinden dökmez. Ama ayrıntılı bir hata yine de şemanın bedava bir haritasıdır.",
+          "takeaway": "Arka ofisin müşteriyle konuşmasına asla izin verme. Gerçek hatayı logla, geriye bir omuz silkme ver - ve parametrele, çünkü ayrıntılı bir hata şemanın bedava bir haritasıdır."
+        },
+        "fields": {
+          "callsign": {
+            "label": "Çağrı kodunu talep et",
+            "placeholder": "örn. NOVA-77"
+          }
+        },
+        "approach": "Masa, talepleri işlediği çekmecenin adını gizler. Ona kabul edemeyeceği bir şey ver, o da geri fırlattığı hatada o tablonun adını ağzından kaçırsın — hatanın kendisi sızıntıdır."
+      }
+    }
+  },
+  "the-vault": {
+    "title": "Kasa",
+    "briefing": "Son kapı. Önde anahtar kelime bekçisi, arkasında sürgülenmiş bir kasa. Bekçiyi lafla geç, sonra aynı nefeste sürgüyü çek. Vurgun bu.",
+    "caseClosed": {
+      "headline": "KASA AÇIK.",
+      "fixer": "Bekçi geçildi, sürgü çekildi, defter bizim. İş bu. Şimdi — işte bu kapıların her biri nasıl kilitlenmeliydi."
+    },
+    "objectives": {
+      "the-doorman": {
+        "goal": "Engellenen ifadeyi bekçinin önünden kaçır ve kasanın kapı anahtarını yürüt.",
+        "why": "Kasanın ACL id'si hiçbir tabelada yok — yazılı olduğu tek yer defter.",
+        "doneWhen": "Kasa kapısının ACL id'si filtreyi geçip sonuçlara giriyor.",
+        "hints": {
+          "h1": "Kasa'daki hamleyi zaten biliyorsun - defterden iki sütunluk bir çekiş. Tek yeni sorun, kapıdaki ifadeyi engelleyen adam. Yeni bir saldırı icat etme. Eskisini kılık değiştir.",
+          "h2": "Bekçi ifadeyi harf harf eşleştiriyor, o yüzden onu SQLite'ın boşluk saydığı bir şeyle böl. İki kelimenin arasına konan satır içi bir yorum /**/ tam da bunu yapar: filtre farklı bir metin görür, veritabanı anahtar kelimeyi görür.",
+          "h3": "Engellenen  ' UNION SELECT schematic, loot FROM archive_ledger --  şuna dönüşür:  ' UNION/**/SELECT schematic, loot FROM archive_ledger --  . Altta aynı sorgu; /**/ yasaklı ifadeyi böler, böylece filtre onu asla eşleştiremez."
+        },
+        "payoff": {
+          "got": "KASA KAPI ANAHTARI",
+          "fixer": "İşte kasanın ACL id'si — VLT-DOOR-3E9A. Şimdi sürgüsünü tek nefeste çevir."
+        },
+        "debrief": {
+          "explanation": "Bekçi bir engelleme listesi: ham girdini 'UNION SELECT' gibi düz ifadeler için tarar ve birini bulursa isteği reddeder. Ama METİN eşleştiriyor, oysa SQLite TOKEN ayrıştırıyor. Satır içi bir yorum /**/ filtre için sadece karakterlerden ibaret - 'UNION SELECT' ifadesini bölmeye yeter, böylece alt metin kontrolü ıskalar - ama SQLite için yorum boşluktur, dolayısıyla 'UNION/**/SELECT' filtrenin durdurmak istediği anahtar kelimenin ta kendisi olarak ayrıştırılır. Engelleme listeleri doğaları gereği kırılgandır: yorumlar, fazladan boşluk, harf büyüklüğü ve kodlamalar hepsi etraflarından dolaşır ve alttaki sorgu hâlâ birleştirmeyle kuruluyor.",
+          "takeaway": "Yasak kelimeler listesi, sadece saldırganın henüz kılık değiştirmediği kelimelerin listesidir. Bir WAF düzeltme değildir - sorguyu bağla (bind), ifade önemini yitirir."
+        },
+        "fields": {
+          "q": {
+            "label": "Arşivde ara",
+            "placeholder": "Duyurularda ara"
+          }
+        },
+        "approach": "Öndeki bir bekçi bariz saldırı kelimelerini reddeder. Alttaki hamle zaten bildiğin aynı defter-okuması — sadece yasak kelimeleri kılık değiştir ki bekçi onları geçirsin ama veritabanı yine de komut olarak okusun."
+      },
+      "the-double-tap": {
+        "goal": "Rozet okumasının üstüne bir yazma istifle ve kasanın ACL'sini OPEN'a çevir.",
+        "why": "Kapının id'sini defterden yürüttün — şimdi aynı nefeste, bir rozet okumasıyla birlikte granted değerini 1'e zorla.",
+        "doneWhen": "Fazladan bir sonuç kümesi, istiflenmiş yazmanın VLT-DOOR-3E9A'yı vurduğunu kanıtlıyor — sürgü çevrildi.",
+        "hints": {
+          "h1": "Bu masa sadece rozetini okumuyor - ona ne verirsen baştan sona çalıştırıyor. Tek bir sorgu kibarcadır. Kabalaşıp ona ikinci bir komut vermene engel olan hiçbir şey yok.",
+          "h2": "Tırnağı kapat, okumayı bir noktalı virgülle bitir, sonra kendi ifadeni yaz: yürüttüğün kapı id'sinde (VLT-DOOR-3E9A) granted = 1 yapmak için UPDATE door_acl. Değişikliğin bir sonuç olarak görünmesi için bir SELECT daha ekle ve sondaki tırnağı yoruma almak için -- ile bitir.",
+          "h3": "Rozet kutusuna:  B-1001'; UPDATE door_acl SET granted = 1 WHERE door = 'VLT-DOOR-3E9A'; SELECT door, granted FROM door_acl WHERE door = 'VLT-DOOR-3E9A' --   UPDATE soygun; son SELECT ise makbuzun."
+        },
+        "payoff": {
+          "got": "KASA AÇIK",
+          "fixer": "İki hamle, tek nefes — kasanın ACL'si OPEN'a döndü. İş bu."
+        },
+        "debrief": {
+          "explanation": "Yine iki hata: rozetin SQL'e ekleniyor ve masa tüm metni bir toplu iş olarak çalıştırıyor — yani bir noktalı virgül uygulamanın okumasını bitirip senin kendi ifadeni başlatıyor. 'B-1001'den sonra tırnağı kapatıp ; UPDATE door_acl SET granted = 1 WHERE door = 'VLT-DOOR-3E9A' ekliyorsun (asıl hasar — o id yürüttüğün defterden geldi), sonra doğrulamak için ikinci bir SELECT ve arta kalan tırnağı yutmak için --. SQLite hepsini sırayla çalıştırır: zararsız okuma, senin yazman ve doğrulayan okuma. Fazladan sonuç kümesi, istiflenmiş ifadenin çalıştığının kanıtı.",
+          "takeaway": "Bir soru tek bir şey sormalı. Değeri bağla (bind) VE sürücünün tek bir ifade çalıştırmasına izin ver - ki bir noktalı virgül bir yapılacaklar listesi değil, bir sözdizimi hatası olsun."
+        },
+        "fields": {
+          "badge": {
+            "label": "Rozet ID'si",
+            "placeholder": "örn. B-1001"
+          }
+        },
+        "approach": "Kasa kapısının id'sini bir adım önce defterden söktün. Bu rozet masası ona verdiğin her şeyi baştan sona çalıştırır — rozet okumasının arkasına o kapının erişimini açık'a çeviren İKİNCİ bir komut ekle, sonra sürgünün kaydığını kanıtlamak için geri oku."
+      }
+    }
+  }
+}
