@@ -76,10 +76,10 @@
     "faq": {
       "eyebrow": "Prosto z mostu",
       "title": "Zanim weźmiesz pierwszą robotę",
-      "more": "Przeczytaj każdą odpowiedź The Fixer"
+      "more": "Przeczytaj każdą odpowiedź Neo"
     },
     "closer": {
-      "fixerName": "The Fixer",
+      "fixerName": "Neo",
       "fixerLine": "„Trzy roboty. Ty zatrzymujesz wiedzę — Meridian zostaje z rachunkiem.”",
       "title": "Drzwi są otwarte. Przejdź przez nie.",
       "cta": "Weź pierwszą robotę"
@@ -87,7 +87,7 @@
     "loop": {
       "0": {
         "title": "Odprawa",
-        "blurb": "The Fixer wskazuje cel i łup — nigdy metodę."
+        "blurb": "Neo wskazuje cel i łup — nigdy metodę."
       },
       "1": {
         "title": "Rozpoznanie",
@@ -136,13 +136,13 @@
   "help": {
     "eyebrow": "Odprawa",
     "title": "Jak działa robota",
-    "lead": "The Fixer się nie powtarza. Przeczytaj raz i idź zarabiać.",
+    "lead": "Neo się nie powtarza. Przeczytaj raz i idź zarabiać.",
     "sectionBefore": "Zanim czegokolwiek dotkniesz",
     "calloutSafe": "Bezpieczne z założenia",
     "sectionMoves": "Pięć ruchów",
     "sectionWire": "Czytanie linii",
     "sectionControls": "Sterowanie",
-    "sectionStuck": "Utknąłeś? Zadzwoń do The Fixer",
+    "sectionStuck": "Utknąłeś? Zadzwoń do Neo",
     "sectionPoint": "Sedno",
     "cta": "Zobacz tablicę",
     "before": {
@@ -156,7 +156,7 @@
       "items": {
         "0": {
           "title": "Odprawa",
-          "body": "The Fixer wskazuje cel i łup — nigdy metodę. Pokazuje drzwi; zamek rozgryzasz sam."
+          "body": "Neo wskazuje cel i łup — nigdy metodę. Pokazuje drzwi; zamek rozgryzasz sam."
         },
         "1": {
           "title": "Rozpoznanie",
@@ -222,7 +222,7 @@
   },
   "faq": {
     "eyebrow": "Prosto z mostu",
-    "title": "Pytania, na które The Fixer odpowiada raz",
+    "title": "Pytania, na które Neo odpowiada raz",
     "lead": "Bez pogaduszek. Oto, o co ludzie pytają przed pierwszą robotą.",
     "srHeading": "Często zadawane pytania",
     "stillStuck": "Nadal utknąłeś?",
@@ -390,9 +390,9 @@
       "unmute": "Włącz dźwięk"
     },
     "hint": {
-      "call": "Zadzwoń do The Fixer",
+      "call": "Zadzwoń do Neo",
       "unlocked": "{opened}/{total} odblokowane",
-      "suggest": "Utknąłeś? The Fixer czeka na linii.",
+      "suggest": "Utknąłeś? Neo czeka na linii.",
       "tier": {
         "0": "Słówko",
         "1": "Metoda",
@@ -482,7 +482,7 @@
     },
     "debrief": {
       "stamp": "Podsumowanie — Atak → Obrona",
-      "fixerTag": "The Fixer",
+      "fixerTag": "Neo",
       "beat1": "① Ruch",
       "beat1Text": "Ładunek, który podałeś fasadzie, na linii:",
       "beat2": "② Dlaczego zadziałało",

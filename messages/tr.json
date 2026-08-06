@@ -76,10 +76,10 @@
     "faq": {
       "eyebrow": "Dobra Cevaplar",
       "title": "İlk işinden önce",
-      "more": "The Fixer'ın verdiği her cevabı oku"
+      "more": "Neo'nun verdiği her cevabı oku"
     },
     "closer": {
-      "fixerName": "The Fixer",
+      "fixerName": "Neo",
       "fixerLine": "“Üç iş. Öğrendiğin sende kalır — fatura Meridian'a kalır.”",
       "title": "Kapı açık. Geç içeri.",
       "cta": "İlk işi al"
@@ -87,7 +87,7 @@
     "loop": {
       "0": {
         "title": "Brifing",
-        "blurb": "The Fixer hedefi ve vurgunu söyler — yöntemi asla."
+        "blurb": "Neo hedefi ve vurgunu söyler — yöntemi asla."
       },
       "1": {
         "title": "Keşif",
@@ -136,13 +136,13 @@
   "help": {
     "eyebrow": "Brifing",
     "title": "İş nasıl işler",
-    "lead": "The Fixer kendini tekrar etmez. Bir kez oku, sonra git kazan.",
+    "lead": "Neo kendini tekrar etmez. Bir kez oku, sonra git kazan.",
     "sectionBefore": "Hiçbir şeye dokunmadan önce",
     "calloutSafe": "Tasarımı gereği güvenli",
     "sectionMoves": "Beş hamle",
     "sectionWire": "Hattı okumak",
     "sectionControls": "Kontroller",
-    "sectionStuck": "Sıkıştın mı? The Fixer'ı ara",
+    "sectionStuck": "Sıkıştın mı? Neo'yu ara",
     "sectionPoint": "Mesele",
     "cta": "Panoyu gör",
     "before": {
@@ -156,7 +156,7 @@
       "items": {
         "0": {
           "title": "Brifing",
-          "body": "The Fixer hedefi ve vurgunu söyler — yöntemi asla. Kapıyı işaret eder; kilidi sen çözersin."
+          "body": "Neo hedefi ve vurgunu söyler — yöntemi asla. Kapıyı işaret eder; kilidi sen çözersin."
         },
         "1": {
           "title": "Keşif",
@@ -222,7 +222,7 @@
   },
   "faq": {
     "eyebrow": "Dobra Cevaplar",
-    "title": "The Fixer'ın bir kez cevapladığı sorular",
+    "title": "Neo'nun bir kez cevapladığı sorular",
     "lead": "Lafı dolandırmak yok. İnsanların ilk işinden önce sorduğu şeyler.",
     "srHeading": "Sıkça sorulan sorular",
     "stillStuck": "Hâlâ sıkıştın mı?",
@@ -390,9 +390,9 @@
       "unmute": "Sesi aç"
     },
     "hint": {
-      "call": "The Fixer'ı ara",
+      "call": "Neo'yu ara",
       "unlocked": "{opened}/{total} açıldı",
-      "suggest": "Sıkıştın mı? The Fixer hatta.",
+      "suggest": "Sıkıştın mı? Neo hatta.",
       "tier": {
         "0": "Bir kelime",
         "1": "Yöntem",
@@ -482,7 +482,7 @@
     },
     "debrief": {
       "stamp": "Değerlendirme — Saldırı → Savunma",
-      "fixerTag": "The Fixer",
+      "fixerTag": "Neo",
       "beat1": "① Hamle",
       "beat1Text": "Vitrine uzattığın yük, hatta:",
       "beat2": "② Neden işe yaradı",

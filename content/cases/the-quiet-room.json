@@ -4,7 +4,7 @@
   "number": "002",
   "title": "The Quiet Room",
   "briefing": {
-    "handler": "The Fixer",
+    "handler": "Neo",
     "text": "This wing of Meridian barely talks. Green or dark. Fast or slow. A choked error. But nothing that answers is truly silent — you just have to ask the right way. Read what it leaks."
   },
   "target": {
@@ -61,6 +61,7 @@
       "goal": "Read one digit of the master PIN from a yes/no tell.",
       "why": "The desk never prints the PIN — but it will confirm a guess.",
       "doneWhen": "The desk lights green: your guess about the PIN held true.",
+      "approach": "The desk never prints the master PIN — but its reset-code box quietly answers every guess: a row comes back for yes, nothing for no. Ask it true/false questions about the PIN and read that yes/no to pull the digits out one at a time.",
       "technique": "blind-boolean",
       "difficulty": "medium",
       "surface": "search-box",
@@ -255,6 +256,7 @@
       "goal": "Prove the pried PIN is live — read it off the vault gate's clock.",
       "why": "A pried number is just a guess until the lock honors it. The gate won't say yes or no, but it stalls only when the PIN is the real one.",
       "doneWhen": "The gate drags its feet — the slow branch fires only when master_pin matches what you pried.",
+      "approach": "This gate answers the same no matter what — the only thing it can't hide is how LONG it takes. Make it do slow work only when the PIN you already pried is the real one, then read the answer off the delay.",
       "technique": "blind-timing",
       "difficulty": "medium",
       "surface": "url-param",
@@ -452,6 +454,7 @@
       "goal": "Force a duplicate error that names the hidden claims table.",
       "why": "The desk hides its table — make it blurt the name in an error.",
       "doneWhen": "The error names its own drawer: promo_claims.",
+      "approach": "The desk hides the name of the drawer it files claims into. Hand it something it can't accept and it'll blurt that table's name in the error it throws back — the mistake itself is the leak.",
       "technique": "error-based",
       "difficulty": "medium",
       "surface": "search-box",

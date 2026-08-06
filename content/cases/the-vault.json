@@ -4,7 +4,7 @@
   "number": "003",
   "title": "The Vault",
   "briefing": {
-    "handler": "The Fixer",
+    "handler": "Neo",
     "text": "The last door. A keyword doorman out front, a vault bolted behind it. Talk past the doorman, then throw the bolt in the same breath. This is the score."
   },
   "target": {
@@ -48,6 +48,7 @@
       "goal": "Slip the blocked phrase past the doorman and lift the vault's door key.",
       "why": "The vault's ACL id isn't on any sign — the ledger is the only place it's written down.",
       "doneWhen": "The vault door's ACL id walks past the filter into the results.",
+      "approach": "A guard out front rejects the obvious attack words. The move underneath is the same ledger-read you already know — you just have to disguise the banned words so the guard waves them through while the database still reads them as the command.",
       "technique": "waf-bypass",
       "difficulty": "hard",
       "surface": "search-box",
@@ -249,6 +250,7 @@
       "goal": "Stack a write onto the badge read and flip the vault's ACL to OPEN.",
       "why": "You lifted the door's id from the ledger — now force its grant to 1 in the same breath as a badge read.",
       "doneWhen": "An extra result set proves the stacked write hit VLT-DOOR-3E9A — the bolt flipped.",
+      "approach": "You lifted the vault door's id from the ledger. This badge desk runs whatever you feed it, start to finish — so tack a SECOND command onto the badge lookup that flips that door's access to open, then read it back to prove the bolt moved.",
       "technique": "stacked-queries",
       "difficulty": "hard",
       "surface": "profile-lookup",

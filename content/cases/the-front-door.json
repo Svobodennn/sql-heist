@@ -4,7 +4,7 @@
   "number": "001",
   "title": "The Front Door",
   "briefing": {
-    "handler": "The Fixer",
+    "handler": "Neo",
     "text": "Meridian Holdings. We go in the front — the storefront admin. Get inside, map what's back there, and walk out with the first score. Three moves: the door, the floor plan, the manifest."
   },
   "target": {
@@ -48,6 +48,7 @@
       "goal": "Get inside as an administrator.",
       "why": "The admin console is the door to everything else in Meridian.",
       "doneWhen": "A row with is_admin = 1 comes back — you're logged in as staff.",
+      "approach": "The login only checks the text you hand it. Treat the username box as a way to rewrite the QUESTION the database asks — not just a name — and you can walk in as staff without ever knowing the password.",
       "technique": "auth-bypass",
       "difficulty": "intro",
       "surface": "login-form",
@@ -252,6 +253,7 @@
       "goal": "List the rooms Meridian keeps off its own floor plan.",
       "why": "You can't rob a room you can't name — read the building's own index and find what recon never listed.",
       "doneWhen": "The catalog hands back a table recon never showed you: offshore_accounts.",
+      "approach": "Recon only lists part of the database. The room you're after isn't on that map — so first make the database hand over its own list of tables, then read the hidden one recon never showed you.",
       "technique": "schema-discovery",
       "difficulty": "hard",
       "surface": "search-box",
@@ -445,6 +447,7 @@
       "goal": "Pull the offshore ledger you just mapped off the shopping page.",
       "why": "You have its name now — offshore_accounts, the room recon hid. That account is the first score.",
       "doneWhen": "The vault manifest tag shows up in the result grid.",
+      "approach": "You mapped a hidden ledger of accounts a step ago. This product search only hands back one shape of answer — ride a second question out on the same channel to pull that hidden table's rows onto the page.",
       "technique": "union-extraction",
       "difficulty": "medium",
       "surface": "search-box",

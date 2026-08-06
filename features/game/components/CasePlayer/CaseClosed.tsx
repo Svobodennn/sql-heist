@@ -23,7 +23,7 @@ import styles from './CasePlayer.module.css'
 // need a fabricated Level per objective). Each objective shows the winning MOVE (its
 // canonical expectedSolution, composed through the frozen composer) → the flaw → the fix →
 // the takeaway. Read-only, all revealed at once.
-export function CaseClosed({ gameCase }: { gameCase: Case }) {
+export function CaseClosed({ gameCase, onReplay }: { gameCase: Case; onReplay: () => void }) {
   const { caseClosed } = gameCase
   return (
     <section className={styles.closed}>
@@ -52,6 +52,9 @@ export function CaseClosed({ gameCase }: { gameCase: Case }) {
       </ol>
 
       <div className={styles.closedActions}>
+        <button type="button" className="btn btn--ghost" onClick={onReplay}>
+          <span>Play this case again</span>
+        </button>
         <Link href="/cases" className="btn btn--success">
           <span>Back to the board</span>
           <IconArrowRight size={18} />

@@ -32,6 +32,7 @@ import { BriefingGate } from '../BriefingGate'
 import { ObjectiveBanner } from '../ObjectiveBanner'
 import { ObjectivePayoff } from '../ObjectivePayoff'
 import { ObjectivesProgress } from '../ObjectivesProgress'
+import { CaseTimer } from '../CaseTimer'
 import { ReconNotebook } from '../ReconNotebook'
 import { Stamp } from '../Stamp'
 import { ToastStack } from '../Toast'
@@ -86,7 +87,7 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
   const { t } = useTranslation()
   const reduce = useReducedMotion()
   const objectives = gameCase.objectives
-  const { status, run, commit, retry } = useCaseEngine(gameCase)
+  const { status, run, commit, reset, retry } = useCaseEngine(gameCase)
   const { records, ready } = useCaseProgress()
   const { toasts, push, dismiss } = useToasts()
 
@@ -103,6 +104,8 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
   // surface — the fix for "everything dumped at once".
   const [stage, setStage] = useState<Stage>('briefing')
   const [hydrated, setHydrated] = useState(false)
+  // Bumped on replay so the case timer zeroes.
+  const [replayCount, setReplayCount] = useState(0)
   const mainRef = useRef<HTMLElement>(null)
 
   // Reconcile persisted progress once localStorage is read (client-only): mark done
@@ -288,6 +291,19 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
           ? `Objective ${selectedIndex + 1} cleared${objective.payoff ? `: ${objective.payoff.got}` : ''}`
           : `Objective ${selectedIndex + 1} of ${objectives.length}: ${objective.goal}`
 
+  // Replay: rebuild the case DB from schema+seed, wipe the in-session play state, and
+  // drop the player back on objective 1. Persisted mastery (localStorage) is kept —
+  // replaying is practice, not a progress reset.
+  const handleReplay = useCallback(() => {
+    reset()
+    setCompletedIds(new Set())
+    setSelectedIndex(0)
+    setUiByObjective(initUi(objectives))
+    setNotebook(initNotebook(gameCase.database.visibleSchema))
+    setReplayCount((n) => n + 1)
+    setStage('playing')
+  }, [reset, objectives, gameCase.database.visibleSchema])
+
   const showStepper = stage === 'playing' || stage === 'payoff'
 
   return (
@@ -302,10 +318,18 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
                 Target: <span className="mono">{gameCase.target.appName}</span>
               </p>
             </div>
-            <Link href="/cases" className={styles.backLink}>
-              <IconArrowLeft size={16} />
-              <span>The board</span>
-            </Link>
+            <div className={styles.caseHeaderAside}>
+              {stage !== 'briefing' && (
+                <CaseTimer
+                  running={stage === 'playing' || stage === 'payoff'}
+                  resetKey={replayCount}
+                />
+              )}
+              <Link href="/cases" className={styles.backLink}>
+                <IconArrowLeft size={16} />
+                <span>The board</span>
+              </Link>
+            </div>
           </header>
 
           {showStepper && (
@@ -343,7 +367,7 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
                     onStart={handleStart}
                   />
                 ) : stage === 'closed' ? (
-                  <CaseClosed gameCase={gameCase} />
+                  <CaseClosed gameCase={gameCase} onReplay={handleReplay} />
                 ) : stage === 'payoff' ? (
                   <ObjectivePayoff
                     index={selectedIndex}
@@ -363,6 +387,7 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
                       goal={objective.goal}
                       why={objective.why}
                       doneWhen={objective.doneWhen}
+                      approach={objective.approach}
                       technique={objective.technique}
                     />
 

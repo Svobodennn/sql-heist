@@ -45,6 +45,11 @@
 .backLink:hover {
   color: var(--primary);
 }
+.caseHeaderAside {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
 
 /* The exploit surface now spans the full page width — the objectives moved to the
    top stepper (ObjectivesProgress), so there's no left sidebar to narrow it. */
@@ -320,4 +325,6 @@
 .closedActions {
   display: flex;
   justify-content: flex-start;
+  gap: var(--space-3);
+  flex-wrap: wrap;
 }

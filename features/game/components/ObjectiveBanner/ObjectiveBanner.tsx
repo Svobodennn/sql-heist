@@ -18,6 +18,7 @@ interface ObjectiveBannerProps {
   goal: string
   why: string
   doneWhen: string
+  approach?: string // plain-language "where to look / why" orientation (no SQL)
   technique: TechniqueId
 }
 
@@ -27,6 +28,7 @@ export function ObjectiveBanner({
   goal,
   why,
   doneWhen,
+  approach,
   technique,
 }: ObjectiveBannerProps) {
   return (
@@ -42,6 +44,13 @@ export function ObjectiveBanner({
         <IconTarget size={20} />
         <span>{goal}</span>
       </h2>
+
+      {approach && (
+        <p className={styles.angle}>
+          <span className={styles.angleLabel}>The angle</span>
+          <span className={styles.angleText}>{approach}</span>
+        </p>
+      )}
 
       <dl className={styles.meta}>
         <div className={styles.metaRow}>

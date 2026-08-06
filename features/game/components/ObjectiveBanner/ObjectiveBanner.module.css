@@ -45,6 +45,30 @@
   border-radius: var(--radius-sm);
 }
 
+/* "The angle" — the always-visible, free orientation: where to look and why, in
+   plain language (no SQL). Tinted + accented so the player's eye lands on it. */
+.angle {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--primary) 9%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary) 26%, transparent);
+}
+.angleLabel {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+.angleText {
+  color: var(--text);
+  line-height: 1.55;
+}
+
 .meta {
   display: flex;
   flex-direction: column;

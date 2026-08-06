@@ -24,6 +24,7 @@ export const objectiveSchema = z.object({
   goal: z.string().min(1), // WHAT: one imperative line
   why: z.string().min(1), // WHY: the narrative stakes
   doneWhen: z.string().min(1), // HOW YOU KNOW: player-facing success signal
+  approach: z.string().min(1).optional(), // WHERE TO LOOK: free plain-language orientation, no SQL — keeps the player from ever being lost
   // Shown on the per-objective payoff screen after a win: `got` = what you pulled
   // (short headline), `fixer` = the Fixer's "now we can…" line that chains forward.
   payoff: z.object({ got: z.string().min(1), fixer: z.string().min(1) }).optional(),

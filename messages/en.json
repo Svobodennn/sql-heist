@@ -53,9 +53,18 @@
       "title": "Learn the break-in to learn the lock",
       "lede": "SQL Heist is an educational SQL-injection game. You pull the attack against a real database, then study the code that should have stopped you — offence teaches defence better than any lecture.",
       "facts": {
-        "0": { "k": "Where", "v": "100% in your browser. Nothing ever touches the network." },
-        "1": { "k": "Against", "v": "A real SQLite engine, seeded fresh for every single run." },
-        "2": { "k": "Risk", "v": "No real target — the only thing you can break is the sandbox." }
+        "0": {
+          "k": "Where",
+          "v": "100% in your browser. Nothing ever touches the network."
+        },
+        "1": {
+          "k": "Against",
+          "v": "A real SQLite engine, seeded fresh for every single run."
+        },
+        "2": {
+          "k": "Risk",
+          "v": "No real target — the only thing you can break is the sandbox."
+        }
       },
       "safe": "Safe by design — no accounts, no downloads, no setup."
     },
@@ -67,20 +76,35 @@
     "faq": {
       "eyebrow": "Straight Answers",
       "title": "Before your first job",
-      "more": "Read every answer the Fixer gives"
+      "more": "Read every answer Neo gives"
     },
     "closer": {
-      "fixerName": "The Fixer",
+      "fixerName": "Neo",
       "fixerLine": "“Three cases. You keep what you learn — Meridian keeps the bill.”",
       "title": "The door is open. Walk through it.",
       "cta": "Take the first case"
     },
     "loop": {
-      "0": { "title": "Brief", "blurb": "The Fixer names the mark and the take — never the method." },
-      "1": { "title": "Recon", "blurb": "Case the target. Find where your input actually lands." },
-      "2": { "title": "Exploit", "blurb": "Type into the form, watch the live query your input builds, then run it." },
-      "3": { "title": "Loot", "blurb": "The take and your score. Nobody stopped you — that is the point." },
-      "4": { "title": "Debrief", "blurb": "The vulnerable code beside the fix that closes it. This is defence." }
+      "0": {
+        "title": "Brief",
+        "blurb": "Neo names the mark and the take — never the method."
+      },
+      "1": {
+        "title": "Recon",
+        "blurb": "Case the target. Find where your input actually lands."
+      },
+      "2": {
+        "title": "Exploit",
+        "blurb": "Type into the form, watch the live query your input builds, then run it."
+      },
+      "3": {
+        "title": "Loot",
+        "blurb": "The take and your score. Nobody stopped you — that is the point."
+      },
+      "4": {
+        "title": "Debrief",
+        "blurb": "The vulnerable code beside the fix that closes it. This is defence."
+      }
     },
     "faqTeasers": {
       "0": {
@@ -112,13 +136,13 @@
   "help": {
     "eyebrow": "The Briefing",
     "title": "How the job works",
-    "lead": "The Fixer doesn't repeat himself. Read it once, then go earn.",
+    "lead": "Neo doesn't repeat himself. Read it once, then go earn.",
     "sectionBefore": "Before you touch anything",
     "calloutSafe": "Safe by design",
     "sectionMoves": "The five moves",
     "sectionWire": "Reading the wire",
     "sectionControls": "Controls",
-    "sectionStuck": "Stuck? Call the Fixer",
+    "sectionStuck": "Stuck? Call Neo",
     "sectionPoint": "The point",
     "cta": "See the board",
     "before": {
@@ -132,7 +156,7 @@
       "items": {
         "0": {
           "title": "Brief",
-          "body": "The Fixer names the mark and the take — never the method. He points at the door; you work out the lock."
+          "body": "Neo names the mark and the take — never the method. He points at the door; you work out the lock."
         },
         "1": {
           "title": "Recon",
@@ -198,7 +222,7 @@
   },
   "faq": {
     "eyebrow": "Straight Answers",
-    "title": "Questions the Fixer answers once",
+    "title": "Questions Neo answers once",
     "lead": "No small talk. Here's what people ask before their first job.",
     "srHeading": "Frequently asked questions",
     "stillStuck": "Still stuck?",
@@ -366,10 +390,14 @@
       "unmute": "Unmute"
     },
     "hint": {
-      "call": "Call the Fixer",
+      "call": "Call Neo",
       "unlocked": "{opened}/{total} unlocked",
-      "suggest": "Stuck? The Fixer's on the line.",
-      "tier": { "0": "A word", "1": "The method", "2": "The play" },
+      "suggest": "Stuck? Neo's on the line.",
+      "tier": {
+        "0": "A word",
+        "1": "The method",
+        "2": "The play"
+      },
       "tierFallback": "Tier {n}",
       "locked": "Unlock the previous tier first.",
       "confirmTitle": "Costs you {cost}. Still want it?",
@@ -386,7 +414,11 @@
     },
     "stars": {
       "aria": "{stars} of 3 stars — {label}",
-      "tier": { "1": "Loud", "2": "Done", "3": "Clean" }
+      "tier": {
+        "1": "Loud",
+        "2": "Done",
+        "3": "Clean"
+      }
     },
     "board": {
       "stamp": "THE BOARD",
@@ -450,7 +482,7 @@
     },
     "debrief": {
       "stamp": "Debrief — Attack → Defense",
-      "fixerTag": "The Fixer",
+      "fixerTag": "Neo",
       "beat1": "① The move",
       "beat1Text": "The payload you handed the front, on the wire:",
       "beat2": "② Why it worked",
