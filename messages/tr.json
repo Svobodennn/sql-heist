@@ -597,6 +597,7 @@
         "defenseSub": "Yaptığın her hamle ve onu kapatacak tek satır kod.",
         "objective": "Hedef {index}",
         "move": "Hamle",
+        "typed": "Yazdığın",
         "replay": "Bu vakayı tekrar oyna",
         "back": "Panoya dön"
       },

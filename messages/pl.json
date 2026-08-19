@@ -597,6 +597,7 @@
         "defenseSub": "Każdy twój ruch i ta jedna linia kodu, która by go zamknęła.",
         "objective": "Cel {index}",
         "move": "Ruch",
+        "typed": "Twój wpis",
         "replay": "Zagraj tę sprawę ponownie",
         "back": "Powrót do tablicy"
       },

@@ -93,6 +93,11 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
   const { toasts, push, dismiss } = useToasts()
 
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set())
+  // The exact inputs that WON each objective this session — threaded into the case-
+  // closed debrief so its "move" shows what the player actually typed, not the canonical
+  // solution. Empty on a cold revisit (payloads aren't persisted) → CaseClosed falls back
+  // to the authored expectedSolution.
+  const [solvedInputs, setSolvedInputs] = useState<Record<string, Record<string, string>>>({})
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [uiByObjective, setUiByObjective] = useState<Record<string, ObjectiveUi>>(() =>
     initUi(objectives),
@@ -178,6 +183,7 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
       if (!completedIds.has(obj.id)) {
         commit(index) // Model A: this run's DB state becomes the next objective's start.
         recordObjectiveWin(gameCase.id, obj.id)
+        setSolvedInputs((prev) => ({ ...prev, [obj.id]: inputs })) // the winning payload, for the debrief
         const next = new Set(completedIds)
         next.add(obj.id)
         setCompletedIds(next)
@@ -304,6 +310,7 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
   const handleReplay = useCallback(() => {
     reset()
     setCompletedIds(new Set())
+    setSolvedInputs({})
     setSelectedIndex(0)
     setUiByObjective(initUi(objectives))
     setNotebook(initNotebook(gameCase.database.visibleSchema))
@@ -374,7 +381,7 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
                     onStart={handleStart}
                   />
                 ) : stage === 'closed' ? (
-                  <CaseClosed gameCase={gameCase} onReplay={handleReplay} />
+                  <CaseClosed gameCase={gameCase} solvedInputs={solvedInputs} onReplay={handleReplay} />
                 ) : stage === 'payoff' ? (
                   <ObjectivePayoff
                     index={selectedIndex}

@@ -24,7 +24,16 @@ import styles from './CasePlayer.module.css'
 // need a fabricated Level per objective). Each objective shows the winning MOVE (its
 // canonical expectedSolution, composed through the frozen composer) → the flaw → the fix →
 // the takeaway. Read-only, all revealed at once.
-export function CaseClosed({ gameCase, onReplay }: { gameCase: Case; onReplay: () => void }) {
+export function CaseClosed({
+  gameCase,
+  solvedInputs,
+  onReplay,
+}: {
+  gameCase: Case
+  // Per-objective winning inputs from this session's play; absent on a cold revisit.
+  solvedInputs?: Record<string, Record<string, string>>
+  onReplay: () => void
+}) {
   const { t, locale } = useTranslation()
   const { caseClosed } = gameCase
   return (
@@ -47,7 +56,12 @@ export function CaseClosed({ gameCase, onReplay }: { gameCase: Case; onReplay: (
 
       <ol className={styles.defenseList}>
         {gameCase.objectives.map((objective, index) => (
-          <ObjectiveDefense key={objective.id} objective={objective} index={index} />
+          <ObjectiveDefense
+            key={objective.id}
+            objective={objective}
+            index={index}
+            playerInputs={solvedInputs?.[objective.id]}
+          />
         ))}
       </ol>
 
@@ -64,13 +78,32 @@ export function CaseClosed({ gameCase, onReplay }: { gameCase: Case; onReplay: (
   )
 }
 
-function ObjectiveDefense({ objective, index }: { objective: Objective; index: number }) {
+function ObjectiveDefense({
+  objective,
+  index,
+  playerInputs,
+}: {
+  objective: Objective
+  index: number
+  playerInputs?: Record<string, string>
+}) {
   const { t } = useTranslation()
-  // The canonical winning move for this objective (not the player's — the debrief is
-  // reachable on any revisit), composed through the frozen composer for the live preview.
+  // The winning move for this objective. Prefer what the PLAYER actually typed this
+  // session (threaded from CasePlayer); on a cold revisit those inputs are gone, so fall
+  // back to the authored expectedSolution. The raw payload and the live preview are built
+  // from the SAME inputs, so "what you typed" and the highlighted SQL never disagree.
+  const inputsUsed = playerInputs ?? objective.expectedSolution.inputs
   const composed = useMemo(
-    () => compose(objective.query.template, objective.expectedSolution.inputs),
-    [objective.query.template, objective.expectedSolution.inputs],
+    () => compose(objective.query.template, inputsUsed),
+    [objective.query.template, inputsUsed],
+  )
+  // The raw values the player entered — only the fields they actually filled.
+  const typed = useMemo(
+    () =>
+      objective.fields
+        .map((f) => ({ name: f.name, label: f.label, value: inputsUsed[f.name] ?? '' }))
+        .filter((e) => e.value.length > 0),
+    [objective.fields, inputsUsed],
   )
   const secureGroups = useMemo(
     () => groupSecureSnippets(selectSecureSnippets(objective.debrief)),
@@ -91,8 +124,23 @@ function ObjectiveDefense({ objective, index }: { objective: Objective; index: n
       </div>
       <h3 className={styles.defenseGoal}>{objective.goal}</h3>
 
-      <p className={styles.moveLabel}>{t('game.case.closed.move')}</p>
-      <SqlPreview segments={composed.segments} />
+      <div className={styles.moveBlock}>
+        <p className={styles.moveLabel}>{t('game.case.closed.move')}</p>
+        {typed.length > 0 && (
+          <div className={styles.typed}>
+            <span className={styles.typedLabel}>{t('game.case.closed.typed')}</span>
+            <span className={styles.typedValues}>
+              {typed.map((e) => (
+                <code key={e.name} className={cx('mono', styles.typedValue)}>
+                  {typed.length > 1 && <span className={styles.typedField}>{e.label}: </span>}
+                  {e.value}
+                </code>
+              ))}
+            </span>
+          </div>
+        )}
+        <SqlPreview segments={composed.segments} />
+      </div>
 
       <p className={cx('prose', styles.explanation)}>{objective.debrief.explanation}</p>
 
