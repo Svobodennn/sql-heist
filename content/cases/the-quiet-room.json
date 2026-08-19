@@ -124,6 +124,24 @@
             "code": "// VULNERABLE - code is concatenated into SQL; the page reveals only FOUND / NOT FOUND\nconst { rows } = await client.query(\n  \"SELECT id FROM reset_codes WHERE code = '\" + code + \"'\",\n);\nres.send(rows.length > 0 ? 'Reset code is active' : 'No matching request'); // one bit is the oracle\n// mysql2: conn.query(\"... WHERE code = '\" + code + \"'\") - same flaw"
           },
           {
+            "id": "prisma",
+            "label": "Prisma",
+            "language": "js",
+            "code": "// VULNERABLE - code interpolated into raw SQL; the page reveals only FOUND / NOT FOUND\nconst rows = await prisma.$queryRawUnsafe(\n  `SELECT id FROM reset_codes WHERE code = '${code}'`,\n);\nres.send(rows.length > 0 ? 'Reset code is active' : 'No matching request'); // one bit is the oracle"
+          },
+          {
+            "id": "drizzle",
+            "label": "Drizzle",
+            "language": "js",
+            "code": "// VULNERABLE - sql.raw() inlines the code; a boolean condition can be smuggled in\nconst rows = await db.execute(sql.raw(`SELECT id FROM reset_codes WHERE code = '${code}'`));\nres.send(rows.length > 0 ? 'Reset code is active' : 'No matching request'); // one bit is the oracle"
+          },
+          {
+            "id": "sequelize",
+            "label": "Sequelize (raw query)",
+            "language": "js",
+            "code": "// VULNERABLE - code concatenated into SQL; the page leaks one bit (FOUND / NOT FOUND)\nconst [rows] = await sequelize.query(\n  \"SELECT id FROM reset_codes WHERE code = '\" + code + \"'\",\n);\nres.send(rows.length > 0 ? 'Reset code is active' : 'No matching request'); // the oracle"
+          },
+          {
             "id": "python",
             "label": "Python (sqlite3 / psycopg2)",
             "language": "python",
@@ -188,6 +206,24 @@
             "label": "Node.js (pg / mysql2)",
             "language": "js",
             "code": "// SECURE - bind the code as $1; input can never become SQL, so there is no oracle to steer\nconst { rows } = await client.query(\n  'SELECT id FROM reset_codes WHERE code = $1',\n  [code],\n);\nres.send(rows.length > 0 ? 'Reset code is active' : 'No matching request');\n// A generic response is NOT the fix - binding is. Least privilege: the reset-lookup\n// DB role should have no read access to vault_config. mysql2: '... code = ?', [code]"
+          },
+          {
+            "id": "prisma",
+            "label": "Prisma",
+            "language": "js",
+            "code": "// SECURE - bind the code; input can never become SQL, so there is no oracle to steer\nconst rows = await prisma.$queryRaw`SELECT id FROM reset_codes WHERE code = ${code}`;\nres.send(rows.length > 0 ? 'Reset code is active' : 'No matching request');\n// A generic response is NOT the fix - binding is. Least privilege: this role shouldn't read vault_config."
+          },
+          {
+            "id": "drizzle",
+            "label": "Drizzle",
+            "language": "js",
+            "code": "// SECURE - the sql`` tag binds ${code}; no branch can be steered by the input\nconst rows = await db.execute(sql`SELECT id FROM reset_codes WHERE code = ${code}`);\nres.send(rows.length > 0 ? 'Reset code is active' : 'No matching request');\n// Binding is the fix, not hiding output. Least privilege: no read access to vault_config."
+          },
+          {
+            "id": "sequelize",
+            "label": "Sequelize (raw query)",
+            "language": "js",
+            "code": "// SECURE - bind the code; input never becomes SQL, so there is no oracle\nconst rows = await sequelize.query(\n  'SELECT id FROM reset_codes WHERE code = $code',\n  { bind: { code }, type: QueryTypes.SELECT },\n);\nres.send(rows.length > 0 ? 'Reset code is active' : 'No matching request');\n// A generic response is NOT the fix - binding is. Least privilege: no access to vault_config."
           },
           {
             "id": "python",
@@ -323,6 +359,24 @@
             "code": "// VULNERABLE - token concatenated into SQL; every response looks identical to the user...\nconst { rows } = await client.query(\n  \"SELECT id FROM sessions WHERE token = '\" + token + \"'\",\n);\nres.send('processing'); // ...but a CASE WHEN branch makes the DB slow ONLY when a condition holds\n// real engines: ... THEN pg_sleep(3); the wait leaks the answer. mysql2 conn.query is the same flaw"
           },
           {
+            "id": "prisma",
+            "label": "Prisma",
+            "language": "js",
+            "code": "// VULNERABLE - token interpolated into raw SQL; a CASE WHEN ... pg_sleep() branch leaks via time\nconst rows = await prisma.$queryRawUnsafe(\n  `SELECT id FROM sessions WHERE token = '${token}'`,\n);\nres.send('processing'); // every response looks identical - only the DELAY differs"
+          },
+          {
+            "id": "drizzle",
+            "label": "Drizzle",
+            "language": "js",
+            "code": "// VULNERABLE - sql.raw() inlines the token; a slow CASE WHEN branch leaks the answer by time\nconst rows = await db.execute(sql.raw(`SELECT id FROM sessions WHERE token = '${token}'`));\nres.send('processing'); // responses look identical; only the wall-clock differs"
+          },
+          {
+            "id": "sequelize",
+            "label": "Sequelize (raw query)",
+            "language": "js",
+            "code": "// VULNERABLE - token concatenated into SQL; a CASE WHEN ... branch makes the DB slow on a hit\nconst [rows] = await sequelize.query(\n  \"SELECT id FROM sessions WHERE token = '\" + token + \"'\",\n);\nres.send('processing'); // identical responses; the wait is the leak"
+          },
+          {
             "id": "python",
             "label": "Python (sqlite3 / psycopg2)",
             "language": "python",
@@ -387,6 +441,24 @@
             "label": "Node.js (pg / mysql2)",
             "language": "js",
             "code": "// SECURE - bind the token; input never becomes SQL, so no branch can be steered\nconst { rows } = await client.query('SELECT id FROM sessions WHERE token = $1', [token]);\nres.send('processing');\n// Hiding output cannot patch a timing channel - keep input OUT of the SQL (bind).\n// Least privilege: a session check must not read the staff table. Add a statement_timeout.\n// mysql2: conn.execute('SELECT id FROM sessions WHERE token = ?', [token])"
+          },
+          {
+            "id": "prisma",
+            "label": "Prisma",
+            "language": "js",
+            "code": "// SECURE - bind the token; input never becomes SQL, so no branch can be timed\nconst rows = await prisma.$queryRaw`SELECT id FROM sessions WHERE token = ${token}`;\nres.send('processing');\n// Hiding output can't patch a timing channel - keep input OUT of the SQL. Add a statement_timeout."
+          },
+          {
+            "id": "drizzle",
+            "label": "Drizzle",
+            "language": "js",
+            "code": "// SECURE - the sql`` tag binds ${token}; no branch can be steered, so nothing to time\nconst rows = await db.execute(sql`SELECT id FROM sessions WHERE token = ${token}`);\nres.send('processing');\n// A timing channel is closed by binding, not by hiding output. Add a statement_timeout."
+          },
+          {
+            "id": "sequelize",
+            "label": "Sequelize (raw query)",
+            "language": "js",
+            "code": "// SECURE - bind the token; input never becomes SQL, so no branch can be timed\nconst rows = await sequelize.query(\n  'SELECT id FROM sessions WHERE token = $token',\n  { bind: { token }, type: QueryTypes.SELECT },\n);\nres.send('processing');\n// Keep input OUT of the SQL (bind). Least privilege + a statement_timeout as defense in depth."
           },
           {
             "id": "python",
@@ -516,6 +588,24 @@
             "code": "// VULNERABLE - callsign concatenated into the INSERT, and the raw DB error is echoed back\ntry {\n  await client.query(\n    \"INSERT INTO promo_claims (callsign) VALUES ('\" + callsign + \"')\",\n  );\n  res.send('Callsign reserved');\n} catch (err) {\n  res.status(400).send(err.message); // leaks \"...promo_claims...\" on a duplicate key\n}"
           },
           {
+            "id": "prisma",
+            "label": "Prisma",
+            "language": "js",
+            "code": "// VULNERABLE - callsign interpolated into the INSERT, and the raw DB error is echoed back\ntry {\n  await prisma.$executeRawUnsafe(\n    `INSERT INTO promo_claims (callsign) VALUES ('${callsign}')`,\n  );\n  res.send('Callsign reserved');\n} catch (err) {\n  res.status(400).send(err.message); // leaks \"...promo_claims...\" and more on a crafted error\n}"
+          },
+          {
+            "id": "drizzle",
+            "label": "Drizzle",
+            "language": "js",
+            "code": "// VULNERABLE - sql.raw() inlines the callsign, and the raw driver error is returned to the client\ntry {\n  await db.execute(sql.raw(`INSERT INTO promo_claims (callsign) VALUES ('${callsign}')`));\n  res.send('Callsign reserved');\n} catch (err) {\n  res.status(400).send(err.message); // the error text leaks schema details\n}"
+          },
+          {
+            "id": "sequelize",
+            "label": "Sequelize (raw query)",
+            "language": "js",
+            "code": "// VULNERABLE - callsign concatenated into the INSERT, and the raw DB error is echoed back\ntry {\n  await sequelize.query(\n    \"INSERT INTO promo_claims (callsign) VALUES ('\" + callsign + \"')\",\n  );\n  res.send('Callsign reserved');\n} catch (err) {\n  res.status(400).send(err.message); // leaks \"...promo_claims...\" on a duplicate key\n}"
+          },
+          {
             "id": "python",
             "label": "Python (sqlite3 / psycopg2)",
             "language": "python",
@@ -580,6 +670,24 @@
             "label": "Node.js (pg / mysql2)",
             "language": "js",
             "code": "// pg - bind the callsign (stops the injection) AND return a generic error (stops the schema leak)\ntry {\n  await client.query('INSERT INTO promo_claims (callsign) VALUES ($1)', [callsign]);\n  res.send('Callsign reserved');\n} catch (err) {\n  logger.error('reserve_callsign_failed', err); // real error stays server-side\n  res.status(409).send('That callsign is unavailable');\n}\n// mysql2: conn.execute('INSERT INTO promo_claims (callsign) VALUES (?)', [callsign])"
+          },
+          {
+            "id": "prisma",
+            "label": "Prisma",
+            "language": "js",
+            "code": "// SECURE - $executeRaw binds the callsign, AND a generic error stops the schema leak\ntry {\n  await prisma.$executeRaw`INSERT INTO promo_claims (callsign) VALUES (${callsign})`;\n  res.send('Callsign reserved');\n} catch (err) {\n  logger.error('reserve_callsign_failed', err); // real error stays server-side\n  res.status(409).send('That callsign is unavailable');\n}\n// Best: prisma.promoClaim.create({ data: { callsign } })"
+          },
+          {
+            "id": "drizzle",
+            "label": "Drizzle",
+            "language": "js",
+            "code": "// SECURE - the sql`` tag binds ${callsign}; log the real error, return a generic one\ntry {\n  await db.execute(sql`INSERT INTO promo_claims (callsign) VALUES (${callsign})`);\n  res.send('Callsign reserved');\n} catch (err) {\n  logger.error('reserve_callsign_failed', err);\n  res.status(409).send('That callsign is unavailable');\n}\n// Or the builder: db.insert(promoClaims).values({ callsign })"
+          },
+          {
+            "id": "sequelize",
+            "label": "Sequelize (raw query)",
+            "language": "js",
+            "code": "// SECURE - bind the callsign (stops injection) AND return a generic error (stops the leak)\ntry {\n  await sequelize.query(\n    'INSERT INTO promo_claims (callsign) VALUES ($callsign)',\n    { bind: { callsign }, type: QueryTypes.INSERT },\n  );\n  res.send('Callsign reserved');\n} catch (err) {\n  logger.error('reserve_callsign_failed', err);\n  res.status(409).send('That callsign is unavailable');\n}\n// Best: PromoClaim.create({ callsign })"
           },
           {
             "id": "python",

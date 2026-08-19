@@ -120,6 +120,24 @@
             "code": "// VULNERABLE - keyword blocklist bolted in front of a still-concatenated pg query\nconst BLOCK = [/union\\s+select/i, /union\\s+all\\s+select/i];\nif (BLOCK.some((re) => re.test(q))) return res.status(403).send('blocked');\nconst { rows } = await client.query(\n  \"SELECT title, body FROM notices WHERE title LIKE '%\" + q + \"%'\",\n);\n// 'UNION/**/SELECT' slips past the regex; mysql2 conn.query has the same flaw"
           },
           {
+            "id": "prisma",
+            "label": "Prisma",
+            "language": "js",
+            "code": "// VULNERABLE - a keyword blocklist bolted in front of a still-interpolated raw query\nconst BLOCK = [/union\\s+select/i, /union\\s+all\\s+select/i];\nif (BLOCK.some((re) => re.test(q))) return res.status(403).send('blocked');\nconst rows = await prisma.$queryRawUnsafe(\n  `SELECT title, body FROM notices WHERE title LIKE '%${q}%'`,\n);\n// 'UNION/**/SELECT' slips past the regex and the raw SQL runs it."
+          },
+          {
+            "id": "drizzle",
+            "label": "Drizzle",
+            "language": "js",
+            "code": "// VULNERABLE - a regex blocklist in front of a sql.raw() query that still inlines q\nconst BLOCK = [/union\\s+select/i, /union\\s+all\\s+select/i];\nif (BLOCK.some((re) => re.test(q))) return res.status(403).send('blocked');\nconst rows = await db.execute(sql.raw(`SELECT title, body FROM notices WHERE title LIKE '%${q}%'`));\n// 'UNION/**/SELECT' slips past the regex; the raw SQL runs it anyway."
+          },
+          {
+            "id": "sequelize",
+            "label": "Sequelize (raw query)",
+            "language": "js",
+            "code": "// VULNERABLE - a keyword blocklist in front of a still-concatenated raw query\nconst BLOCK = [/union\\s+select/i, /union\\s+all\\s+select/i];\nif (BLOCK.some((re) => re.test(q))) return res.status(403).send('blocked');\nconst [rows] = await sequelize.query(\n  \"SELECT title, body FROM notices WHERE title LIKE '%\" + q + \"%'\",\n);\n// 'UNION/**/SELECT' slips past the regex; the concatenated SQL runs it."
+          },
+          {
             "id": "python",
             "label": "Python (sqlite3 / psycopg2)",
             "language": "python",
@@ -184,6 +202,24 @@
             "label": "Node.js (pg / mysql2)",
             "language": "js",
             "code": "// SECURE - bind the LIKE pattern; the injection never forms, so there is nothing to filter\nconst { rows } = await client.query(\n  'SELECT title, body FROM notices WHERE title LIKE $1',\n  ['%' + q + '%'],\n);\n// A WAF / keyword blocklist is defense-in-depth, NEVER the fix. Parameterize first;\n// prefer an allowlist (what input is permitted) over a blocklist (guessing every bad word).\n// mysql2: conn.execute('SELECT title, body FROM notices WHERE title LIKE ?', ['%' + q + '%'])"
+          },
+          {
+            "id": "prisma",
+            "label": "Prisma",
+            "language": "js",
+            "code": "// SECURE - bind the pattern; the injection never forms, so there is nothing to filter\nconst rows = await prisma.$queryRaw`\n  SELECT title, body FROM notices WHERE title LIKE ${'%' + q + '%'}`;\n// A WAF / blocklist is defense-in-depth, NEVER the fix. Parameterize first."
+          },
+          {
+            "id": "drizzle",
+            "label": "Drizzle",
+            "language": "js",
+            "code": "// SECURE - bind the LIKE pattern; there is no injection left to filter\nconst rows = await db.execute(\n  sql`SELECT title, body FROM notices WHERE title LIKE ${'%' + q + '%'}`,\n);\n// Prefer an allowlist over a blocklist; the blocklist is at best defense-in-depth."
+          },
+          {
+            "id": "sequelize",
+            "label": "Sequelize (raw query)",
+            "language": "js",
+            "code": "// SECURE - bind the pattern; the injection never forms, so there is nothing to filter\nconst rows = await sequelize.query(\n  'SELECT title, body FROM notices WHERE title LIKE $pattern',\n  { bind: { pattern: '%' + q + '%' }, type: QueryTypes.SELECT },\n);\n// A WAF / blocklist is defense-in-depth, NEVER the fix. Prefer an allowlist."
           },
           {
             "id": "python",
@@ -318,6 +354,24 @@
             "code": "// VULNERABLE - mysql2 multipleStatements:true lets a stacked ';' run a second command\nconst conn = await mysql.createConnection({ host, user, database, multipleStatements: true });\nconst sql = \"SELECT door, granted FROM door_acl WHERE badge = '\" + badge + \"'\";\nconst [results] = await conn.query(sql);\n// After the badge read, \"; UPDATE door_acl SET granted=1 WHERE door='VAULT'\" rides in as its own statement."
           },
           {
+            "id": "prisma",
+            "label": "Prisma",
+            "language": "js",
+            "code": "// VULNERABLE - $queryRawUnsafe with no bound params; a stacked ';' can run as a second statement\nconst rows = await prisma.$queryRawUnsafe(\n  `SELECT door, granted FROM door_acl WHERE badge = '${badge}'`,\n);\n// \"'; UPDATE door_acl SET granted=1 WHERE door='VAULT' --\" rides in after the badge read."
+          },
+          {
+            "id": "drizzle",
+            "label": "Drizzle",
+            "language": "js",
+            "code": "// VULNERABLE - sql.raw() inlines the badge; a stacked ';' can run as a second statement\nconst rows = await db.execute(\n  sql.raw(`SELECT door, granted FROM door_acl WHERE badge = '${badge}'`),\n);\n// \"'; UPDATE door_acl SET granted=1 WHERE door='VAULT' --\" rides in after the badge read."
+          },
+          {
+            "id": "sequelize",
+            "label": "Sequelize (raw query)",
+            "language": "js",
+            "code": "// VULNERABLE - raw query string; with a multi-statement driver a stacked ';' runs\nconst [results] = await sequelize.query(\n  \"SELECT door, granted FROM door_acl WHERE badge = '\" + badge + \"'\",\n);\n// \"'; UPDATE door_acl SET granted=1 WHERE door='VAULT'\" rides in as its own statement."
+          },
+          {
             "id": "python",
             "label": "Python (sqlite3 / psycopg2)",
             "language": "python",
@@ -382,6 +436,24 @@
             "label": "Node.js (pg / mysql2)",
             "language": "js",
             "code": "// SECURE - multipleStatements stays OFF and the value is bound, so only ONE statement runs\nconst conn = await mysql.createConnection({ host, user, database /* multipleStatements: false */ });\nconst [rows] = await conn.execute(\n  'SELECT door, granted FROM door_acl WHERE badge = ?', [badge]);\n// A stacked ';' is now an inert literal inside the badge, not a second command."
+          },
+          {
+            "id": "prisma",
+            "label": "Prisma",
+            "language": "js",
+            "code": "// SECURE - the $queryRaw tag binds ${badge}; the parameterized protocol runs ONE statement\nconst rows = await prisma.$queryRaw`SELECT door, granted FROM door_acl WHERE badge = ${badge}`;\n// A stacked ';' is now an inert literal inside the badge, not a second command."
+          },
+          {
+            "id": "drizzle",
+            "label": "Drizzle",
+            "language": "js",
+            "code": "// SECURE - the sql`` tag binds ${badge}, so the value can't open a second statement\nconst rows = await db.execute(sql`SELECT door, granted FROM door_acl WHERE badge = ${badge}`);\n// The stacked ';' is now an inert literal inside the badge, not a command."
+          },
+          {
+            "id": "sequelize",
+            "label": "Sequelize (raw query)",
+            "language": "js",
+            "code": "// SECURE - bind the badge; only ONE parameterized statement is sent\nconst rows = await sequelize.query(\n  'SELECT door, granted FROM door_acl WHERE badge = $badge',\n  { bind: { badge }, type: QueryTypes.SELECT },\n);\n// A stacked ';' is now an inert literal inside the badge, not a second command."
           },
           {
             "id": "python",

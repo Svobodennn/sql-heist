@@ -120,6 +120,24 @@
             "code": "// VULNERABLE - username/password concatenated straight into the SQL text\nconst { rows } = await client.query(\n  \"SELECT id, username, is_admin FROM users \" +\n  \"WHERE username = '\" + username + \"' AND password = '\" + password + \"'\",\n);\nconst row = rows[0];\n// mysql2: conn.query(\"... username = '\" + username + \"'\") - same flaw"
           },
           {
+            "id": "prisma",
+            "label": "Prisma",
+            "language": "js",
+            "code": "// VULNERABLE - $queryRawUnsafe builds raw SQL text; nothing is bound\nconst rows = await prisma.$queryRawUnsafe(\n  `SELECT id, username, is_admin FROM users WHERE username = '${username}' AND password = '${password}'`,\n);\nconst row = rows[0];\n// The quote in username closes the string; the rest is parsed as SQL."
+          },
+          {
+            "id": "drizzle",
+            "label": "Drizzle",
+            "language": "js",
+            "code": "// VULNERABLE - sql.raw() drops the string in verbatim, with no binding\nconst rows = await db.execute(\n  sql.raw(`SELECT id, username, is_admin FROM users WHERE username = '${username}' AND password = '${password}'`),\n);\n// sql.raw is an escape hatch - the interpolated username is parsed as SQL."
+          },
+          {
+            "id": "sequelize",
+            "label": "Sequelize (raw query)",
+            "language": "js",
+            "code": "// VULNERABLE - the values are concatenated straight into the query string\nconst [rows] = await sequelize.query(\n  \"SELECT id, username, is_admin FROM users WHERE username = '\" + username + \"' AND password = '\" + password + \"'\",\n);\n// No bind/replacements - username breaks out of the quotes."
+          },
+          {
             "id": "python",
             "label": "Python (sqlite3 / psycopg2)",
             "language": "python",
@@ -184,6 +202,24 @@
             "label": "Node.js (pg / mysql2)",
             "language": "js",
             "code": "// pg — bind username/password as $1/$2; the driver never parses them as SQL\nconst { rows } = await client.query(\n  'SELECT id, username, is_admin FROM users WHERE username = $1 AND password = $2',\n  [username, password],\n);\nconst row = rows[0];\n// mysql2: conn.execute('... WHERE username = ? AND password = ?', [username, password])"
+          },
+          {
+            "id": "prisma",
+            "label": "Prisma",
+            "language": "js",
+            "code": "// SECURE - the $queryRaw tagged template binds every ${} as a parameter\nconst rows = await prisma.$queryRaw`\n  SELECT id, username, is_admin FROM users\n  WHERE username = ${username} AND password = ${password}`;\nconst row = rows[0];\n// Best: prisma.user.findFirst({ where: { username, password } }) - no raw SQL at all."
+          },
+          {
+            "id": "drizzle",
+            "label": "Drizzle",
+            "language": "js",
+            "code": "// SECURE - the sql`` tag turns every ${} into a bound placeholder\nconst rows = await db.execute(\n  sql`SELECT id, username, is_admin FROM users WHERE username = ${username} AND password = ${password}`,\n);\n// Best: db.select().from(users).where(and(eq(users.username, username), eq(users.password, password)))"
+          },
+          {
+            "id": "sequelize",
+            "label": "Sequelize (raw query)",
+            "language": "js",
+            "code": "// SECURE - $named bind params are sent to the server separately from the SQL\nconst rows = await sequelize.query(\n  'SELECT id, username, is_admin FROM users WHERE username = $username AND password = $password',\n  { bind: { username, password }, type: QueryTypes.SELECT },\n);\n// Best: User.findOne({ where: { username, password } }) - the model builder binds for you."
           },
           {
             "id": "python",
@@ -317,6 +353,24 @@
             "code": "// VULNERABLE - the search term is concatenated into the LIKE pattern\nconst { rows } = await client.query(\n  \"SELECT title, body FROM articles WHERE title LIKE '%\" + q + \"%'\",\n);\n// UNION / sqlite_master ride straight in through the unclosed quote."
           },
           {
+            "id": "prisma",
+            "label": "Prisma",
+            "language": "js",
+            "code": "// VULNERABLE - the search term is interpolated into a raw LIKE pattern\nconst rows = await prisma.$queryRawUnsafe(\n  `SELECT title, body FROM articles WHERE title LIKE '%${q}%'`,\n);\n// UNION / sqlite_master ride straight in through the unclosed quote."
+          },
+          {
+            "id": "drizzle",
+            "label": "Drizzle",
+            "language": "js",
+            "code": "// VULNERABLE - sql.raw() inlines the term, so the LIKE pattern is attacker-controlled\nconst rows = await db.execute(\n  sql.raw(`SELECT title, body FROM articles WHERE title LIKE '%${q}%'`),\n);\n// The UNION SELECT rides in through the unclosed quote."
+          },
+          {
+            "id": "sequelize",
+            "label": "Sequelize (raw query)",
+            "language": "js",
+            "code": "// VULNERABLE - the term is concatenated into the LIKE pattern\nconst [rows] = await sequelize.query(\n  \"SELECT title, body FROM articles WHERE title LIKE '%\" + q + \"%'\",\n);\n// UNION / sqlite_master ride straight in through the unclosed quote."
+          },
+          {
             "id": "python",
             "label": "Python (sqlite3 / psycopg2)",
             "language": "python",
@@ -381,6 +435,24 @@
             "label": "Node.js (pg / mysql2)",
             "language": "js",
             "code": "// pg — bind the pattern; UNION / sqlite_master become plain search text\nconst { rows } = await client.query(\n  'SELECT title, body FROM articles WHERE title LIKE $1',\n  ['%' + q + '%'],\n);\n// Defense in depth: grant the app role SELECT only on the tables it needs."
+          },
+          {
+            "id": "prisma",
+            "label": "Prisma",
+            "language": "js",
+            "code": "// SECURE - bind the whole pattern; UNION / sqlite_master become plain search text\nconst rows = await prisma.$queryRaw`\n  SELECT title, body FROM articles WHERE title LIKE ${'%' + q + '%'}`;\n// Defense in depth: grant the app role SELECT only on the tables it needs."
+          },
+          {
+            "id": "drizzle",
+            "label": "Drizzle",
+            "language": "js",
+            "code": "// SECURE - the % wildcards live in the bound VALUE, never in the SQL text\nconst rows = await db.execute(\n  sql`SELECT title, body FROM articles WHERE title LIKE ${'%' + q + '%'}`,\n);\n// Or the builder: db.select().from(articles).where(like(articles.title, '%' + q + '%'))"
+          },
+          {
+            "id": "sequelize",
+            "label": "Sequelize (raw query)",
+            "language": "js",
+            "code": "// SECURE - bind the pattern value; wildcards stay data, not SQL\nconst rows = await sequelize.query(\n  'SELECT title, body FROM articles WHERE title LIKE $pattern',\n  { bind: { pattern: '%' + q + '%' }, type: QueryTypes.SELECT },\n);\n// Defense in depth: grant the app role SELECT only on the tables it needs."
           },
           {
             "id": "python",
@@ -514,6 +586,24 @@
             "code": "// VULNERABLE - the search term is concatenated into the LIKE pattern\nconst { rows } = await client.query(\n  \"SELECT id, name, price FROM products WHERE name LIKE '%\" + q + \"%'\",\n);\n// mysql2: conn.query(\"... WHERE name LIKE '%\" + q + \"%'\") - same flaw"
           },
           {
+            "id": "prisma",
+            "label": "Prisma",
+            "language": "js",
+            "code": "// VULNERABLE - the search term is interpolated into a raw LIKE pattern\nconst rows = await prisma.$queryRawUnsafe(\n  `SELECT id, name, price FROM products WHERE name LIKE '%${q}%'`,\n);\n// A UNION SELECT with a matching column count rides straight in."
+          },
+          {
+            "id": "drizzle",
+            "label": "Drizzle",
+            "language": "js",
+            "code": "// VULNERABLE - sql.raw() inlines the term; the LIKE pattern is attacker-controlled\nconst rows = await db.execute(\n  sql.raw(`SELECT id, name, price FROM products WHERE name LIKE '%${q}%'`),\n);\n// A UNION SELECT with a matching column count rides straight in."
+          },
+          {
+            "id": "sequelize",
+            "label": "Sequelize (raw query)",
+            "language": "js",
+            "code": "// VULNERABLE - the term is concatenated into the LIKE pattern\nconst [rows] = await sequelize.query(\n  \"SELECT id, name, price FROM products WHERE name LIKE '%\" + q + \"%'\",\n);\n// A UNION SELECT with a matching column count rides straight in."
+          },
+          {
             "id": "python",
             "label": "Python (sqlite3 / psycopg2)",
             "language": "python",
@@ -578,6 +668,24 @@
             "label": "Node.js (pg / mysql2)",
             "language": "js",
             "code": "// pg — the % wildcards live in the bound VALUE, never in the SQL text\nconst { rows } = await client.query(\n  'SELECT id, name, price FROM products WHERE name LIKE $1',\n  ['%' + q + '%'],\n);\n// mysql2: conn.execute('... WHERE name LIKE ?', ['%' + q + '%'])"
+          },
+          {
+            "id": "prisma",
+            "label": "Prisma",
+            "language": "js",
+            "code": "// SECURE - bind the pattern; the % wildcards live in the value, not the SQL\nconst rows = await prisma.$queryRaw`\n  SELECT id, name, price FROM products WHERE name LIKE ${'%' + q + '%'}`;\n// Best: prisma.product.findMany({ where: { name: { contains: q } } }) - no raw SQL."
+          },
+          {
+            "id": "drizzle",
+            "label": "Drizzle",
+            "language": "js",
+            "code": "// SECURE - the sql`` tag binds the pattern value as a parameter\nconst rows = await db.execute(\n  sql`SELECT id, name, price FROM products WHERE name LIKE ${'%' + q + '%'}`,\n);\n// Or the builder: db.select().from(products).where(like(products.name, '%' + q + '%'))"
+          },
+          {
+            "id": "sequelize",
+            "label": "Sequelize (raw query)",
+            "language": "js",
+            "code": "// SECURE - bind the pattern value; wildcards stay data\nconst rows = await sequelize.query(\n  'SELECT id, name, price FROM products WHERE name LIKE $pattern',\n  { bind: { pattern: '%' + q + '%' }, type: QueryTypes.SELECT },\n);\n// Best: Product.findAll({ where: { name: { [Op.like]: '%' + q + '%' } } })"
           },
           {
             "id": "python",
