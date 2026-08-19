@@ -46,6 +46,22 @@
       color-mix(in srgb, var(--noir-900) 72%, transparent) 100%
     );
 }
+/* Cinematic key-art backdrop (warm break-in scene) under a heavy center-safe
+   scrim, so the CENTRED hero stack stays high-contrast over it. Decorative. */
+.heroPhoto {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      120% 110% at 50% 42%,
+      color-mix(in srgb, var(--bg) 58%, transparent),
+      color-mix(in srgb, var(--bg) 85%, transparent) 100%
+    ),
+    linear-gradient(0deg, var(--bg) 4%, transparent 46%),
+    url('/hero-vault-brass.webp') center / cover no-repeat;
+}
 
 .heroInner {
   position: relative;

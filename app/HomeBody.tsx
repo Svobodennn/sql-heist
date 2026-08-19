@@ -41,7 +41,9 @@ export function HomeBody({ locale }: { locale: Locale }) {
       <JsonLd data={softwareLd} />
       {/* ---------- Hero ---------- */}
       <section className={styles.hero}>
-        {/* Faint scanline + vignette. Decorative, static, non-interactive. */}
+        {/* Cinematic key-art backdrop (the break-in scene) under a heavy scrim,
+            plus scanline + vignette. Decorative, static, non-interactive. */}
+        <div className={styles.heroPhoto} aria-hidden="true" />
         <div className={styles.heroScan} aria-hidden="true" />
 
         <div className={styles.heroInner}>
