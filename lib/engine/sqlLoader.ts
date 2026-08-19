@@ -1,7 +1,7 @@
 import initSqlJs, { type SqlJsStatic } from 'sql.js'
 
 // WASM boot singleton (docs/01-architecture.md §2.1). This is the engine's only
-// entry point for compiling the SQLite WASM; SqlEngine.init() (levelSession.ts)
+// entry point for compiling the SQLite WASM; CaseEngine.init() (caseSession.ts)
 // consumes it and owns the fresh-DB-per-level lifecycle on top. Kept side-effect
 // -light and lazy so the landing page ships no WASM.
 

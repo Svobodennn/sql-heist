@@ -9,7 +9,7 @@ import styles from './WafBanner.module.css'
 
 // WAF FilterOutcome overlay (docs/ws3-design.md "WAF feedback = both"): what the
 // input filter DID to the raw payload on the last run, surfaced by
-// levelSession.run().filter. reject => a hard crimson "blocked" stop naming the
+// caseSession.runObjective().filter. reject => a hard crimson "blocked" stop naming the
 // terms; strip => a steel "cleaned" note showing the neutered input. It is
 // ORTHOGONAL to the signal panel (a waf-bypass level still renders rows/etc.), so
 // it rides above the readout as its own banner. The effectiveInput is RAW player

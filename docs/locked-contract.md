@@ -3,6 +3,12 @@
 > Parent (Hızır) tarafından `01-architecture.md` (architect — şema/engine/DSL için KANONİK)
 > + `02-game-design.md` (planner — tasarım/skor/ipucu için KANONİK) uzlaştırılarak donduruldu.
 > Gate 2 agent'ları (03/04/05/06) buna **harfiyen** uyar. Çelişkiler aşağıda çözüldü.
+>
+> **GÜNCELLEME (2026-08-19):** Bu MVP-dönemi kilit sözleşmesidir; tarihsel kayıt olarak durur.
+> Oyun o zamandan beri **3 case / 8 objective** modeline geçti ve win-DSL **ek olarak** 7 tipe
+> genişledi (blind-boolean/timing, error-based, stacked-queries + `mustReference` — hiçbiri mevcut
+> tipleri kırmadan). §C'deki 3-tip DSL ile §D'deki 3-job skeleton o günün kilididir; güncel gerçek
+> için `cases-design.md` + `CLAUDE.md`.
 
 ## A. Kanonik level-JSON şeması (architect — 01)
 Alanlar ([E] = engine tüketir, architect kilidi · [C] = semantik, 02/05/06 doldurur):

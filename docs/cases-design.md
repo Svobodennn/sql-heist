@@ -1,5 +1,8 @@
 # Cases & Objectives — Design
 
+> **Shipped (2026-08).** This is the design that landed — the phased plan (P0–P5) below is done.
+> Kept as the design record; current operational authority is `CLAUDE.md`.
+
 ## Why (north star)
 
 Today's 8 standalone jobs don't make it clear **what** the player must do, **why**, or
@@ -112,7 +115,9 @@ Difficulty escalates across cases (3 + 3 + 2 = 8). Each case's objective DBs mer
 
 ## Open questions / risks
 
-- Keep `/jobs` as redirect stubs, or hard-replace? (SEO: the site is fresh, low external linkage.)
+- ~~Keep `/jobs` as redirect stubs, or hard-replace?~~ **Resolved: hard-replace, no stubs.** `/jobs`
+  was removed; under static export (`output: 'export'`) there is no server-side redirect, so `/jobs`
+  now returns 404. Acceptable — fresh site, low external linkage; `/cases` is the only board route.
 - Case-closed payoff: one screen after the last objective (vs per-objective loot moments — keep both?).
 - Objective independence: an objective must be solvable from its own snapshot even if the player
   jumps around — snapshots guarantee this, but authoring must not assume out-of-order play.

@@ -5,6 +5,12 @@ SRP (UI in components, pure logic in lib); one-way layered dependencies with `i1
 and `ui/` as shared cross-cutting layers. **No URL/route changes.** All 291 unit +
 8 E2E green at the end of every phase.
 
+> **UPDATE (2026-08-19):** This refactor is **complete** and kept as the historical record.
+> "No URL/route changes" and "291 unit + 8 E2E" describe that moment; the game has since moved to
+> the **cases** model (`/cases`, and `caseSession` was added *additively* under the frozen engine
+> contract — the suite has since grown). The layering / colocation rules still hold; current
+> authority is `CLAUDE.md`.
+
 ## Target layout
 
 ```

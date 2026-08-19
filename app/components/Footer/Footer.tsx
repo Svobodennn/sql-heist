@@ -33,8 +33,8 @@ const COLUMNS = [
 ] as const
 
 // Sitewide footer / page inventory. Suppressed on the in-game route
-// (/jobs/<id>) so the job screen stays a focused, full-height surface — the
-// board (/jobs) and every other route keep it.
+// (/cases/<id>) so the case screen stays a focused, full-height surface — the
+// board (/cases) and every other route keep it.
 export function Footer() {
   const pathname = usePathname()
   const { t, locale } = useTranslation()

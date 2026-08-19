@@ -30,7 +30,7 @@ export interface ComposedQuery {
   unresolved: string[] // token names given no value (validation)
   segments: ComposedSegment[] // static/injected split for the live preview
   // WS3 WAF: present ONLY when an inputFilter ran. `rejected` => the run should be
-  // blocked (levelSession surfaces filterMessage as an error). Absent otherwise.
+  // blocked (caseSession surfaces filterMessage as an error). Absent otherwise.
   rejected?: boolean
   filterMessage?: string
   filter?: FilterOutcome // what the WAF did (present ONLY when an inputFilter ran)

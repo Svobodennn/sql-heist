@@ -1,10 +1,11 @@
 # SQL Heist — Post-MVP Roadmap
 
-> Generated: 2026-07-30 · Status: **approved sequence, ready to execute**
-> The MVP (engine + 3 jobs + UI + narrative + E2E) is live and deployed to Vercel.
-> This roadmap sequences the agreed enhancements. Ordering rationale: settle the UI
-> surface first, then internationalize it last (so strings are extracted once), and
-> treat auth as a separate initiative because it breaks the current static-only model.
+> Generated: 2026-07-30 · **Status update (2026-08-19): WS0–WS4 are shipped; WS5 (auth) is the only remaining track.**
+> The game is live on Vercel as **three cases / eight objectives** — full UI + narrative,
+> recon notebook + badges, multi-stack secure-code debrief, and i18n (en/tr/pl) are all done.
+> The workstream detail below is kept as the historical plan of record. Ordering rationale
+> (still valid for WS5): settle the UI surface first, internationalize last, and treat auth as
+> a separate initiative because it breaks the current static-only model.
 
 ## Sequence at a glance
 
@@ -26,7 +27,7 @@ WS0→WS1→WS2 and WS3 are largely independent/pipelineable; **WS4 (i18n) must 
 **Tasks**
 - a11y audit of the game UI (semantic color law actually colorblind-safe, keyboard nav, focus order, AA contrast, 44px targets) — the design promised this; verify it.
 - UI code review of `features/game/*` (component boundaries, K7 XSS ban, file sizes, dead code).
-- Web-perf pass (bundle size, lazy-load boundaries, first-load; `/jobs/[jobId]` ~159 kB today).
+- Web-perf pass (bundle size, lazy-load boundaries, first-load; the in-game route is `/cases/[caseId]`).
 - Close the open P1 engine findings: `sqlLoader` retry-path test (Medium); `visibleSchema` copy-on-read; `exact`-mode cardinality clarification; `starsForScore` magic numbers; doc drift (01 §3.2 `segments`).
 **Agents:** `a11y-expert` ∥ `code-reviewer` ∥ `web-perf-expert` (audit) → `spark`/`frontend-dev` + `kraken` (fixes) → `verifier` (gate).
 **Acceptance:** audit findings triaged; criticals fixed; tsc/test/build/lint green; E2E still green.

@@ -129,7 +129,7 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
   // A11y: AnimatePresence mode="wait" mounts the new screen AFTER exit, dropping
   // focus. On every stage/objective swap move focus to the new heading
   // ([data-objective-heading], tabIndex -1). Fired from onExitComplete so it never
-  // steals focus on the initial mount (mirrors JobPlayer.focusPhaseHeading).
+  // steals focus on the initial mount.
   const focusHeading = useCallback(() => {
     let tries = 0
     const attempt = () => {
@@ -196,7 +196,7 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
     } else {
       // MISS: a clean run that just missed the win. Neutral, result-aware note
       // (literal by design — this track adds no message-catalog keys), mirroring
-      // JobPlayer: never echo evaluation.reason (authored as the WIN sentence).
+      // Never echo evaluation.reason (authored as the WIN sentence).
       push(
         'info',
         result.rowCount > 0

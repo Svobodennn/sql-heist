@@ -6,7 +6,7 @@ import type { ExecutionResult } from '@/lib/engine/sqlRunner'
 // deriveSignal is a PURE interpretation of what compose/exec ALREADY produced —
 // it changes nothing about how exec/compose/evaluate work. The Exploit screen
 // ("THE WIRE") switches its render on RunSignal.kind. The WAF FilterOutcome is a
-// SEPARATE orthogonal overlay surfaced by levelSession.run (see queryComposer).
+// SEPARATE orthogonal overlay surfaced by caseSession.runObjective (see queryComposer).
 
 export type RunSignal =
   | { kind: 'rows'; columns: string[]; rows: SqlCell[][] } // classic / union / auth
