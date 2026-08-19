@@ -50,21 +50,28 @@ export function HomeBody({ locale }: { locale: Locale }) {
           <div className={styles.heroLeft}>
             <p className={styles.slate}>
               <span className={styles.recDot} aria-hidden="true" />
-              <Logo size={18} className={styles.slateMark} />
               <span className="stamp">{hero.eyebrow}</span>
             </p>
 
-            {/* Colossal two-line wordmark; the last word carries the teal. Words come
-                from the localized title, so the accent tracks whatever it splits into. */}
+            {/* Colossal two-line wordmark; the Cowled mark locks up beside the first
+                word, the last word carries the accent. Words come from the localized
+                title, so the accent tracks whatever it splits into. */}
             <h1 className={styles.title}>
-              {hero.title.split(' ').map((word, i, words) => (
-                <span
-                  key={i}
-                  className={`${styles.titleWord}${i === words.length - 1 ? ` ${styles.titleAccent}` : ''}`}
-                >
-                  {word}
-                </span>
-              ))}
+              {hero.title.split(' ').map((word, i, words) => {
+                const cls = `${styles.titleWord}${
+                  i === words.length - 1 ? ` ${styles.titleAccent}` : ''
+                }`
+                return i === 0 ? (
+                  <span key={i} className={styles.titleLockup}>
+                    <span className={cls}>{word}</span>
+                    <Logo className={styles.titleMark} />
+                  </span>
+                ) : (
+                  <span key={i} className={cls}>
+                    {word}
+                  </span>
+                )
+              })}
             </h1>
             <p className={styles.tagline}>{hero.tagline}</p>
             <p className={styles.lede}>{hero.lede}</p>

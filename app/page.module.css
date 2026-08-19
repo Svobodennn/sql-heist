@@ -122,6 +122,19 @@
   color: var(--primary);
   text-shadow: 0 0 48px rgba(226, 169, 80, 0.6);
 }
+/* The Cowled mark locked up beside the first word; scales with the wordmark (em). */
+.titleLockup {
+  display: flex;
+  align-items: center;
+  gap: 0.14em;
+}
+.titleMark {
+  flex: none;
+  width: 0.85em;
+  height: auto;
+  color: var(--primary);
+  filter: drop-shadow(0 0 18px color-mix(in srgb, var(--primary) 55%, transparent));
+}
 .tagline {
   font-family: var(--font-display);
   font-size: clamp(1.15rem, 2.4vw, 1.7rem);
