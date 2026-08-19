@@ -114,7 +114,7 @@ html {
   /* In-page anchors (e.g. "How it works") glide instead of jumping. The
      reduced-motion block below forces this back to `auto`. */
   scroll-behavior: smooth;
-  scroll-padding-top: var(--space-8);
+  scroll-padding-top: 4.5rem; /* clear the sticky nav on anchor jumps */
 }
 
 body {

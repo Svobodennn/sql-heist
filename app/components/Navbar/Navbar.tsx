@@ -20,11 +20,9 @@ const NAV_LINKS = [
   { href: '/help', key: 'nav.help', Icon: IconHelpCircle },
 ] as const
 
-// Site chrome. Rendered once from app/layout.tsx so it wraps every route. It is
-// intentionally NOT sticky: the in-game <TopBar> is sticky at top:0 (z-dropdown),
-// and two top:0 sticky bars in the same scroll container would overlap. A static
-// nav scrolls away on the job screen and lets the game's own bar pin — zero
-// changes to the game shell (that in-game chrome is a separate track).
+// Site chrome. Rendered once from app/layout.tsx so it wraps every route. Sticky
+// at top:0 (see Navbar.module.css); the in-game chrome (case header + objectives
+// stepper) is non-sticky, so there is no second top:0 bar to overlap.
 export function Navbar() {
   const pathname = usePathname()
   const { t, locale } = useTranslation()

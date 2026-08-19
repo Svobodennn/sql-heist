@@ -1,7 +1,13 @@
-/* Site chrome. Non-sticky by design (see Navbar.tsx) so it never collides with
- * the game's own sticky TopBar. Dark-native, brass agency accent. */
+/* Site chrome. Sticky at the top on every route; the in-game chrome (case header
+ * + objectives stepper) is non-sticky, so there is no second top:0 bar to collide
+ * with. Translucent + blur so content scrolls under it. Dark-native, brass accent. */
 .header {
-  background: var(--bg);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-dropdown);
+  background: color-mix(in srgb, var(--bg) 85%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border);
 }
 
