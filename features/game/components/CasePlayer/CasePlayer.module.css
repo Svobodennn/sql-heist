@@ -298,51 +298,11 @@
   font-size: 1.25rem;
   margin: 0;
 }
-.moveBlock {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
 .moveLabel {
   font-size: 0.75rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-muted);
-}
-/* "What you typed" — the raw payload the player entered, styled as the same crimson
-   band the composer paints the injected span with, so the eye ties the two together. */
-.typed {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-2);
-}
-.typedLabel {
-  flex-shrink: 0;
-  font-size: 0.6875rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-.typedValues {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  min-width: 0;
-}
-.typedValue {
-  font-size: 0.8125rem;
-  color: var(--injected-fg);
-  background: var(--injected-bg);
-  border: 1px solid var(--crimson-500);
-  border-radius: var(--radius-sm);
-  padding: 2px 8px;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-.typedField {
-  color: var(--text-muted);
-  text-transform: none;
 }
 .explanation {
   margin: 0;

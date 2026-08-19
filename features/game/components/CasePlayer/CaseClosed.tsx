@@ -97,14 +97,6 @@ function ObjectiveDefense({
     () => compose(objective.query.template, inputsUsed),
     [objective.query.template, inputsUsed],
   )
-  // The raw values the player entered — only the fields they actually filled.
-  const typed = useMemo(
-    () =>
-      objective.fields
-        .map((f) => ({ name: f.name, label: f.label, value: inputsUsed[f.name] ?? '' }))
-        .filter((e) => e.value.length > 0),
-    [objective.fields, inputsUsed],
-  )
   const secureGroups = useMemo(
     () => groupSecureSnippets(selectSecureSnippets(objective.debrief)),
     [objective.debrief],
@@ -124,23 +116,8 @@ function ObjectiveDefense({
       </div>
       <h3 className={styles.defenseGoal}>{objective.goal}</h3>
 
-      <div className={styles.moveBlock}>
-        <p className={styles.moveLabel}>{t('game.case.closed.move')}</p>
-        {typed.length > 0 && (
-          <div className={styles.typed}>
-            <span className={styles.typedLabel}>{t('game.case.closed.typed')}</span>
-            <span className={styles.typedValues}>
-              {typed.map((e) => (
-                <code key={e.name} className={cx('mono', styles.typedValue)}>
-                  {typed.length > 1 && <span className={styles.typedField}>{e.label}: </span>}
-                  {e.value}
-                </code>
-              ))}
-            </span>
-          </div>
-        )}
-        <SqlPreview segments={composed.segments} />
-      </div>
+      <p className={styles.moveLabel}>{t('game.case.closed.move')}</p>
+      <SqlPreview segments={composed.segments} />
 
       <p className={cx('prose', styles.explanation)}>{objective.debrief.explanation}</p>
 

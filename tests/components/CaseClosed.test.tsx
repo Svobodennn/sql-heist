@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, render } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 // CaseClosed renders a next/link "back to the board"; the app-router context isn't
@@ -16,31 +16,24 @@ afterEach(cleanup)
 const gameCase = CASES[0] // the-front-door
 const first = gameCase.objectives[0] // auth-bypass — fields: username + password
 
-// The payload is rendered verbatim inside a <code> chip; the SqlPreview splits the same
-// value into per-char spans (and the default normalizer trims whitespace), so match on the
-// chip by tag + substring (a multi-field move prefixes each value with its field label).
-// SqlPreview uses <pre>/<span>, never <code>, so <code> is uniquely our typed chip.
-const chip = (value: string) => (_: string, el: Element | null) =>
-  el?.tagName === 'CODE' && (el.textContent ?? '').includes(value)
-
-describe('<CaseClosed> — the move shows what the player typed', () => {
-  it('renders the player’s actual winning payload, not the canonical solution', () => {
+describe('<CaseClosed> — the move box reflects what the player typed', () => {
+  it('composes the debrief SQL from the player’s actual winning payload', () => {
     const pwned = "' OR /*pwned*/ '1'='1' -- "
-    render(
+    const { container } = render(
       <CaseClosed
         gameCase={gameCase}
         solvedInputs={{ [first.id]: { username: pwned, password: '' } }}
         onReplay={() => {}}
       />,
     )
-    expect(screen.getAllByText('What you typed').length).toBeGreaterThan(0)
-    expect(screen.getAllByText(chip(pwned)).length).toBeGreaterThan(0)
+    // SqlPreview weaves the raw input into the composed query; textContent joins the spans.
+    expect(container.textContent).toContain(pwned)
   })
 
-  it('falls back to the authored expectedSolution when the session inputs are gone', () => {
+  it('falls back to the authored expectedSolution when session inputs are gone', () => {
     const canonical = first.expectedSolution.inputs.username
     expect(canonical).toBeTruthy()
-    render(<CaseClosed gameCase={gameCase} onReplay={() => {}} />)
-    expect(screen.getAllByText(chip(canonical)).length).toBeGreaterThan(0)
+    const { container } = render(<CaseClosed gameCase={gameCase} onReplay={() => {}} />)
+    expect(container.textContent).toContain(canonical)
   })
 })

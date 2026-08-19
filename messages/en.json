@@ -597,7 +597,6 @@
         "defenseSub": "Every move you pulled, and the one line of code that would have shut it.",
         "objective": "Objective {index}",
         "move": "The move",
-        "typed": "What you typed",
         "replay": "Play this case again",
         "back": "Back to the board"
       },
