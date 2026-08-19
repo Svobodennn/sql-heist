@@ -41,41 +41,76 @@ export function HomeBody({ locale }: { locale: Locale }) {
       <JsonLd data={softwareLd} />
       {/* ---------- Hero ---------- */}
       <section className={styles.hero}>
-        {/* Cinematic key-art backdrop (the break-in scene) under a heavy scrim,
-            plus scanline + vignette. Decorative, static, non-interactive. */}
+        {/* Cinematic key-art backdrop (the break-in scene) under a dark left→right
+            scrim, plus scanline/vignette. Decorative, static, non-interactive. */}
         <div className={styles.heroPhoto} aria-hidden="true" />
         <div className={styles.heroScan} aria-hidden="true" />
 
         <div className={styles.heroInner}>
-          <Logo size={72} className={styles.heroLogo} />
-          <span className="stamp">{hero.eyebrow}</span>
+          <div className={styles.heroLeft}>
+            <p className={styles.slate}>
+              <span className={styles.recDot} aria-hidden="true" />
+              <Logo size={18} className={styles.slateMark} />
+              <span className="stamp">{hero.eyebrow}</span>
+            </p>
 
-          <h1 className={styles.title}>{hero.title}</h1>
+            {/* Colossal two-line wordmark; the last word carries the teal. Words come
+                from the localized title, so the accent tracks whatever it splits into. */}
+            <h1 className={styles.title}>
+              {hero.title.split(' ').map((word, i, words) => (
+                <span
+                  key={i}
+                  className={`${styles.titleWord}${i === words.length - 1 ? ` ${styles.titleAccent}` : ''}`}
+                >
+                  {word}
+                </span>
+              ))}
+            </h1>
+            <p className={styles.tagline}>{hero.tagline}</p>
+            <p className={styles.lede}>{hero.lede}</p>
 
-          <p className={styles.tagline}>{hero.tagline}</p>
+            <div className={styles.heroCtas}>
+              <Link href={localeHref('/cases', locale)} className="btn btn--primary">
+                <span>{hero.primaryCta}</span>
+                <IconArrowRight size={18} />
+              </Link>
+              <a href="#how-it-works" className="btn btn--ghost">
+                {hero.secondaryCta}
+              </a>
+            </div>
+          </div>
 
-          <p className={styles.lede}>{hero.lede}</p>
-
-          {/* The wire: your input has stopped being data. The blinking caret sits
-              where you just typed; everything past the -- is dead code. */}
-          <pre className={styles.teaser} aria-hidden="true">
-            <code>
-              <span className={styles.kw}>SELECT</span> * <span className={styles.kw}>FROM</span>{' '}
-              users <span className={styles.kw}>WHERE</span> name = &apos;
-              <span className={styles.inj}>&apos; OR &apos;1&apos;=&apos;1&apos; --</span>
-              <span className={styles.caret} />
-              <span className={styles.dim}> &apos; AND pass = &apos;…&apos;</span>
-            </code>
-          </pre>
-
-          <div className={styles.heroCtas}>
-            <Link href={localeHref('/cases', locale)} className="btn btn--primary">
-              <span>{hero.primaryCta}</span>
-              <IconArrowRight size={18} />
-            </Link>
-            <a href="#how-it-works" className="btn btn--ghost">
-              {hero.secondaryCta}
-            </a>
+          {/* The wire: your input has stopped being data. The payload types itself
+              in (pure CSS), the caret sits where you typed, and everything past the
+              -- is dead code. Decorative — hidden from assistive tech. */}
+          <div className={styles.heroSlab} aria-hidden="true">
+            <div className={styles.slabBar}>
+              <span>meridian · /login</span>
+              <span className={styles.slabDots}>
+                <i />
+                <i />
+                <i />
+              </span>
+            </div>
+            <div className={styles.slabBody}>
+              <pre className={styles.teaser}>
+                <code>
+                  <span className={styles.kw}>SELECT</span> * <span className={styles.kw}>FROM</span>{' '}
+                  users <span className={styles.kw}>WHERE</span> name = &apos;
+                  <span className={styles.inj}>&apos; OR &apos;1&apos;=&apos;1&apos; --</span>
+                  <span className={styles.caret} />
+                  <span className={styles.dim}> &apos; AND pass = &apos;…&apos;</span>
+                </code>
+              </pre>
+              {/* The breach lands after the payload finishes typing (CSS-timed). */}
+              <div className={styles.slabResult}>
+                <span className={styles.slabGranted}>
+                  <IconCheck size={15} />
+                  ACCESS GRANTED · admin
+                </span>
+                <span className={styles.slabLoot}>loot: session_token</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>

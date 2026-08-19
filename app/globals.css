@@ -60,6 +60,8 @@
   --info: var(--steel-400);
   --info-subtle: var(--steel-950);
 
+  --loot: var(--brass-400); /* LOOT accent (brass) — the score you walk out with */
+
   /* ---------- Component tokens (derive from semantic) ---------- */
   --btn-primary-bg: var(--primary);
   --btn-primary-fg: var(--noir-900); /* dark ink on amber = AA */
@@ -94,6 +96,7 @@
   --shell-max: 1200px;
 
   /* font stacks wired from next/font (app/layout.tsx) */
+  --font-brand: var(--font-brand-src), 'Anton', 'Arial Narrow', system-ui, sans-serif;
   --font-display: var(--font-display-src), 'Space Grotesk', system-ui, sans-serif;
   --font-sans: var(--font-sans-src), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-mono-src), ui-monospace, 'SFMono-Regular', monospace;

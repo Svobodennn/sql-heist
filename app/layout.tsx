@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
-import { Geist, Geist_Mono, Space_Grotesk } from 'next/font/google'
+import { Anton, Geist, Geist_Mono, Space_Grotesk } from 'next/font/google'
 import { Navbar } from './components/Navbar'
 import { Footer } from './components/Footer'
 import { CookieConsent } from './components/CookieConsent'
@@ -9,10 +9,17 @@ import { SITE_URL, SITE_NAME, SITE_TAGLINE, SITE_DESCRIPTION } from './siteConfi
 import styles from './layout.module.css'
 import './globals.css'
 
-// Fonts (docs/04-frontend-ux.md §1.4). Inter is BANNED. Space Grotesk = display,
-// Geist Sans = body, Geist Mono = code surface (ligatures switched OFF in CSS so
-// `--`, `<>`, `!=` stay literal — critical for the injection lesson). next/font
-// self-hosts these at build time, so the static export ships no runtime font CDN.
+// Fonts (docs/04-frontend-ux.md §1.4). Inter is BANNED. Anton = brand/hero display
+// (Neon Noir wordmark), Space Grotesk = section headings, Geist Sans = body, Geist
+// Mono = code surface (ligatures switched OFF in CSS so `--`, `<>`, `!=` stay literal
+// — critical for the injection lesson). next/font self-hosts these at build time, so
+// the static export ships no runtime font CDN.
+const brand = Anton({
+  weight: '400',
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-brand-src',
+})
 const display = Space_Grotesk({
   subsets: ['latin'],
   display: 'swap',
@@ -55,7 +62,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`${display.variable} ${sans.variable} ${mono.variable}`}>
+    <html
+      lang="en"
+      className={`${brand.variable} ${display.variable} ${sans.variable} ${mono.variable}`}
+    >
       <body>
         <a href="#main-content" className={styles.skipLink}>
           Skip to content

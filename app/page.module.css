@@ -8,27 +8,30 @@
   flex-direction: column;
 }
 
-/* ---------- Hero ---------- */
-/* ~80svh so the marquee band peeks below the fold (a hint that there's more). */
+/* ---------- Hero — cinematic, asymmetric (Neon Cut template, brass theme) ---------- */
+/* Full-viewport; key-art backdrop weighted right under a left→right scrim so the
+   wordmark (left) reads clean. Warm brass/crimson lighting (main theme). */
 .hero {
   position: relative;
-  min-height: 80vh;
-  min-height: 80svh;
+  min-height: 100vh;
+  min-height: 100svh;
   display: flex;
   align-items: center;
-  justify-content: center;
   overflow: hidden;
   padding: var(--space-12) var(--space-4);
-  background: radial-gradient(
-      120% 80% at 50% -10%,
-      color-mix(in srgb, var(--primary) 8%, transparent),
+  background:
+    radial-gradient(
+      70% 62% at 86% 2%,
+      color-mix(in srgb, var(--danger-solid) 20%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      62% 60% at 2% 100%,
+      color-mix(in srgb, var(--primary) 16%, transparent),
       transparent 60%
     ),
-    var(--bg);
+    radial-gradient(130% 95% at 50% -18%, #0c0f1c, var(--bg) 62%);
 }
-
-/* Scanline + vignette. Alpha-only white lines (matches the repo's inner-highlight
- * idiom) plus a token-based edge darkening. Static — nothing animates here. */
 .heroScan {
   position: absolute;
   inset: 0;
@@ -37,85 +40,204 @@
   background:
     repeating-linear-gradient(
       to bottom,
-      rgba(255, 255, 255, 0.022) 0 1px,
+      rgba(255, 255, 255, 0.024) 0 1px,
       transparent 1px 3px
     ),
     radial-gradient(
       130% 100% at 50% -6%,
-      transparent 52%,
-      color-mix(in srgb, var(--noir-900) 72%, transparent) 100%
+      transparent 46%,
+      color-mix(in srgb, var(--noir-900) 82%, transparent) 100%
     );
+  box-shadow: inset 0 0 200px 44px rgba(0, 0, 0, 0.72);
 }
-/* Cinematic key-art backdrop (warm break-in scene) under a heavy center-safe
-   scrim, so the CENTRED hero stack stays high-contrast over it. Decorative. */
+/* Key-art backdrop, weighted right, under a dark left→right + bottom scrim so the
+   wordmark (left) and slab stay high-contrast over it. Decorative. */
 .heroPhoto {
   position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(
-      120% 110% at 50% 42%,
-      color-mix(in srgb, var(--bg) 58%, transparent),
-      color-mix(in srgb, var(--bg) 85%, transparent) 100%
+    linear-gradient(
+      90deg,
+      var(--bg) 0%,
+      color-mix(in srgb, var(--bg) 88%, transparent) 30%,
+      color-mix(in srgb, var(--bg) 45%, transparent) 58%,
+      color-mix(in srgb, var(--bg) 18%, transparent) 100%
     ),
-    linear-gradient(0deg, var(--bg) 4%, transparent 46%),
+    linear-gradient(0deg, var(--bg) 2%, transparent 44%),
     url('/hero-vault-brass.webp') center / cover no-repeat;
 }
-
 .heroInner {
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 44rem;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-  text-align: center;
+  max-width: var(--shell-max);
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: 1.02fr 0.98fr;
+  gap: clamp(var(--space-6), 4vw, 3.5rem);
   align-items: center;
 }
-.heroLogo {
-  width: clamp(3.5rem, 8vw, 4.75rem);
-  height: auto;
+.heroLeft {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.slate {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-muted);
+}
+.slateMark {
   color: var(--primary);
-  margin-bottom: calc(-1 * var(--space-2));
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--primary) 60%, transparent));
+}
+.recDot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--danger-solid);
+  box-shadow: 0 0 10px var(--danger-solid);
+  animation: rec-pulse 1.5s ease-in-out infinite;
 }
 .title {
-  font-size: clamp(2.75rem, 9vw, 4.5rem);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--text);
+  font-family: var(--font-brand);
+  font-size: clamp(4rem, 13vw, 11rem);
+  font-weight: 400; /* Anton ships a single weight */
+  line-height: 0.8;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: #fff;
+  margin-top: var(--space-4);
+  text-shadow:
+    0 0 46px rgba(226, 169, 80, 0.4),
+    6px 5px 0 rgba(214, 69, 63, 0.16);
+}
+.titleWord {
+  display: block;
+}
+.titleAccent {
+  color: var(--primary);
+  text-shadow: 0 0 48px rgba(226, 169, 80, 0.6);
 }
 .tagline {
   font-family: var(--font-display);
-  font-size: clamp(1.125rem, 3.5vw, 1.5rem);
+  font-size: clamp(1.15rem, 2.4vw, 1.7rem);
   font-weight: 600;
   letter-spacing: -0.01em;
+  line-height: 1.25;
   color: var(--text);
+  margin-top: var(--space-6);
   max-width: 24ch;
+  text-wrap: balance;
 }
 .lede {
   color: var(--text-secondary);
   font-size: 1.0625rem;
   line-height: 1.65;
-  max-width: 55ch;
+  max-width: 46ch;
+  margin-top: var(--space-4);
   text-wrap: pretty;
 }
+.heroCtas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-8);
+}
 
-.teaser {
-  width: 100%;
-  margin: 0;
-  padding: var(--space-4);
-  overflow-x: auto;
-  background: var(--noir-850);
-  border: 1px solid var(--border);
+/* ---------- Hero SQL slab: the thesis, typed in pure CSS ---------- */
+.heroSlab {
+  position: relative;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent), var(--surface);
+  box-shadow:
+    0 40px 90px -50px #000,
+    inset 0 0 0 1px rgba(226, 169, 80, 0.06);
+}
+.slabBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.slabDots {
+  display: flex;
+  gap: 6px;
+}
+.slabDots i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--border-strong);
+}
+.slabDots i:first-child {
+  background: var(--danger-solid);
+}
+.slabBody {
+  padding: clamp(var(--space-4), 2.4vw, var(--space-8));
+}
+/* The breach result — reveals after the payload finishes typing. Jade grant +
+   brass loot: the whole thesis (attack → in → score) lives in the hero. */
+.slabResult {
+  margin-top: var(--space-5, 1.25rem);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--primary) 42%, transparent);
   border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+  box-shadow: 0 0 34px -14px var(--primary);
+  opacity: 0;
+  animation: granted-in 0.55s var(--ease-out) 2.3s both;
+}
+.slabGranted {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--success);
+}
+.slabLoot {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--noir-900);
+  background: var(--loot);
+  border-radius: var(--radius-full);
+  padding: 3px 10px;
+  box-shadow: 0 0 20px -6px var(--loot);
+}
+.teaser {
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
   font-family: var(--font-mono);
   font-variant-ligatures: none;
   font-feature-settings:
     'liga' 0,
     'calt' 0;
-  font-size: 0.875rem;
+  font-size: clamp(0.95rem, 1.5vw, 1.35rem);
+  line-height: 1.75;
   text-align: left;
   color: var(--text-secondary);
   white-space: pre-wrap;
@@ -124,36 +246,37 @@
 .kw {
   color: var(--sql-keyword);
 }
+/* The payload types itself in (steps width reveal), lit crimson, glowing. */
 .inj {
+  display: inline-block;
+  max-width: 15ch;
+  overflow: hidden;
+  white-space: nowrap;
+  vertical-align: bottom;
   background: var(--injected-bg);
   color: var(--injected-fg);
   border-radius: 3px;
   padding: 1px 3px;
-  text-decoration: underline dashed var(--crimson-500);
+  text-decoration: underline dashed var(--danger-solid);
   text-underline-offset: 3px;
+  box-shadow: 0 0 12px -3px var(--danger-solid);
+  animation: type-inj 1.6s steps(15, end) 0.5s both;
 }
 .dim {
   color: var(--sql-comment);
   font-style: italic;
-  opacity: 0.6;
+  opacity: 0.55;
   text-decoration: line-through;
 }
-/* Blinking terminal cursor, right where the operator stopped typing. */
+/* Blinking cursor at the injection point, where the payload lands. */
 .caret {
   display: inline-block;
   width: 0.55ch;
   height: 1.05em;
   margin-left: 3px;
   vertical-align: -0.16em;
-  background: var(--primary);
+  background: var(--danger-solid);
   animation: caret-blink 1.05s steps(1, end) infinite;
-}
-
-.heroCtas {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-  justify-content: center;
 }
 
 /* ---------- Marquee (decorative ticker) ---------- */
@@ -556,6 +679,12 @@
     grid-template-columns: repeat(5, 1fr);
   }
 }
+@media (max-width: 60rem) {
+  .heroInner {
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+  }
+}
 @media (max-width: 30rem) {
   .fact {
     grid-template-columns: 1fr;
@@ -572,6 +701,34 @@
     transform: translateX(-50%);
   }
 }
+/* Payload types itself in (width reveal); breach + REC pulse. */
+@keyframes type-inj {
+  from {
+    max-width: 0;
+  }
+  to {
+    max-width: 15ch;
+  }
+}
+@keyframes granted-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes rec-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
 
 /* ---------- Reduced motion: freeze the ticker, keep it fully visible ---------- */
 @media (prefers-reduced-motion: reduce) {
@@ -580,6 +737,16 @@
     transform: translateX(0);
   }
   .caret {
+    animation: none;
+  }
+  .inj {
+    animation: none;
+  }
+  .slabResult {
+    animation: none;
+    opacity: 1;
+  }
+  .recDot {
     animation: none;
   }
   .loopStep:hover {
