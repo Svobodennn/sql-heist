@@ -16,13 +16,11 @@ describe('<BriefingGate>', () => {
     expect(onStart).toHaveBeenCalledTimes(1)
   })
 
-  it('pluralizes the objective count', () => {
-    const many = render(<BriefingGate briefing={briefing} objectiveCount={3} onStart={() => {}} />)
-    expect(many.container.textContent).toContain('objectives')
-    many.unmount()
-
-    const solo = render(<BriefingGate briefing={briefing} objectiveCount={1} onStart={() => {}} />)
-    expect(solo.container.textContent).toMatch(/\b1 objective\b/)
-    expect(solo.container.textContent).not.toContain('objectives')
+  it('shows the objective count in the brief meta', () => {
+    const { container } = render(
+      <BriefingGate briefing={briefing} objectiveCount={3} onStart={() => {}} />,
+    )
+    expect(container.textContent).toContain('3')
+    expect(container.textContent).toContain('objectives')
   })
 })

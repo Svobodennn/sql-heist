@@ -285,12 +285,18 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
 
   const announce =
     stage === 'briefing'
-      ? `Case briefing: ${gameCase.title}`
+      ? t('game.case.announce.briefing', { title: gameCase.title })
       : stage === 'closed'
-        ? 'Case closed'
+        ? t('game.case.announce.closed')
         : stage === 'payoff'
-          ? `Objective ${selectedIndex + 1} cleared${objective.payoff ? `: ${objective.payoff.got}` : ''}`
-          : `Objective ${selectedIndex + 1} of ${objectives.length}: ${objective.goal}`
+          ? objective.payoff
+            ? t('game.case.announce.clearedGot', { index: selectedIndex + 1, got: objective.payoff.got })
+            : t('game.case.announce.cleared', { index: selectedIndex + 1 })
+          : t('game.case.announce.active', {
+              index: selectedIndex + 1,
+              total: objectives.length,
+              goal: objective.goal,
+            })
 
   // Replay: rebuild the case DB from schema+seed, wipe the in-session play state, and
   // drop the player back on objective 1. Persisted mastery (localStorage) is kept —
@@ -313,7 +319,7 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
         <div className={cx('container', styles.inner)}>
           <header className={styles.caseHeader}>
             <div className={styles.caseHeaderMain}>
-              <Stamp>Case {gameCase.number}</Stamp>
+              <Stamp>{t('game.case.header.number', { number: gameCase.number })}</Stamp>
               <h1 className={styles.caseTitle}>{gameCase.title}</h1>
               <p className={styles.caseTarget}>
                 Target: <span className="mono">{gameCase.target.appName}</span>
@@ -328,7 +334,7 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
               )}
               <Link href={localeHref('/cases', locale)} className={styles.backLink}>
                 <IconArrowLeft size={16} />
-                <span>The board</span>
+                <span>{t('game.case.header.board')}</span>
               </Link>
             </div>
           </header>

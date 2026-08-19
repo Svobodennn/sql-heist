@@ -528,7 +528,9 @@
       "mastery": "Ustalık",
       "itemAria": "{label} — {status}",
       "mastered": "ustalaşıldı",
-      "locked": "kilitli"
+      "locked": "kilitli",
+      "casesClosed": "{closed} / {total} vaka kapandı",
+      "summaryAria": "Teknik ustalığı: {total} üzerinden {earned}. {cases} vakadan {closed} kapandı."
     },
     "signal": {
       "timingOracle": "Zamanlama kâhini",
@@ -554,6 +556,84 @@
       "cleaned": "temizlendi",
       "became": "→ girdin şuna dönüştü",
       "empty": "(boş)"
+    },
+    "technique": {
+      "auth-bypass": "Kimlik Bypass",
+      "union-extraction": "UNION Çekme",
+      "schema-discovery": "Şema Keşfi",
+      "error-based": "Hata Tabanlı",
+      "blind-boolean": "Kör Boolean",
+      "blind-timing": "Kör Zamanlama",
+      "stacked-queries": "İstiflenmiş Sorgu",
+      "waf-bypass": "WAF Atlatma"
+    },
+    "case": {
+      "header": {
+        "number": "Vaka {number}",
+        "board": "Pano"
+      },
+      "objective": {
+        "counter": "Hedef {index}/{total}",
+        "order": "Hedef {order}",
+        "why": "Neden",
+        "doneWhen": "Ne zaman biter",
+        "angle": "Yaklaşım",
+        "progressAria": "Hedef ilerlemesi",
+        "cleared": "tamamlandı",
+        "active": "mevcut hedef",
+        "locked": "kilitli — önce önceki hedefleri tamamla"
+      },
+      "payoff": {
+        "secured": "Hedef {index}/{total} · alındı",
+        "extracted": "Ne çektik",
+        "next": "Sıradaki",
+        "hintNext": "Sıradaki ele geçelim.",
+        "hintLast": "Vakayı kapat — seni nasıl durduracaklarını gör.",
+        "fallback": "Hedef tamamlandı."
+      },
+      "closed": {
+        "stamp": "Vaka kapandı",
+        "defense": "Seni nasıl durdururlardı",
+        "defenseSub": "Yaptığın her hamle ve onu kapatacak tek satır kod.",
+        "objective": "Hedef {index}",
+        "move": "Hamle",
+        "replay": "Bu vakayı tekrar oyna",
+        "back": "Panoya dön"
+      },
+      "brief": {
+        "stamp": "Brifing",
+        "heading": "İş şu.",
+        "meta": "{count} hedef — teker teker. Her biri sana ne yapacağını, neden yapacağını ve başardığını nasıl anlayacağını söyler.",
+        "take": "Vakayı al"
+      },
+      "announce": {
+        "briefing": "Vaka brifingi: {title}",
+        "closed": "Vaka kapandı",
+        "cleared": "Hedef {index} tamamlandı",
+        "clearedGot": "Hedef {index} tamamlandı: {got}",
+        "active": "Hedef {index}/{total}: {goal}"
+      },
+      "card": {
+        "cleared": "Tamamlandı",
+        "inProgress": "Devam ediyor",
+        "open": "Açık",
+        "ctaCleared": "Tekrar çek",
+        "ctaProgress": "Devam et",
+        "ctaNew": "Vaka açık",
+        "aria": "Vaka {number} — {title} ({status}, {total} hedeften {done})",
+        "techniquesAria": "Bu vakadaki teknikler",
+        "progressAria": "{total} hedeften {done} tamamlandı",
+        "allCleared": "Tüm hedefler tamamlandı",
+        "progress": "{done} / {total} hedef"
+      },
+      "board": {
+        "stamp": "Vaka dosyaları",
+        "title": "Hedefini seç.",
+        "sub": "{cases} sızma · {target} hedefine karşı {objectives} hedef. Her vaka ne, neden ve başardığını nasıl anlayacağını yanıtlar.",
+        "clearedStamp": "Tamamlandı",
+        "tally": "{total} vakadan {cleared}",
+        "targetFallback": "hedef"
+      }
     }
   }
 }

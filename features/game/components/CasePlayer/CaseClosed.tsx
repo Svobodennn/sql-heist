@@ -8,7 +8,6 @@ import type { Case, Objective } from '@/lib/schema/case'
 import { compose } from '@/lib/engine/queryComposer'
 import { cx } from '@/ui/cx'
 import { groupSecureSnippets, selectSecureSnippets, selectVulnerableSnippets } from '../../lib/secureCode'
-import { techniqueLabel } from '../../lib/caseView'
 import { CodeCompare } from '../CodeCompare'
 import { SqlPreview } from '../SqlPreview'
 import { Stamp } from '../Stamp'
@@ -26,12 +25,12 @@ import styles from './CasePlayer.module.css'
 // canonical expectedSolution, composed through the frozen composer) → the flaw → the fix →
 // the takeaway. Read-only, all revealed at once.
 export function CaseClosed({ gameCase, onReplay }: { gameCase: Case; onReplay: () => void }) {
-  const { locale } = useTranslation()
+  const { t, locale } = useTranslation()
   const { caseClosed } = gameCase
   return (
     <section className={styles.closed}>
       <header className={styles.closedHead}>
-        <Stamp>Case closed</Stamp>
+        <Stamp>{t('game.case.closed.stamp')}</Stamp>
         <h2 className={styles.closedHeadline} data-objective-heading tabIndex={-1}>
           {caseClosed.headline}
         </h2>
@@ -42,10 +41,8 @@ export function CaseClosed({ gameCase, onReplay }: { gameCase: Case; onReplay: (
       </header>
 
       <div className={styles.defenseIntro}>
-        <Stamp>How they’d stop you</Stamp>
-        <p className={styles.defenseSub}>
-          Every move you pulled, and the one line of code that would have shut it.
-        </p>
+        <Stamp>{t('game.case.closed.defense')}</Stamp>
+        <p className={styles.defenseSub}>{t('game.case.closed.defenseSub')}</p>
       </div>
 
       <ol className={styles.defenseList}>
@@ -56,10 +53,10 @@ export function CaseClosed({ gameCase, onReplay }: { gameCase: Case; onReplay: (
 
       <div className={styles.closedActions}>
         <button type="button" className="btn btn--ghost" onClick={onReplay}>
-          <span>Play this case again</span>
+          <span>{t('game.case.closed.replay')}</span>
         </button>
         <Link href={localeHref('/cases', locale)} className="btn btn--success">
-          <span>Back to the board</span>
+          <span>{t('game.case.closed.back')}</span>
           <IconArrowRight size={18} />
         </Link>
       </div>
@@ -68,6 +65,7 @@ export function CaseClosed({ gameCase, onReplay }: { gameCase: Case; onReplay: (
 }
 
 function ObjectiveDefense({ objective, index }: { objective: Objective; index: number }) {
+  const { t } = useTranslation()
   // The canonical winning move for this objective (not the player's — the debrief is
   // reachable on any revisit), composed through the frozen composer for the live preview.
   const composed = useMemo(
@@ -86,12 +84,14 @@ function ObjectiveDefense({ objective, index }: { objective: Objective; index: n
   return (
     <li className={cx('panel', styles.defense)}>
       <div className={styles.defenseHeader}>
-        <Stamp>Objective {index + 1}</Stamp>
-        <span className={cx('mono', styles.defenseBadge)}>{techniqueLabel(objective.technique)}</span>
+        <Stamp>{t('game.case.closed.objective', { index: index + 1 })}</Stamp>
+        <span className={cx('mono', styles.defenseBadge)}>
+          {t(`game.technique.${objective.technique}`)}
+        </span>
       </div>
       <h3 className={styles.defenseGoal}>{objective.goal}</h3>
 
-      <p className={styles.moveLabel}>The move</p>
+      <p className={styles.moveLabel}>{t('game.case.closed.move')}</p>
       <SqlPreview segments={composed.segments} />
 
       <p className={cx('prose', styles.explanation)}>{objective.debrief.explanation}</p>

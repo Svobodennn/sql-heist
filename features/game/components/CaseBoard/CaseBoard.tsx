@@ -2,18 +2,18 @@
 
 import type { CaseMeta } from '../../cases'
 import { useCaseProgress } from '../../lib/useCaseProgress'
+import { useTranslation } from '@/i18n/useTranslation'
 import { Stamp } from '../Stamp'
 import { CaseBadgeStrip } from '../CaseBadgeStrip'
 import { CaseCard } from '../CaseCard'
 import styles from './CaseBoard.module.css'
 
-// Case Board (docs/cases-design.md — replaces the Job Board). The case twin of
-// JobBoard: a client component that reads localStorage progress to show each
-// case's completion. Progress is a clamped count (cleared objective ids vs the
-// case's objective count) so the board never needs the objective ids — it stays a
-// thin metadata surface that ships no SQL. First client render uses empty records
-// (matches the server baseline) then fills after mount → no hydration mismatch.
+// Case Board — a client component that reads localStorage progress to show each
+// case's completion. Progress is a clamped count so the board ships no SQL. First
+// client render uses empty records (matches the server baseline) then fills after
+// mount → no hydration mismatch. Structural labels come from the i18n catalog.
 export function CaseBoard({ cases }: { cases: CaseMeta[] }) {
+  const { t } = useTranslation()
   const { records } = useCaseProgress()
 
   const doneFor = (meta: CaseMeta) =>
@@ -23,24 +23,27 @@ export function CaseBoard({ cases }: { cases: CaseMeta[] }) {
   const clearedCases = cases.filter((c) => doneFor(c) >= c.objectiveCount && c.objectiveCount > 0)
     .length
   const targets = new Set(cases.map((c) => c.appName))
-  const primaryTarget = targets.size === 1 ? [...targets][0] : 'the target'
+  const primaryTarget = targets.size === 1 ? [...targets][0] : t('game.case.board.targetFallback')
 
   return (
     <section className={styles.wrap}>
       <header className={styles.header}>
         <div>
-          <Stamp>Case files</Stamp>
-          <h1 className={styles.title}>Pick your mark.</h1>
+          <Stamp>{t('game.case.board.stamp')}</Stamp>
+          <h1 className={styles.title}>{t('game.case.board.title')}</h1>
           <p className={styles.sub}>
-            {cases.length} breaches · {totalObjectives} objectives against {primaryTarget}. Every
-            case answers what, why, and how you know it landed.
+            {t('game.case.board.sub', {
+              cases: cases.length,
+              objectives: totalObjectives,
+              target: primaryTarget,
+            })}
           </p>
         </div>
         {clearedCases > 0 && (
           <div className={styles.tally}>
-            <Stamp>Cleared</Stamp>
+            <Stamp>{t('game.case.board.clearedStamp')}</Stamp>
             <p className={styles.tallyValue}>
-              <span className="mono">{clearedCases}</span> / {cases.length} cases
+              {t('game.case.board.tally', { cleared: clearedCases, total: cases.length })}
             </p>
           </div>
         )}

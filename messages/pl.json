@@ -528,7 +528,9 @@
       "mastery": "Opanowanie",
       "itemAria": "{label} — {status}",
       "mastered": "opanowane",
-      "locked": "zablokowane"
+      "locked": "zablokowane",
+      "casesClosed": "{closed} / {total} spraw zamkniętych",
+      "summaryAria": "Opanowanie technik: {earned} z {total}. {closed} z {cases} spraw zamkniętych."
     },
     "signal": {
       "timingOracle": "Wyrocznia czasowa",
@@ -554,6 +556,84 @@
       "cleaned": "wyczyszczone",
       "became": "→ twój wpis stał się",
       "empty": "(puste)"
+    },
+    "technique": {
+      "auth-bypass": "Omijanie logowania",
+      "union-extraction": "Ekstrakcja UNION",
+      "schema-discovery": "Odkrywanie schematu",
+      "error-based": "Oparte na błędach",
+      "blind-boolean": "Ślepe boolean",
+      "blind-timing": "Ślepe czasowe",
+      "stacked-queries": "Zapytania łączone",
+      "waf-bypass": "Omijanie WAF"
+    },
+    "case": {
+      "header": {
+        "number": "Sprawa {number}",
+        "board": "Tablica"
+      },
+      "objective": {
+        "counter": "Cel {index}/{total}",
+        "order": "Cel {order}",
+        "why": "Dlaczego",
+        "doneWhen": "Gotowe, gdy",
+        "angle": "Podejście",
+        "progressAria": "Postęp celów",
+        "cleared": "ukończony",
+        "active": "bieżący cel",
+        "locked": "zablokowane — najpierw ukończ wcześniejsze cele"
+      },
+      "payoff": {
+        "secured": "Cel {index}/{total} · zdobyty",
+        "extracted": "Co wyciągnęliśmy",
+        "next": "Dalej",
+        "hintNext": "Przechodzimy do następnego rozdania.",
+        "hintLast": "Zamknij sprawę — zobacz, jak by cię powstrzymali.",
+        "fallback": "Cel ukończony."
+      },
+      "closed": {
+        "stamp": "Sprawa zamknięta",
+        "defense": "Jak by cię powstrzymali",
+        "defenseSub": "Każdy twój ruch i ta jedna linia kodu, która by go zamknęła.",
+        "objective": "Cel {index}",
+        "move": "Ruch",
+        "replay": "Zagraj tę sprawę ponownie",
+        "back": "Powrót do tablicy"
+      },
+      "brief": {
+        "stamp": "Odprawa",
+        "heading": "Oto robota.",
+        "meta": "{count} cele — po kolei. Każdy mówi ci, co zrobić, dlaczego i skąd będziesz wiedzieć, że się udało.",
+        "take": "Weź sprawę"
+      },
+      "announce": {
+        "briefing": "Odprawa sprawy: {title}",
+        "closed": "Sprawa zamknięta",
+        "cleared": "Cel {index} ukończony",
+        "clearedGot": "Cel {index} ukończony: {got}",
+        "active": "Cel {index} z {total}: {goal}"
+      },
+      "card": {
+        "cleared": "Ukończone",
+        "inProgress": "W toku",
+        "open": "Otwarte",
+        "ctaCleared": "Zagraj jeszcze raz",
+        "ctaProgress": "Kontynuuj",
+        "ctaNew": "Sprawa otwarta",
+        "aria": "Sprawa {number} — {title} ({status}, {done} z {total} celów)",
+        "techniquesAria": "Techniki w tej sprawie",
+        "progressAria": "{done} z {total} celów ukończonych",
+        "allCleared": "Wszystkie cele ukończone",
+        "progress": "{done} / {total} celów"
+      },
+      "board": {
+        "stamp": "Akta spraw",
+        "title": "Wybierz swój cel.",
+        "sub": "{cases} włamań · {objectives} celów przeciwko {target}. Każda sprawa odpowiada: co, dlaczego i skąd wiesz, że się udało.",
+        "clearedStamp": "Ukończone",
+        "tally": "{cleared} / {total} spraw",
+        "targetFallback": "cel"
+      }
     }
   }
 }

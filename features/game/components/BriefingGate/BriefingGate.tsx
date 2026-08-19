@@ -1,17 +1,16 @@
 'use client'
 
 import { cx } from '@/ui/cx'
+import { useTranslation } from '@/i18n/useTranslation'
 import { Button } from '../Button'
 import { Stamp } from '../Stamp'
 import { IconArrowRight, IconTarget } from '../icons'
 import styles from './BriefingGate.module.css'
 
-// The briefing GATE (docs/cases-design.md — "briefing + … the active objective's
-// exploit surface"). Entering a case now opens on the brief ALONE — the Fixer's
-// pitch and a single "Take the case" CTA — instead of dumping brief + plan + recon +
-// exploit on one screen. Clicking through hands the player to the active objective.
-// Render-only; the CasePlayer owns the stage. The heading carries the phase-swap
-// focus marker so a return to this gate (never on initial mount) lands here.
+// The briefing GATE. Entering a case opens on the brief ALONE — the handler's pitch
+// and a single "take the case" CTA — then hands the player to the active objective.
+// Structural labels come from the i18n catalog; briefing.handler + briefing.text are
+// localized case content. The heading carries the phase-swap focus marker.
 interface BriefingGateProps {
   briefing: { handler: string; text: string }
   objectiveCount: number
@@ -19,31 +18,28 @@ interface BriefingGateProps {
 }
 
 export function BriefingGate({ briefing, objectiveCount, onStart }: BriefingGateProps) {
+  const { t } = useTranslation()
   return (
     <section className={cx('panel', styles.gate)} aria-label="Case briefing">
       <div className={styles.head}>
-        <Stamp>The brief</Stamp>
+        <Stamp>{t('game.case.brief.stamp')}</Stamp>
         <span className={cx('mono', styles.handler)}>{briefing.handler}</span>
       </div>
 
       <h2 className={styles.heading} data-objective-heading tabIndex={-1}>
-        Here&rsquo;s the job.
+        {t('game.case.brief.heading')}
       </h2>
 
       <p className={cx('prose', styles.text)}>{briefing.text}</p>
 
       <p className={styles.meta}>
         <IconTarget size={16} />
-        <span>
-          <span className="mono">{objectiveCount}</span> objective
-          {objectiveCount === 1 ? '' : 's'} — one at a time. Each one tells you what to do, why,
-          and how you&rsquo;ll know it landed.
-        </span>
+        <span>{t('game.case.brief.meta', { count: objectiveCount })}</span>
       </p>
 
       <div className={styles.actions}>
         <Button variant="primary" onClick={onStart} iconRight={<IconArrowRight size={18} />}>
-          Take the case
+          {t('game.case.brief.take')}
         </Button>
       </div>
     </section>

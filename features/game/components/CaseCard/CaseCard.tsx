@@ -5,26 +5,32 @@ import type { CaseMeta } from '../../cases'
 import { cx } from '@/ui/cx'
 import { useTranslation } from '@/i18n/useTranslation'
 import { localeHref } from '@/i18n/localeHref'
-import { techniqueLabel } from '../../lib/caseView'
 import { IconArrowRight, IconCheck } from '../icons'
 import styles from './CaseCard.module.css'
 
 export type CaseCardState = 'cleared' | 'in-progress' | 'new'
 
-// Case Board card (docs/cases-design.md — "numbered cards 'Case 001 — The Front
-// Door'"). The case twin of JobCard: three states carried by icon + label + a
-// progress bar (never color alone, §11). Every case is always playable — the
-// gating is WITHIN a case (its ordered objectives), not across cases — so this is
-// always a link; the state only reflects how far the player got. `done` is the
-// count of cleared objectives, passed by the client CaseBoard from localStorage.
+// Case Board card. Three states carried by icon + label + a progress bar (never
+// color alone, §11). Every case is always playable; state only reflects how far the
+// player got. Structural labels come from the i18n catalog; title/appName/technique
+// are localized case metadata. `done` = cleared-objective count from localStorage.
 export function CaseCard({ meta, done }: { meta: CaseMeta; done: number }) {
-  const { locale } = useTranslation()
+  const { t, locale } = useTranslation()
   const total = meta.objectiveCount
   const state: CaseCardState =
     done >= total && total > 0 ? 'cleared' : done > 0 ? 'in-progress' : 'new'
   const statusLabel =
-    state === 'cleared' ? 'Cleared' : state === 'in-progress' ? 'In progress' : 'Open'
-  const cta = state === 'cleared' ? 'Run it back' : state === 'in-progress' ? 'Continue' : 'Case open'
+    state === 'cleared'
+      ? t('game.case.card.cleared')
+      : state === 'in-progress'
+        ? t('game.case.card.inProgress')
+        : t('game.case.card.open')
+  const cta =
+    state === 'cleared'
+      ? t('game.case.card.ctaCleared')
+      : state === 'in-progress'
+        ? t('game.case.card.ctaProgress')
+        : t('game.case.card.ctaNew')
   const pct = total > 0 ? Math.round((done / total) * 100) : 0
 
   return (
@@ -32,10 +38,18 @@ export function CaseCard({ meta, done }: { meta: CaseMeta; done: number }) {
       <Link
         href={localeHref(`/cases/${meta.id}`, locale)}
         className={styles.link}
-        aria-label={`Case ${meta.number} — ${meta.title} (${statusLabel}, ${done} of ${total} objectives)`}
+        aria-label={t('game.case.card.aria', {
+          number: meta.number,
+          title: meta.title,
+          status: statusLabel,
+          done,
+          total,
+        })}
       >
         <div className={styles.top}>
-          <span className={cx('mono', styles.index)}>Case {meta.number}</span>
+          <span className={cx('mono', styles.index)}>
+            {t('game.case.header.number', { number: meta.number })}
+          </span>
           <span className={cx(styles.statusTag, styles[`tag--${state}`])}>
             {state === 'cleared' && <IconCheck size={13} />}
             {statusLabel}
@@ -47,10 +61,10 @@ export function CaseCard({ meta, done }: { meta: CaseMeta; done: number }) {
           <p className={cx('mono', styles.app)}>{meta.appName}</p>
         </div>
 
-        <ul className={styles.techniques} aria-label="Techniques in this case">
+        <ul className={styles.techniques} aria-label={t('game.case.card.techniquesAria')}>
           {meta.objectives.map((objective) => (
             <li key={objective.id} className={cx('mono', styles.chip)}>
-              {techniqueLabel(objective.technique)}
+              {t(`game.technique.${objective.technique}`)}
             </li>
           ))}
         </ul>
@@ -62,13 +76,15 @@ export function CaseCard({ meta, done }: { meta: CaseMeta; done: number }) {
             aria-valuemin={0}
             aria-valuemax={total}
             aria-valuenow={done}
-            aria-label={`${done} of ${total} objectives cleared`}
+            aria-label={t('game.case.card.progressAria', { done, total })}
           >
             <div className={styles.fill} style={{ transform: `scaleX(${pct / 100})` }} />
           </div>
           <div className={styles.footRow}>
             <span className={styles.progress}>
-              {state === 'cleared' ? 'All objectives cleared' : `${done} / ${total} objectives`}
+              {state === 'cleared'
+                ? t('game.case.card.allCleared')
+                : t('game.case.card.progress', { done, total })}
             </span>
             <span className={styles.cta}>
               {cta} <IconArrowRight size={15} />

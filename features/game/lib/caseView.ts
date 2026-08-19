@@ -1,7 +1,6 @@
 import type { Case, Objective } from '@/lib/schema/case'
-import type { Level, TechniqueId } from '@/lib/schema/level'
+import type { Level } from '@/lib/schema/level'
 import type { RunResult } from '@/lib/engine/sqlRunner'
-import { BADGE_TECHNIQUES } from './badges'
 
 // Pure case/objective view helpers (no React) — the case twin of the small
 // mappers the jobs flow reads off a Level. Kept in features/game/lib so they
@@ -42,11 +41,6 @@ export function objectiveAsLevel(gameCase: Case, objective: Objective): Level {
   }
 }
 
-// Title-cased technique label ("auth-bypass" -> "Auth Bypass"), reusing the
-// canonical roster in badges.ts so the case UI and the mastery badges never drift.
-const TECHNIQUE_LABEL = new Map<TechniqueId, string>(
-  BADGE_TECHNIQUES.map((b) => [b.id, b.label]),
-)
 // The notebook line an objective records on a win — a short, technique-aware note
 // of what it pulled (the loot flag, the oracle answer, the write that landed).
 export function pullDetail(objective: Objective, result: RunResult): string {
@@ -66,10 +60,6 @@ export function pullDetail(objective: Objective, result: RunResult): string {
     case 'rows-returned':
       return `${result.rowCount} row${result.rowCount === 1 ? '' : 's'} pulled`
   }
-}
-
-export function techniqueLabel(id: TechniqueId): string {
-  return TECHNIQUE_LABEL.get(id) ?? id
 }
 
 // The objective the player must tackle now = the first one not yet cleared.

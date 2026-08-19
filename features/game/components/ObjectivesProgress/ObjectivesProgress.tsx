@@ -2,18 +2,16 @@
 
 import type { Objective } from '@/lib/schema/case'
 import { cx } from '@/ui/cx'
+import { useTranslation } from '@/i18n/useTranslation'
 import { firstIncompleteIndex } from '../../lib/caseView'
 import { IconCheck, IconLock, IconTarget } from '../icons'
 import styles from './ObjectivesProgress.module.css'
 
 // The case's objectives as a compact HORIZONTAL progress stepper across the top of
-// the case (docs/cases-design.md — "an objectives checklist (progress)"), the
-// repurpose of the old left-hand ObjectivesChecklist: moving it up here gives the
-// exploit surface the full page width. Three states carried by icon + label +
-// position + color (never color alone, §11): done ✓ / active / locked, numbered,
-// each with its short goal. Done items and the single active one are selectable
-// (jump / revisit); later objectives are locked until the earlier ones clear.
-// Render-only — progress is owned by the CasePlayer.
+// the case. Three states carried by icon + label + position + color (never color
+// alone, §11): done ✓ / active / locked, numbered, each with its short goal. Done
+// items and the single active one are selectable (jump / revisit). Structural labels
+// come from the i18n catalog; the per-objective goal VALUE is localized case content.
 interface ObjectivesProgressProps {
   objectives: Objective[]
   completed: ReadonlySet<string>
@@ -23,10 +21,11 @@ interface ObjectivesProgressProps {
 
 type ItemState = 'done' | 'active' | 'locked'
 
-const STATE_WORD: Record<ItemState, string> = {
+// Maps a state to its catalog key suffix under game.case.objective.*
+const STATE_KEY: Record<ItemState, string> = {
   done: 'cleared',
-  active: 'current objective',
-  locked: 'locked — clear the earlier objectives first',
+  active: 'active',
+  locked: 'locked',
 }
 
 export function ObjectivesProgress({
@@ -35,6 +34,7 @@ export function ObjectivesProgress({
   selectedIndex,
   onSelect,
 }: ObjectivesProgressProps) {
+  const { t } = useTranslation()
   const active = firstIncompleteIndex(objectives, completed)
 
   const stateOf = (index: number, id: string): ItemState => {
@@ -43,7 +43,7 @@ export function ObjectivesProgress({
   }
 
   return (
-    <nav className={styles.wrap} aria-label="Objectives progress">
+    <nav className={styles.wrap} aria-label={t('game.case.objective.progressAria')}>
       <ol className={styles.steps}>
         {objectives.map((objective, index) => {
           const state = stateOf(index, objective.id)
@@ -66,10 +66,12 @@ export function ObjectivesProgress({
                 )}
               </span>
               <span className={styles.body}>
-                <span className={cx('mono', styles.order)}>Objective {order}</span>
+                <span className={cx('mono', styles.order)}>
+                  {t('game.case.objective.order', { order })}
+                </span>
                 <span className={styles.goal}>{objective.goal}</span>
                 {/* State conveyed to AT here — icon + color are presentational. */}
-                <span className="sr-only">{STATE_WORD[state]}</span>
+                <span className="sr-only">{t(`game.case.objective.${STATE_KEY[state]}`)}</span>
               </span>
             </>
           )

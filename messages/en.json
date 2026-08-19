@@ -528,7 +528,9 @@
       "mastery": "Mastery",
       "itemAria": "{label} — {status}",
       "mastered": "mastered",
-      "locked": "locked"
+      "locked": "locked",
+      "casesClosed": "{closed} / {total} cases closed",
+      "summaryAria": "Technique mastery: {earned} of {total}. {closed} of {cases} cases closed."
     },
     "signal": {
       "timingOracle": "Timing oracle",
@@ -554,6 +556,84 @@
       "cleaned": "cleaned",
       "became": "→ your input became",
       "empty": "(empty)"
+    },
+    "technique": {
+      "auth-bypass": "Auth Bypass",
+      "union-extraction": "Union Extraction",
+      "schema-discovery": "Schema Discovery",
+      "error-based": "Error-Based",
+      "blind-boolean": "Blind Boolean",
+      "blind-timing": "Blind Timing",
+      "stacked-queries": "Stacked Queries",
+      "waf-bypass": "WAF Bypass"
+    },
+    "case": {
+      "header": {
+        "number": "Case {number}",
+        "board": "The board"
+      },
+      "objective": {
+        "counter": "Objective {index}/{total}",
+        "order": "Objective {order}",
+        "why": "Why",
+        "doneWhen": "Done when",
+        "angle": "The angle",
+        "progressAria": "Objectives progress",
+        "cleared": "cleared",
+        "active": "current objective",
+        "locked": "locked — clear the earlier objectives first"
+      },
+      "payoff": {
+        "secured": "Objective {index}/{total} · secured",
+        "extracted": "What we pulled",
+        "next": "Next",
+        "hintNext": "On to the next hand.",
+        "hintLast": "Close the case — see how they’d have stopped you.",
+        "fallback": "Objective cleared."
+      },
+      "closed": {
+        "stamp": "Case closed",
+        "defense": "How they’d stop you",
+        "defenseSub": "Every move you pulled, and the one line of code that would have shut it.",
+        "objective": "Objective {index}",
+        "move": "The move",
+        "replay": "Play this case again",
+        "back": "Back to the board"
+      },
+      "brief": {
+        "stamp": "The brief",
+        "heading": "Here’s the job.",
+        "meta": "{count} objectives — one at a time. Each one tells you what to do, why, and how you’ll know it landed.",
+        "take": "Take the case"
+      },
+      "announce": {
+        "briefing": "Case briefing: {title}",
+        "closed": "Case closed",
+        "cleared": "Objective {index} cleared",
+        "clearedGot": "Objective {index} cleared: {got}",
+        "active": "Objective {index} of {total}: {goal}"
+      },
+      "card": {
+        "cleared": "Cleared",
+        "inProgress": "In progress",
+        "open": "Open",
+        "ctaCleared": "Run it back",
+        "ctaProgress": "Continue",
+        "ctaNew": "Case open",
+        "aria": "Case {number} — {title} ({status}, {done} of {total} objectives)",
+        "techniquesAria": "Techniques in this case",
+        "progressAria": "{done} of {total} objectives cleared",
+        "allCleared": "All objectives cleared",
+        "progress": "{done} / {total} objectives"
+      },
+      "board": {
+        "stamp": "Case files",
+        "title": "Pick your mark.",
+        "sub": "{cases} breaches · {objectives} objectives against {target}. Every case answers what, why, and how you know it landed.",
+        "clearedStamp": "Cleared",
+        "tally": "{cleared} / {total} cases",
+        "targetFallback": "the target"
+      }
     }
   }
 }
