@@ -5,4 +5,4 @@ export const SITE_URL = 'https://sql-heist.vercel.app'
 export const SITE_NAME = 'SQL Heist'
 export const SITE_TAGLINE = 'Learn SQL Injection by Pulling It Off'
 export const SITE_DESCRIPTION =
-  'A noir heist game that teaches SQL injection against a real in-browser SQLite engine — then teaches you to defend it. Eight jobs, zero setup, nothing leaves your browser.'
+  'A noir heist game that teaches SQL injection against a real in-browser SQLite engine — then teaches you to defend it. Three cases, eight objectives, zero setup — nothing leaves your browser.'
