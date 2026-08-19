@@ -76,7 +76,10 @@
         "type": "flag-in-result",
         "flag": "VLT-DOOR-3E9A",
         "caseSensitive": true,
-        "reason": "The phrase walked past the doorman and the vault's door id surfaced from the ledger."
+        "reason": "The phrase walked past the doorman and the vault's door id surfaced from the ledger.",
+        "mustReference": [
+          "archive_ledger"
+        ]
       },
       "hints": [
         {
@@ -271,6 +274,7 @@
         "minResultSets": 2,
         "mustReference": [
           "UPDATE",
+          "door_acl",
           "VLT-DOOR-3E9A"
         ],
         "reason": "A second statement rode in behind the badge read — the vault door (VLT-DOOR-3E9A) flipped to granted and the verify read proved it."

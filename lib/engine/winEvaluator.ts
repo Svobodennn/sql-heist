@@ -120,6 +120,16 @@ export function evaluate(cond: WinCondition, ctx: WinContext): WinEvaluation {
         return lose(cond.reason ?? `Column "${cond.column}" is not in the result.`)
       }
 
+      // Anti-echo guard: when the level names what the payload must reference (the
+      // source table / sqlite_master), a flag that surfaced only because the player
+      // SELECTed it as a literal constant is NOT the technique — reject it. Same
+      // opt-in contract (winCondition.mustReference) as the blind/stacked types.
+      if (cond.mustReference && !composedReferencesAll(ctx.composedSql, cond.mustReference)) {
+        return lose(
+          'The flag surfaced — but as a constant you handed in, not pulled from the target. Read it out of the source, don’t echo it.',
+        )
+      }
+
       for (const row of ctx.rows) {
         const cells = cond.column ? [row[columnIndex]] : row
         for (const cell of cells) {

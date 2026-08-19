@@ -121,6 +121,10 @@ export const winConditionSchema = z.discriminatedUnion('type', [
     flag: z.string(),
     column: z.string().optional(),
     caseSensitive: z.boolean().optional(),
+    // Anti-echo guard: the composed SQL must reference every token (e.g. the source
+    // table / sqlite_master), so a player can't win by SELECTing the flag as a literal
+    // constant without performing the extraction. Same contract as the blind/stacked types.
+    mustReference: z.array(z.string()).min(1).optional(),
     reason: z.string().optional(),
   }),
   // (3) target row(s) present. subset = row may carry extra columns; exact = 1:1.

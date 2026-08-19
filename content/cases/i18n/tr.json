@@ -39,7 +39,7 @@
       "blueprint": {
         "goal": "Meridian'ın kendi kat planından gizlediği odaları listele.",
         "why": "Adını bilmediğin bir odayı soyamazsın — binanın kendi dizinini oku ve keşfin hiç listelemediğini bul.",
-        "doneWhen": "Katalog, keşfin sana hiç göstermediği bir tabloyu geri veriyor: offshore_accounts.",
+        "doneWhen": "Katalog, keşfin sana hiç göstermediği bir tabloyu geri veriyor.",
         "hints": {
           "h1": "Numarayı Kasa'dan biliyorsun. Bilmediğin şey oda numarası. Tahmin etmeyi bırak — bina kendi odalarının bir listesini tutuyor. Önce o listeyi iste.",
           "h2": "Tablo adını tahmin etme - veritabanı kendi kataloğunu tutuyor: sqlite_master. name ve sql'i çek; sql sütunu, sütunları gösterir. Bu iş 2 sütun.",

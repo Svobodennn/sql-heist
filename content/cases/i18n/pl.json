@@ -39,7 +39,7 @@
       "blueprint": {
         "goal": "Wypisz pomieszczenia, które Meridian trzyma poza własnym planem budynku.",
         "why": "Nie okradniesz pomieszczenia, którego nie potrafisz nazwać — odczytaj własny indeks budynku i znajdź to, czego rozpoznanie nigdy nie wypisało.",
-        "doneWhen": "Katalog zwraca tabelę, której rozpoznanie nigdy ci nie pokazało: offshore_accounts.",
+        "doneWhen": "Katalog zwraca tabelę, której rozpoznanie nigdy ci nie pokazało.",
         "hints": {
           "h1": "Masz już sztuczkę z Sejfu. Czego nie masz, to numeru pomieszczenia. Przestań zgadywać — budynek trzyma listę własnych pomieszczeń. Najpierw poproś go o tę listę.",
           "h2": "Nie zgaduj nazwy tabeli — baza danych trzyma własny katalog: sqlite_master. Wyciągnij name i sql; kolumna sql pokazuje kolumny. Ta robota to 2 kolumny.",

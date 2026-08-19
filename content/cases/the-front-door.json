@@ -252,7 +252,7 @@
       "order": 2,
       "goal": "List the rooms Meridian keeps off its own floor plan.",
       "why": "You can't rob a room you can't name — read the building's own index and find what recon never listed.",
-      "doneWhen": "The catalog hands back a table recon never showed you: offshore_accounts.",
+      "doneWhen": "The catalog hands back a table recon never showed you.",
       "approach": "Recon only lists part of the database. The room you're after isn't on that map — so first make the database hand over its own list of tables, then read the hidden one recon never showed you.",
       "technique": "schema-discovery",
       "difficulty": "hard",
@@ -273,7 +273,10 @@
         "type": "flag-in-result",
         "flag": "offshore_accounts",
         "caseSensitive": false,
-        "reason": "The catalog gave up a hidden room — offshore_accounts, a table recon never listed."
+        "reason": "The catalog gave up a hidden room — offshore_accounts, a table recon never listed.",
+        "mustReference": [
+          "sqlite_master"
+        ]
       },
       "hints": [
         {
@@ -467,7 +470,10 @@
         "type": "flag-in-result",
         "flag": "LOOT-VAULT-9F2C4471",
         "caseSensitive": true,
-        "reason": "Vault manifest surfaced in the result grid - the cross-table UNION held."
+        "reason": "Vault manifest surfaced in the result grid - the cross-table UNION held.",
+        "mustReference": [
+          "offshore_accounts"
+        ]
       },
       "hints": [
         {

@@ -80,7 +80,8 @@
       "winCondition": {
         "type": "blind-boolean",
         "mustReference": [
-          "master_pin"
+          "master_pin",
+          "vault_config"
         ],
         "reason": "The desk lit green - your guess about the PIN held TRUE. That is the oracle answering."
       },
@@ -278,7 +279,8 @@
         "slowDelayMs": 3000,
         "mustReference": [
           "master_pin",
-          "7731"
+          "7731",
+          "vault_config"
         ],
         "reason": "The gate dragged its feet — the slow branch fired only because master_pin really is 7731, the PIN you pried."
       },
