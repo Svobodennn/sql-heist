@@ -5,11 +5,86 @@
     "help": "Yardım",
     "signIn": "Giriş yap",
     "signOut": "Çıkış yap",
-    "signInTitle": "Hesaplar çok yakında geliyor",
     "brandAria": "SQL Heist — ana sayfa",
     "primaryAria": "Birincil",
     "openMenu": "Menüyü aç",
     "closeMenu": "Menüyü kapat"
+  },
+  "auth": {
+    "signIn": {
+      "stamp": "Teşkilat erişimi",
+      "title": "Giriş yap",
+      "email": "E-posta",
+      "password": "Şifre",
+      "submit": "Giriş yap",
+      "noAccount": "Hesabın yok mu?",
+      "goSignUp": "Hesap oluştur",
+      "resend": "Onay e-postasını yeniden gönder",
+      "resent": "Onay e-postası gönderildi.",
+      "submitting": "Giriş yapılıyor…"
+    },
+    "signUp": {
+      "stamp": "Yeni operatör",
+      "title": "Hesap oluştur",
+      "email": "E-posta",
+      "username": "Kullanıcı adı",
+      "usernameHint": "3–20 karakter: a–z, 0–9, _",
+      "password": "Şifre",
+      "passwordHint": "En az 8 karakter.",
+      "submit": "Hesap oluştur",
+      "haveAccount": "Zaten hesabın var mı?",
+      "goSignIn": "Giriş yap",
+      "checkInboxTitle": "Gelen kutunu kontrol et",
+      "checkInbox": "{email} adresine bir onay bağlantısı gönderdik. Kurulumu bitirmek için bağlantıyı bu tarayıcıda aç.",
+      "resend": "E-postayı yeniden gönder",
+      "resent": "Gönderildi — gelen kutunu (ve spam klasörünü) kontrol et.",
+      "checking": "Uygunluk kontrol ediliyor…",
+      "available": "Uygun.",
+      "taken": "Alınmış — başka bir tane dene.",
+      "submitting": "Hesap oluşturuluyor…"
+    },
+    "callback": {
+      "stamp": "Teşkilat erişimi",
+      "confirming": "E-postan onaylanıyor…",
+      "hold": "Bekle — bağlantı doğrulanıyor ve oturumun açılıyor.",
+      "errorTitle": "Onay tamamlanamadı",
+      "verifyFailed": "Bağlantı bu tarayıcıda doğrulanamadı. Onayı zaten yaptıysan şifrenle giriş yapman yeterli.",
+      "goSignIn": "Girişe git",
+      "resend": "Onay e-postasını yeniden gönder",
+      "resent": "Gönderildi — gelen kutunu kontrol et."
+    },
+    "gate": {
+      "stamp": "Takma adını seç",
+      "title": "Bir kullanıcı adı seç",
+      "desc": "Panoda ve profilinde görünecek herkese açık adın. Yalnızca küçük harf, rakam ve alt çizgi.",
+      "username": "Kullanıcı adı",
+      "submit": "Adı kap",
+      "signOut": "Vazgeç, çıkış yap",
+      "checking": "Uygunluk kontrol ediliyor…",
+      "available": "Uygun.",
+      "taken": "Alınmış — başka bir tane dene.",
+      "submitting": "Alınıyor…",
+      "usernameHint": "3–20 karakter: a–z, 0–9, _"
+    },
+    "validation": {
+      "email": "Geçerli bir e-posta adresi gir.",
+      "password": "En az 8 karakter kullan.",
+      "username": "3–20 karakter: a–z, 0–9, _"
+    },
+    "errors": {
+      "auth-disabled": "Hesaplar şu anda kullanılamıyor — oyun onlarsız da çalışır.",
+      "invalid-credentials": "E-posta veya şifre hatalı.",
+      "email-not-confirmed": "E-posta henüz onaylanmadı — gelen kutunu kontrol et.",
+      "user-exists": "Bu e-postanın zaten bir hesabı var.",
+      "weak-password": "Bu şifre çok zayıf.",
+      "rate-limited": "Çok fazla deneme — bir dakika bekleyip tekrar dene.",
+      "username-taken": "Bu kullanıcı adı alınmış.",
+      "generic": "Bir şeyler ters gitti. Tekrar dene."
+    },
+    "menu": {
+      "openAria": "Hesap menüsü: {username}",
+      "listAria": "Hesap"
+    }
   },
   "lang": {
     "triggerAria": "Dil: {language}",
@@ -67,7 +142,7 @@
           "v": "Gerçek hedef yok — kırabileceğin tek şey korumalı alan."
         }
       },
-      "safe": "Tasarımı gereği güvenli — hesap yok, indirme yok, kurulum yok."
+      "safe": "Tasarımı gereği güvenli — hesap gerekmez, indirme yok, kurulum yok."
     },
     "how": {
       "eyebrow": "İş",
@@ -114,7 +189,7 @@
       },
       "1": {
         "q": "Bir şey kurmam gerekiyor mu?",
-        "a": "Hayır. Modern bir tarayıcıda çalışır. SQLite motoru ilk ihtiyaç duyduğunda, istek üzerine yüklenir — hesap yok, indirme yok, kurulum yok."
+        "a": "Hayır. Modern bir tarayıcıda çalışır. SQLite motoru ilk ihtiyaç duyduğunda, istek üzerine yüklenir — hesap gerekmez, indirme yok, kurulum yok."
       },
       "2": {
         "q": "SQL biliyor olmam gerekiyor mu?",
@@ -234,7 +309,7 @@
       },
       "1": {
         "q": "Bir şey kurmam gerekiyor mu?",
-        "a": "Hayır. Modern bir tarayıcıda çalışır. Veritabanı motoru (WebAssembly'ye derlenmiş SQLite), ilk ihtiyaç duyduğunda istek üzerine yüklenir — hesap yok, indirme yok, kurulum yok."
+        "a": "Hayır. Modern bir tarayıcıda çalışır. Veritabanı motoru (WebAssembly'ye derlenmiş SQLite), ilk ihtiyaç duyduğunda istek üzerine yüklenir — hesap gerekmez, indirme yok, kurulum yok."
       },
       "2": {
         "q": "Zaten SQL biliyor olmam gerekiyor mu?",
@@ -246,7 +321,7 @@
       },
       "4": {
         "q": "İlerlemem nerede kaydediliyor?",
-        "a": "Bu cihazda, tarayıcının yerel depolamasında. Hesap ve sunucu olmadığından onu asla görmeyiz. Tarayıcı verilerini temizle — ya da oyunu başka bir yerde aç — ve baştan başlarsın."
+        "a": "Bu cihazda, tarayıcının yerel depolamasında. Anonim oyun hesap ve sunucu kullanmaz, bu yüzden onu asla görmeyiz — giriş yaparsan ilerlemen ayrıca hesabına eşitlenir. Tarayıcı verilerini temizle ya da oyunu başka bir yerde aç, yerel oyun baştan başlar."
       },
       "5": {
         "q": "Herhangi bir ücreti var mı?",
@@ -287,7 +362,7 @@
     "sections": {
       "0": {
         "title": "Ne topluyoruz",
-        "body": "Seni tanımlayan hiçbir şey. SQL Heist'in bu sürümde hesap sistemi, kayıt ve giriş yok (“Giriş yap” bağlantısı, gelecekteki bir sürüm için yer tutucudur). Oynaman için adını, e-postanı ya da başka bir şeyi istemeyiz."
+        "body": "Seni tanımlayan hiçbir şey yok — hesap oluşturmayı seçmediğin sürece. Anonim oyun için ad, e-posta veya kayıt gerekmez. Kaydolursan e-posta adresini (giriş ve onay için), bir parolayı (yalnızca tuzlanmış özet olarak, asla düz metin değil), seçtiğin kullanıcı adını ve oyun ilerlemeni toplarız. Hesaplar, işleyicimiz Supabase tarafından yönetilir."
       },
       "1": {
         "title": "Cihazında ne kalır",
@@ -299,7 +374,7 @@
       },
       "3": {
         "title": "Üçüncü taraflar",
-        "body": "Oyun, statik bir sitedir. Yazı tipleri derleme sırasında paket içine gömülür ve veritabanı motoru tarayıcında yerel olarak çalışır, dolayısıyla olağan oyun hiçbir üçüncü taraf isteği yapmaz. Siteyi barındıran taraf, güvenlik ve operasyon amacıyla standart sunucu günlükleri (IP adresleri gibi) tutabilir; bu işleme, barındırıcının kendi politikalarına tabidir."
+        "body": "Oyun, statik bir sitedir. Yazı tipleri derleme sırasında paket içine gömülür ve veritabanı motoru tarayıcında yerel olarak çalışır, dolayısıyla anonim oyun hiçbir üçüncü taraf isteği yapmaz. Hesap oluşturursan e-postan, kullanıcı adın ve ilerlemen, kimlik doğrulama ve veritabanı işleyicimiz Supabase’e (AB’de barındırılır) gönderilir ve orada saklanır — tek üçüncü taraf veri akışı budur ve yalnızca giriş yapmış kullanıcılar içindir. Siteyi barındıran taraf, güvenlik ve operasyon amacıyla standart sunucu günlükleri (IP adresleri gibi) tutabilir; bu işleme, barındırıcının kendi politikalarına tabidir."
       },
       "4": {
         "title": "Çocuklar",

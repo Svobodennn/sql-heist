@@ -24,7 +24,7 @@ export function PrivacyBody({ locale }: { locale: Locale }) {
     <ContentPage
       eyebrow={t('privacy.eyebrow')}
       title={t('privacy.title')}
-      updated="2026-07-30"
+      updated="2026-08-22"
       locale={locale}
       lead={t('privacy.lead')}
     >

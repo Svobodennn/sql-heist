@@ -5,11 +5,86 @@
     "help": "Pomoc",
     "signIn": "Zaloguj się",
     "signOut": "Wyloguj się",
-    "signInTitle": "Konta już wkrótce",
     "brandAria": "SQL Heist — strona główna",
     "primaryAria": "Główna",
     "openMenu": "Otwórz menu",
     "closeMenu": "Zamknij menu"
+  },
+  "auth": {
+    "signIn": {
+      "stamp": "Dostęp agencji",
+      "title": "Zaloguj się",
+      "email": "E-mail",
+      "password": "Hasło",
+      "submit": "Zaloguj się",
+      "noAccount": "Nie masz konta?",
+      "goSignUp": "Utwórz konto",
+      "resend": "Wyślij ponownie e-mail potwierdzający",
+      "resent": "E-mail potwierdzający wysłany.",
+      "submitting": "Logowanie…"
+    },
+    "signUp": {
+      "stamp": "Nowy agent",
+      "title": "Utwórz konto",
+      "email": "E-mail",
+      "username": "Nazwa użytkownika",
+      "usernameHint": "3–20 znaków: a–z, 0–9, _",
+      "password": "Hasło",
+      "passwordHint": "Co najmniej 8 znaków.",
+      "submit": "Utwórz konto",
+      "haveAccount": "Masz już konto?",
+      "goSignIn": "Zaloguj się",
+      "checkInboxTitle": "Sprawdź skrzynkę",
+      "checkInbox": "Wysłaliśmy link potwierdzający na {email}. Otwórz go w tej przeglądarce, aby dokończyć.",
+      "resend": "Wyślij e-mail ponownie",
+      "resent": "Wysłano — sprawdź skrzynkę (i spam).",
+      "checking": "Sprawdzanie dostępności…",
+      "available": "Dostępna.",
+      "taken": "Zajęta — spróbuj innej.",
+      "submitting": "Tworzenie konta…"
+    },
+    "callback": {
+      "stamp": "Dostęp agencji",
+      "confirming": "Potwierdzanie adresu e-mail…",
+      "hold": "Chwila — weryfikujemy link i otwieramy sesję.",
+      "errorTitle": "Potwierdzenie się nie udało",
+      "verifyFailed": "Nie udało się zweryfikować linku w tej przeglądarce. Jeśli już potwierdziłeś, po prostu zaloguj się hasłem.",
+      "goSignIn": "Przejdź do logowania",
+      "resend": "Wyślij ponownie e-mail potwierdzający",
+      "resent": "Wysłano — sprawdź skrzynkę."
+    },
+    "gate": {
+      "stamp": "Wybierz pseudonim",
+      "title": "Wybierz nazwę użytkownika",
+      "desc": "Twoja publiczna nazwa na tablicy i w profilu. Tylko małe litery, cyfry i podkreślnik.",
+      "username": "Nazwa użytkownika",
+      "submit": "Zajmij ją",
+      "signOut": "Jednak się wyloguj",
+      "checking": "Sprawdzanie dostępności…",
+      "available": "Dostępna.",
+      "taken": "Zajęta — spróbuj innej.",
+      "submitting": "Zajmowanie…",
+      "usernameHint": "3–20 znaków: a–z, 0–9, _"
+    },
+    "validation": {
+      "email": "Podaj prawidłowy adres e-mail.",
+      "password": "Użyj co najmniej 8 znaków.",
+      "username": "3–20 znaków: a–z, 0–9, _"
+    },
+    "errors": {
+      "auth-disabled": "Konta są teraz niedostępne — gra działa bez nich.",
+      "invalid-credentials": "Błędny e-mail lub hasło.",
+      "email-not-confirmed": "E-mail nie został jeszcze potwierdzony — sprawdź skrzynkę.",
+      "user-exists": "Ten e-mail ma już konto.",
+      "weak-password": "To hasło jest zbyt słabe.",
+      "rate-limited": "Zbyt wiele prób — odczekaj minutę i spróbuj ponownie.",
+      "username-taken": "Ta nazwa użytkownika jest zajęta.",
+      "generic": "Coś poszło nie tak. Spróbuj ponownie."
+    },
+    "menu": {
+      "openAria": "Menu konta: {username}",
+      "listAria": "Konto"
+    }
   },
   "lang": {
     "triggerAria": "Język: {language}",
@@ -67,7 +142,7 @@
           "v": "Żadnego prawdziwego celu — jedyne, co możesz zepsuć, to piaskownica."
         }
       },
-      "safe": "Bezpieczne z założenia — bez kont, bez pobierania, bez konfiguracji."
+      "safe": "Bezpieczne z założenia — bez potrzeby konta, bez pobierania, bez konfiguracji."
     },
     "how": {
       "eyebrow": "Robota",
@@ -114,7 +189,7 @@
       },
       "1": {
         "q": "Czy muszę cokolwiek instalować?",
-        "a": "Nie. Działa w nowoczesnej przeglądarce. Silnik SQLite ładuje się na żądanie, gdy pierwszy raz go potrzebujesz — bez kont, bez pobierania, bez konfiguracji."
+        "a": "Nie. Działa w nowoczesnej przeglądarce. Silnik SQLite ładuje się na żądanie, gdy pierwszy raz go potrzebujesz — bez potrzeby konta, bez pobierania, bez konfiguracji."
       },
       "2": {
         "q": "Czy muszę już znać SQL?",
@@ -234,7 +309,7 @@
       },
       "1": {
         "q": "Czy muszę coś instalować?",
-        "a": "Nie. Działa w nowoczesnej przeglądarce. Silnik bazy danych (SQLite skompilowany do WebAssembly) ładuje się na żądanie, gdy pierwszy raz go potrzebujesz — bez kont, bez pobierania, bez konfiguracji."
+        "a": "Nie. Działa w nowoczesnej przeglądarce. Silnik bazy danych (SQLite skompilowany do WebAssembly) ładuje się na żądanie, gdy pierwszy raz go potrzebujesz — bez potrzeby konta, bez pobierania, bez konfiguracji."
       },
       "2": {
         "q": "Czy muszę już znać SQL?",
@@ -246,7 +321,7 @@
       },
       "4": {
         "q": "Gdzie zapisywany jest mój postęp?",
-        "a": "Na tym urządzeniu, w pamięci lokalnej twojej przeglądarki. Nie ma konta ani serwera, więc nigdy tego nie widzimy. Wyczyść dane przeglądarki — albo otwórz grę gdzie indziej — i zaczynasz od nowa."
+        "a": "Na tym urządzeniu, w pamięci lokalnej twojej przeglądarki. Gra anonimowa nie używa konta ani serwera, więc nigdy tego nie widzimy — zaloguj się, a twój postęp będzie też synchronizowany z kontem. Wyczyść dane przeglądarki albo otwórz grę gdzie indziej, a gra lokalna zaczyna od nowa."
       },
       "5": {
         "q": "Czy to coś kosztuje?",
@@ -287,7 +362,7 @@
     "sections": {
       "0": {
         "title": "Co zbieramy",
-        "body": "Niczego, co pozwala cię zidentyfikować. SQL Heist nie ma w tej wersji systemu kont, rejestracji ani logowania (link „Zaloguj się” to element zastępczy przewidziany na przyszłe wydanie). Nie prosimy o twoje imię, adres e-mail ani o nic innego, aby grać."
+        "body": "Niczego, co pozwala cię zidentyfikować — chyba że zdecydujesz się utworzyć konto. Gra anonimowa nie wymaga imienia, adresu e-mail ani rejestracji. Jeśli się zarejestrujesz, zbieramy twój adres e-mail (do logowania i potwierdzenia), hasło (przechowywane wyłącznie jako solony skrót, nigdy jako zwykły tekst), wybraną nazwę użytkownika oraz twój postęp w grze. Kontami zarządza nasz podmiot przetwarzający, Supabase."
       },
       "1": {
         "title": "Co zostaje na twoim urządzeniu",
@@ -299,7 +374,7 @@
       },
       "3": {
         "title": "Podmioty zewnętrzne",
-        "body": "Gra jest witryną statyczną. Czcionki są dołączane na etapie kompilacji, a silnik bazy danych działa lokalnie w twojej przeglądarce, więc zwykła gra nie wysyła żadnych żądań do podmiotów zewnętrznych. Podmiot hostujący witrynę może przechowywać standardowe logi serwera (takie jak adresy IP) na potrzeby bezpieczeństwa i działania; takie przetwarzanie podlega własnym zasadom tego podmiotu."
+        "body": "Gra jest witryną statyczną. Czcionki są dołączane na etapie kompilacji, a silnik bazy danych działa lokalnie w twojej przeglądarce, więc gra anonimowa nie wysyła żadnych żądań do podmiotów zewnętrznych. Jeśli utworzysz konto, twój adres e-mail, nazwa użytkownika i postęp są wysyłane do Supabase — naszego podmiotu przetwarzającego uwierzytelnianie i bazę danych, hostowanego w UE — i przechowywane tam; to jedyny przepływ danych do podmiotów zewnętrznych i tylko dla zalogowanych użytkowników. Podmiot hostujący witrynę może przechowywać standardowe logi serwera (takie jak adresy IP) na potrzeby bezpieczeństwa i działania; takie przetwarzanie podlega własnym zasadom tego podmiotu."
       },
       "4": {
         "title": "Dzieci",

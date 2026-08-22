@@ -5,11 +5,86 @@
     "help": "Help",
     "signIn": "Sign in",
     "signOut": "Sign out",
-    "signInTitle": "Accounts are coming soon",
     "brandAria": "SQL Heist — home",
     "primaryAria": "Primary",
     "openMenu": "Open menu",
     "closeMenu": "Close menu"
+  },
+  "auth": {
+    "signIn": {
+      "stamp": "Agency access",
+      "title": "Sign in",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign in",
+      "noAccount": "No account yet?",
+      "goSignUp": "Create one",
+      "resend": "Resend confirmation email",
+      "resent": "Confirmation email sent.",
+      "submitting": "Signing in…"
+    },
+    "signUp": {
+      "stamp": "New operative",
+      "title": "Create account",
+      "email": "Email",
+      "username": "Username",
+      "usernameHint": "3–20 characters: a–z, 0–9, _",
+      "password": "Password",
+      "passwordHint": "At least 8 characters.",
+      "submit": "Create account",
+      "haveAccount": "Already have an account?",
+      "goSignIn": "Sign in",
+      "checkInboxTitle": "Check your inbox",
+      "checkInbox": "We sent a confirmation link to {email}. Open it in this browser to finish setup.",
+      "resend": "Resend email",
+      "resent": "Sent — check your inbox (and spam).",
+      "checking": "Checking availability…",
+      "available": "Available.",
+      "taken": "Taken — try another.",
+      "submitting": "Creating account…"
+    },
+    "callback": {
+      "stamp": "Agency access",
+      "confirming": "Confirming your email…",
+      "hold": "Hold tight — verifying the link and opening your session.",
+      "errorTitle": "Confirmation didn't complete",
+      "verifyFailed": "The link couldn't be verified in this browser. If you already confirmed elsewhere, just sign in with your password.",
+      "goSignIn": "Go to sign in",
+      "resend": "Resend confirmation email",
+      "resent": "Sent — check your inbox."
+    },
+    "gate": {
+      "stamp": "Choose your alias",
+      "title": "Pick a username",
+      "desc": "Your public name on the board and profile. Lowercase letters, digits and underscore only.",
+      "username": "Username",
+      "submit": "Claim it",
+      "signOut": "Sign out instead",
+      "checking": "Checking availability…",
+      "available": "Available.",
+      "taken": "Taken — try another.",
+      "submitting": "Claiming…",
+      "usernameHint": "3–20 characters: a–z, 0–9, _"
+    },
+    "validation": {
+      "email": "Enter a valid email address.",
+      "password": "Use at least 8 characters.",
+      "username": "3–20 characters: a–z, 0–9, _"
+    },
+    "errors": {
+      "auth-disabled": "Accounts are unavailable right now — the game works without them.",
+      "invalid-credentials": "Wrong email or password.",
+      "email-not-confirmed": "Email not confirmed yet — check your inbox.",
+      "user-exists": "This email already has an account.",
+      "weak-password": "That password is too weak.",
+      "rate-limited": "Too many attempts — wait a minute and try again.",
+      "username-taken": "That username is taken.",
+      "generic": "Something went wrong. Try again."
+    },
+    "menu": {
+      "openAria": "Account menu: {username}",
+      "listAria": "Account"
+    }
   },
   "lang": {
     "triggerAria": "Language: {language}",
@@ -67,7 +142,7 @@
           "v": "No real target — the only thing you can break is the sandbox."
         }
       },
-      "safe": "Safe by design — no accounts, no downloads, no setup."
+      "safe": "Safe by design — no account needed, no downloads, no setup."
     },
     "how": {
       "eyebrow": "The Job",
@@ -114,7 +189,7 @@
       },
       "1": {
         "q": "Do I need to install anything?",
-        "a": "No. It runs in a modern browser. The SQLite engine loads on demand the first time you need it — no accounts, no downloads, no setup."
+        "a": "No. It runs in a modern browser. The SQLite engine loads on demand the first time you need it — no account needed, no downloads, no setup."
       },
       "2": {
         "q": "Do I need to know SQL already?",
@@ -234,7 +309,7 @@
       },
       "1": {
         "q": "Do I need to install anything?",
-        "a": "No. It runs in a modern browser. The database engine (SQLite compiled to WebAssembly) loads on demand the first time you need it — no accounts, no downloads, no setup."
+        "a": "No. It runs in a modern browser. The database engine (SQLite compiled to WebAssembly) loads on demand the first time you need it — no account needed, no downloads, no setup."
       },
       "2": {
         "q": "Do I need to know SQL already?",
@@ -246,7 +321,7 @@
       },
       "4": {
         "q": "Where is my progress saved?",
-        "a": "On this device, in your browser's local storage. There's no account and no server, so we never see it. Clear your browser data — or open the game somewhere else — and you start fresh."
+        "a": "On this device, in your browser's local storage. Anonymous play uses no account and no server, so we never see it — sign in and your progress also syncs to your account. Clear your browser data, or open the game somewhere else, and local play starts fresh."
       },
       "5": {
         "q": "Does it cost anything?",
@@ -275,7 +350,7 @@
   "consent": {
     "aria": "Storage notice",
     "title": "This game uses local storage",
-    "body": "SQL Heist keeps your progress and language choice in your browser's local storage. No tracking, no analytics, no ad cookies — and nothing ever leaves your device.",
+    "body": "SQL Heist keeps your progress and language choice in your browser's local storage. No tracking, no analytics, no ad cookies. Nothing leaves your device unless you create an optional account.",
     "accept": "Got it"
   },
   "privacy": {
@@ -283,11 +358,11 @@
     "title": "Privacy",
     "lead": "Short version: we don't collect you. The long version is below, and it's still short.",
     "glanceLabel": "At a glance",
-    "glanceBody": "No accounts. No tracking. No analytics in this build. Your progress lives in your browser's local storage on your device — we have no server that can read it.",
+    "glanceBody": "Accounts are optional. No tracking, no analytics in this build. Play anonymously and your progress stays in your browser's local storage on your device. If you create an account, your email, username, and progress are stored by our processor, Supabase, so they sync across your devices.",
     "sections": {
       "0": {
         "title": "What we collect",
-        "body": "Nothing that identifies you. SQL Heist has no account system in this build, no sign-up, and no login (the “Sign in” link is a placeholder for a future release). We don't ask for your name, email, or anything else to play."
+        "body": "Nothing that identifies you — unless you choose to create an account. Anonymous play needs no name, email, or sign-up. If you sign up, we collect your email address (for login and confirmation), a password (stored only as a salted hash, never in plain text), your chosen username, and your game progress. Accounts are handled by our processor, Supabase."
       },
       "1": {
         "title": "What stays on your device",
@@ -299,7 +374,7 @@
       },
       "3": {
         "title": "Third parties",
-        "body": "The game is a static site. Fonts are bundled at build time and the database engine runs locally in your browser, so ordinary play makes no third-party requests. Whoever hosts the site may keep standard server logs (such as IP addresses) for security and operations; that handling is governed by the host's own policies."
+        "body": "The game is a static site. Fonts are bundled at build time and the database engine runs locally in your browser, so anonymous play makes no third-party requests. If you create an account, your email, username, and progress are sent to and stored by Supabase — our authentication and database processor, hosted in the EU — the only third-party data flow, and only for signed-in users. Whoever hosts the site may keep standard server logs (such as IP addresses) for security and operations; that handling is governed by the host’s own policies."
       },
       "4": {
         "title": "Children",
