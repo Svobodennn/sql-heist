@@ -10,6 +10,7 @@ import { ShareButton } from '../ShareButton'
 import { LanguageSwitcher } from '../LanguageSwitcher'
 import { useTranslation } from '@/i18n/useTranslation'
 import { localeHref } from '@/i18n/localeHref'
+import { useAuth } from '@/features/auth'
 import styles from './Navbar.module.css'
 
 // Icons are decorative (aria-hidden in <Base>); the translated text stays the
@@ -19,6 +20,30 @@ const NAV_LINKS = [
   { href: '/cases', key: 'nav.jobs', Icon: IconBoard },
   { href: '/help', key: 'nav.help', Icon: IconHelpCircle },
 ] as const
+
+// Auth entry point (desktop + mobile). Env-less builds ('disabled') render nothing;
+// 'loading' renders like 'anon' — that IS what the prerendered HTML contains, so
+// hydration never mismatches. /auth/* stays canonical (non-localized), hence Link
+// without localeHref. P1 replaces the temporary sign-out button with UserMenu.
+function AuthEntry() {
+  const { status, signOut } = useAuth()
+  const { t } = useTranslation()
+  if (status === 'disabled') return null
+  if (status === 'authed') {
+    return (
+      <button type="button" className={styles.signin} onClick={() => void signOut()}>
+        <IconUser size={18} />
+        <span>{t('nav.signOut')}</span>
+      </button>
+    )
+  }
+  return (
+    <Link href="/auth/sign-in" className={styles.signin} title={t('nav.signInTitle')}>
+      <IconUser size={18} />
+      <span>{t('nav.signIn')}</span>
+    </Link>
+  )
+}
 
 // Site chrome. Rendered once from app/layout.tsx so it wraps every route. Sticky
 // at top:0 (see Navbar.module.css); the in-game chrome (case header + objectives
@@ -77,11 +102,7 @@ export function Navbar() {
         <div className={styles.actions}>
           <ShareButton />
           <LanguageSwitcher />
-          {/* Stubbed auth entry point — accounts land in WS5. */}
-          <a href="#wip" className={styles.signin} title={t('nav.signInTitle')}>
-            <IconUser size={18} />
-            <span>{t('nav.signIn')}</span>
-          </a>
+          <AuthEntry />
         </div>
 
         <button
@@ -118,10 +139,7 @@ export function Navbar() {
         <div className={styles.mobileActions}>
           <ShareButton compact />
           <LanguageSwitcher />
-          <a href="#wip" className={styles.signin} title={t('nav.signInTitle')}>
-            <IconUser size={18} />
-            <span>{t('nav.signIn')}</span>
-          </a>
+          <AuthEntry />
         </div>
       </div>
     </header>
