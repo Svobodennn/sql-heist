@@ -38,7 +38,7 @@ export const IconClose = (p: IconProps) => (
 )
 
 // Generic icons shared with the game feature live in the ui/ layer (one source).
-export { IconArrowRight, IconBoard, IconCheck, IconChevronDown, IconGlobe } from '@/ui/icons'
+export { IconArrowRight, IconBoard, IconCheck, IconChevronDown, IconGlobe, IconUser } from '@/ui/icons'
 
 // Share = a link handed off (node + outgoing arc).
 export const IconShare = (p: IconProps) => (
@@ -55,14 +55,6 @@ export const IconLink = (p: IconProps) => (
     <path d="M9 15 15 9" />
     <path d="M11 6.5 12.5 5a4 4 0 0 1 5.5 5.5L16.5 12" />
     <path d="M13 17.5 11.5 19A4 4 0 0 1 6 13.5L7.5 12" />
-  </Base>
-)
-
-// Sign-in entry point (stub → WS5).
-export const IconUser = (p: IconProps) => (
-  <Base {...p}>
-    <circle cx="12" cy="8" r="3.5" />
-    <path d="M5 20a7 7 0 0 1 14 0" />
   </Base>
 )
 

@@ -10,7 +10,8 @@ import { ShareButton } from '../ShareButton'
 import { LanguageSwitcher } from '../LanguageSwitcher'
 import { useTranslation } from '@/i18n/useTranslation'
 import { localeHref } from '@/i18n/localeHref'
-import { useAuth } from '@/features/auth'
+import { useAuth } from '@/features/auth/useAuth'
+import { UserMenu } from '@/features/auth/UserMenu'
 import styles from './Navbar.module.css'
 
 // Icons are decorative (aria-hidden in <Base>); the translated text stays the
@@ -24,21 +25,14 @@ const NAV_LINKS = [
 // Auth entry point (desktop + mobile). Env-less builds ('disabled') render nothing;
 // 'loading' renders like 'anon' — that IS what the prerendered HTML contains, so
 // hydration never mismatches. /auth/* stays canonical (non-localized), hence Link
-// without localeHref. P1 replaces the temporary sign-out button with UserMenu.
+// without localeHref.
 function AuthEntry() {
-  const { status, signOut } = useAuth()
+  const { status } = useAuth()
   const { t } = useTranslation()
   if (status === 'disabled') return null
-  if (status === 'authed') {
-    return (
-      <button type="button" className={styles.signin} onClick={() => void signOut()}>
-        <IconUser size={18} />
-        <span>{t('nav.signOut')}</span>
-      </button>
-    )
-  }
+  if (status === 'authed') return <UserMenu />
   return (
-    <Link href="/auth/sign-in" className={styles.signin} title={t('nav.signInTitle')}>
+    <Link href="/auth/sign-in" className={styles.signin}>
       <IconUser size={18} />
       <span>{t('nav.signIn')}</span>
     </Link>
