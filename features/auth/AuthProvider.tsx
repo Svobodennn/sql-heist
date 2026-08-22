@@ -10,6 +10,8 @@ import {
 } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase'
+import * as authClient from './authClient'
+import type { AuthResult, ProfileRow } from './authClient'
 
 export type AuthStatus = 'loading' | 'anon' | 'authed' | 'disabled'
 
@@ -26,17 +28,21 @@ export interface Profile {
 export interface AuthState {
   user: User | null
   profile: Profile | null
+  // True once the own-profile lookup for the CURRENT user settled ("no row" is a
+  // settled answer — that's what sends first-time users to the UsernameGate).
+  profileReady: boolean
   status: AuthStatus
 }
 
 export interface AuthContextValue extends AuthState {
-  signInEmail(email: string, password: string): Promise<{ error?: string }>
-  signUpEmail(email: string, password: string, username: string): Promise<{ error?: string }>
+  signInEmail(email: string, password: string): Promise<AuthResult>
+  signUpEmail(email: string, password: string, username: string): Promise<AuthResult>
   signOut(): Promise<void>
   refreshProfile(): Promise<void>
+  adoptProfile(row: ProfileRow): void
 }
 
-const DISABLED_STATE: AuthState = { user: null, profile: null, status: 'disabled' }
+const DISABLED_STATE: AuthState = { user: null, profile: null, profileReady: false, status: 'disabled' }
 
 // Default context mirrors I18nContext: a consumer rendered outside the provider
 // (or in an env-less build) sees auth as cleanly off — never a crash.
@@ -46,19 +52,12 @@ export const AuthContext = createContext<AuthContextValue>({
   signUpEmail: async () => ({ error: 'auth-disabled' }),
   signOut: async () => {},
   refreshProfile: async () => {},
+  adoptProfile: () => {},
 })
 
-// Own `profiles` row (snake_case) → Profile. RLS only ever returns the caller's row.
-interface ProfileRow {
-  id: string
-  username: string
-  display_name: string | null
-  country: string | null
-  leaderboard_opt_in: boolean
-  created_at: string
-  updated_at: string
-}
-
+// snake_case `profiles` row (RLS only ever returns the caller's) → Profile.
+// ProfileRow is defined in authClient (shared with createMyProfile) to keep the
+// column contract in one place.
 const PROFILE_COLUMNS = 'id, username, display_name, country, leaderboard_opt_in, created_at, updated_at'
 
 function toProfile(row: ProfileRow): Profile {
@@ -78,7 +77,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // agree on the initial status: env-less builds start (and stay) 'disabled';
   // configured builds start 'loading' until the stored session is read.
   const [state, setState] = useState<AuthState>(() =>
-    isSupabaseConfigured() ? { user: null, profile: null, status: 'loading' } : DISABLED_STATE,
+    isSupabaseConfigured()
+      ? { user: null, profile: null, profileReady: false, status: 'loading' }
+      : DISABLED_STATE,
   )
 
   // Session lifecycle. onAuthStateChange fires INITIAL_SESSION on subscribe, so it
@@ -90,13 +91,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!supabase) return
     const { data } = supabase.auth.onAuthStateChange((_event, session) => {
       const user = session?.user ?? null
-      setState((prev) => ({
-        user,
+      setState((prev) => {
         // Keep an already-loaded profile while the same user stays signed in
         // (TOKEN_REFRESHED etc.); drop it on sign-out or user switch.
-        profile: user && prev.profile?.id === user.id ? prev.profile : null,
-        status: user ? 'authed' : 'anon',
-      }))
+        const sameUser = user !== null && prev.profile?.id === user.id
+        return {
+          user,
+          profile: sameUser ? prev.profile : null,
+          profileReady: user !== null && sameUser ? prev.profileReady : false,
+          status: user ? 'authed' : 'anon',
+        }
+      })
     })
     return () => data.subscription.unsubscribe()
   }, [])
@@ -109,11 +114,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .select(PROFILE_COLUMNS)
       .eq('id', userId)
       .maybeSingle()
-    // Read failure is treated as "no profile yet" — P1's UsernameGate owns creation.
+    // Read FAILURE stays un-ready (the gate must not pop over a network blip);
+    // a clean "no row" resolves to ready + null → UsernameGate takes over.
     if (error) return
     setState((prev) =>
       prev.user?.id === userId
-        ? { ...prev, profile: data ? toProfile(data as ProfileRow) : null }
+        ? { ...prev, profile: data ? toProfile(data as ProfileRow) : null, profileReady: true }
         : prev,
     )
   }, [])
@@ -124,40 +130,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (userId) void loadProfile(userId)
   }, [userId, loadProfile])
 
-  const signInEmail = useCallback(async (email: string, password: string) => {
-    const supabase = getSupabase()
-    if (!supabase) return { error: 'auth-disabled' }
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    return error ? { error: error.message } : {}
-  }, [])
+  const signInEmail = useCallback(
+    (email: string, password: string) => authClient.signInEmail(email, password),
+    [],
+  )
 
-  const signUpEmail = useCallback(async (email: string, password: string, username: string) => {
-    const supabase = getSupabase()
-    if (!supabase) return { error: 'auth-disabled' }
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        // Captured as metadata now; the profiles row itself is created by P1's
-        // UsernameGate after the first confirmed sign-in (RLS insert-self).
-        data: { username },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    })
-    return error ? { error: error.message } : {}
-  }, [])
+  const signUpEmail = useCallback(
+    (email: string, password: string, username: string) =>
+      authClient.signUpEmail(email, password, username),
+    [],
+  )
 
-  const signOut = useCallback(async () => {
-    await getSupabase()?.auth.signOut()
-  }, [])
+  const signOut = useCallback(() => authClient.signOut(), [])
 
   const refreshProfile = useCallback(async () => {
     if (userId) await loadProfile(userId)
   }, [userId, loadProfile])
 
+  // Adopt a row the caller just created (UsernameGate) without a re-read.
+  const adoptProfile = useCallback((row: ProfileRow) => {
+    setState((prev) =>
+      prev.user?.id === row.id ? { ...prev, profile: toProfile(row), profileReady: true } : prev,
+    )
+  }, [])
+
   const value = useMemo<AuthContextValue>(
-    () => ({ ...state, signInEmail, signUpEmail, signOut, refreshProfile }),
-    [state, signInEmail, signUpEmail, signOut, refreshProfile],
+    () => ({ ...state, signInEmail, signUpEmail, signOut, refreshProfile, adoptProfile }),
+    [state, signInEmail, signUpEmail, signOut, refreshProfile, adoptProfile],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
