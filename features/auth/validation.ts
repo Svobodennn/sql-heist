@@ -1,0 +1,34 @@
+import { z } from 'zod'
+
+// Client-side mirror of the server rules: the DB CHECK enforces the username
+// format, and Supabase Auth enforces the password minimum (set to 8 in the
+// project's auth settings — keep the two in sync).
+export const USERNAME_PATTERN = /^[a-z0-9_]{3,20}$/
+export const PASSWORD_MIN_LENGTH = 8
+
+export const emailSchema = z.string().trim().email()
+export const passwordSchema = z.string().min(PASSWORD_MIN_LENGTH)
+export const usernameSchema = z.string().regex(USERNAME_PATTERN)
+
+// Field validators return an i18n key (UI never shows raw zod messages).
+export function validateEmail(value: string): string | null {
+  return emailSchema.safeParse(value).success ? null : 'auth.validation.email'
+}
+
+export function validatePassword(value: string): string | null {
+  return passwordSchema.safeParse(value).success ? null : 'auth.validation.password'
+}
+
+export function validateUsername(value: string): string | null {
+  return usernameSchema.safeParse(value).success ? null : 'auth.validation.username'
+}
+
+// What we submit: trimmed email, trimmed+lowercased username (the DB stores
+// lowercase-only; citext would accept 'Ada' as a duplicate of 'ada' anyway).
+export function normalizeEmail(value: string): string {
+  return value.trim()
+}
+
+export function normalizeUsername(value: string): string {
+  return value.trim().toLowerCase()
+}
