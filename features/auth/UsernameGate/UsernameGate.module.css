@@ -1,0 +1,115 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: grid;
+  /* `safe center` + scrollable overlay: if the card is taller than the viewport
+     (landscape phone, 200% zoom) it scrolls instead of clipping its only exit. */
+  place-items: safe center;
+  overflow-y: auto;
+  padding: var(--space-4);
+  /* color-mix over the primitive, not a hand-copied hex (mirrors Navbar's scrim). */
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+.card {
+  width: 100%;
+  max-width: 26rem;
+  margin-block: auto; /* stays centred when it fits, scrolls when it doesn't */
+  padding: var(--space-6);
+  /* --radius-lg is the "modal / loot" step (globals.css) — matches HintTray. */
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Header cluster (stamp + title + desc) holds tight at --space-2; the form is
+   separated by --space-4 so it reads as its own group (2× ratio, like AuthCard). */
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+
+.desc {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.input {
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: var(--font-sans);
+  /* 16px avoids iOS Safari focus-zoom; tighten only on ≥640px viewports. */
+  font-size: 1rem;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+@media (min-width: 640px) {
+  .input {
+    font-size: 0.9375rem;
+  }
+}
+
+.input:focus-visible {
+  border-color: var(--primary);
+}
+
+.input[aria-invalid='true'] {
+  border-color: var(--danger-solid);
+}
+
+.status {
+  margin: 0;
+  min-height: 1.25rem;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.statusError {
+  margin: 0;
+  min-height: 1.25rem;
+  font-size: 0.8125rem;
+  color: var(--danger);
+}
+
+.escape {
+  align-self: flex-start;
+  margin-top: var(--space-4);
+  padding-block: var(--space-2);
+  min-height: 44px;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.875rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.escape:hover {
+  color: var(--text-secondary);
+}
