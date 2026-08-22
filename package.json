@@ -7,7 +7,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint --dir app --dir features --dir lib --dir tests",
+    "lint": "next lint --dir app --dir features --dir lib --dir tests --dir i18n --dir ui",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
