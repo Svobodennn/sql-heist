@@ -37,6 +37,8 @@ describe('<UserMenu>', () => {
     const trigger = screen.getByRole('button', { name: 'Account menu: ada_l' })
     fireEvent.click(trigger)
     const accountLink = screen.getByRole('link', { name: 'Account' })
+    const leaderboardLink = screen.getByRole('link', { name: 'Leaderboard' })
+    expect(leaderboardLink.getAttribute('href')).toBe('/leaderboard')
     accountLink.focus()
     expect(document.activeElement).toBe(accountLink)
 

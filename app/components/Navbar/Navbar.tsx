@@ -5,7 +5,15 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { cx } from '@/ui/cx'
 import { Logo } from '../Logo'
-import { IconMenu, IconClose, IconUser, IconHome, IconBoard, IconHelpCircle } from '../icons'
+import {
+  IconMenu,
+  IconClose,
+  IconUser,
+  IconHome,
+  IconBoard,
+  IconTrophy,
+  IconHelpCircle,
+} from '../icons'
 import { ShareButton } from '../ShareButton'
 import { LanguageSwitcher } from '../LanguageSwitcher'
 import { useTranslation } from '@/i18n/useTranslation'
@@ -19,6 +27,7 @@ import styles from './Navbar.module.css'
 const NAV_LINKS = [
   { href: '/', key: 'nav.home', Icon: IconHome },
   { href: '/cases', key: 'nav.jobs', Icon: IconBoard },
+  { href: '/leaderboard', key: 'nav.leaderboard', Icon: IconTrophy },
   { href: '/help', key: 'nav.help', Icon: IconHelpCircle },
 ] as const
 

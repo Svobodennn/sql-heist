@@ -10,7 +10,6 @@ import styles from './UserMenu.module.css'
 
 // Signed-in navbar entry. Same disclosure pattern as LanguageSwitcher (button +
 // list, not an ARIA menu — no roving focus implemented, keep the contract honest).
-// The account link ships in P3; the leaderboard joins the list in P4.
 export function UserMenu() {
   const { t } = useTranslation()
   const { user, profile, signOut } = useAuth()
@@ -63,6 +62,11 @@ export function UserMenu() {
           <li>
             <Link className={styles.item} href="/account" onClick={() => setOpen(false)}>
               {t('nav.account')}
+            </Link>
+          </li>
+          <li>
+            <Link className={styles.item} href="/leaderboard" onClick={() => setOpen(false)}>
+              {t('nav.leaderboard')}
             </Link>
           </li>
           <li>

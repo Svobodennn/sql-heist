@@ -1,0 +1,178 @@
+.page {
+  padding-block: var(--space-12);
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  max-width: 52rem;
+  margin-inline: auto;
+}
+
+.title {
+  color: var(--text);
+  font-size: clamp(2rem, 7vw, 3.5rem);
+}
+
+.lede {
+  max-width: 62ch;
+  color: var(--text-secondary);
+  font-size: 1.0625rem;
+}
+
+.disclosure {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  margin-top: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--primary) 45%, var(--border));
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+  color: var(--text-secondary);
+}
+
+.disclosure strong {
+  color: var(--primary);
+}
+
+.rankCard,
+.board,
+.state {
+  max-width: 68rem;
+  margin: var(--space-8) auto 0;
+}
+
+.rankCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-6);
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
+}
+
+.rankValue {
+  margin-top: var(--space-1);
+  color: var(--primary);
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.rankCopy {
+  margin-top: var(--space-2);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.rankMeta {
+  color: var(--text-secondary);
+}
+
+.board {
+  padding: 0;
+  overflow: hidden;
+}
+
+.tableWrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tableWrap:focus-visible {
+  outline-offset: -3px;
+}
+
+.scrollHint {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-raised);
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+}
+
+.table {
+  width: 100%;
+  min-width: 46rem;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.table th,
+.table td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.table th {
+  background: var(--surface-raised);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.table tbody tr:hover {
+  background: color-mix(in srgb, var(--primary) 4%, transparent);
+}
+
+.position,
+.objectives {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.operative {
+  display: inline-flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.operative span:last-child {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  font-weight: 400;
+}
+
+.state {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: clamp(var(--space-6), 6vw, var(--space-12));
+}
+
+.state h2 {
+  color: var(--text);
+  font-size: clamp(1.5rem, 5vw, 2.25rem);
+}
+
+.state p {
+  max-width: 58ch;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 639px) {
+  .rankCard {
+    align-items: flex-start;
+    flex-direction: column;
+    padding-inline: var(--space-4);
+  }
+}
+
+@media (min-width: 800px) {
+  .scrollHint {
+    display: none;
+  }
+}
