@@ -1,0 +1,85 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.78);
+}
+
+.modal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: min(100%, 32rem);
+  max-height: calc(100dvh - var(--space-8));
+  padding: var(--space-6);
+  overflow-y: auto;
+}
+
+.title {
+  font-size: 1.25rem;
+}
+
+.copy {
+  color: var(--text-secondary);
+}
+
+.form,
+.field {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.form {
+  gap: var(--space-4);
+}
+
+.field {
+  gap: var(--space-2);
+}
+
+.label {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.input {
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-raised);
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.error {
+  color: var(--danger);
+  font-size: 0.875rem;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+@media (min-width: 640px) {
+  .input {
+    font-size: 0.9375rem;
+  }
+}
+
+@media (max-width: 720px) {
+  .actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
