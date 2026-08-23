@@ -9,10 +9,9 @@ vi.hoisted(() => {
   delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 })
 
-// Availability probe is exercised in useUsernameAvailability.test; here it just
-// needs to resolve so it never interferes. rememberPendingEmail is a no-op.
+// Signup deliberately does not probe private username reservations while anon;
+// availability is checked after confirmation in UsernameGate.
 vi.mock('@/features/auth/authClient', () => ({
-  usernameAvailable: vi.fn(async () => true),
   resendSignupEmail: vi.fn(async () => ({})),
   rememberPendingEmail: vi.fn(),
 }))

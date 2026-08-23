@@ -12,7 +12,6 @@ import {
   validatePassword,
   validateUsername,
 } from '../validation'
-import { useUsernameAvailability } from '../useUsernameAvailability'
 import { AuthCard } from '../AuthCard'
 import styles from './SignUpForm.module.css'
 
@@ -31,12 +30,12 @@ export function SignUpForm() {
   const [formError, setFormError] = useState<AuthErrorCode | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [sentTo, setSentTo] = useState<string | null>(null)
-  const [resend, setResend] = useState<{ pending: boolean; done: boolean; error: AuthErrorCode | null }>(
-    { pending: false, done: false, error: null },
-  )
+  const [resend, setResend] = useState<{
+    pending: boolean
+    done: boolean
+    error: AuthErrorCode | null
+  }>({ pending: false, done: false, error: null })
   const inFlight = useRef(false)
-
-  const availability = useUsernameAvailability(username, status !== 'disabled')
 
   if (status === 'disabled') {
     return (
@@ -75,7 +74,11 @@ export function SignUpForm() {
           {t('auth.signUp.resend')}
         </button>
         <p className={styles.resendStatus} role="status" aria-live="polite">
-          {resend.error ? t(`auth.errors.${resend.error}`) : resend.done ? t('auth.signUp.resent') : ''}
+          {resend.error
+            ? t(`auth.errors.${resend.error}`)
+            : resend.done
+              ? t('auth.signUp.resent')
+              : ''}
         </p>
       </AuthCard>
     )
@@ -94,7 +97,6 @@ export function SignUpForm() {
     setFieldError(errors)
     setFormError(null)
     if (errors.email || errors.username || errors.password) return
-    if (availability === 'taken') return
     inFlight.current = true
     setSubmitting(true)
     const { error } = await signUpEmail(cleanEmail, password, cleanUsername)
@@ -107,15 +109,6 @@ export function SignUpForm() {
     rememberPendingEmail(cleanEmail)
     setSentTo(cleanEmail)
   }
-
-  const availabilityLine =
-    availability === 'checking'
-      ? t('auth.signUp.checking')
-      : availability === 'available'
-        ? t('auth.signUp.available')
-        : availability === 'taken'
-          ? t('auth.signUp.taken')
-          : null
 
   return (
     <AuthCard
@@ -171,14 +164,14 @@ export function SignUpForm() {
             spellCheck={false}
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            aria-invalid={fieldError.username || availability === 'taken' ? true : undefined}
+            aria-invalid={fieldError.username ? true : undefined}
             aria-describedby="signup-username-hint"
           />
           <p id="signup-username-hint" className={styles.hint} role="status" aria-live="polite">
             {fieldError.username ? (
               <span className={styles.fieldError}>{t(fieldError.username)}</span>
             ) : (
-              (availabilityLine ?? t('auth.signUp.usernameHint'))
+              t('auth.signUp.usernameHint')
             )}
           </p>
         </div>
@@ -209,7 +202,7 @@ export function SignUpForm() {
         <button
           type="submit"
           className="btn btn--primary btn--full"
-          disabled={submitting || availability === 'taken'}
+          disabled={submitting}
           aria-busy={submitting}
         >
           {submitting ? t('auth.signUp.submitting') : t('auth.signUp.submit')}
