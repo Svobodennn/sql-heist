@@ -5,6 +5,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react'
@@ -125,10 +126,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const userId = state.user?.id ?? null
+  const progressMergedFor = useRef<string | null>(null)
 
   useEffect(() => {
     if (userId) void loadProfile(userId)
   }, [userId, loadProfile])
+
+  const profileId = state.profile?.id ?? null
+
+  useEffect(() => {
+    if (state.status !== 'authed' || !userId) {
+      progressMergedFor.current = null
+      return
+    }
+    if (profileId !== userId || progressMergedFor.current === userId) return
+
+    progressMergedFor.current = userId
+    let active = true
+
+    void Promise.all([
+      import('@/features/game/lib/useCaseProgress'),
+      import('@/features/game/lib/progressSync'),
+    ])
+      .then(([{ readCaseProgress }, { mergeLocalIntoServer }]) => {
+        if (!active) return
+        return mergeLocalIntoServer(readCaseProgress())
+      })
+      .catch(() => {
+        // Progress stays local; a later sign-in starts a fresh handshake.
+      })
+
+    return () => {
+      active = false
+    }
+  }, [state.status, userId, profileId])
 
   const signInEmail = useCallback(
     (email: string, password: string) => authClient.signInEmail(email, password),

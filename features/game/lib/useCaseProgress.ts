@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { z } from 'zod'
+import { useAuth } from '@/features/auth/useAuth'
+import { fetchServerProgress, mergeCaseProgress } from './progressSync'
 
 // Per-objective case progress (docs/cases-design.md — "Progress in localStorage:
 // per-objective completion within a case; case done when all pass"). On-device
-// only (no backend/account). Deliberately a SEPARATE key + shape from the jobs'
-// useProgress so the two tracks never collide during the migration window.
+// only at its core; authenticated sync is layered into the hook below. It stays a
+// SEPARATE key + shape from the jobs' useProgress so the two tracks never collide.
 
 // Which objective ids are cleared, per case id. A case is complete once all of
 // its objective ids appear here.
@@ -78,13 +80,52 @@ export function caseCompletion(
 // `ready` guards a hydration mismatch: the server renders the empty baseline, then
 // the client fills real progress after mount (mirrors useProgress).
 export function useCaseProgress(): { records: CaseProgressMap; ready: boolean } {
+  const { status: authStatus } = useAuth()
   const [records, setRecords] = useState<CaseProgressMap>({})
   const [ready, setReady] = useState(false)
+  const [serverReady, setServerReady] = useState(false)
 
   useEffect(() => {
     setRecords(readCaseProgress())
     setReady(true)
   }, [])
 
-  return { records, ready }
+  useEffect(() => {
+    if (authStatus !== 'authed') {
+      setServerReady(false)
+      return
+    }
+
+    let cancelled = false
+    setServerReady(false)
+
+    const syncServerProgress = async () => {
+      try {
+        const server = await fetchServerProgress()
+        if (cancelled) return
+
+        for (const [caseId, progress] of Object.entries(server)) {
+          for (const objectiveId of progress.objectives) {
+            recordObjectiveWin(caseId, objectiveId)
+          }
+        }
+
+        setRecords(mergeCaseProgress(readCaseProgress(), server))
+      } catch {
+        // The local cache remains authoritative while the network is unavailable.
+      } finally {
+        if (!cancelled) setServerReady(true)
+      }
+    }
+
+    void syncServerProgress()
+    return () => {
+      cancelled = true
+    }
+  }, [authStatus])
+
+  const syncedReady =
+    authStatus === 'loading' ? false : authStatus === 'authed' ? ready && serverReady : ready
+
+  return { records, ready: syncedReady }
 }

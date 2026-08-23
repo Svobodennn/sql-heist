@@ -20,7 +20,9 @@ import { canOpenHint, shouldSuggestHint } from '@/lib/engine/scoring'
 import { cx } from '@/ui/cx'
 import { useTranslation } from '@/i18n/useTranslation'
 import { localeHref } from '@/i18n/localeHref'
+import { useAuth } from '@/features/auth/useAuth'
 import { useCaseEngine } from '../../lib/useCaseEngine'
+import { pushObjectiveWin } from '../../lib/progressSync'
 import {
   completedObjectiveIds,
   recordObjectiveWin,
@@ -86,6 +88,7 @@ function clearedInputs(inputs: Record<string, string>): Record<string, string> {
 
 export function CasePlayer({ gameCase }: { gameCase: Case }) {
   const { t, locale } = useTranslation()
+  const { status: authStatus } = useAuth()
   const reduce = useReducedMotion()
   const objectives = gameCase.objectives
   const { status, run, commit, reset, retry } = useCaseEngine(gameCase)
@@ -183,6 +186,9 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
       if (!completedIds.has(obj.id)) {
         commit(index) // Model A: this run's DB state becomes the next objective's start.
         recordObjectiveWin(gameCase.id, obj.id)
+        if (authStatus === 'authed') {
+          void pushObjectiveWin(gameCase.id, obj.id).catch(() => {})
+        }
         setSolvedInputs((prev) => ({ ...prev, [obj.id]: inputs })) // the winning payload, for the debrief
         const next = new Set(completedIds)
         next.add(obj.id)
@@ -210,7 +216,7 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
           : "Nothing came back — that one didn't land.",
       )
     }
-  }, [selectedIndex, objectives, uiByObjective, run, gameCase, push, t, commit, completedIds])
+  }, [selectedIndex, objectives, uiByObjective, run, gameCase, push, t, commit, completedIds, authStatus])
 
   const handleChange = useCallback(
     (field: string, value: string) => {
