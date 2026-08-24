@@ -16,13 +16,36 @@ export default defineConfig({
   // `import React` (components don't import it).
   esbuild: { jsx: 'automatic' },
   test: {
-    // Node by default (engine/schema suites load the sql.js WASM under Node); only
-    // the component suite needs a DOM, so it opts into jsdom by path.
-    environment: 'node',
-    environmentMatchGlobs: [['tests/components/**', 'jsdom']],
     globals: true,
-    include: ['**/*.{test,spec}.{ts,tsx}'],
     exclude: [...configDefaults.exclude, '.claude/**', 'out/**', '.next/**'],
     passWithNoTests: true,
+    // Engine/schema suites load sql.js under Node, while component tests need a
+    // browser-like DOM. Vitest projects keep that boundary explicit without the
+    // deprecated environmentMatchGlobs option.
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: 'node',
+          environment: 'node',
+          include: ['**/*.{test,spec}.{ts,tsx}'],
+          exclude: [
+            ...configDefaults.exclude,
+            '.claude/**',
+            'out/**',
+            '.next/**',
+            'tests/components/**',
+          ],
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: 'components',
+          environment: 'jsdom',
+          include: ['tests/components/**/*.{test,spec}.{ts,tsx}'],
+        },
+      },
+    ],
   },
 })
