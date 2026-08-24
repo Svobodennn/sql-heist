@@ -33,15 +33,15 @@ const NAV_LINKS = [
 
 // Auth entry point (desktop + mobile). Env-less builds ('disabled') render nothing;
 // 'loading' renders like 'anon' — that IS what the prerendered HTML contains, so
-// hydration never mismatches. /auth/* stays canonical (non-localized), hence Link
-// without localeHref.
+// hydration never mismatches. Interactive auth pages have localized static variants;
+// the email callback remains canonical inside localeHref.
 function AuthEntry() {
   const { status } = useAuth()
-  const { t } = useTranslation()
+  const { locale, t } = useTranslation()
   if (status === 'disabled') return null
   if (status === 'authed') return <UserMenu />
   return (
-    <Link href="/auth/sign-in" className={styles.signin}>
+    <Link href={localeHref('/auth/sign-in', locale)} className={styles.signin}>
       <IconUser size={18} />
       <span>{t('nav.signIn')}</span>
     </Link>

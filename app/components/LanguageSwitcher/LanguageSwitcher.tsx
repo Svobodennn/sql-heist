@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { LOCALES, LOCALE_LABELS, LOCALE_SHORT } from '@/i18n/config'
+import { switchLocaleHref } from '@/i18n/localeHref'
 import { useTranslation } from '@/i18n/useTranslation'
 import { cx } from '@/ui/cx'
 import { IconGlobe, IconChevronDown, IconCheck } from '../icons'
@@ -41,12 +42,9 @@ export function LanguageSwitcher({ className }: { className?: string }) {
     setOpen(false)
     setLocale(next) // remember the choice: drives the game chrome + seeds the switcher
 
-    // Every localizable route (marketing AND the game) is statically generated per
-    // locale, so switching = navigating between /, /tr, /pl variants of the SAME path.
-    const parts = pathname.split('/')
-    const hasPrefix = parts[1] === 'tr' || parts[1] === 'pl'
-    const rest = (hasPrefix ? parts.slice(2) : parts.slice(1)).join('/')
-    router.push(next === 'en' ? `/${rest}` : `/${next}${rest ? `/${rest}` : ''}`)
+    // Preserve query/hash state while moving between static locale variants. The
+    // helper leaves non-localized routes such as /auth/callback canonical.
+    router.push(switchLocaleHref(pathname, window.location.search, window.location.hash, next))
   }
 
   return (

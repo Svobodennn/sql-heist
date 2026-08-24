@@ -3,6 +3,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { User } from '@supabase/supabase-js'
 import { AuthContext, type AuthContextValue } from '@/features/auth/AuthProvider'
 import { SignUpForm } from '@/features/auth/SignUpForm'
+import { I18nContext } from '@/i18n/I18nProvider'
+import type { Locale } from '@/i18n/config'
+import { createTranslator } from '@/i18n/translate'
+import en from '@/messages/en.json'
+import tr from '@/messages/tr.json'
 
 vi.hoisted(() => {
   delete process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -36,11 +41,14 @@ function makeValue(overrides: Partial<AuthContextValue> = {}): AuthContextValue 
   }
 }
 
-function renderForm(value: AuthContextValue) {
+function renderForm(value: AuthContextValue, locale: Locale = 'en') {
+  const primary = locale === 'tr' ? tr : en
   return render(
-    <AuthContext.Provider value={value}>
-      <SignUpForm />
-    </AuthContext.Provider>,
+    <I18nContext.Provider value={{ locale, setLocale: vi.fn(), t: createTranslator(primary, en) }}>
+      <AuthContext.Provider value={value}>
+        <SignUpForm />
+      </AuthContext.Provider>
+    </I18nContext.Provider>,
   )
 }
 
@@ -60,6 +68,29 @@ describe('<SignUpForm>', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Create account' }))
     expect(value.signUpEmail).not.toHaveBeenCalled()
     expect(screen.getByText('Enter a valid email address.')).toBeTruthy()
+  })
+
+  it('shows the controller-purpose notice and legal links at collection', () => {
+    renderForm(makeValue())
+    expect(screen.getByText(/Melih Saraç.*process your email/i)).toBeTruthy()
+    expect(screen.getByRole('link', { name: 'Privacy notice' }).getAttribute('href')).toBe(
+      '/privacy',
+    )
+    expect(screen.getByRole('link', { name: 'Terms of Use' }).getAttribute('href')).toBe('/terms')
+  })
+
+  it('keeps signup, legal, and sign-in links inside the Turkish locale', () => {
+    renderForm(makeValue(), 'tr')
+    expect(screen.getByText(/Melih Saraç.*e-posta adresini/i)).toBeTruthy()
+    expect(
+      screen.getByRole('link', { name: 'Gizlilik ve KVKK Aydınlatma Metni' }).getAttribute('href'),
+    ).toBe('/tr/privacy')
+    expect(screen.getByRole('link', { name: 'Kullanım Koşulları' }).getAttribute('href')).toBe(
+      '/tr/terms',
+    )
+    expect(screen.getByRole('link', { name: 'Giriş yap' }).getAttribute('href')).toBe(
+      '/tr/auth/sign-in',
+    )
   })
 
   it('swaps to the check-inbox card on success and remembers the address', async () => {

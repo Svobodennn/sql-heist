@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useTranslation } from '@/i18n/useTranslation'
+import { localeHref } from '@/i18n/localeHref'
 import { cx } from '@/ui/cx'
 import { IconUser, IconChevronDown } from '@/ui/icons'
 import { useAuth } from '../useAuth'
@@ -11,7 +12,7 @@ import styles from './UserMenu.module.css'
 // Signed-in navbar entry. Same disclosure pattern as LanguageSwitcher (button +
 // list, not an ARIA menu — no roving focus implemented, keep the contract honest).
 export function UserMenu() {
-  const { t } = useTranslation()
+  const { locale, t } = useTranslation()
   const { user, profile, signOut } = useAuth()
   const [open, setOpen] = useState(false)
   const wrapRef = useRef<HTMLDivElement>(null)
@@ -60,12 +61,20 @@ export function UserMenu() {
       {open && (
         <ul id={listId} className={styles.list} aria-label={t('auth.menu.listAria')}>
           <li>
-            <Link className={styles.item} href="/account" onClick={() => setOpen(false)}>
+            <Link
+              className={styles.item}
+              href={localeHref('/account', locale)}
+              onClick={() => setOpen(false)}
+            >
               {t('nav.account')}
             </Link>
           </li>
           <li>
-            <Link className={styles.item} href="/leaderboard" onClick={() => setOpen(false)}>
+            <Link
+              className={styles.item}
+              href={localeHref('/leaderboard', locale)}
+              onClick={() => setOpen(false)}
+            >
               {t('nav.leaderboard')}
             </Link>
           </li>

@@ -1,5 +1,9 @@
 import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { I18nContext } from '@/i18n/I18nProvider'
+import en from '@/messages/en.json'
+import tr from '@/messages/tr.json'
+import { createTranslator } from '@/i18n/translate'
 
 const { getPublicProfileMock, query } = vi.hoisted(() => ({
   getPublicProfileMock: vi.fn(),
@@ -86,5 +90,19 @@ describe('<ProfileView>', () => {
 
     expect(screen.queryByText('@ada_l')).toBeNull()
     expect(screen.getByText('Opening dossier…')).toBeTruthy()
+  })
+
+  it('keeps the empty-state case link inside the active locale', () => {
+    render(
+      <I18nContext.Provider
+        value={{ locale: 'tr', setLocale: vi.fn(), t: createTranslator(tr, en) }}
+      >
+        <ProfileView />
+      </I18nContext.Provider>,
+    )
+
+    expect(screen.getByRole('link', { name: 'İşlere göz at' }).getAttribute('href')).toBe(
+      '/tr/cases',
+    )
   })
 })

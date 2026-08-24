@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useRef, useState, type FormEvent } from 'react'
+import { localeHref } from '@/i18n/localeHref'
 import { useTranslation } from '@/i18n/useTranslation'
 import { useAuth } from '../useAuth'
 import { resendSignupEmail, type AuthErrorCode } from '../authClient'
@@ -11,7 +12,7 @@ import { AuthCard } from '../AuthCard'
 import styles from './SignInForm.module.css'
 
 export function SignInForm() {
-  const { t } = useTranslation()
+  const { locale, t } = useTranslation()
   const { status, signInEmail } = useAuth()
   const router = useRouter()
 
@@ -23,9 +24,11 @@ export function SignInForm() {
   // The email that triggered email-not-confirmed — resend targets THIS, not
   // whatever is in the field now (the user may have edited it since).
   const [unconfirmedEmail, setUnconfirmedEmail] = useState<string | null>(null)
-  const [resend, setResend] = useState<{ pending: boolean; done: boolean; error: AuthErrorCode | null }>(
-    { pending: false, done: false, error: null },
-  )
+  const [resend, setResend] = useState<{
+    pending: boolean
+    done: boolean
+    error: AuthErrorCode | null
+  }>({ pending: false, done: false, error: null })
   const inFlight = useRef(false)
 
   if (status === 'disabled') {
@@ -58,7 +61,7 @@ export function SignInForm() {
       setUnconfirmedEmail(error === 'email-not-confirmed' ? cleanEmail : null)
       return
     }
-    router.push('/')
+    router.push(localeHref('/', locale))
   }
 
   const doResend = async () => {
@@ -75,7 +78,7 @@ export function SignInForm() {
       footer={
         <>
           <span>{t('auth.signIn.noAccount')}</span>
-          <Link href="/auth/sign-up">{t('auth.signIn.goSignUp')}</Link>
+          <Link href={localeHref('/auth/sign-up', locale)}>{t('auth.signIn.goSignUp')}</Link>
         </>
       }
     >

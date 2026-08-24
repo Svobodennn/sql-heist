@@ -2,6 +2,11 @@ import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { User } from '@supabase/supabase-js'
 import { AuthContext, type AuthContextValue } from '@/features/auth/AuthProvider'
+import { I18nContext } from '@/i18n/I18nProvider'
+import type { Locale } from '@/i18n/config'
+import { createTranslator } from '@/i18n/translate'
+import en from '@/messages/en.json'
+import tr from '@/messages/tr.json'
 
 const { getLeaderboardMock, getMyRankMock } = vi.hoisted(() => ({
   getLeaderboardMock: vi.fn(),
@@ -27,11 +32,14 @@ const baseAuth: AuthContextValue = {
   adoptProfile: vi.fn(),
 }
 
-function renderLeaderboard(auth: AuthContextValue = baseAuth) {
+function renderLeaderboard(auth: AuthContextValue = baseAuth, locale: Locale = 'en') {
+  const primary = locale === 'tr' ? tr : en
   return render(
-    <AuthContext.Provider value={auth}>
-      <LeaderboardTable />
-    </AuthContext.Provider>,
+    <I18nContext.Provider value={{ locale, setLocale: vi.fn(), t: createTranslator(primary, en) }}>
+      <AuthContext.Provider value={auth}>
+        <LeaderboardTable />
+      </AuthContext.Provider>
+    </I18nContext.Provider>,
   )
 }
 
@@ -139,6 +147,35 @@ describe('<LeaderboardTable>', () => {
     await waitFor(() => expect(screen.getByText('You are not on the board.')).toBeTruthy())
     expect(screen.getByRole('link', { name: 'Manage visibility' }).getAttribute('href')).toBe(
       '/account',
+    )
+  })
+
+  it('keeps profile and account links inside the active locale', async () => {
+    getLeaderboardMock.mockResolvedValue([
+      {
+        rank: 1,
+        username: 'ada_l',
+        displayName: 'Ada',
+        country: 'GB',
+        objectivesCleared: 7,
+        lastActive: null,
+      },
+    ])
+    getMyRankMock.mockResolvedValue(null)
+    renderLeaderboard(
+      {
+        ...baseAuth,
+        user: { id: 'user-1', email: 'ada@example.com' } as User,
+        status: 'authed',
+      },
+      'tr',
+    )
+
+    expect((await screen.findByRole('link', { name: /Ada.*@ada_l/ })).getAttribute('href')).toBe(
+      '/tr/u?name=ada_l',
+    )
+    expect(screen.getByRole('link', { name: 'Görünürlüğü yönet' }).getAttribute('href')).toBe(
+      '/tr/account',
     )
   })
 })

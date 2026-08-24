@@ -3,6 +3,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { User } from '@supabase/supabase-js'
 import { AuthContext, type AuthContextValue } from '@/features/auth/AuthProvider'
 import { SignInForm } from '@/features/auth/SignInForm'
+import { I18nContext } from '@/i18n/I18nProvider'
+import type { Locale } from '@/i18n/config'
+import { createTranslator } from '@/i18n/translate'
+import en from '@/messages/en.json'
+import tr from '@/messages/tr.json'
 
 // No Supabase env in the test process → module-level guard resolves 'disabled';
 // the anon/authed flows below are driven through a mocked context instead.
@@ -36,11 +41,14 @@ function makeAuthValue(overrides: Partial<AuthContextValue> = {}): AuthContextVa
   }
 }
 
-function renderWithAuth(value: AuthContextValue) {
+function renderWithAuth(value: AuthContextValue, locale: Locale = 'en') {
+  const primary = locale === 'tr' ? tr : en
   return render(
-    <AuthContext.Provider value={value}>
-      <SignInForm />
-    </AuthContext.Provider>,
+    <I18nContext.Provider value={{ locale, setLocale: vi.fn(), t: createTranslator(primary, en) }}>
+      <AuthContext.Provider value={value}>
+        <SignInForm />
+      </AuthContext.Provider>
+    </I18nContext.Provider>,
   )
 }
 
@@ -82,5 +90,17 @@ describe('<SignInForm>', () => {
     fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'hunter22' } })
     fireEvent.click(screen.getByRole('button', { name: 'Sign in' }))
     await waitFor(() => expect(push).toHaveBeenCalledWith('/'))
+  })
+
+  it('keeps signup and successful navigation inside the Turkish locale', async () => {
+    const value = makeAuthValue()
+    renderWithAuth(value, 'tr')
+    expect(screen.getByRole('link', { name: 'Hesap oluştur' }).getAttribute('href')).toBe(
+      '/tr/auth/sign-up',
+    )
+    fireEvent.change(screen.getByLabelText('E-posta'), { target: { value: 'ada@example.com' } })
+    fireEvent.change(screen.getByLabelText('Şifre'), { target: { value: 'hunter22' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Giriş yap' }))
+    await waitFor(() => expect(push).toHaveBeenCalledWith('/tr'))
   })
 })

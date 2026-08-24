@@ -16,7 +16,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     pl: `${SITE_URL}/pl${path}`,
   })
 
-  const marketing = ['', '/help', '/faq', '/privacy', '/terms', '/contact']
+  const marketing = ['', '/help', '/faq', '/leaderboard', '/privacy', '/terms', '/contact']
   const marketingEntries = marketing.map((path) => ({
     url: `${SITE_URL}${path}`,
     changeFrequency: 'monthly' as const,

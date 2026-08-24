@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useRef, useState, type FormEvent } from 'react'
+import { localeHref } from '@/i18n/localeHref'
 import { useTranslation } from '@/i18n/useTranslation'
 import { useAuth } from '../useAuth'
 import { rememberPendingEmail, resendSignupEmail, type AuthErrorCode } from '../authClient'
@@ -16,7 +17,7 @@ import { AuthCard } from '../AuthCard'
 import styles from './SignUpForm.module.css'
 
 export function SignUpForm() {
-  const { t } = useTranslation()
+  const { locale, t } = useTranslation()
   const { status, signUpEmail } = useAuth()
 
   const [email, setEmail] = useState('')
@@ -60,7 +61,7 @@ export function SignUpForm() {
         footer={
           <>
             <span>{t('auth.signUp.haveAccount')}</span>
-            <Link href="/auth/sign-in">{t('auth.signUp.goSignIn')}</Link>
+            <Link href={localeHref('/auth/sign-in', locale)}>{t('auth.signUp.goSignIn')}</Link>
           </>
         }
       >
@@ -117,7 +118,7 @@ export function SignUpForm() {
       footer={
         <>
           <span>{t('auth.signUp.haveAccount')}</span>
-          <Link href="/auth/sign-in">{t('auth.signUp.goSignIn')}</Link>
+          <Link href={localeHref('/auth/sign-in', locale)}>{t('auth.signUp.goSignIn')}</Link>
         </>
       }
     >
@@ -126,7 +127,7 @@ export function SignUpForm() {
           <div className={styles.alert} role="alert">
             <p>{t(`auth.errors.${formError}`)}</p>
             {formError === 'user-exists' && (
-              <Link className={styles.alertAction} href="/auth/sign-in">
+              <Link className={styles.alertAction} href={localeHref('/auth/sign-in', locale)}>
                 {t('auth.signUp.goSignIn')}
               </Link>
             )}
@@ -198,6 +199,13 @@ export function SignUpForm() {
             )}
           </p>
         </div>
+
+        <p className={styles.legalNotice}>
+          {t('auth.signUp.privacyNotice')}{' '}
+          <Link href={localeHref('/privacy', locale)}>{t('auth.signUp.privacyLink')}</Link>.{' '}
+          {t('auth.signUp.termsNotice')}{' '}
+          <Link href={localeHref('/terms', locale)}>{t('auth.signUp.termsLink')}</Link>.
+        </p>
 
         <button
           type="submit"

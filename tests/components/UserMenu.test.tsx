@@ -3,6 +3,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { User } from '@supabase/supabase-js'
 import { AuthContext, type AuthContextValue } from '@/features/auth/AuthProvider'
 import { UserMenu } from '@/features/auth/UserMenu'
+import { I18nContext } from '@/i18n/I18nProvider'
+import en from '@/messages/en.json'
+import tr from '@/messages/tr.json'
+import { createTranslator } from '@/i18n/translate'
 
 const value: AuthContextValue = {
   user: { id: 'user-1', email: 'ada@example.com' } as User,
@@ -46,5 +50,23 @@ describe('<UserMenu>', () => {
 
     expect(screen.queryByRole('link', { name: 'Account' })).toBeNull()
     expect(document.activeElement).toBe(trigger)
+  })
+
+  it('keeps account destinations inside the active locale', () => {
+    render(
+      <I18nContext.Provider
+        value={{ locale: 'tr', setLocale: vi.fn(), t: createTranslator(tr, en) }}
+      >
+        <AuthContext.Provider value={value}>
+          <UserMenu />
+        </AuthContext.Provider>
+      </I18nContext.Provider>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Hesap menüsü: ada_l' }))
+    expect(screen.getByRole('link', { name: 'Hesap' }).getAttribute('href')).toBe('/tr/account')
+    expect(screen.getByRole('link', { name: 'Sıralama' }).getAttribute('href')).toBe(
+      '/tr/leaderboard',
+    )
   })
 })

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/features/auth/useAuth'
+import { localeHref } from '@/i18n/localeHref'
 import { useTranslation } from '@/i18n/useTranslation'
 import {
   getLeaderboard,
@@ -100,7 +101,7 @@ function rankStateForUser(
 }
 
 function OwnRankCard({ state }: { state: Exclude<RankState, { kind: 'hidden' }> }) {
-  const { t } = useTranslation()
+  const { locale, t } = useTranslation()
 
   if (state.kind === 'loading') {
     return (
@@ -143,7 +144,7 @@ function OwnRankCard({ state }: { state: Exclude<RankState, { kind: 'hidden' }> 
           <p className={styles.rankCopy}>{t('leaderboard.notRanked')}</p>
           <p className={styles.rankMeta}>{t('leaderboard.notRankedBody')}</p>
         </div>
-        <Link className="btn btn--ghost" href="/account">
+        <Link className="btn btn--ghost" href={localeHref('/account', locale)}>
           {t('leaderboard.manageVisibility')}
         </Link>
       </aside>
@@ -194,7 +195,7 @@ function Board({ state, locale }: { state: BoardState; locale: keyof typeof DATE
       <div className={`panel ${styles.state}`}>
         <h2>{t('leaderboard.emptyTitle')}</h2>
         <p>{t('leaderboard.emptyBody')}</p>
-        <Link className="btn btn--ghost" href="/cases">
+        <Link className="btn btn--ghost" href={localeHref('/cases', locale)}>
           {t('leaderboard.browseCases')}
         </Link>
       </div>
@@ -228,7 +229,7 @@ function Board({ state, locale }: { state: BoardState; locale: keyof typeof DATE
                 <td>
                   <Link
                     className={styles.operative}
-                    href={`/u?name=${encodeURIComponent(row.username)}`}
+                    href={localeHref(`/u?name=${encodeURIComponent(row.username)}`, locale)}
                   >
                     <span>{row.displayName ?? row.username}</span>
                     <span className="mono">@{row.username}</span>

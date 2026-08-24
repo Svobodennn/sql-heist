@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import { localeHref } from '@/i18n/localeHref'
 import { useTranslation } from '@/i18n/useTranslation'
 import { getPublicProfile, type PublicProfile } from '../lib/profileQuery'
 import styles from './ProfileView.module.css'
@@ -64,7 +65,7 @@ export function ProfileView() {
     return (
       <ProfileShell stamp={t('profile.stamp')} title={t('profile.emptyTitle')}>
         <p className={styles.copy}>{t('profile.emptyBody')}</p>
-        <Link className="btn btn--ghost" href="/cases">
+        <Link className="btn btn--ghost" href={localeHref('/cases', locale)}>
           {t('profile.browseCases')}
         </Link>
       </ProfileShell>
