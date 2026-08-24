@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { AuthProvider, useAuth, type AuthContextValue } from '@/features/auth'
 
@@ -59,5 +59,19 @@ describe('<AuthProvider> without Supabase env', () => {
     })
     await expect(captured!.signOut()).resolves.toBeUndefined()
     await expect(captured!.refreshProfile()).resolves.toBeUndefined()
+  })
+
+  it('removes an expired pending signup email on app load even when auth is disabled', async () => {
+    window.localStorage.setItem(
+      'sql-heist:auth:pending-email',
+      JSON.stringify({ email: 'expired@example.com', expiresAt: Date.now() - 1 }),
+    )
+    render(
+      <AuthProvider>
+        <span>game</span>
+      </AuthProvider>,
+    )
+
+    await waitFor(() => expect(window.localStorage.length).toBe(0))
   })
 })

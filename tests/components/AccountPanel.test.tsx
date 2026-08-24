@@ -2,6 +2,11 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { User } from '@supabase/supabase-js'
 import { AuthContext, type AuthContextValue, type Profile } from '@/features/auth/AuthProvider'
+import { I18nContext } from '@/i18n/I18nProvider'
+import type { Locale } from '@/i18n/config'
+import { createTranslator } from '@/i18n/translate'
+import en from '@/messages/en.json'
+import tr from '@/messages/tr.json'
 
 const {
   deleteMyAccountMock,
@@ -23,9 +28,14 @@ vi.mock('next/navigation', () => ({
 
 vi.mock('@/features/profile/lib/profileQuery', () => ({
   COUNTRY_MAX_LENGTH: 56,
-  DISPLAY_NAME_MAX_LENGTH: 80,
+  DISPLAY_NAME_MAX_LENGTH: 40,
   deleteMyAccount: deleteMyAccountMock,
   exportMyData: exportMyDataMock,
+  profileFieldsAreValid: (displayName: string, country: string) => {
+    const displayLength = displayName.trim().length
+    const countryLength = country.trim().length
+    return displayLength <= 40 && (countryLength === 0 || countryLength >= 2) && countryLength <= 56
+  },
   setLeaderboardOptIn: setLeaderboardOptInMock,
   updateMyProfile: updateMyProfileMock,
 }))
@@ -59,11 +69,14 @@ function makeValue(overrides: Partial<AuthContextValue> = {}): AuthContextValue 
   }
 }
 
-function renderPanel(value: AuthContextValue) {
+function renderPanel(value: AuthContextValue, locale: Locale = 'en') {
+  const primary = locale === 'tr' ? tr : en
   return render(
-    <AuthContext.Provider value={value}>
-      <AccountPanel />
-    </AuthContext.Provider>,
+    <I18nContext.Provider value={{ locale, setLocale: vi.fn(), t: createTranslator(primary, en) }}>
+      <AuthContext.Provider value={value}>
+        <AccountPanel />
+      </AuthContext.Provider>
+    </I18nContext.Provider>,
   )
 }
 
@@ -92,6 +105,20 @@ describe('<AccountPanel>', () => {
     await waitFor(() => expect(replaceMock).toHaveBeenCalledWith('/auth/sign-in'))
   })
 
+  it('redirects anonymous Turkish visitors to localized sign-in', async () => {
+    renderPanel(makeValue({ status: 'anon', user: null, profile: null, profileReady: false }), 'tr')
+    await waitFor(() => expect(replaceMock).toHaveBeenCalledWith('/tr/auth/sign-in'))
+  })
+
+  it('rejects profile fields outside the live database bounds before saving', () => {
+    const value = makeValue()
+    renderPanel(value)
+    fireEvent.change(screen.getByLabelText('Country'), { target: { value: 'X' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save profile' }))
+    expect(updateMyProfileMock).not.toHaveBeenCalled()
+    expect(screen.getByRole('alert').textContent).toContain('Country must be blank or 2–56')
+  })
+
   it('saves trimmed display fields and refreshes provider state', async () => {
     const value = makeValue()
     renderPanel(value)
@@ -113,6 +140,9 @@ describe('<AccountPanel>', () => {
   it('persists explicit public-profile consent', async () => {
     const value = makeValue()
     renderPanel(value)
+    expect(screen.getByRole('link', { name: 'Privacy notice' }).getAttribute('href')).toBe(
+      '/privacy',
+    )
     fireEvent.click(screen.getByLabelText('Show my profile publicly'))
 
     await waitFor(() => {
@@ -192,5 +222,28 @@ describe('<AccountPanel>', () => {
 
     releaseUpdate?.()
     await waitFor(() => expect(screen.getByText('Profile saved.')).toBeTruthy())
+  })
+
+  it('keeps public profile and post-deletion navigation inside the active locale', async () => {
+    const value = makeValue({ profile: { ...profile, leaderboardOptIn: true } })
+    renderPanel(value, 'tr')
+
+    expect(
+      screen.getByRole('link', { name: 'Herkese açık profili gör' }).getAttribute('href'),
+    ).toBe('/tr/u?name=ada_l')
+    expect(screen.getByRole('link', { name: 'Gizlilik bildirimi' }).getAttribute('href')).toBe(
+      '/tr/privacy',
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Hesap silme talebi oluştur' }))
+    fireEvent.change(screen.getByLabelText('Onaylamak için ada_l yaz'), {
+      target: { value: 'ada_l' },
+    })
+    fireEvent.change(screen.getByLabelText('Mevcut şifre'), {
+      target: { value: 'correct horse' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Silme talebini gönder' }))
+
+    await waitFor(() => expect(replaceMock).toHaveBeenCalledWith('/tr'))
   })
 })

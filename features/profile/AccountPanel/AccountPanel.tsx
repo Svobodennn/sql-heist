@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
+import { localeHref } from '@/i18n/localeHref'
 import { useTranslation } from '@/i18n/useTranslation'
 import { useAuth } from '@/features/auth/useAuth'
 import {
@@ -10,6 +11,7 @@ import {
   DISPLAY_NAME_MAX_LENGTH,
   deleteMyAccount,
   exportMyData,
+  profileFieldsAreValid,
   setLeaderboardOptIn,
   type ProfileQueryErrorCode,
   updateMyProfile,
@@ -23,7 +25,7 @@ type FeedbackState = Partial<Record<ActionScope, ActionFeedbackValue>>
 
 export function AccountPanel() {
   const router = useRouter()
-  const { t } = useTranslation()
+  const { locale, t } = useTranslation()
   const { status, user, profile, profileReady, refreshProfile, signOut } = useAuth()
   const [displayName, setDisplayName] = useState('')
   const [country, setCountry] = useState('')
@@ -40,9 +42,13 @@ export function AccountPanel() {
 
   useEffect(() => {
     if (status === 'anon') {
-      router.replace(deletionSubmittedRef.current ? '/' : '/auth/sign-in')
+      router.replace(
+        deletionSubmittedRef.current
+          ? localeHref('/', locale)
+          : localeHref('/auth/sign-in', locale),
+      )
     }
-  }, [status, router])
+  }, [status, locale, router])
 
   useEffect(() => {
     if (!profile) return
@@ -81,11 +87,8 @@ export function AccountPanel() {
     event.preventDefault()
     if (mutationInFlight.current) return
     clearFeedback('profile')
-    if (
-      displayName.trim().length > DISPLAY_NAME_MAX_LENGTH ||
-      country.trim().length > COUNTRY_MAX_LENGTH
-    ) {
-      reportFeedback('profile', { kind: 'error', message: t('account.errors.tooLong') })
+    if (!profileFieldsAreValid(displayName, country)) {
+      reportFeedback('profile', { kind: 'error', message: t('account.errors.invalidProfile') })
       return
     }
     mutationInFlight.current = true
@@ -163,7 +166,7 @@ export function AccountPanel() {
         // The server-side soft lock already succeeded. Navigation must not turn
         // a sign-out network failure into a misleading, impossible-to-retry error.
       }
-      router.replace('/')
+      router.replace(localeHref('/', locale))
     } catch (error) {
       setDeleteError(isProfileQueryError(error, 'reauth-failed') ? 'reauth' : 'request')
       setDeleting(false)
@@ -249,12 +252,16 @@ export function AccountPanel() {
             <span>{t('account.visibilityLabel')}</span>
           </label>
           <p id="account-visibility-consent" className={styles.hint}>
-            {t('account.visibilityConsent')}
+            {t('account.visibilityConsent')}{' '}
+            <Link className={styles.hintLink} href={localeHref('/privacy', locale)}>
+              {t('account.visibilityPrivacyLink')}
+            </Link>
+            .
           </p>
           {optIn && (
             <Link
               className={styles.profileLink}
-              href={`/u?name=${encodeURIComponent(profile.username)}`}
+              href={localeHref(`/u?name=${encodeURIComponent(profile.username)}`, locale)}
             >
               {t('account.viewPublicProfile')}
             </Link>

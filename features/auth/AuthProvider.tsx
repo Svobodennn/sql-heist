@@ -43,7 +43,12 @@ export interface AuthContextValue extends AuthState {
   adoptProfile(row: ProfileRow): void
 }
 
-const DISABLED_STATE: AuthState = { user: null, profile: null, profileReady: false, status: 'disabled' }
+const DISABLED_STATE: AuthState = {
+  user: null,
+  profile: null,
+  profileReady: false,
+  status: 'disabled',
+}
 
 // Default context mirrors I18nContext: a consumer rendered outside the provider
 // (or in an env-less build) sees auth as cleanly off — never a crash.
@@ -59,7 +64,8 @@ export const AuthContext = createContext<AuthContextValue>({
 // snake_case `profiles` row (RLS only ever returns the caller's) → Profile.
 // ProfileRow is defined in authClient (shared with createMyProfile) to keep the
 // column contract in one place.
-const PROFILE_COLUMNS = 'id, username, display_name, country, leaderboard_opt_in, created_at, updated_at'
+const PROFILE_COLUMNS =
+  'id, username, display_name, country, leaderboard_opt_in, created_at, updated_at'
 
 function toProfile(row: ProfileRow): Profile {
   return {
@@ -82,6 +88,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       ? { user: null, profile: null, profileReady: false, status: 'loading' }
       : DISABLED_STATE,
   )
+
+  useEffect(() => {
+    authClient.clearExpiredPendingEmail()
+  }, [])
 
   // Session lifecycle. onAuthStateChange fires INITIAL_SESSION on subscribe, so it
   // is the single source of truth for 'loading' → 'anon'/'authed'. The callback

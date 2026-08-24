@@ -146,12 +146,23 @@ export async function createMyProfile(
 }
 
 // The confirm email lands in a fresh tab with no app state; remembering the
-// pending address locally lets the callback's error path offer a resend.
+// pending address locally lets the callback's error path offer a resend. The
+// default confirmation link expires after one hour, so the local copy does too.
 const PENDING_EMAIL_KEY = 'sql-heist:auth:pending-email'
+const PENDING_EMAIL_TTL_MS = 60 * 60 * 1000
+
+interface PendingEmail {
+  email: string
+  expiresAt: number
+}
 
 export function rememberPendingEmail(email: string): void {
   try {
-    window.localStorage.setItem(PENDING_EMAIL_KEY, email)
+    const pending: PendingEmail = {
+      email,
+      expiresAt: Date.now() + PENDING_EMAIL_TTL_MS,
+    }
+    window.localStorage.setItem(PENDING_EMAIL_KEY, JSON.stringify(pending))
   } catch {
     // Private mode / storage disabled — resend affordance simply won't show.
   }
@@ -159,10 +170,29 @@ export function rememberPendingEmail(email: string): void {
 
 export function readPendingEmail(): string | null {
   try {
-    return window.localStorage.getItem(PENDING_EMAIL_KEY)
+    const stored = window.localStorage.getItem(PENDING_EMAIL_KEY)
+    if (!stored) return null
+    const pending = JSON.parse(stored) as Partial<PendingEmail>
+    if (
+      typeof pending.email !== 'string' ||
+      typeof pending.expiresAt !== 'number' ||
+      !Number.isFinite(pending.expiresAt) ||
+      Date.now() >= pending.expiresAt
+    ) {
+      clearPendingEmail()
+      return null
+    }
+    return pending.email
   } catch {
+    clearPendingEmail()
     return null
   }
+}
+
+// Called once when the app mounts so an expired or malformed value is removed
+// even if the visitor never opens the callback/resend flow again.
+export function clearExpiredPendingEmail(): void {
+  void readPendingEmail()
 }
 
 export function clearPendingEmail(): void {

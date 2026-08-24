@@ -5,6 +5,9 @@ const { getSupabaseMock } = vi.hoisted(() => ({ getSupabaseMock: vi.fn() }))
 vi.mock('@/lib/supabase', () => ({ getSupabase: getSupabaseMock }))
 
 import {
+  COUNTRY_MIN_LENGTH,
+  DISPLAY_NAME_MAX_LENGTH,
+  PUBLIC_PROFILE_NOTICE_VERSION,
   deleteMyAccount,
   exportMyData,
   getPublicProfile,
@@ -92,6 +95,16 @@ describe('getPublicProfile', () => {
 })
 
 describe('own-profile mutations', () => {
+  it('rejects values outside the live profiles table bounds before any request', async () => {
+    await expect(
+      updateMyProfile({ displayName: 'x'.repeat(DISPLAY_NAME_MAX_LENGTH + 1) }),
+    ).rejects.toMatchObject({ code: 'invalid-profile' })
+    await expect(
+      updateMyProfile({ country: 'x'.repeat(COUNTRY_MIN_LENGTH - 1) }),
+    ).rejects.toMatchObject({ code: 'invalid-profile' })
+    expect(getSupabaseMock).not.toHaveBeenCalled()
+  })
+
   it('trims optional fields and updates only the caller row', async () => {
     const single = vi.fn(async () => ({ data: { ...profileRow, country: null }, error: null }))
     const select = vi.fn(() => ({ single }))
@@ -109,22 +122,24 @@ describe('own-profile mutations', () => {
     expect(eq).toHaveBeenCalledWith('id', user.id)
   })
 
-  it('persists an explicit leaderboard consent choice on the caller row', async () => {
-    const single = vi.fn(async () => ({
+  it('records leaderboard consent through the versioned own-user RPC', async () => {
+    const rpc = vi.fn(async () => ({
       data: { ...profileRow, leaderboard_opt_in: false },
       error: null,
     }))
-    const select = vi.fn(() => ({ single }))
-    const eq = vi.fn(() => ({ select }))
-    const update = vi.fn(() => ({ eq }))
+    const from = vi.fn()
     getSupabaseMock.mockReturnValue({
       auth: authReturning(),
-      from: vi.fn(() => ({ update })),
+      from,
+      rpc,
     })
 
     await expect(setLeaderboardOptIn(false)).resolves.toMatchObject({ leaderboardOptIn: false })
-    expect(update).toHaveBeenCalledWith(expect.objectContaining({ leaderboard_opt_in: false }))
-    expect(eq).toHaveBeenCalledWith('id', user.id)
+    expect(rpc).toHaveBeenCalledWith('set_public_profile_consent', {
+      p_enabled: false,
+      p_notice_version: PUBLIC_PROFILE_NOTICE_VERSION,
+    })
+    expect(from).not.toHaveBeenCalled()
   })
 
   it('re-authenticates before calling the server-timestamped deletion RPC', async () => {
@@ -195,7 +210,7 @@ describe('own-profile mutations', () => {
 })
 
 describe('exportMyData', () => {
-  it('exports only the authenticated user profile and progress as JSON', async () => {
+  it('exports only the authenticated user profile, progress, and consent history as JSON', async () => {
     const profileMaybeSingle = vi.fn(async () => ({ data: profileRow, error: null }))
     const profileEq = vi.fn(() => ({ maybeSingle: profileMaybeSingle }))
     const progressEq = vi.fn(async () => ({
@@ -209,10 +224,30 @@ describe('exportMyData', () => {
       ],
       error: null,
     }))
+    const consentOrder = vi.fn(async () => ({
+      data: [
+        {
+          id: 11,
+          purpose: 'public_profile',
+          action: 'granted',
+          notice_version: PUBLIC_PROFILE_NOTICE_VERSION,
+          source: 'account_settings',
+          occurred_at: '2026-08-22T02:00:00.000Z',
+        },
+      ],
+      error: null,
+    }))
+    const consentEq = vi.fn(() => ({ order: consentOrder }))
     const profileSelect = vi.fn(() => ({ eq: profileEq }))
     const progressSelect = vi.fn(() => ({ eq: progressEq }))
+    const consentSelect = vi.fn(() => ({ eq: consentEq }))
     const from = vi.fn((table: string) => ({
-      select: table === 'profiles' ? profileSelect : progressSelect,
+      select:
+        table === 'profiles'
+          ? profileSelect
+          : table === 'case_progress'
+            ? progressSelect
+            : consentSelect,
     }))
     getSupabaseMock.mockReturnValue({ auth: authReturning(), from })
 
@@ -220,7 +255,7 @@ describe('exportMyData', () => {
     const payload = JSON.parse(await blob.text())
 
     expect(payload).toMatchObject({
-      exportVersion: 1,
+      exportVersion: 2,
       account: { email: user.email },
       profiles: [profileRow],
       case_progress: [
@@ -229,9 +264,23 @@ describe('exportMyData', () => {
           completed_objectives: ['bypass-login'],
         },
       ],
+      profile_consent_events: [
+        {
+          id: 11,
+          purpose: 'public_profile',
+          action: 'granted',
+          notice_version: PUBLIC_PROFILE_NOTICE_VERSION,
+          source: 'account_settings',
+        },
+      ],
     })
     expect(profileEq).toHaveBeenCalledWith('id', user.id)
     expect(progressEq).toHaveBeenCalledWith('user_id', user.id)
+    expect(consentEq).toHaveBeenCalledWith('user_id', user.id)
+    expect(consentSelect).toHaveBeenCalledWith(
+      'id, purpose, action, notice_version, source, occurred_at',
+    )
+    expect(consentOrder).toHaveBeenCalledWith('id', { ascending: true })
     expect(blob.type).toBe('application/json')
   })
 })

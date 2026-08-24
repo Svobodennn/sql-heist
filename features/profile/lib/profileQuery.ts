@@ -5,9 +5,12 @@ const PUBLIC_PROFILE_COLUMNS = 'username, display_name, country, created_at, obj
 const MY_PROFILE_COLUMNS =
   'id, username, display_name, country, leaderboard_opt_in, delete_requested_at, created_at, updated_at'
 const EXPORT_PROGRESS_COLUMNS = 'case_id, completed_objectives, best_score, updated_at'
+const EXPORT_CONSENT_COLUMNS = 'id, purpose, action, notice_version, source, occurred_at'
 
-export const DISPLAY_NAME_MAX_LENGTH = 80
+export const DISPLAY_NAME_MAX_LENGTH = 40
+export const COUNTRY_MIN_LENGTH = 2
 export const COUNTRY_MAX_LENGTH = 56
+export const PUBLIC_PROFILE_NOTICE_VERSION = '2026-08-23'
 
 export type ProfileQueryErrorCode =
   'auth-disabled' | 'auth-required' | 'invalid-profile' | 'reauth-failed' | 'request-failed'
@@ -109,15 +112,30 @@ function toMyProfile(row: MyProfileRow): MyProfile {
 
 function normalizeOptionalField(
   value: string | null,
+  minLength: number,
   maxLength: number,
   label: string,
 ): string | null {
   if (value === null) return null
   const normalized = value.trim()
+  if (!normalized) return null
+  if (normalized.length < minLength) {
+    throw new ProfileQueryError('invalid-profile', `${label} is too short`)
+  }
   if (normalized.length > maxLength) {
     throw new ProfileQueryError('invalid-profile', `${label} is too long`)
   }
-  return normalized || null
+  return normalized
+}
+
+export function profileFieldsAreValid(displayName: string, country: string): boolean {
+  const displayNameLength = displayName.trim().length
+  const countryLength = country.trim().length
+  return (
+    displayNameLength <= DISPLAY_NAME_MAX_LENGTH &&
+    (countryLength === 0 || countryLength >= COUNTRY_MIN_LENGTH) &&
+    countryLength <= COUNTRY_MAX_LENGTH
+  )
 }
 
 async function updateOwnRow(patch: Record<string, string | boolean | null>): Promise<MyProfile> {
@@ -164,12 +182,18 @@ export async function updateMyProfile(patch: MyProfilePatch): Promise<MyProfile>
   if (patch.displayName !== undefined) {
     update.display_name = normalizeOptionalField(
       patch.displayName,
+      1,
       DISPLAY_NAME_MAX_LENGTH,
       'Display name',
     )
   }
   if (patch.country !== undefined) {
-    update.country = normalizeOptionalField(patch.country, COUNTRY_MAX_LENGTH, 'Country')
+    update.country = normalizeOptionalField(
+      patch.country,
+      COUNTRY_MIN_LENGTH,
+      COUNTRY_MAX_LENGTH,
+      'Country',
+    )
   }
   if (Object.keys(update).length === 0) {
     throw new ProfileQueryError('invalid-profile', 'No profile changes supplied')
@@ -178,25 +202,42 @@ export async function updateMyProfile(patch: MyProfilePatch): Promise<MyProfile>
 }
 
 export async function setLeaderboardOptIn(enabled: boolean): Promise<MyProfile> {
-  return updateOwnRow({ leaderboard_opt_in: enabled })
+  const client = requireClient()
+  await requireUser(client)
+  const { data, error } = await client.rpc('set_public_profile_consent', {
+    p_enabled: enabled,
+    p_notice_version: PUBLIC_PROFILE_NOTICE_VERSION,
+  })
+  throwIfError(error)
+  if (!data) {
+    throw new ProfileQueryError('request-failed', 'Consent update returned no profile')
+  }
+  return toMyProfile(data as MyProfileRow)
 }
 
 export async function exportMyData(): Promise<Blob> {
   const client = requireClient()
   const user = await requireUser(client)
-  const [profileResult, progressResult] = await Promise.all([
+  const [profileResult, progressResult, consentResult] = await Promise.all([
     client.from('profiles').select(MY_PROFILE_COLUMNS).eq('id', user.id).maybeSingle(),
     client.from('case_progress').select(EXPORT_PROGRESS_COLUMNS).eq('user_id', user.id),
+    client
+      .from('profile_consent_events')
+      .select(EXPORT_CONSENT_COLUMNS)
+      .eq('user_id', user.id)
+      .order('id', { ascending: true }),
   ])
   throwIfError(profileResult.error)
   throwIfError(progressResult.error)
+  throwIfError(consentResult.error)
 
   const payload = {
-    exportVersion: 1,
+    exportVersion: 2,
     exportedAt: new Date().toISOString(),
     account: { email: user.email ?? null },
     profiles: profileResult.data ? [profileResult.data as MyProfileRow] : [],
     case_progress: progressResult.data ?? [],
+    profile_consent_events: consentResult.data ?? [],
   }
 
   return new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })

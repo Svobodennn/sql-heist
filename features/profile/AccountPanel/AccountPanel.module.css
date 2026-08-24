@@ -90,6 +90,10 @@
   font-size: 0.8125rem;
 }
 
+.hintLink {
+  font-weight: 600;
+}
+
 .toggle {
   display: flex;
   align-items: flex-start;
