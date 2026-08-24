@@ -8,8 +8,8 @@ import { localeHref } from '@/i18n/localeHref'
 import styles from '@/app/components/ContentPage/content.module.css'
 
 // Contact body (Server Component, no client JS). Shared by the unprefixed en
-// route (app/contact/page.tsx) and a future per-locale export; the `locale` prop
-// selects the catalog. All visible prose lives under the `contact` namespace; the
+// route and the statically exported /tr + /pl routes; the `locale` prop selects
+// the catalog. All visible prose lives under the `contact` namespace; the
 // email address is data (identical in every locale), so it stays a literal.
 const EMAIL = 'melih.sarac@hotmail.com'
 

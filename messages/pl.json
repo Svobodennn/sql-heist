@@ -43,7 +43,11 @@
       "checking": "Sprawdzanie dostępności…",
       "available": "Dostępna.",
       "taken": "Zajęta — spróbuj innej.",
-      "submitting": "Tworzenie konta…"
+      "submitting": "Tworzenie konta…",
+      "privacyNotice": "Administratorem danych SQL Heist jest Melih Saraç. Przetwarzamy twój adres e-mail, nazwę użytkownika i postęp konta, aby utworzyć i synchronizować to opcjonalne konto. Szczegóły:",
+      "privacyLink": "Informacja o prywatności",
+      "termsNotice": "Tworząc konto, akceptujesz",
+      "termsLink": "Warunki korzystania"
     },
     "callback": {
       "stamp": "Dostęp agencji",
@@ -58,7 +62,7 @@
     "gate": {
       "stamp": "Wybierz pseudonim",
       "title": "Wybierz nazwę użytkownika",
-      "desc": "Twoja publiczna nazwa na tablicy i w profilu. Tylko małe litery, cyfry i podkreślnik.",
+      "desc": "Nazwa użytkownika twojego konta. Pozostaje prywatna, dopóki nie włączysz profilu publicznego. Tylko małe litery, cyfry i podkreślnik.",
       "username": "Nazwa użytkownika",
       "submit": "Zajmij ją",
       "signOut": "Jednak się wyloguj",
@@ -154,11 +158,12 @@
     "visibilityTitle": "Widoczność publiczna",
     "visibilityLabel": "Pokazuj mój profil publicznie",
     "visibilityConsent": "Po włączeniu publikowane są nazwa użytkownika, nazwa wyświetlana, kraj, data dołączenia, liczba ukończonych celów i czas ostatniej zsynchronizowanej aktywności. Zgodę możesz wycofać w każdej chwili.",
+    "visibilityPrivacyLink": "Informacja o prywatności",
     "visibilityPublic": "Twój profil publiczny jest widoczny.",
     "visibilityPrivate": "Twój profil jest prywatny.",
     "viewPublicProfile": "Zobacz profil publiczny",
     "dataTitle": "Twoje dane",
-    "dataBody": "Pobierz kopię JSON profilu konta i zsynchronizowanego postępu spraw.",
+    "dataBody": "Pobierz kopię JSON profilu konta, zsynchronizowanego postępu spraw i historii zgody na profil publiczny.",
     "export": "Pobierz moje dane",
     "exporting": "Przygotowywanie pliku…",
     "exportReady": "Plik z twoimi danymi jest gotowy.",
@@ -173,7 +178,7 @@
     "deleteConfirm": "Wyślij wniosek o usunięcie",
     "deleting": "Wysyłanie…",
     "errors": {
-      "tooLong": "Jedno z pól jest za długie.",
+      "invalidProfile": "Nazwa wyświetlana może mieć najwyżej 40 znaków. Kraj musi być pusty albo mieć 2–56 znaków.",
       "save": "Nie udało się zapisać profilu. Spróbuj ponownie.",
       "visibility": "Nie udało się zmienić widoczności. Spróbuj ponownie.",
       "export": "Nie udało się przygotować danych. Spróbuj ponownie.",
@@ -205,7 +210,7 @@
     "linkPrivacy": "Prywatność",
     "linkTerms": "Warunki",
     "linkContact": "Kontakt",
-    "note": "Działa w całości w twojej przeglądarce. Bez serwera, bez sieci.",
+    "note": "Baza treningowa działa lokalnie. Synchronizacja konta jest opcjonalna.",
     "alsoTry": "sprawdź też",
     "copyright": "© {year} SQL Heist"
   },
@@ -226,7 +231,7 @@
       "facts": {
         "0": {
           "k": "Gdzie",
-          "v": "100% w twojej przeglądarce. Nic nigdy nie dotyka sieci."
+          "v": "Baza treningowa i każdy ładunek działają w przeglądarce; synchronizacja konta jest osobna i opcjonalna."
         },
         "1": {
           "k": "Przeciw",
@@ -280,7 +285,7 @@
     "faqTeasers": {
       "0": {
         "q": "Czy to legalne?",
-        "a": "Tak. Każda robota działa w całości w twojej przeglądarce, na osadzonej w piaskownicy bazie SQLite dołączonej do gry. Żadnych prawdziwych systemów, żadnych połączeń sieciowych — nie ma czego zepsuć poza celem treningowym."
+        "a": "Tak. Każda robota celuje wyłącznie w bazę SQLite w piaskownicy twojej przeglądarki. Ładunek treningowy nigdy nie trafia do prawdziwego systemu; dostarczenie strony i opcjonalna synchronizacja konta są oddzielone od celu."
       },
       "1": {
         "q": "Czy muszę cokolwiek instalować?",
@@ -400,7 +405,7 @@
     "items": {
       "0": {
         "q": "Czy to legalne?",
-        "a": "Tak. Każda robota działa w całości w twojej przeglądarce, na bazie SQLite w piaskownicy dostarczanej z grą. Po drugiej stronie nie ma prawdziwych systemów, żadnych połączeń sieciowych, a jedyne, co możesz zepsuć, to cel treningowy."
+        "a": "Tak. Każda robota celuje wyłącznie w bazę SQLite w piaskownicy twojej przeglądarki. Ładunek treningowy nigdy nie trafia do prawdziwego systemu; dostarczenie strony i opcjonalna synchronizacja konta są oddzielone od celu."
       },
       "1": {
         "q": "Czy muszę coś instalować?",
@@ -445,40 +450,61 @@
   "consent": {
     "aria": "Informacja o pamięci lokalnej",
     "title": "Ta gra korzysta z pamięci lokalnej",
-    "body": "SQL Heist przechowuje twój postęp i wybór języka w pamięci lokalnej przeglądarki. Bez śledzenia, bez analityki, bez ciasteczek reklamowych — i nic nigdy nie opuszcza twojego urządzenia.",
+    "body": "SQL Heist używa pamięci lokalnej dla języka, postępu, tej informacji i zalogowanej sesji. Oczekujący e-mail rejestracyjny wygasa po godzinie i jest usuwany przy następnym uruchomieniu lub sprawdzeniu przez aplikację; wyczyszczenie danych witryny usuwa go wcześniej. Bez analityki i śledzenia reklamowego. Synchronizacja konta używa Supabase; profile publiczne wymagają wyraźnego włączenia.",
     "accept": "Jasne"
   },
   "privacy": {
     "eyebrow": "Drobny druk",
     "title": "Prywatność",
-    "lead": "Wersja krótka: nie zbieramy cię. Wersja długa jest niżej i wciąż jest krótka.",
+    "lead": "Domyślnie anonimowo. Opcjonalne konto synchronizuje tylko dane potrzebne do tożsamości, postępu i wybranej przez ciebie obecności publicznej.",
     "glanceLabel": "W skrócie",
-    "glanceBody": "Brak kont. Brak śledzenia. Brak analityki w tej wersji. Twój postęp znajduje się w pamięci lokalnej przeglądarki na twoim urządzeniu — nie mamy serwera, który mógłby go odczytać.",
+    "glanceBody": "Możesz grać bez konta: rozgrywka i postęp pozostają w pamięci lokalnej, natomiast hosting otrzymuje zwykłe żądanie niezbędne do wyświetlenia strony. Opcjonalne konto wysyła do Supabase opisane poniżej dane konta i postępu. Ta wersja nie zawiera analityki ani modułów śledzenia reklam.",
     "sections": {
       "0": {
-        "title": "Co zbieramy",
-        "body": "Niczego, co pozwala cię zidentyfikować — chyba że zdecydujesz się utworzyć konto. Gra anonimowa nie wymaga imienia, adresu e-mail ani rejestracji. Jeśli się zarejestrujesz, zbieramy twój adres e-mail (do logowania i potwierdzenia), hasło (przechowywane wyłącznie jako solony skrót, nigdy jako zwykły tekst), wybraną nazwę użytkownika oraz twój postęp w grze. Kontami zarządza nasz podmiot przetwarzający, Supabase."
+        "title": "Administrator danych i kontakt",
+        "body": "SQL Heist jest prowadzony przez Melih Saraç, administratora danych w zakresie przetwarzania opisanego w tej informacji. Pytania dotyczące prywatności i realizacji praw można wysyłać na melih.sarac@hotmail.com."
       },
       "1": {
-        "title": "Co zostaje na twoim urządzeniu",
-        "body": "Twój postęp — które roboty ukończyłeś i twoje najlepsze wyniki — jest zapisywany w pamięci lokalnej przeglądarki, na twoim urządzeniu. Nigdy nie opuszcza przeglądarki i nie mamy możliwości jego odczytania. Wyczyszczenie danych przeglądarki usuwa go."
+        "title": "Dane, które przetwarzamy",
+        "body": "Dane są zbierane elektronicznie: bezpośrednio z formularzy rejestracji i profilu oraz z przeglądarki, przez żądania API Supabase po zalogowaniu, a także automatycznie w zwykłych żądaniach do hostingu. Gra anonimowa nie wymaga imienia ani adresu e-mail. Przeglądarka zapisuje lokalnie wybrany język i ukończone cele spraw; żądania do hostingu mogą zawierać adres IP, agent użytkownika, żądany URL i czas.",
+        "body2": "Jeśli utworzysz konto, przetwarzamy adres e-mail, wybraną nazwę użytkownika, opcjonalną nazwę wyświetlaną i kraj, wybór publikacji profilu oraz historię zgody (udzielenie lub wycofanie, wersję informacji, źródło i czas), identyfikatory ukończonych spraw i celów oraz znaczniki czasu konta i postępu. Hasło trafia bezpośrednio do Supabase Auth; zachowywany jest wyłącznie solony skrót, a operator nie może odczytać hasła. Gdy piszesz do nas e-mail, przetwarzamy także twój adres, treść wiadomości, czas wysłania i odbioru oraz zwykłe metadane routingu poczty. Nie wysyłamy do Supabase twoich treningowych ładunków SQL i nie zamierzamy zbierać danych szczególnych kategorii."
       },
       "2": {
-        "title": "Pliki cookie i śledzenie",
-        "body": "Gra nie ustawia żadnych plików cookie służących śledzeniu ani reklamie i nie zawiera w tej wersji analityki zewnętrznych podmiotów. Jeśli kiedykolwiek się to zmieni, zaktualizujemy tę stronę i tę datę, zanim to nastąpi."
+        "title": "Postęp lokalny i synchronizowany",
+        "body": "Postęp jest zawsze zapisywany najpierw w przeglądarce. Po zalogowaniu zbiory ukończonych celów są także scalane z kontem, dzięki czemu postęp przechodzi między urządzeniami bez usuwania którejkolwiek kopii. Wyczyszczenie danych przeglądarki usuwa kopię lokalną, nie kopię konta; wylogowanie nie usuwa żadnej. W ustawieniach konta możesz wyeksportować synchronizowaną kopię lub poprosić o jej usunięcie."
       },
       "3": {
-        "title": "Podmioty zewnętrzne",
-        "body": "Gra jest witryną statyczną. Czcionki są dołączane na etapie kompilacji, a silnik bazy danych działa lokalnie w twojej przeglądarce, więc gra anonimowa nie wysyła żadnych żądań do podmiotów zewnętrznych. Jeśli utworzysz konto, twój adres e-mail, nazwa użytkownika i postęp są wysyłane do Supabase — naszego podmiotu przetwarzającego uwierzytelnianie i bazę danych, hostowanego w UE — i przechowywane tam; to jedyny przepływ danych do podmiotów zewnętrznych i tylko dla zalogowanych użytkowników. Podmiot hostujący witrynę może przechowywać standardowe logi serwera (takie jak adresy IP) na potrzeby bezpieczeństwa i działania; takie przetwarzanie podlega własnym zasadom tego podmiotu."
+        "title": "Cele i podstawy prawne",
+        "body": "Tożsamość konta, uwierzytelnianie, eksport, żądania usunięcia i postęp między urządzeniami przetwarzamy, aby świadczyć zamówioną opcjonalną usługę konta (RODO art. 6 ust. 1 lit. b; KVKK art. 5 ust. 2 lit. c). Pamięć przeglądarki potrzebna dla języka, lokalnego postępu i zalogowanej sesji służy realizacji tych funkcji.",
+        "body2": "Publikacja profilu lub wpisu w rankingu opiera się na twojej wyraźnej i odwołalnej zgodzie (RODO art. 6 ust. 1 lit. a; wyraźna zgoda według KVKK). Ograniczone logi hostingu i bezpieczeństwa mogą być przetwarzane w celu działania i ochrony usługi (RODO art. 6 ust. 1 lit. f; KVKK art. 5 ust. 2 lit. f). Korespondencję przetwarzamy, aby odpowiadać na prośby o wsparcie lub realizację praw i zachować wymagane dowody (odpowiednio RODO art. 6 ust. 1 lit. b, c i f; KVKK art. 5 ust. 2 lit. c, ç i f). Nie sprzedajemy danych, nie używamy ich do reklam i nie podejmujemy decyzji dotyczących ciebie wyłącznie automatycznie."
       },
       "4": {
-        "title": "Dzieci",
-        "body": "SQL Heist to narzędzie edukacyjne skierowane do programistów. Nie jest przeznaczone dla dzieci poniżej 13 roku życia i nie zbiera świadomie ich danych."
+        "title": "Profil publiczny i nieformalny ranking",
+        "body": "Konta są domyślnie prywatne. Po wyrażeniu zgody publicznie mogą pojawić się nazwa użytkownika, opcjonalna nazwa wyświetlana i kraj, data dołączenia, liczba ukończonych celów oraz znacznik ostatniej aktywności. Adres e-mail i wewnętrzny identyfikator użytkownika nigdy nie są publikowane. Cofnięcie zgody w ustawieniach konta natychmiast usuwa profil i wpis rankingowy. Każde faktyczne udzielenie lub wycofanie zapisujemy z czasem bazy danych i wersją informacji, aby wybór można było wykazać i respektować. Nieformalny ranking opiera się na postępie przesyłanym przez klienta i nie jest zweryfikowanym konkursem."
       },
       "5": {
-        "title": "Zmiany",
-        "body": "Jeśli zaktualizujemy sposób działania którejkolwiek z tych rzeczy, zmienimy tę stronę oraz widniejącą powyżej datę „ostatniej aktualizacji”. Pytania? ",
-        "link": "Skontaktuj się z ekipą"
+        "title": "Podmioty przetwarzające i transfery międzynarodowe",
+        "body": "Cloudflare pośredniczy dla domeny sqlheist.com i może przetwarzać dane żądań lub bezpieczeństwa; Vercel udostępnia statyczną stronę; Supabase zapewnia uwierzytelnianie i bazę danych dla opcjonalnych kont; Microsoft Outlook.com/Hotmail obsługuje wiadomości wysyłane na adres kontaktowy. Baza projektu Supabase znajduje się w regionie eu-west-1 (Irlandia). Dostawcy ci nie otrzymują lokalnych treningowych ładunków SQL z gry.",
+        "body2": "Dostawcy i ujawnieni przez nich podwykonawcy mogą przetwarzać dane poza twoim krajem, w tym poza Turcją lub EOG. Wymagane mechanizmy transferu muszą zostać udokumentowane dla obecnego hostingu, pośrednictwa i obsługi wiadomości kontaktowych; dokumentacja dotycząca Supabase musi być kompletna przed udostępnieniem opcjonalnych kont. Aktualne informacje o dostawcach, podwykonawcach, podstawie transferu i zabezpieczeniach uzyskasz od administratora."
+      },
+      "6": {
+        "title": "Przechowywanie i usunięcie",
+        "body": "Dane lokalne pozostają do czasu wyczyszczenia danych witryny. Konto, zsynchronizowany postęp i historia zgody na profil publiczny są przechowywane, dopóki konto jest aktywne; obecnie nie ma automatycznego usuwania nieaktywnych kont. Widoczność publiczna trwa tylko podczas udziału. Zamknięta korespondencja wsparcia lub prywatności jest usuwana w ciągu 12 miesięcy; jeśli prawo lub trwające roszczenie wymaga dłuższego okresu, jest usuwana po jego zakończeniu. Po usunięciu przez nas wiadomości z Outlook.com Microsoft podaje, że zwykle pozostaje ona w folderze Elementy usunięte przez około 7 dni, chyba że folder zostanie opróżniony wcześniej, a po jego opróżnieniu może pozostawać w systemach Microsoft przez maksymalnie 30 dni przed ostatecznym usunięciem, chyba że prawo wymaga dłuższego przechowywania.",
+        "body2": "Żądanie usunięcia natychmiast ukrywa profil, blokuje dalsze zapisy z przeglądarki i wylogowuje użytkownika. Operator trwale usuwa użytkownika Auth oraz powiązane wiersze profilu, postępu i historii zgody w ciągu 30 dni. Po wykonaniu prywatny rejestr dostępny wyłącznie operatorowi przechowuje tylko kluczowany HMAC UUID Auth oraz czasy żądania, wykonania, terminu i potwierdzenia przez najwyżej 90 dni, po czym jest usuwany; nie zawiera e-maila, nazwy użytkownika ani surowego UUID. Jeśli logi dostawców lub kopie odtwarzania awaryjnego zawierają powiązane dane, pozostają tylko do czasu, gdy przestaną być potrzebne dla bezpieczeństwa, albo do zastąpienia właściwej rotacyjnej kopii zapasowej; dokładne bieżące okresy można uzyskać od administratora."
+      },
+      "7": {
+        "title": "Twoje prawa",
+        "body": "Zależnie od właściwego prawa możesz żądać dostępu, poprawienia, usunięcia, ograniczenia, sprzeciwu i przenoszenia danych oraz w każdej chwili wycofać zgodę na profil publiczny. Ustawienia konta oferują eksport JSON adresu e-mail, profilu, zsynchronizowanego postępu i historii zgody na profil publiczny, a także kontrolę widoczności i usunięcia.",
+        "body2": "W sprawach, których aplikacja nie może wykonać, w tym korekty nazwy użytkownika, napisz na melih.sarac@hotmail.com. Możemy zweryfikować twoją tożsamość i odpowiemy w terminie wynikającym z prawa. Możesz też złożyć skargę do właściwego organu ochrony danych, w tym do tureckiego Urzędu Ochrony Danych Osobowych, gdy ma zastosowanie."
+      },
+      "8": {
+        "title": "Pamięć, śledzenie i bezpieczeństwo",
+        "body": "Ta wersja nie zawiera zewnętrznej analityki, modułów śledzenia reklam ani marketingowych plików cookie. Używa pamięci lokalnej przeglądarki dla języka, lokalnego postępu i tej informacji, a tylko po zalogowaniu także dla niezbędnej sesji Supabase. Podczas rejestracji oczekujący adres e-mail może służyć do potwierdzenia i ponownego wysłania przez godzinę; wygasły lub uszkodzony wpis jest usuwany przy następnym uruchomieniu albo sprawdzeniu przez SQL Heist, a logowanie, wylogowanie lub wyczyszczenie danych witryny usuwa go wcześniej. Row Level Security w Supabase ogranicza bazowe wiersze konta do ich właściciela, lecz żaden system online nie może zagwarantować absolutnego bezpieczeństwa."
+      },
+      "9": {
+        "title": "Dzieci i zmiany",
+        "body": "SQL Heist jest narzędziem edukacyjnym dla programistów i nie jest kierowany do dzieci. Jeśli nie osiągnąłeś wieku wymaganego w swoim kraju do samodzielnego zarządzania kontem online, nie twórz go bez rodzica lub opiekuna. Przed istotną zmianą tych praktyk zaktualizujemy informację i datę powyżej. Pytania lub żądania? ",
+        "link": "Skontaktuj się z administratorem"
       }
     }
   },
@@ -487,7 +513,7 @@
     "title": "Warunki korzystania",
     "lead": "Graj, poznaj fach, trzymaj się czysto. Szczegóły:",
     "shortLabel": "Krótko mówiąc",
-    "shortBody": "Darmowa, edukacyjna gra. Używaj tego, czego uczy, wyłącznie na systemach, które są twoje lub do których masz upoważnienie do testowania — wszystko inne to przestępstwo, i to na twoją odpowiedzialność.",
+    "shortBody": "Darmowa gra edukacyjna z opcjonalnymi kontami. Używaj tego, czego uczy, wyłącznie na systemach, które są twoje lub do których masz upoważnienie do testów — za wszystko inne odpowiadasz ty.",
     "sections": {
       "0": {
         "title": "Umowa",
@@ -499,18 +525,33 @@
         "body2": "Nie próbuj nadużywać, przeciążać ani odtwarzać wstecznie samej gry, aby dotrzeć do czegokolwiek poza dostarczaną z nią zawartością treningową."
       },
       "2": {
+        "title": "Konta",
+        "body": "Konto jest opcjonalne. Jeśli je utworzysz, podaj kontrolowany przez siebie adres e-mail, wybierz dozwoloną nazwę użytkownika, chroń dane logowania i niezwłocznie zgłoś podejrzenie nieautoryzowanego dostępu. Odpowiadasz za aktywność w swojej sesji, chyba że właściwe prawo stanowi inaczej.",
+        "body2": "Możesz wyeksportować dane konta i poprosić o usunięcie w ustawieniach. Żądanie natychmiast ukrywa i blokuje konto; trwałe usunięcie jest wykonywane ręcznie w ciągu 30 dni. Powiązane przetwarzanie opisuje informacja o prywatności."
+      },
+      "3": {
+        "title": "Udział publiczny",
+        "body": "Profile publiczne i ranking towarzyski są dobrowolne. Jeśli dołączysz, publiczne pola opisane w informacji o prywatności może zobaczyć każdy, dopóki nie zrezygnujesz. Nie używaj nazwy użytkownika, nazwy wyświetlanej ani pola kraju do podszywania się, nękania lub publikowania treści niezgodnych z prawem.",
+        "body2": "Postęp rankingowy jest przesyłany przez klientów przeglądarkowych i może być niedokładny lub zmanipulowany. Służy wyłącznie nieformalnej nauce: nie zależy od niego żadna nagroda, decyzja rekrutacyjna, certyfikat bezpieczeństwa ani zweryfikowany wynik zawodów."
+      },
+      "4": {
+        "title": "Dostępność i egzekwowanie zasad",
+        "body": "Możemy zmieniać, wstrzymywać lub wycofywać funkcje oraz ograniczyć konto, gdy jest to rozsądnie konieczne dla bezpieczeństwa, zapobiegania nadużyciom, zgodności z prawem lub ochrony innych użytkowników. Nie wykorzystamy tego punktu do odebrania praw, których właściwe prawo nie pozwala wyłączyć."
+      },
+      "5": {
         "title": "Brak gwarancji",
         "body": "Gra i jej zawartość są dostarczane „w stanie takim, w jakim są”, bez jakichkolwiek gwarancji. To narzędzie dydaktyczne, a nie profesjonalna porada z zakresu bezpieczeństwa, i nie obiecujemy, że jest wolne od błędów ani przydatne do jakiegokolwiek konkretnego celu. Prawdziwe systemy są bardziej skomplikowane niż cel treningowy."
       },
-      "3": {
+      "6": {
         "title": "Ograniczenie odpowiedzialności",
         "body": "W najszerszym zakresie dozwolonym przez prawo twórcy SQL Heist nie ponoszą odpowiedzialności za jakiekolwiek szkody wynikające z korzystania przez ciebie z gry lub z umiejętności, których uczy."
       },
-      "4": {
+      "7": {
         "title": "Treść",
-        "body": "Teksty, postacie, grafika i kod gry należą do nas, o ile nie zaznaczono inaczej. SQL to SQL — język i koncepcje należą do wszystkich. Nie przepakowuj gry jako własnej."
+        "body": "Teksty, postacie, grafika i kod gry należą do nas, o ile nie zaznaczono inaczej. SQL to SQL — język i koncepcje należą do wszystkich. Nie przepakowuj gry jako własnej.",
+        "body2": "Znak „Cowled” jest autorstwa Lorca (https://game-icons.net/1x1/lorc/cowled.html) i jest używany na licencji CC BY 3.0 (https://creativecommons.org/licenses/by/3.0/); SQL Heist zmienia jego kolor i rozmiar."
       },
-      "5": {
+      "8": {
         "title": "Zmiany",
         "body": "Możemy aktualizować niniejsze warunki; gdy to zrobimy, zmienimy widniejącą powyżej datę. Dalsze granie po zmianie oznacza jej akceptację. Pytania? ",
         "link": "Skontaktuj się z ekipą"

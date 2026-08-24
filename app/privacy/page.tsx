@@ -5,7 +5,7 @@ import { PrivacyBody } from './PrivacyBody'
 export const metadata: Metadata = {
   title: 'Privacy',
   description:
-    'How SQL Heist handles your data: no accounts, no tracking, progress stored locally in your browser. It runs entirely client-side.',
+    'How SQL Heist handles anonymous local play and optional account data, progress sync, public profiles, and deletion requests.',
   alternates: pageAlternates('/privacy', 'en'),
 }
 

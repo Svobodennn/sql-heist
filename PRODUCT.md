@@ -46,11 +46,13 @@ Structure: **three cases, eight objectives total.** Each objective teaches one d
 - **The Quiet Room** — blind boolean → blind timing → error-based
 - **The Vault** — WAF / filter bypass → stacked queries
 
-Deployed live as a static site (Vercel, `sql-heist.vercel.app`). Everything runs client-side: no backend, no accounts, no network, nothing leaves the player's machine.
+Deployed live as a static site on Vercel at `sqlheist.com`. The SQL practice target, payload execution, and anonymous progress all run client-side. Optional browser-to-Supabase accounts add email authentication, loss-free cross-device objective sync, an opt-in public profile, and a casual leaderboard; anonymous local play remains the default.
 
 ## Capabilities and Constraints
 
-- **100% client-side, static export** — deployable to any static host. No backend, no user accounts, no multiplayer (all by design).
+- **Static export with no Next.js server runtime** — deployable to any static host. Optional account features call Supabase directly from the browser; Row Level Security is the sole data boundary.
+- **Local-first accounts** — no account is required; signed-in completion data is merged by monotonic per-case set union, never used to replace the local copy.
+- **Opt-in public presence** — profiles and the casual, client-submitted leaderboard expose only curated fields and remain private until the player explicitly joins.
 - **Real SQLite via `sql.js`** (WebAssembly); each objective/case loads a fresh database.
 - **Data-driven cases** — each case is a JSON file validated by a Zod schema at import (a malformed case fails the build). Adding or editing a case does not touch the engine: *new content = new JSON.*
 - **Frozen engine + schema contracts** (`lib/engine`, `lib/schema`: composer, SQLite runner, win evaluator, case session), fully test-covered. The win-DSL is extended **additively** (optional fields) and never broken; new pure modules may be added beside the frozen ones.

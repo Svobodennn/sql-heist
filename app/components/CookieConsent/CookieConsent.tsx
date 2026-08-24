@@ -10,9 +10,10 @@ import styles from './CookieConsent.module.css'
 // so a future copy change could re-prompt without stranding old acknowledgements.
 const CONSENT_KEY = 'sql-heist:consent:v1'
 
-// Bottom storage notice — honest to this app: it only writes game progress and the
-// language choice to localStorage; no cookies, no tracking, no analytics. Rendered
-// once from the root layout so it covers every route.
+// Bottom storage notice — the app uses localStorage for language, progress, this
+// acknowledgement, an expiring signup address, and (when signed in) the Supabase
+// session. It sets no analytics/advertising storage. Rendered once from the root
+// layout so it covers every route.
 //
 // Hydration safety: the static export ships NO banner (the first render returns
 // null, matching the server HTML). Only AFTER mount do we read localStorage and, if

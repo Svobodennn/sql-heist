@@ -28,9 +28,23 @@ describe('i18n catalogs stay in key parity (en/tr/pl)', () => {
     expect(plKeys).toEqual(enKeys)
   })
 
-  it('the auth namespace exists and is non-trivial', () => {
-    const authKeys = enKeys.filter((k) => k.startsWith('auth.'))
-    expect(authKeys.length).toBeGreaterThan(30)
+  it('the account feature namespaces and navigation keys are covered', () => {
+    const namespaceMinimums = {
+      auth: 30,
+      account: 20,
+      leaderboard: 20,
+      profile: 10,
+    }
+    for (const [namespace, minimum] of Object.entries(namespaceMinimums)) {
+      expect(enKeys.filter((key) => key.startsWith(`${namespace}.`)).length).toBeGreaterThan(
+        minimum,
+      )
+    }
+    for (const key of ['nav.account', 'nav.leaderboard', 'nav.signIn', 'nav.signOut']) {
+      expect(enKeys).toContain(key)
+    }
+
+    const authKeys = enKeys.filter((key) => key.startsWith('auth.'))
     // Every AuthErrorCode surfaced by authClient has a message.
     for (const code of [
       'auth-disabled',
