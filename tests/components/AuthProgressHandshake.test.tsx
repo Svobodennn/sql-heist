@@ -28,7 +28,6 @@ const profileRow = {
   id: 'user-1',
   username: 'neo_01',
   display_name: null,
-  country: null,
   leaderboard_opt_in: false,
   created_at: '2026-08-23T00:00:00Z',
   updated_at: '2026-08-23T00:00:00Z',

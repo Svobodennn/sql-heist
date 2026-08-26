@@ -15,9 +15,13 @@ describe('auth field validators (return i18n keys, null = valid)', () => {
     expect(validateEmail('')).toBe('auth.validation.email')
   })
 
-  it('enforces the 8-char password minimum (mirrors the Supabase auth setting)', () => {
-    expect(validatePassword('12345678')).toBeNull()
-    expect(validatePassword('1234567')).toBe('auth.validation.password')
+  it('requires 8+ chars with lowercase, uppercase, a digit, and a symbol', () => {
+    expect(validatePassword('Agent47!')).toBeNull()
+    expect(validatePassword('agent47!')).toBe('auth.validation.password')
+    expect(validatePassword('AGENT47!')).toBe('auth.validation.password')
+    expect(validatePassword('AgentOnly!')).toBe('auth.validation.password')
+    expect(validatePassword('Agent470')).toBe('auth.validation.password')
+    expect(validatePassword('Aa1!')).toBe('auth.validation.password')
     expect(validatePassword('')).toBe('auth.validation.password')
   })
 

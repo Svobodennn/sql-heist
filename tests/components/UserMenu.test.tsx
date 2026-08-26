@@ -14,7 +14,6 @@ const value: AuthContextValue = {
     id: 'user-1',
     username: 'ada_l',
     displayName: 'Ada',
-    country: 'GB',
     leaderboardOptIn: false,
     createdAt: '2026-08-22T00:00:00.000Z',
     updatedAt: '2026-08-22T00:00:00.000Z',

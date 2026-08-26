@@ -1,15 +1,15 @@
 import type { SupabaseClient, User } from '@supabase/supabase-js'
 import { getSupabase } from '@/lib/supabase'
 
-const PUBLIC_PROFILE_COLUMNS = 'username, display_name, country, created_at, objectives_cleared'
+const PUBLIC_PROFILE_COLUMNS = 'username, display_name, created_at, objectives_cleared'
 const MY_PROFILE_COLUMNS =
-  'id, username, display_name, country, leaderboard_opt_in, delete_requested_at, created_at, updated_at'
+  'id, username, display_name, leaderboard_opt_in, delete_requested_at, created_at, updated_at'
+const EXPORT_PROFILE_COLUMNS =
+  'id, username, display_name, leaderboard_opt_in, delete_requested_at, created_at, updated_at'
 const EXPORT_PROGRESS_COLUMNS = 'case_id, completed_objectives, best_score, updated_at'
 const EXPORT_CONSENT_COLUMNS = 'id, purpose, action, notice_version, source, occurred_at'
 
 export const DISPLAY_NAME_MAX_LENGTH = 40
-export const COUNTRY_MIN_LENGTH = 2
-export const COUNTRY_MAX_LENGTH = 56
 export const PUBLIC_PROFILE_NOTICE_VERSION = '2026-08-23'
 
 export type ProfileQueryErrorCode =
@@ -28,7 +28,6 @@ export class ProfileQueryError extends Error {
 export interface PublicProfile {
   username: string
   displayName: string | null
-  country: string | null
   createdAt: string
   objectivesCleared: number
 }
@@ -37,7 +36,6 @@ export interface MyProfile {
   id: string
   username: string
   displayName: string | null
-  country: string | null
   leaderboardOptIn: boolean
   deleteRequestedAt: string | null
   createdAt: string
@@ -46,13 +44,11 @@ export interface MyProfile {
 
 export interface MyProfilePatch {
   displayName?: string | null
-  country?: string | null
 }
 
 interface PublicProfileRow {
   username: string
   display_name: string | null
-  country: string | null
   created_at: string
   objectives_cleared: number
 }
@@ -61,7 +57,6 @@ interface MyProfileRow {
   id: string
   username: string
   display_name: string | null
-  country: string | null
   leaderboard_opt_in: boolean
   delete_requested_at: string | null
   created_at: string
@@ -91,7 +86,6 @@ function toPublicProfile(row: PublicProfileRow): PublicProfile {
   return {
     username: row.username,
     displayName: row.display_name,
-    country: row.country,
     createdAt: row.created_at,
     objectivesCleared: row.objectives_cleared,
   }
@@ -102,7 +96,6 @@ function toMyProfile(row: MyProfileRow): MyProfile {
     id: row.id,
     username: row.username,
     displayName: row.display_name,
-    country: row.country,
     leaderboardOptIn: row.leaderboard_opt_in,
     deleteRequestedAt: row.delete_requested_at,
     createdAt: row.created_at,
@@ -128,14 +121,8 @@ function normalizeOptionalField(
   return normalized
 }
 
-export function profileFieldsAreValid(displayName: string, country: string): boolean {
-  const displayNameLength = displayName.trim().length
-  const countryLength = country.trim().length
-  return (
-    displayNameLength <= DISPLAY_NAME_MAX_LENGTH &&
-    (countryLength === 0 || countryLength >= COUNTRY_MIN_LENGTH) &&
-    countryLength <= COUNTRY_MAX_LENGTH
-  )
+export function profileFieldsAreValid(displayName: string): boolean {
+  return displayName.trim().length <= DISPLAY_NAME_MAX_LENGTH
 }
 
 async function updateOwnRow(patch: Record<string, string | boolean | null>): Promise<MyProfile> {
@@ -187,14 +174,6 @@ export async function updateMyProfile(patch: MyProfilePatch): Promise<MyProfile>
       'Display name',
     )
   }
-  if (patch.country !== undefined) {
-    update.country = normalizeOptionalField(
-      patch.country,
-      COUNTRY_MIN_LENGTH,
-      COUNTRY_MAX_LENGTH,
-      'Country',
-    )
-  }
   if (Object.keys(update).length === 0) {
     throw new ProfileQueryError('invalid-profile', 'No profile changes supplied')
   }
@@ -219,7 +198,7 @@ export async function exportMyData(): Promise<Blob> {
   const client = requireClient()
   const user = await requireUser(client)
   const [profileResult, progressResult, consentResult] = await Promise.all([
-    client.from('profiles').select(MY_PROFILE_COLUMNS).eq('id', user.id).maybeSingle(),
+    client.from('profiles').select(EXPORT_PROFILE_COLUMNS).eq('id', user.id).maybeSingle(),
     client.from('case_progress').select(EXPORT_PROGRESS_COLUMNS).eq('user_id', user.id),
     client
       .from('profile_consent_events')

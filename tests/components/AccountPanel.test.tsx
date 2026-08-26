@@ -27,15 +27,10 @@ vi.mock('next/navigation', () => ({
 }))
 
 vi.mock('@/features/profile/lib/profileQuery', () => ({
-  COUNTRY_MAX_LENGTH: 56,
   DISPLAY_NAME_MAX_LENGTH: 40,
   deleteMyAccount: deleteMyAccountMock,
   exportMyData: exportMyDataMock,
-  profileFieldsAreValid: (displayName: string, country: string) => {
-    const displayLength = displayName.trim().length
-    const countryLength = country.trim().length
-    return displayLength <= 40 && (countryLength === 0 || countryLength >= 2) && countryLength <= 56
-  },
+  profileFieldsAreValid: (displayName: string) => displayName.trim().length <= 40,
   setLeaderboardOptIn: setLeaderboardOptInMock,
   updateMyProfile: updateMyProfileMock,
 }))
@@ -46,7 +41,6 @@ const profile: Profile = {
   id: 'user-1',
   username: 'ada_l',
   displayName: 'Ada',
-  country: 'GB',
   leaderboardOptIn: false,
   createdAt: '2026-08-22T00:00:00.000Z',
   updatedAt: '2026-08-22T00:00:00.000Z',
@@ -110,13 +104,10 @@ describe('<AccountPanel>', () => {
     await waitFor(() => expect(replaceMock).toHaveBeenCalledWith('/tr/auth/sign-in'))
   })
 
-  it('rejects profile fields outside the live database bounds before saving', () => {
-    const value = makeValue()
-    renderPanel(value)
-    fireEvent.change(screen.getByLabelText('Country'), { target: { value: 'X' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Save profile' }))
-    expect(updateMyProfileMock).not.toHaveBeenCalled()
-    expect(screen.getByRole('alert').textContent).toContain('Country must be blank or 2–56')
+  it('does not collect a country', () => {
+    renderPanel(makeValue())
+
+    expect(screen.queryByLabelText('Country')).toBeNull()
   })
 
   it('saves trimmed display fields and refreshes provider state', async () => {
@@ -125,16 +116,22 @@ describe('<AccountPanel>', () => {
     fireEvent.change(screen.getByLabelText('Display name'), {
       target: { value: '  Ada Lovelace  ' },
     })
-    fireEvent.change(screen.getByLabelText('Country'), { target: { value: '  UK  ' } })
     fireEvent.click(screen.getByRole('button', { name: 'Save profile' }))
 
     await waitFor(() => {
       expect(updateMyProfileMock).toHaveBeenCalledWith({
         displayName: '  Ada Lovelace  ',
-        country: '  UK  ',
       })
       expect(value.refreshProfile).toHaveBeenCalled()
     })
+  })
+
+  it('shows an unlabeled skeleton instead of themed loading copy while auth settles', () => {
+    renderPanel(makeValue({ profile: null, profileReady: false }))
+
+    const loading = screen.getByRole('status', { name: 'Loading account…' })
+    expect(loading.getAttribute('aria-busy')).toBe('true')
+    expect(screen.queryByText('Opening your file…')).toBeNull()
   })
 
   it('persists explicit public-profile consent', async () => {

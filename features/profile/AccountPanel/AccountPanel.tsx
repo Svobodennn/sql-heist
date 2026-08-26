@@ -7,7 +7,6 @@ import { localeHref } from '@/i18n/localeHref'
 import { useTranslation } from '@/i18n/useTranslation'
 import { useAuth } from '@/features/auth/useAuth'
 import {
-  COUNTRY_MAX_LENGTH,
   DISPLAY_NAME_MAX_LENGTH,
   deleteMyAccount,
   exportMyData,
@@ -28,7 +27,6 @@ export function AccountPanel() {
   const { locale, t } = useTranslation()
   const { status, user, profile, profileReady, refreshProfile, signOut } = useAuth()
   const [displayName, setDisplayName] = useState('')
-  const [country, setCountry] = useState('')
   const [optIn, setOptIn] = useState(false)
   const [mutationPending, setMutationPending] = useState<ActionScope | null>(null)
   const [exporting, setExporting] = useState(false)
@@ -53,7 +51,6 @@ export function AccountPanel() {
   useEffect(() => {
     if (!profile) return
     setDisplayName(profile.displayName ?? '')
-    setCountry(profile.country ?? '')
     setOptIn(profile.leaderboardOptIn)
   }, [profile])
 
@@ -69,7 +66,7 @@ export function AccountPanel() {
   }
 
   if (status !== 'authed' || !user || !profileReady || !profile) {
-    return <AccountState title={t('account.loading')} body={t('account.loadingBody')} live />
+    return <AccountLoading label={t('account.loading')} />
   }
 
   const clearFeedback = (scope: ActionScope) => {
@@ -87,14 +84,14 @@ export function AccountPanel() {
     event.preventDefault()
     if (mutationInFlight.current) return
     clearFeedback('profile')
-    if (!profileFieldsAreValid(displayName, country)) {
+    if (!profileFieldsAreValid(displayName)) {
       reportFeedback('profile', { kind: 'error', message: t('account.errors.invalidProfile') })
       return
     }
     mutationInFlight.current = true
     setMutationPending('profile')
     try {
-      await updateMyProfile({ displayName, country })
+      await updateMyProfile({ displayName })
       await refreshProfile()
       reportFeedback('profile', { kind: 'success', message: t('account.saved') })
     } catch {
@@ -217,19 +214,6 @@ export function AccountPanel() {
                 onChange={(event) => setDisplayName(event.target.value)}
               />
             </div>
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="account-country">
-                {t('account.country')}
-              </label>
-              <input
-                id="account-country"
-                className={styles.input}
-                value={country}
-                maxLength={COUNTRY_MAX_LENGTH}
-                disabled={mutationPending !== null}
-                onChange={(event) => setCountry(event.target.value)}
-              />
-            </div>
             <button className="btn btn--primary" type="submit" disabled={mutationPending !== null}>
               {mutationPending === 'profile' ? t('account.saving') : t('account.save')}
             </button>
@@ -334,20 +318,40 @@ function isProfileQueryError(error: unknown, code: ProfileQueryErrorCode): boole
   return typeof error === 'object' && error !== null && 'code' in error && error.code === code
 }
 
-function AccountState({
-  title,
-  body,
-  live = false,
-}: {
-  title: string
-  body: string
-  live?: boolean
-}) {
+function AccountState({ title, body }: { title: string; body: string }) {
   return (
     <section className={`container ${styles.page}`}>
-      <div className={`panel ${styles.state}`} role={live ? 'status' : undefined}>
+      <div className={`panel ${styles.state}`}>
         <h1 className={styles.title}>{title}</h1>
         <p className={styles.lede}>{body}</p>
+      </div>
+    </section>
+  )
+}
+
+function AccountLoading({ label }: { label: string }) {
+  return (
+    <section
+      className={`container ${styles.page}`}
+      role="status"
+      aria-label={label}
+      aria-busy="true"
+    >
+      <div className={styles.loading} aria-hidden="true">
+        <header className={styles.header}>
+          <span className={`${styles.skeleton} ${styles.skeletonStamp}`} />
+          <span className={`${styles.skeleton} ${styles.skeletonTitle}`} />
+          <span className={`${styles.skeleton} ${styles.skeletonLede}`} />
+        </header>
+        <div className={styles.grid}>
+          {Array.from({ length: 4 }, (_, index) => (
+            <div className={`panel ${styles.panel} ${styles.skeletonPanel}`} key={index}>
+              <span className={`${styles.skeleton} ${styles.skeletonPanelTitle}`} />
+              <span className={`${styles.skeleton} ${styles.skeletonLine}`} />
+              <span className={`${styles.skeleton} ${styles.skeletonLineShort}`} />
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   )

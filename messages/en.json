@@ -32,7 +32,7 @@
       "username": "Username",
       "usernameHint": "3–20 characters: a–z, 0–9, _",
       "password": "Password",
-      "passwordHint": "At least 8 characters.",
+      "passwordHint": "At least 8 characters, including a–z, A–Z, 0–9, and an ASCII symbol.",
       "submit": "Create account",
       "haveAccount": "Already have an account?",
       "goSignIn": "Sign in",
@@ -44,7 +44,7 @@
       "available": "Available.",
       "taken": "Taken — try another.",
       "submitting": "Creating account…",
-      "privacyNotice": "SQL Heist is operated by Melih Saraç, the data controller. We process your email, username, and account progress to create and sync this optional account. Details:",
+      "privacyNotice": "We process your email, username, and account progress only to create and sync this optional account. Details:",
       "privacyLink": "Privacy notice",
       "termsNotice": "By creating an account, you accept the",
       "termsLink": "Terms of Use"
@@ -74,7 +74,7 @@
     },
     "validation": {
       "email": "Enter a valid email address.",
-      "password": "Use at least 8 characters.",
+      "password": "Use at least 8 characters, including a–z, A–Z, 0–9, and an ASCII symbol.",
       "username": "3–20 characters: a–z, 0–9, _"
     },
     "errors": {
@@ -82,7 +82,7 @@
       "invalid-credentials": "Wrong email or password.",
       "email-not-confirmed": "Email not confirmed yet — check your inbox.",
       "user-exists": "This email already has an account.",
-      "weak-password": "That password is too weak.",
+      "weak-password": "Use at least 8 characters, including a–z, A–Z, 0–9, and an ASCII symbol.",
       "rate-limited": "Too many attempts — wait a minute and try again.",
       "username-taken": "That username is taken.",
       "generic": "Something went wrong. Try again."
@@ -104,9 +104,7 @@
     "errorTitle": "Couldn't open this dossier",
     "errorBody": "Public profiles are unavailable right now. Try again shortly.",
     "objectivesCleared": "Objectives cleared",
-    "country": "Country",
-    "joined": "Joined",
-    "undisclosed": "Undisclosed"
+    "joined": "Joined"
   },
   "leaderboard": {
     "stamp": "Agency rankings",
@@ -126,10 +124,8 @@
     "scrollHint": "Scroll horizontally to see every column.",
     "rank": "Rank",
     "operative": "Operative",
-    "country": "Country",
     "objectives": "Objectives",
     "lastActive": "Last active",
-    "undisclosed": "Undisclosed",
     "neverActive": "No synced activity",
     "yourRank": "Your rank",
     "rankLoading": "Finding your position…",
@@ -145,19 +141,18 @@
     "lede": "Manage the identity and synced data attached to your SQL Heist account.",
     "disabledTitle": "Accounts unavailable",
     "disabledBody": "The game still works offline without an account.",
-    "loading": "Opening your file…",
+    "loading": "Loading account…",
     "loadingBody": "Checking your authenticated profile.",
     "profileTitle": "Profile details",
     "username": "Username",
     "usernameLocked": "Usernames cannot be changed yet.",
     "displayName": "Display name",
-    "country": "Country",
     "save": "Save profile",
     "saving": "Saving…",
     "saved": "Profile saved.",
     "visibilityTitle": "Public visibility",
     "visibilityLabel": "Show my profile publicly",
-    "visibilityConsent": "Opting in publishes your username, display name, country, join date, objectives cleared and last synced activity time. You can withdraw at any time.",
+    "visibilityConsent": "Opting in publishes your username, display name, join date, objectives cleared and last synced activity time. You can withdraw at any time.",
     "visibilityPrivacyLink": "Privacy notice",
     "visibilityPublic": "Your public profile is visible.",
     "visibilityPrivate": "Your profile is private.",
@@ -178,7 +173,7 @@
     "deleteConfirm": "Submit deletion request",
     "deleting": "Submitting…",
     "errors": {
-      "invalidProfile": "Display name must be at most 40 characters. Country must be blank or 2–56 characters.",
+      "invalidProfile": "Display name must be at most 40 characters.",
       "save": "The profile could not be saved. Try again.",
       "visibility": "Visibility could not be changed. Try again.",
       "export": "Your data could not be prepared. Try again.",
@@ -462,12 +457,12 @@
     "sections": {
       "0": {
         "title": "Controller and contact",
-        "body": "SQL Heist is operated by Melih Saraç, the data controller for the processing described in this notice. Privacy and data-rights requests can be sent to melih.sarac@hotmail.com."
+        "body": "We operate SQL Heist and act as the data controller for the processing described in this notice. Privacy and data-rights requests can be sent to melih.sarac@hotmail.com."
       },
       "1": {
         "title": "Data we process",
         "body": "Data is collected electronically: directly from the signup/profile forms and your browser, through Supabase API requests when signed in, and automatically through ordinary hosting requests. Anonymous play does not require a name or email. Your browser stores your language choice and completed case objectives locally; hosting requests may include IP address, user agent, requested URL, and time.",
-        "body2": "If you create an account, we process your email, chosen username, optional display name and country, public-profile choice and consent history (grant or withdrawal, notice version, source, and time), completed case and objective identifiers, and account/progress timestamps. Your password goes directly to Supabase Auth; only a salted password hash is retained, and the operator cannot read the password. If you email us, we also process your address, message contents, sent/received times, and ordinary mail-routing metadata. We do not send your SQL practice payloads to Supabase or intentionally collect special-category data."
+        "body2": "If you create an account, we process your email, chosen username, optional display name, public-profile choice and consent history (grant or withdrawal, notice version, source, and time), completed case and objective identifiers, and account/progress timestamps. Your password goes directly to Supabase Auth; only a salted password hash is retained, and the operator cannot read the password. If you email us, we also process your address, message contents, sent/received times, and ordinary mail-routing metadata. We do not send your SQL practice payloads to Supabase or intentionally collect special-category data."
       },
       "2": {
         "title": "Local and synced progress",
@@ -480,7 +475,7 @@
       },
       "4": {
         "title": "Public profile and casual leaderboard",
-        "body": "Accounts are private by default. If you opt in, your username, optional display name and country, join date, objectives-cleared count, and activity timestamp may appear publicly. Email and internal user ID are never included. You can withdraw the opt-in from account settings; the profile and leaderboard entry then disappear immediately. We record each actual grant or withdrawal with a database timestamp and notice version so the choice can be demonstrated and respected. The casual leaderboard is based on client-submitted progress and is not a verified competition."
+        "body": "Accounts are private by default. If you opt in, your username, optional display name, join date, objectives-cleared count, and activity timestamp may appear publicly. Email and internal user ID are never included. You can withdraw the opt-in from account settings; the profile and leaderboard entry then disappear immediately. We record each actual grant or withdrawal with a database timestamp and notice version so the choice can be demonstrated and respected. The casual leaderboard is based on client-submitted progress and is not a verified competition."
       },
       "5": {
         "title": "Processors and international transfers",
@@ -531,7 +526,7 @@
       },
       "3": {
         "title": "Public participation",
-        "body": "Public profiles and the casual leaderboard are opt-in. If you join, the public fields described in the Privacy notice can be seen by anyone until you opt out. Do not use a username, display name, or country field to impersonate, harass, or publish unlawful content.",
+        "body": "Public profiles and the casual leaderboard are opt-in. If you join, the public fields described in the Privacy notice can be seen by anyone until you opt out. Do not use a username or display name to impersonate, harass, or publish unlawful content.",
         "body2": "Leaderboard progress is submitted by browser clients and can be inaccurate or manipulated. It is for informal learning only: no prize, employment decision, security certification, or verified competitive result depends on it."
       },
       "4": {

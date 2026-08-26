@@ -32,7 +32,7 @@
       "username": "Kullanıcı adı",
       "usernameHint": "3–20 karakter: a–z, 0–9, _",
       "password": "Şifre",
-      "passwordHint": "En az 8 karakter.",
+      "passwordHint": "En az 8 karakter; a–z, A–Z, 0–9 ve bir ASCII sembolü kullan.",
       "submit": "Hesap oluştur",
       "haveAccount": "Zaten hesabın var mı?",
       "goSignIn": "Giriş yap",
@@ -44,7 +44,7 @@
       "available": "Uygun.",
       "taken": "Alınmış — başka bir tane dene.",
       "submitting": "Hesap oluşturuluyor…",
-      "privacyNotice": "SQL Heist'in veri sorumlusu Melih Saraç'tır. Bu isteğe bağlı hesabı oluşturup eşitlemek için e-posta adresini, kullanıcı adını ve hesap ilerlemeni işleriz. Ayrıntılar:",
+      "privacyNotice": "Bu isteğe bağlı hesabı oluşturup eşitlemek için yalnızca e-posta adresini, kullanıcı adını ve hesap ilerlemeni işleriz. Ayrıntılar:",
       "privacyLink": "Gizlilik ve KVKK Aydınlatma Metni",
       "termsNotice": "Hesap oluşturarak şunları kabul edersin:",
       "termsLink": "Kullanım Koşulları"
@@ -74,7 +74,7 @@
     },
     "validation": {
       "email": "Geçerli bir e-posta adresi gir.",
-      "password": "En az 8 karakter kullan.",
+      "password": "En az 8 karakter; a–z, A–Z, 0–9 ve bir ASCII sembolü kullan.",
       "username": "3–20 karakter: a–z, 0–9, _"
     },
     "errors": {
@@ -82,7 +82,7 @@
       "invalid-credentials": "E-posta veya şifre hatalı.",
       "email-not-confirmed": "E-posta henüz onaylanmadı — gelen kutunu kontrol et.",
       "user-exists": "Bu e-postanın zaten bir hesabı var.",
-      "weak-password": "Bu şifre çok zayıf.",
+      "weak-password": "En az 8 karakter; a–z, A–Z, 0–9 ve bir ASCII sembolü kullan.",
       "rate-limited": "Çok fazla deneme — bir dakika bekleyip tekrar dene.",
       "username-taken": "Bu kullanıcı adı alınmış.",
       "generic": "Bir şeyler ters gitti. Tekrar dene."
@@ -104,9 +104,7 @@
     "errorTitle": "Bu dosya açılamadı",
     "errorBody": "Herkese açık profillere şu anda ulaşılamıyor. Kısa süre sonra tekrar dene.",
     "objectivesCleared": "Tamamlanan hedefler",
-    "country": "Ülke",
-    "joined": "Katılma tarihi",
-    "undisclosed": "Belirtilmedi"
+    "joined": "Katılma tarihi"
   },
   "leaderboard": {
     "stamp": "Ajans sıralaması",
@@ -126,10 +124,8 @@
     "scrollHint": "Tüm sütunları görmek için yatay kaydır.",
     "rank": "Sıra",
     "operative": "Operatör",
-    "country": "Ülke",
     "objectives": "Hedefler",
     "lastActive": "Son etkinlik",
-    "undisclosed": "Belirtilmedi",
     "neverActive": "Senkronize etkinlik yok",
     "yourRank": "Sıralaman",
     "rankLoading": "Konumun bulunuyor…",
@@ -145,19 +141,18 @@
     "lede": "SQL Heist hesabına bağlı kimliği ve senkronize verileri yönet.",
     "disabledTitle": "Hesaplar kullanılamıyor",
     "disabledBody": "Oyun hesap olmadan çevrimdışı çalışmaya devam eder.",
-    "loading": "Dosyan açılıyor…",
+    "loading": "Hesap yükleniyor…",
     "loadingBody": "Kimliği doğrulanmış profilin kontrol ediliyor.",
     "profileTitle": "Profil bilgileri",
     "username": "Kullanıcı adı",
     "usernameLocked": "Kullanıcı adları henüz değiştirilemiyor.",
     "displayName": "Görünen ad",
-    "country": "Ülke",
     "save": "Profili kaydet",
     "saving": "Kaydediliyor…",
     "saved": "Profil kaydedildi.",
     "visibilityTitle": "Herkese açık görünürlük",
     "visibilityLabel": "Profilimi herkese açık göster",
-    "visibilityConsent": "İzin verdiğinde kullanıcı adın, görünen adın, ülken, katılma tarihin, tamamladığın hedefler ve son senkronize etkinlik zamanın yayımlanır. İznini istediğin zaman geri çekebilirsin.",
+    "visibilityConsent": "İzin verdiğinde kullanıcı adın, görünen adın, katılma tarihin, tamamladığın hedefler ve son senkronize etkinlik zamanın yayımlanır. İznini istediğin zaman geri çekebilirsin.",
     "visibilityPrivacyLink": "Gizlilik bildirimi",
     "visibilityPublic": "Herkese açık profilin görünür.",
     "visibilityPrivate": "Profilin gizli.",
@@ -178,7 +173,7 @@
     "deleteConfirm": "Silme talebini gönder",
     "deleting": "Gönderiliyor…",
     "errors": {
-      "invalidProfile": "Görünen ad en fazla 40 karakter olmalıdır. Ülke boş bırakılmalı veya 2–56 karakter olmalıdır.",
+      "invalidProfile": "Görünen ad en fazla 40 karakter olmalıdır.",
       "save": "Profil kaydedilemedi. Tekrar dene.",
       "visibility": "Görünürlük değiştirilemedi. Tekrar dene.",
       "export": "Verilerin hazırlanamadı. Tekrar dene.",
@@ -462,12 +457,12 @@
     "sections": {
       "0": {
         "title": "Veri sorumlusu ve iletişim",
-        "body": "SQL Heist, bu bildirimde açıklanan veri işleme faaliyetlerinin veri sorumlusu Melih Saraç tarafından işletilir. Gizlilik ve kişisel veri haklarına ilişkin taleplerini melih.sarac@hotmail.com adresine gönderebilirsin."
+        "body": "SQL Heist'i işletir ve bu bildirimde açıklanan veri işleme faaliyetleri için veri sorumlusu olarak hareket ederiz. Gizlilik ve kişisel veri haklarına ilişkin taleplerini melih.sarac@hotmail.com adresine gönderebilirsin."
       },
       "1": {
         "title": "İşlediğimiz veriler",
         "body": "Veriler elektronik ortamda; doğrudan kayıt ve profil formlarından ve tarayıcından, giriş yaptığında Supabase API istekleri aracılığıyla ve olağan barındırma istekleriyle otomatik olarak toplanır. Anonim oyun ad veya e-posta istemez. Tarayıcın dil seçimini ve tamamlanan vaka hedeflerini yerel olarak saklar; barındırma istekleri IP adresi, kullanıcı aracısı, istenen URL ve zaman gibi olağan teknik verileri içerebilir.",
-        "body2": "Hesap oluşturursan e-posta adresini, seçtiğin kullanıcı adını, isteğe bağlı görünen ad ve ülkeyi, herkese açık profil tercihini ve rıza geçmişini (verme veya geri çekme, bildirim sürümü, kaynak ve zaman), tamamlanan vaka ve hedef kimliklerini ve hesap/ilerleme zaman damgalarını işleriz. Parolan doğrudan Supabase Auth'a gider; yalnızca tuzlanmış parola özeti saklanır ve işletmeci parolanı okuyamaz. Bize e-posta gönderirsen adresini, mesaj içeriğini, gönderim/alım zamanlarını ve olağan e-posta yönlendirme üst verilerini de işleriz. SQL pratik girdilerini Supabase'e göndermeyiz ve özel nitelikli kişisel veri toplamayı amaçlamayız."
+        "body2": "Hesap oluşturursan e-posta adresini, seçtiğin kullanıcı adını, isteğe bağlı görünen adını, herkese açık profil tercihini ve rıza geçmişini (verme veya geri çekme, bildirim sürümü, kaynak ve zaman), tamamlanan vaka ve hedef kimliklerini ve hesap/ilerleme zaman damgalarını işleriz. Parolan doğrudan Supabase Auth'a gider; yalnızca tuzlanmış parola özeti saklanır ve işletmeci parolanı okuyamaz. Bize e-posta gönderirsen adresini, mesaj içeriğini, gönderim/alım zamanlarını ve olağan e-posta yönlendirme üst verilerini de işleriz. SQL pratik girdilerini Supabase'e göndermeyiz ve özel nitelikli kişisel veri toplamayı amaçlamayız."
       },
       "2": {
         "title": "Yerel ve eşitlenen ilerleme",
@@ -480,7 +475,7 @@
       },
       "4": {
         "title": "Herkese açık profil ve gayriresmî liderlik tablosu",
-        "body": "Hesaplar varsayılan olarak gizlidir. Katılmayı seçersen kullanıcı adın, isteğe bağlı görünen adın ve ülken, katılma tarihin, tamamladığın hedef sayısı ve etkinlik zamanın herkese açık görünebilir. E-posta ve iç kullanıcı kimliği hiçbir zaman yayımlanmaz. Hesap ayarlarından katılımı geri çektiğinde profil ve liderlik kaydı hemen kaybolur. Seçimin kanıtlanıp uygulanabilmesi için her gerçek katılım veya geri çekme işlemini veritabanı zamanı ve bildirim sürümüyle kaydederiz. Gayriresmî liderlik tablosu istemci tarafından gönderilen ilerlemeye dayanır; doğrulanmış bir yarışma değildir."
+        "body": "Hesaplar varsayılan olarak gizlidir. Katılmayı seçersen kullanıcı adın, isteğe bağlı görünen adın, katılma tarihin, tamamladığın hedef sayısı ve etkinlik zamanın herkese açık görünebilir. E-posta ve iç kullanıcı kimliği hiçbir zaman yayımlanmaz. Hesap ayarlarından katılımı geri çektiğinde profil ve liderlik kaydı hemen kaybolur. Seçimin kanıtlanıp uygulanabilmesi için her gerçek katılım veya geri çekme işlemini veritabanı zamanı ve bildirim sürümüyle kaydederiz. Gayriresmî liderlik tablosu istemci tarafından gönderilen ilerlemeye dayanır; doğrulanmış bir yarışma değildir."
       },
       "5": {
         "title": "Veri işleyenler ve yurt dışı aktarım",
@@ -531,7 +526,7 @@
       },
       "3": {
         "title": "Açık katılım",
-        "body": "Açık profiller ve gündelik liderlik tablosu isteğe bağlıdır. Katılırsan Gizlilik bildiriminde açıklanan açık alanları, ayrılana kadar herkes görebilir. Kullanıcı adı, görünen ad veya ülke alanını kimliğe bürünmek, taciz etmek ya da hukuka aykırı içerik yayımlamak için kullanma.",
+        "body": "Açık profiller ve gündelik liderlik tablosu isteğe bağlıdır. Katılırsan Gizlilik bildiriminde açıklanan açık alanları, ayrılana kadar herkes görebilir. Kullanıcı adı veya görünen ad alanını kimliğe bürünmek, taciz etmek ya da hukuka aykırı içerik yayımlamak için kullanma.",
         "body2": "Liderlik ilerlemesi tarayıcı istemcileri tarafından gönderilir ve hatalı ya da manipüle edilmiş olabilir. Yalnızca gayriresmî öğrenme içindir; hiçbir ödül, işe alım kararı, güvenlik sertifikası veya doğrulanmış yarışma sonucu buna dayanmaz."
       },
       "4": {

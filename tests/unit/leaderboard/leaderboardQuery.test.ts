@@ -9,7 +9,6 @@ import { getLeaderboard, getMyRank } from '@/features/leaderboard/lib/leaderboar
 interface LeaderboardDatabaseRow {
   username: string
   display_name: string | null
-  country: string | null
   objectives_cleared: number
   last_active: string | null
 }
@@ -38,21 +37,18 @@ describe('getLeaderboard', () => {
       {
         username: 'ada_l',
         display_name: 'Ada',
-        country: 'GB',
         objectives_cleared: 7,
         last_active: '2026-08-22T10:00:00.000Z',
       },
       {
         username: 'grace_h',
         display_name: null,
-        country: 'US',
         objectives_cleared: 7,
         last_active: '2026-08-22T10:00:00.000Z',
       },
       {
         username: 'linus_t',
         display_name: 'Linus',
-        country: null,
         objectives_cleared: 3,
         last_active: null,
       },
@@ -65,7 +61,6 @@ describe('getLeaderboard', () => {
         rank: 1,
         username: 'ada_l',
         displayName: 'Ada',
-        country: 'GB',
         objectivesCleared: 7,
         lastActive: '2026-08-22T10:00:00.000Z',
       },
@@ -73,7 +68,6 @@ describe('getLeaderboard', () => {
         rank: 1,
         username: 'grace_h',
         displayName: null,
-        country: 'US',
         objectivesCleared: 7,
         lastActive: '2026-08-22T10:00:00.000Z',
       },
@@ -81,14 +75,13 @@ describe('getLeaderboard', () => {
         rank: 3,
         username: 'linus_t',
         displayName: 'Linus',
-        country: null,
         objectivesCleared: 3,
         lastActive: null,
       },
     ])
     expect(mocks.from).toHaveBeenCalledWith('leaderboard')
     expect(mocks.select).toHaveBeenCalledWith(
-      'username, display_name, country, objectives_cleared, last_active',
+      'username, display_name, objectives_cleared, last_active',
     )
     expect(mocks.select.mock.calls[0]?.[0]).not.toMatch(/\bid\b|email/)
     expect(mocks.order.mock.calls).toEqual([

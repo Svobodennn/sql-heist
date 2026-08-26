@@ -20,7 +20,6 @@ export interface Profile {
   id: string
   username: string
   displayName: string | null
-  country: string | null
   leaderboardOptIn: boolean
   createdAt: string
   updatedAt: string
@@ -64,15 +63,13 @@ export const AuthContext = createContext<AuthContextValue>({
 // snake_case `profiles` row (RLS only ever returns the caller's) → Profile.
 // ProfileRow is defined in authClient (shared with createMyProfile) to keep the
 // column contract in one place.
-const PROFILE_COLUMNS =
-  'id, username, display_name, country, leaderboard_opt_in, created_at, updated_at'
+const PROFILE_COLUMNS = 'id, username, display_name, leaderboard_opt_in, created_at, updated_at'
 
 function toProfile(row: ProfileRow): Profile {
   return {
     id: row.id,
     username: row.username,
     displayName: row.display_name,
-    country: row.country,
     leaderboardOptIn: row.leaderboard_opt_in,
     createdAt: row.created_at,
     updatedAt: row.updated_at,

@@ -5,7 +5,6 @@ const { getSupabaseMock } = vi.hoisted(() => ({ getSupabaseMock: vi.fn() }))
 vi.mock('@/lib/supabase', () => ({ getSupabase: getSupabaseMock }))
 
 import {
-  COUNTRY_MIN_LENGTH,
   DISPLAY_NAME_MAX_LENGTH,
   PUBLIC_PROFILE_NOTICE_VERSION,
   deleteMyAccount,
@@ -20,7 +19,6 @@ const profileRow = {
   id: user.id,
   username: 'ada_l',
   display_name: 'Ada',
-  country: 'GB',
   leaderboard_opt_in: true,
   delete_requested_at: null,
   created_at: '2026-08-22T00:00:00.000Z',
@@ -52,7 +50,6 @@ describe('getPublicProfile', () => {
       data: {
         username: 'ada_l',
         display_name: 'Ada',
-        country: 'GB',
         created_at: '2026-08-22T00:00:00.000Z',
         objectives_cleared: 7,
       },
@@ -66,14 +63,11 @@ describe('getPublicProfile', () => {
     await expect(getPublicProfile('  ADA_L  ')).resolves.toEqual({
       username: 'ada_l',
       displayName: 'Ada',
-      country: 'GB',
       createdAt: '2026-08-22T00:00:00.000Z',
       objectivesCleared: 7,
     })
     expect(from).toHaveBeenCalledWith('public_profiles')
-    expect(select).toHaveBeenCalledWith(
-      'username, display_name, country, created_at, objectives_cleared',
-    )
+    expect(select).toHaveBeenCalledWith('username, display_name, created_at, objectives_cleared')
     expect(select.mock.calls[0]?.[0]).not.toMatch(/\bid\b|email/)
     expect(eq).toHaveBeenCalledWith('username', 'ada_l')
   })
@@ -95,30 +89,25 @@ describe('getPublicProfile', () => {
 })
 
 describe('own-profile mutations', () => {
-  it('rejects values outside the live profiles table bounds before any request', async () => {
+  it('rejects display names outside the live profiles table bounds before any request', async () => {
     await expect(
       updateMyProfile({ displayName: 'x'.repeat(DISPLAY_NAME_MAX_LENGTH + 1) }),
-    ).rejects.toMatchObject({ code: 'invalid-profile' })
-    await expect(
-      updateMyProfile({ country: 'x'.repeat(COUNTRY_MIN_LENGTH - 1) }),
     ).rejects.toMatchObject({ code: 'invalid-profile' })
     expect(getSupabaseMock).not.toHaveBeenCalled()
   })
 
-  it('trims optional fields and updates only the caller row', async () => {
-    const single = vi.fn(async () => ({ data: { ...profileRow, country: null }, error: null }))
+  it('trims the optional display name and updates only the caller row', async () => {
+    const single = vi.fn(async () => ({ data: profileRow, error: null }))
     const select = vi.fn(() => ({ single }))
     const eq = vi.fn(() => ({ select }))
     const update = vi.fn(() => ({ eq }))
     const from = vi.fn(() => ({ update }))
     getSupabaseMock.mockReturnValue({ auth: authReturning(), from })
 
-    await expect(
-      updateMyProfile({ displayName: '  Ada  ', country: '   ' }),
-    ).resolves.toMatchObject({ displayName: 'Ada', country: null })
-    expect(update).toHaveBeenCalledWith(
-      expect.objectContaining({ display_name: 'Ada', country: null }),
-    )
+    await expect(updateMyProfile({ displayName: '  Ada  ' })).resolves.toMatchObject({
+      displayName: 'Ada',
+    })
+    expect(update).toHaveBeenCalledWith({ display_name: 'Ada' })
     expect(eq).toHaveBeenCalledWith('id', user.id)
   })
 
@@ -280,6 +269,10 @@ describe('exportMyData', () => {
     expect(consentSelect).toHaveBeenCalledWith(
       'id, purpose, action, notice_version, source, occurred_at',
     )
+    expect(profileSelect).toHaveBeenCalledWith(
+      'id, username, display_name, leaderboard_opt_in, delete_requested_at, created_at, updated_at',
+    )
+    expect(JSON.stringify(payload)).not.toContain('country')
     expect(consentOrder).toHaveBeenCalledWith('id', { ascending: true })
     expect(blob.type).toBe('application/json')
   })

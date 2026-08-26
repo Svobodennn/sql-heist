@@ -217,7 +217,6 @@ function Board({ state, locale }: { state: BoardState; locale: keyof typeof DATE
             <tr>
               <th scope="col">{t('leaderboard.rank')}</th>
               <th scope="col">{t('leaderboard.operative')}</th>
-              <th scope="col">{t('leaderboard.country')}</th>
               <th scope="col">{t('leaderboard.objectives')}</th>
               <th scope="col">{t('leaderboard.lastActive')}</th>
             </tr>
@@ -235,7 +234,6 @@ function Board({ state, locale }: { state: BoardState; locale: keyof typeof DATE
                     <span className="mono">@{row.username}</span>
                   </Link>
                 </td>
-                <td>{row.country ?? t('leaderboard.undisclosed')}</td>
                 <td className={`mono ${styles.objectives}`}>{row.objectivesCleared}</td>
                 <td>
                   {row.lastActive ? (

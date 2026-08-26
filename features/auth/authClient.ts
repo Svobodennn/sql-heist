@@ -117,14 +117,12 @@ export interface ProfileRow {
   id: string
   username: string
   display_name: string | null
-  country: string | null
   leaderboard_opt_in: boolean
   created_at: string
   updated_at: string
 }
 
-const PROFILE_COLUMNS =
-  'id, username, display_name, country, leaderboard_opt_in, created_at, updated_at'
+const PROFILE_COLUMNS = 'id, username, display_name, leaderboard_opt_in, created_at, updated_at'
 
 // Returns the created row so the caller can adopt it directly — avoids a second
 // round trip whose transient failure would otherwise strand the UsernameGate
@@ -141,7 +139,19 @@ export async function createMyProfile(
     .select(PROFILE_COLUMNS)
     .single()
   if (!error) return { row: data as ProfileRow }
-  if (error.code === '23505') return { error: 'username-taken' }
+  if (error.code === '23505') {
+    // A concurrent tab may already have created this user's row. RLS makes this
+    // recovery read caller-bound: adopt the own row when it exists, and only
+    // report a taken username when the collision belongs to somebody else.
+    const existing = await supabase
+      .from('profiles')
+      .select(PROFILE_COLUMNS)
+      .eq('id', userId)
+      .maybeSingle()
+    if (!existing.error && existing.data) return { row: existing.data as ProfileRow }
+    if (existing.error) return { error: mapAuthError(existing.error.message) }
+    return { error: 'username-taken' }
+  }
   return { error: mapAuthError(error.message) }
 }
 

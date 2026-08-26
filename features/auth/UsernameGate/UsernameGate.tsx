@@ -8,6 +8,11 @@ import { normalizeUsername, validateUsername } from '../validation'
 import { useUsernameAvailability } from '../useUsernameAvailability'
 import styles from './UsernameGate.module.css'
 
+interface PendingProfileClaim {
+  userId: string
+  promise: ReturnType<typeof createMyProfile>
+}
+
 // First-confirmed-sign-in gate: an authed user with NO profiles row must claim a
 // username before anything else is public. Mounted once in app/layout.tsx; it
 // renders nothing unless the profile lookup settled on "no row". Not dismissable
@@ -17,28 +22,67 @@ export function UsernameGate() {
   const { status, user, profile, profileReady, adoptProfile, signOut } = useAuth()
 
   const [username, setUsername] = useState('')
-  // Seed per user.id (not a boolean) so signing out and back in as a DIFFERENT
-  // user never pre-fills the previous user's alias.
-  const [seededFor, setSeededFor] = useState<string | null>(null)
+  const [manualReadyFor, setManualReadyFor] = useState<string | null>(null)
   const [fieldError, setFieldError] = useState<string | null>(null)
   const [submitTaken, setSubmitTaken] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const inFlight = useRef(false)
+  const pendingClaim = useRef<PendingProfileClaim | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const dialogRef = useRef<HTMLDivElement>(null)
 
-  const open = status === 'authed' && profileReady && !profile && user !== null
+  const needsProfile = status === 'authed' && profileReady && !profile && user !== null
+  const open = needsProfile && manualReadyFor === user?.id
+  const userId = user?.id ?? null
+  const signupUsername =
+    typeof user?.user_metadata?.username === 'string' ? user.user_metadata.username : ''
 
   const liveAvailability = useUsernameAvailability(username, open)
   // A submit-time 23505 wins until the input changes again.
   const availability = submitTaken ? 'taken' : liveAvailability
 
   useEffect(() => {
-    if (!open || !user || seededFor === user.id) return
-    const meta = user.user_metadata as Record<string, unknown> | null
-    setUsername(typeof meta?.username === 'string' ? normalizeUsername(meta.username) : '')
-    setSeededFor(user.id)
-  }, [open, user, seededFor])
+    if (!needsProfile || !userId) return
+    setManualReadyFor(null)
+    setFieldError(null)
+    setSubmitTaken(false)
+
+    const candidate = normalizeUsername(signupUsername)
+    setUsername(candidate)
+    if (validateUsername(candidate)) {
+      inFlight.current = false
+      setSubmitting(false)
+      setManualReadyFor(userId)
+      return
+    }
+
+    let claim = pendingClaim.current
+    if (!claim || claim.userId !== userId) {
+      claim = { userId, promise: createMyProfile(userId, candidate) }
+      pendingClaim.current = claim
+    }
+
+    let active = true
+    inFlight.current = true
+    setSubmitting(true)
+    void claim.promise.then(({ error, row }) => {
+      if (!active) return
+      if (pendingClaim.current === claim) pendingClaim.current = null
+      inFlight.current = false
+      setSubmitting(false)
+      if (row) {
+        adoptProfile(row)
+        return
+      }
+      if (error === 'username-taken') setSubmitTaken(true)
+      else setFieldError(error ? `auth.errors.${error}` : 'auth.errors.generic')
+      setManualReadyFor(userId)
+    })
+
+    return () => {
+      active = false
+    }
+  }, [needsProfile, userId, signupUsername, adoptProfile])
 
   useEffect(() => {
     if (open) inputRef.current?.focus()

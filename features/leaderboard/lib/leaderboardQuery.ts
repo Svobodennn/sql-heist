@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { getSupabase } from '@/lib/supabase'
 
-const LEADERBOARD_COLUMNS = 'username, display_name, country, objectives_cleared, last_active'
+const LEADERBOARD_COLUMNS = 'username, display_name, objectives_cleared, last_active'
 const DEFAULT_LIMIT = 50
 const MAX_LIMIT = 100
 
@@ -21,7 +21,6 @@ export interface LeaderboardRow {
   rank: number
   username: string
   displayName: string | null
-  country: string | null
   objectivesCleared: number
   lastActive: string | null
 }
@@ -34,7 +33,6 @@ export interface MyRank {
 interface LeaderboardDatabaseRow {
   username: string
   display_name: string | null
-  country: string | null
   objectives_cleared: number
   last_active: string | null
 }
@@ -81,7 +79,6 @@ function toLeaderboardRows(rows: LeaderboardDatabaseRow[]): LeaderboardRow[] {
         rank,
         username: row.username,
         displayName: row.display_name,
-        country: row.country,
         objectivesCleared: row.objectives_cleared,
         lastActive: row.last_active,
       },

@@ -57,7 +57,6 @@ describe('<LeaderboardTable>', () => {
         rank: 1,
         username: 'ada_l',
         displayName: 'Ada',
-        country: 'GB',
         objectivesCleared: 7,
         lastActive: '2026-08-22T10:00:00.000Z',
       },
@@ -65,7 +64,6 @@ describe('<LeaderboardTable>', () => {
         rank: 2,
         username: 'grace_h',
         displayName: null,
-        country: null,
         objectivesCleared: 5,
         lastActive: null,
       },
@@ -87,6 +85,8 @@ describe('<LeaderboardTable>', () => {
       '/u?name=grace_h',
     )
     expect(screen.getByText('No synced activity')).toBeTruthy()
+    expect(screen.queryByRole('columnheader', { name: 'Country' })).toBeNull()
+    expect(screen.queryByText('United Kingdom')).toBeNull()
     expect(getMyRankMock).not.toHaveBeenCalled()
   })
 
@@ -156,7 +156,6 @@ describe('<LeaderboardTable>', () => {
         rank: 1,
         username: 'ada_l',
         displayName: 'Ada',
-        country: 'GB',
         objectivesCleared: 7,
         lastActive: null,
       },

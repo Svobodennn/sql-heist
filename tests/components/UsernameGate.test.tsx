@@ -1,4 +1,5 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { StrictMode } from 'react'
+import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { User } from '@supabase/supabase-js'
 import { AuthContext, type AuthContextValue } from '@/features/auth/AuthProvider'
@@ -23,7 +24,6 @@ function mkRow(): ProfileRow {
     id: 'user-1',
     username: 'neo_01',
     display_name: null,
-    country: null,
     leaderboard_opt_in: false,
     created_at: '2026-08-22T00:00:00Z',
     updated_at: '2026-08-22T00:00:00Z',
@@ -36,6 +36,7 @@ afterEach(() => {
 })
 
 const authedUser = { id: 'user-1', user_metadata: { username: 'Neo_01' } } as unknown as User
+const userWithoutSignupUsername = { id: 'user-1', user_metadata: {} } as unknown as User
 
 function makeValue(overrides: Partial<AuthContextValue> = {}): AuthContextValue {
   return {
@@ -61,12 +62,72 @@ function renderGate(value: AuthContextValue) {
 }
 
 describe('<UsernameGate>', () => {
-  it('opens only for an authed user whose profile lookup settled on "no row"', () => {
-    renderGate(makeValue())
-    expect(screen.getByRole('dialog')).toBeTruthy()
+  it('automatically claims a valid signup username without opening the fallback dialog', async () => {
+    const value = makeValue()
+    renderGate(value)
+
+    expect(screen.queryByRole('dialog')).toBeNull()
+    await waitFor(() => {
+      expect(createMyProfile).toHaveBeenCalledWith('user-1', 'neo_01')
+      expect(value.adoptProfile).toHaveBeenCalledWith(expect.objectContaining({ id: 'user-1' }))
+    })
   })
 
-  it('stays hidden while the profile is unresolved, present, or the user is anon', () => {
+  it('opens the fallback dialog when signup metadata has no usable username', async () => {
+    renderGate(makeValue({ user: userWithoutSignupUsername }))
+
+    expect(await screen.findByRole('dialog')).toBeTruthy()
+    expect(createMyProfile).not.toHaveBeenCalled()
+  })
+
+  it('keeps one pending automatic claim alive through Strict Mode effect replay', async () => {
+    let resolveClaim: ((value: { row: ProfileRow }) => void) | undefined
+    vi.mocked(createMyProfile).mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveClaim = resolve
+      }),
+    )
+    const value = makeValue()
+
+    render(
+      <StrictMode>
+        <AuthContext.Provider value={value}>
+          <UsernameGate />
+        </AuthContext.Provider>
+      </StrictMode>,
+    )
+
+    await waitFor(() => expect(createMyProfile).toHaveBeenCalledTimes(1))
+    resolveClaim?.({ row: mkRow() })
+    await waitFor(() => expect(value.adoptProfile).toHaveBeenCalledWith(mkRow()))
+    expect(screen.queryByRole('dialog')).toBeNull()
+  })
+
+  it('re-subscribes to the pending claim when auth refreshes the same user object', async () => {
+    let resolveClaim: ((value: { row: ProfileRow }) => void) | undefined
+    vi.mocked(createMyProfile).mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveClaim = resolve
+      }),
+    )
+    const adoptProfile = vi.fn()
+    const firstValue = makeValue({ adoptProfile })
+    const view = renderGate(firstValue)
+    await waitFor(() => expect(createMyProfile).toHaveBeenCalledTimes(1))
+
+    const refreshedUser = { ...authedUser, user_metadata: { username: 'Neo_01' } } as User
+    view.rerender(
+      <AuthContext.Provider value={makeValue({ user: refreshedUser, adoptProfile })}>
+        <UsernameGate />
+      </AuthContext.Provider>,
+    )
+
+    resolveClaim?.({ row: mkRow() })
+    await waitFor(() => expect(adoptProfile).toHaveBeenCalledWith(mkRow()))
+    expect(createMyProfile).toHaveBeenCalledTimes(1)
+  })
+
+  it('stays hidden while the profile is unresolved, present, or the user is anon', async () => {
     renderGate(makeValue({ profileReady: false }))
     expect(screen.queryByRole('dialog')).toBeNull()
     cleanup()
@@ -79,30 +140,11 @@ describe('<UsernameGate>', () => {
     expect(screen.queryByRole('dialog')).toBeNull()
   })
 
-  it('seeds the input from signup metadata, normalized to the DB format', () => {
-    renderGate(makeValue())
-    expect((screen.getByLabelText('Username') as HTMLInputElement).value).toBe('neo_01')
-  })
-
-  it('adopts the created row directly (no re-read), which closes the gate', async () => {
-    const value = makeValue()
-    renderGate(value)
-    fireEvent.click(screen.getByRole('button', { name: 'Claim it' }))
-    await waitFor(() => {
-      expect(createMyProfile).toHaveBeenCalledWith('user-1', 'neo_01')
-      expect(value.adoptProfile).toHaveBeenCalledWith(expect.objectContaining({ id: 'user-1' }))
-    })
-    expect(value.refreshProfile).not.toHaveBeenCalled()
-  })
-
-  it('shows the taken message when the unique constraint wins the race', async () => {
+  it('falls back to a prefilled dialog when the signup username was taken meanwhile', async () => {
     vi.mocked(createMyProfile).mockResolvedValueOnce({ error: 'username-taken' })
-    const value = makeValue()
-    renderGate(value)
-    fireEvent.click(screen.getByRole('button', { name: 'Claim it' }))
-    await waitFor(() => {
-      expect(screen.getByText('Taken — try another.')).toBeTruthy()
-    })
-    expect(value.adoptProfile).not.toHaveBeenCalled()
+    renderGate(makeValue())
+
+    expect(((await screen.findByLabelText('Username')) as HTMLInputElement).value).toBe('neo_01')
+    expect(screen.getByText('Taken — try another.')).toBeTruthy()
   })
 })

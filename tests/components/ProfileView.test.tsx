@@ -48,7 +48,6 @@ describe('<ProfileView>', () => {
     getPublicProfileMock.mockResolvedValue({
       username: 'ada_l',
       displayName: 'Ada',
-      country: 'GB',
       createdAt: '2026-08-22T00:00:00.000Z',
       objectivesCleared: 7,
     })
@@ -56,7 +55,8 @@ describe('<ProfileView>', () => {
 
     await waitFor(() => expect(screen.getByRole('heading', { name: 'Ada' })).toBeTruthy())
     expect(screen.getByText('@ada_l')).toBeTruthy()
-    expect(screen.getByText('GB')).toBeTruthy()
+    expect(screen.queryByText('Country')).toBeNull()
+    expect(screen.queryByText('United Kingdom')).toBeNull()
     expect(screen.getByText('7')).toBeTruthy()
     expect(document.body.textContent).not.toContain('user-1')
     expect(document.body.textContent).not.toContain('@example.com')
@@ -76,7 +76,6 @@ describe('<ProfileView>', () => {
     getPublicProfileMock.mockResolvedValueOnce({
       username: 'ada_l',
       displayName: 'Ada',
-      country: 'GB',
       createdAt: '2026-08-22T00:00:00.000Z',
       objectivesCleared: 7,
     })

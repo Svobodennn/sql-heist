@@ -70,9 +70,10 @@ describe('<SignUpForm>', () => {
     expect(screen.getByText('Enter a valid email address.')).toBeTruthy()
   })
 
-  it('shows the controller-purpose notice and legal links at collection', () => {
+  it('shows the purpose notice without naming an individual and links to the legal pages', () => {
     renderForm(makeValue())
-    expect(screen.getByText(/Melih Saraç.*process your email/i)).toBeTruthy()
+    expect(screen.getByText(/we process your email, username, and account progress/i)).toBeTruthy()
+    expect(document.body.textContent).not.toContain('Melih Saraç')
     expect(screen.getByRole('link', { name: 'Privacy notice' }).getAttribute('href')).toBe(
       '/privacy',
     )
@@ -81,7 +82,8 @@ describe('<SignUpForm>', () => {
 
   it('keeps signup, legal, and sign-in links inside the Turkish locale', () => {
     renderForm(makeValue(), 'tr')
-    expect(screen.getByText(/Melih Saraç.*e-posta adresini/i)).toBeTruthy()
+    expect(screen.getByText(/e-posta adresini, kullanıcı adını ve hesap ilerlemeni işleriz/i)).toBeTruthy()
+    expect(document.body.textContent).not.toContain('Melih Saraç')
     expect(
       screen.getByRole('link', { name: 'Gizlilik ve KVKK Aydınlatma Metni' }).getAttribute('href'),
     ).toBe('/tr/privacy')
@@ -98,10 +100,10 @@ describe('<SignUpForm>', () => {
     renderForm(value)
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'ada@example.com' } })
     fireEvent.change(screen.getByLabelText('Username'), { target: { value: 'ada_l' } })
-    fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'hunter22' } })
+    fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'Hunter22!' } })
     fireEvent.click(screen.getByRole('button', { name: 'Create account' }))
     await waitFor(() => {
-      expect(value.signUpEmail).toHaveBeenCalledWith('ada@example.com', 'hunter22', 'ada_l')
+      expect(value.signUpEmail).toHaveBeenCalledWith('ada@example.com', 'Hunter22!', 'ada_l')
       expect(screen.getByText(/check your inbox/i)).toBeTruthy()
     })
   })
@@ -111,7 +113,7 @@ describe('<SignUpForm>', () => {
     renderForm(value)
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'ada@example.com' } })
     fireEvent.change(screen.getByLabelText('Username'), { target: { value: 'ada_l' } })
-    fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'hunter22' } })
+    fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'Hunter22!' } })
     fireEvent.click(screen.getByRole('button', { name: 'Create account' }))
     await waitFor(() =>
       expect(screen.getByRole('alert').textContent).toContain('This email already has an account.'),

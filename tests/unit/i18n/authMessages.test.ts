@@ -28,6 +28,12 @@ describe('i18n catalogs stay in key parity (en/tr/pl)', () => {
     expect(plKeys).toEqual(enKeys)
   })
 
+  it('does not expose the operator name in user-facing catalogs', () => {
+    for (const catalog of [en, tr, pl]) {
+      expect(JSON.stringify(catalog)).not.toContain('Melih Saraç')
+    }
+  })
+
   it('the account feature namespaces and navigation keys are covered', () => {
     const namespaceMinimums = {
       auth: 30,

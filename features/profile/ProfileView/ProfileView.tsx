@@ -128,10 +128,6 @@ export function ProfileView() {
             <dd>{profile.objectivesCleared}</dd>
           </div>
           <div className={styles.stat}>
-            <dt>{t('profile.country')}</dt>
-            <dd>{profile.country ?? t('profile.undisclosed')}</dd>
-          </div>
-          <div className={styles.stat}>
             <dt>{t('profile.joined')}</dt>
             <dd>{joined}</dd>
           </div>
