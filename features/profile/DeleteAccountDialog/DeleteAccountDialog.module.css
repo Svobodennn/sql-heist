@@ -7,6 +7,7 @@
   padding: var(--space-4);
   overflow-y: auto;
   background: rgba(0, 0, 0, 0.78);
+  animation: overlay-enter var(--dur-fast) var(--ease-out) both;
 }
 
 .modal {
@@ -17,6 +18,29 @@
   max-height: calc(100dvh - var(--space-8));
   padding: var(--space-6);
   overflow-y: auto;
+  animation: dialog-enter var(--dur-normal) var(--ease-out) both;
+}
+
+@keyframes overlay-enter {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes dialog-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .title {
