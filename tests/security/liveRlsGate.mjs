@@ -29,8 +29,10 @@ async function verifySchema() {
       "   'public.profiles','leaderboard_opt_in','update'),",
       " 'display_update', has_column_privilege('authenticated',",
       "   'public.profiles','display_name','update'),",
-      " 'country_update', has_column_privilege('authenticated',",
-      "   'public.profiles','country','update'),",
+      " 'country_exists', exists (select 1",
+      "   from pg_attribute a",
+      "   where a.attrelid = 'public.profiles'::regclass",
+      "     and a.attname = 'country' and not a.attisdropped),",
       " 'profile_delete', has_table_privilege('authenticated',",
       "   'public.profiles','delete'),",
       " 'progress_select', has_table_privilege('authenticated',",
@@ -81,8 +83,10 @@ async function verifySchema() {
     'consent table is append-only to browser roles',
   )
   check(
-    live?.opt_in_update === false && live?.display_update === true && live?.country_update === true,
-    'direct opt-in update is revoked while ordinary edits remain',
+    live?.opt_in_update === false &&
+      live?.display_update === true &&
+      live?.country_exists === false,
+    'direct opt-in updates are revoked, country is absent, and display-name edits remain',
   )
   check(live?.profile_delete === false, 'direct profile deletion privilege is revoked')
   check(
@@ -127,7 +131,7 @@ async function signIn(client, user, label) {
 
 async function verifyProfiles(a, b, anon) {
   const columns =
-    'id,username,display_name,country,leaderboard_opt_in,delete_requested_at,created_at,updated_at'
+    'id,username,display_name,leaderboard_opt_in,delete_requested_at,created_at,updated_at'
 
   success(
     await a
@@ -136,6 +140,13 @@ async function verifyProfiles(a, b, anon) {
       .select(columns)
       .single(),
     'user A creates its own profile',
+  )
+  blocked(
+    await b
+      .from('profiles')
+      .insert({ id: users.b.id, username: users.b.username, country: 'TR' })
+      .select('id'),
+    'removed country cannot be supplied during profile creation',
   )
   success(
     await b
@@ -168,15 +179,16 @@ async function verifyProfiles(a, b, anon) {
   const edited = success(
     await a
       .from('profiles')
-      .update({ display_name: 'Agent A', country: 'TR' })
+      .update({ display_name: 'Agent A' })
       .eq('id', users.a.id)
-      .select('display_name,country')
+      .select('display_name')
       .single(),
-    'ordinary own profile update succeeds',
+    'own display-name update succeeds',
   )
-  check(
-    edited.display_name === 'Agent A' && edited.country === 'TR',
-    'ordinary profile fields round-trip',
+  check(edited.display_name === 'Agent A', 'display name round-trips')
+  blocked(
+    await a.from('profiles').update({ country: 'TR' }).eq('id', users.a.id).select('id'),
+    'removed country cannot be updated',
   )
   blocked(
     await a.from('profiles').update({ leaderboard_opt_in: true }).eq('id', users.a.id).select('id'),
@@ -503,8 +515,8 @@ async function verifyGrantAndPublicViews(a, b, anon) {
   )
   check(
     Object.keys(publicProfile).sort().join(',') ===
-      ['country', 'created_at', 'display_name', 'objectives_cleared', 'username'].sort().join(','),
-    'public profile exposes only five reviewed columns',
+      ['created_at', 'display_name', 'objectives_cleared', 'username'].sort().join(','),
+    'public profile exposes only four reviewed columns',
   )
   const leaderboard = success(
     await anon.from('leaderboard').select('*').eq('username', users.a.username).single(),
@@ -512,8 +524,8 @@ async function verifyGrantAndPublicViews(a, b, anon) {
   )
   check(
     Object.keys(leaderboard).sort().join(',') ===
-      ['country', 'display_name', 'last_active', 'objectives_cleared', 'username'].sort().join(','),
-    'leaderboard exposes only five reviewed columns',
+      ['display_name', 'last_active', 'objectives_cleared', 'username'].sort().join(','),
+    'leaderboard exposes only four reviewed columns',
   )
 
   return eventColumns

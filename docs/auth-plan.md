@@ -113,7 +113,6 @@ create table public.profiles (
   id                 uuid primary key references auth.users(id) on delete cascade,
   username           citext unique not null,
   display_name       text,
-  country            text,
   leaderboard_opt_in boolean not null default false,   -- explicit opt-in; nothing public until true
   created_at         timestamptz not null default now(),
   updated_at         timestamptz not null default now(),
@@ -153,7 +152,7 @@ grant execute on function public.username_available(citext) to anon, authenticat
 
 ```sql
 create view public.public_profiles with (security_invoker = false) as
-  select p.username, p.display_name, p.country, p.created_at,
+  select p.username, p.display_name, p.created_at,
          coalesce((select sum(cardinality(cp.completed_objectives))::int
                      from public.case_progress cp where cp.user_id = p.id), 0) as objectives_cleared
   from public.profiles p
@@ -166,13 +165,13 @@ grant select on public.public_profiles to anon, authenticated;
 
 ```sql
 create view public.leaderboard with (security_invoker = false) as
-  select p.username, p.display_name, p.country,
+  select p.username, p.display_name,
          coalesce(sum(cardinality(cp.completed_objectives))::int, 0) as objectives_cleared,
          max(cp.updated_at) as last_active
   from public.profiles p
   left join public.case_progress cp on cp.user_id = p.id
   where p.leaderboard_opt_in = true
-  group by p.username, p.display_name, p.country;
+  group by p.id, p.username, p.display_name;
 grant select on public.leaderboard to anon, authenticated;   -- client ORDERs by objectives_cleared desc, last_active asc
 
 -- Caller's own rank (even outside top-N) without exposing anyone else's identity.
@@ -460,5 +459,5 @@ Follows the repo's locked test layout: **source dirs hold zero test files**; eve
 
 1. Supabase **Confirm-signup email template** flow (`?code=` PKCE vs `token_hash` OTP) — drives the `/auth/callback` code path.
 2. Client-only **account-deletion** capability vs a minimal deletion Edge Function (P3 §4) — the one spot where "client-only" may need a thin server assist for full erasure.
-3. GoTrue **password policy** (min length / breach check) to mirror in client-side Zod.
+3. **Resolved:** GoTrue and client Zod both require 8+ characters with `a-z`, `A-Z`, `0-9`, and an ASCII symbol. Leaked-password screening remains unavailable on the Hobby plan.
 4. Supabase **region/KVKK transfer basis** for the eu-west-1 project (compliance, counsel).

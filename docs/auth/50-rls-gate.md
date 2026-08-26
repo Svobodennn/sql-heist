@@ -18,8 +18,9 @@ This is the blocking pre-merge review for the browser-accessible Supabase surfac
   `case_progress`, making its caller-bound RPC the sole browser write path.
 - `profile_consent_events` grants browser clients only own-row `select`; insert,
   update, delete, and sequence access are revoked.
-- `public_profiles` exposes exactly `username`, `display_name`, `country`, `created_at`, and `objectives_cleared`.
-- `leaderboard` exposes exactly `username`, `display_name`, `country`, `objectives_cleared`, and `last_active`.
+- `public_profiles` exposes exactly `username`, `display_name`, `created_at`, and `objectives_cleared`.
+- `leaderboard` exposes exactly `username`, `display_name`, `objectives_cleared`, and `last_active`.
+- The unused `country` field has been removed from the base table, consent RPC, exports, and both public projections.
 - Neither public view exposes a profile UUID or auth email.
 - `get_my_rank()` and `request_account_deletion()` use `SECURITY DEFINER` with `search_path=pg_catalog`.
 - `set_public_profile_consent(boolean, text)` uses `SECURITY DEFINER` with
@@ -37,7 +38,7 @@ This is the blocking pre-merge review for the browser-accessible Supabase surfac
 
 ## Adversarial matrix
 
-The live test used two disposable, confirmed Auth users. It executed 114 assertions
+The live test used two disposable, confirmed Auth users. It executed 116 assertions
 through the same publishable-key Data API surface used by the static browser app.
 The reproducible harness is [`../../tests/security/liveRlsGate.mjs`](../../tests/security/liveRlsGate.mjs)
 and requires the explicit guard:
@@ -48,14 +49,14 @@ RUN_LIVE_RLS_GATE=1 node tests/security/liveRlsGate.mjs
 
 | Boundary                       | Verified result                                                                                                                                                                                                                                                                           |
 | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Profile creation               | A user can insert its own profile; a second user cannot insert it on the first user's behalf.                                                                                                                                                                                             |
+| Profile creation               | A user can insert its own profile with the approved identity columns; removed `country` input and creation on another user's behalf are blocked.                                                                                                                                          |
 | Base profile reads             | A user can read its own row; another authenticated user and anon receive no row.                                                                                                                                                                                                          |
-| Profile writes                 | Allowed own fields update; cross-user updates return no row; `username`, `leaderboard_opt_in`, and `delete_requested_at` cannot be written directly by the browser.                                                                                                                       |
+| Profile writes                 | Own display-name updates succeed; cross-user updates return no row; the removed `country` field is unavailable, while `username`, `leaderboard_opt_in`, and `delete_requested_at` cannot be written directly by the browser.                                                             |
 | Profile deletion               | Cross-user and direct own-profile deletes are denied/no-op; rows remain intact.                                                                                                                                                                                                           |
 | Progress reads/writes          | Own progress reads succeed; direct own/cross-user/anon insert, update, and delete paths are denied as applicable. Anon receives no row and cannot invoke the RPC.                                                                                                                         |
 | Progress merge and bounds      | Repeated `upsert_case_progress` calls preserve the sorted union without loss or duplication. Invalid/oversized identifiers, more than 50 objective entries, and a 101st case row are rejected; an existing case still merges at the row limit.                                            |
-| Public profiles                | Only an explicitly opted-in user appears, through the five-column curated shape. A private user remains absent.                                                                                                                                                                           |
-| Leaderboard                    | Only an explicitly opted-in user appears, through the five-column curated shape. A private user remains absent.                                                                                                                                                                           |
+| Public profiles                | Only an explicitly opted-in user appears, through the four-column curated shape. A private user remains absent.                                                                                                                                                                           |
+| Leaderboard                    | Only an explicitly opted-in user appears, through the four-column curated shape. A private user remains absent.                                                                                                                                                                           |
 | Opt-in boundary                | Public opt-in does not grant cross-user access to the underlying profile row.                                                                                                                                                                                                             |
 | Consent evidence               | Only the audited RPC can grant or withdraw public-profile consent. The browser cannot forge, alter, or delete events; another user and anon cannot read them. Events include trusted database time, notice version, purpose, and source.                                                  |
 | Consent retry/version behavior | Same-state retries create no duplicate event; stale grants fail closed; stale clients may always withdraw. Turning opt-in off removes the user from both public views immediately. A new grant is rejected after 100 state-change events while withdrawal remains available.              |
