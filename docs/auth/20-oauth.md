@@ -1,86 +1,71 @@
-# WS5 — Auth Flows, Sessions & Cookies
+# OAuth and browser sessions
 
-> **Status:** DESIGN ONLY. Provider assumed = Supabase GoTrue (per [00-decision](./00-decision.md)). Flows/cookie names below are the standard Supabase model; confirm exact SDK behaviour at build time **[verify]**.
+> **Status:** implemented for the static client-only architecture. Google and GitHub provider configuration and real-provider smoke testing remain operator steps.
 
----
+## Deployment posture
 
-## 1. Two front-end postures (this is a real fork)
+SQL Heist remains a pure Next.js static export. Authentication runs in the browser through one env-guarded `supabase-js` client:
 
-The brief says "static/edge." Those are **different** deployment models with different session mechanics, and the choice is coupled to the httpOnly-cookie requirement:
+- no `@supabase/ssr`, middleware, route handler, service-role key, or application server;
+- the canonical app callback is `/auth/callback` for email PKCE and OAuth;
+- missing public Supabase environment values disable accounts without changing anonymous play;
+- RLS and caller-bound RPCs remain the authorization boundary.
 
-| | **Static SPA** (keep `output: 'export'`) | **Edge/SSR** (Next.js middleware on Vercel/Cloudflare) |
-|---|---|---|
-| Session storage | Access + refresh tokens in **`localStorage`** (supabase-js default) | Tokens in **httpOnly cookies** via `@supabase/ssr` |
-| OAuth callback | Handled **client-side** (`exchangeCodeForSession`) | Handled by an **edge route handler / middleware** |
-| httpOnly cookies? | ❌ not possible (no server to set them) | ✅ yes |
-| XSS token theft risk | Higher — tokens are JS-readable | Lower — refresh token never reaches JS |
-| Keeps pure static export | ✅ | ❌ (adds an edge runtime) |
+This posture necessarily keeps the Supabase session in browser-accessible storage. The repository bans raw HTML injection through lint, and `lib/supabase/client.ts` wraps auth storage to remove Google/GitHub `provider_token` and `provider_refresh_token` values recursively on every write and legacy read. Supabase's own access and refresh tokens remain because the browser client needs them for the authenticated session. If `localStorage` is unavailable, an isolated in-memory adapter is used instead of allowing auth-js to retry unsanitized global storage.
 
-**Recommendation:** because (a) the brief explicitly wants **httpOnly cookies + refresh**, and (b) an OAuth redirect callback already wants a server-side landing point, adopt the **Edge/SSR posture**: Next.js on an edge runtime (Vercel Edge or Cloudflare) with `@supabase/ssr` setting httpOnly cookies. Keep the **static-SPA + `localStorage`** model documented as the fallback if we must remain pure-static — with a **strict CSP + no `dangerouslySetInnerHTML`** (already a frontend rule) as the compensating control. This static-vs-edge call is the first WS5 open decision ([40 §open](./40-anti-cheat.md)).
+## Email flow
 
-> Either way, a server-side function now exists in the stack — see the deployment-model change in [00 §0](./00-decision.md).
+1. `signUpEmail` sends email, password, and the explicitly chosen username metadata to Supabase Auth.
+2. The default confirmation email returns to `/auth/callback` with a PKCE `?code=`. A `token_hash` OTP path remains as a template-compatible fallback.
+3. The client exchanges or detects the session. `UsernameGate` may auto-submit only the explicit email-signup username metadata.
+4. `AuthProvider` loads the own profile through RLS and performs the local/server progress-union handshake.
 
-## 2. Sign-up / sign-in (email + password)
+Passwords must contain at least eight characters including lowercase, uppercase, a digit, and an ASCII symbol in both client validation and the Supabase project policy.
 
-```
-Sign-up
-  form (email, password, username) ──▶ supabase.auth.signUp()
-     ├─ GoTrue creates auth.users row (unconfirmed)
-     ├─ sends verification email (magic link)
-     └─ on first confirmed sign-in: create public.profiles row (username, opt_in=false)
+## Google and GitHub flow
 
-Sign-in
-  form (email, password) ──▶ supabase.auth.signInWithPassword()
-     └─ issues access JWT (~1h) + refresh token
-```
-- **Email verification required before leaderboard eligibility** (anti-spam) — open decision, recommended ON.
-- **Password policy** delegated to GoTrue (min length, breach check if available **[verify]**).
-- `profiles.username` chosen at sign-up; uniqueness enforced by the `citext unique` constraint ([10 §3.1](./10-schema.md)); collision → ask again.
+1. `OAuthButtons` calls `signInWithOAuth` with the fixed `google` or `github` provider and `${window.location.origin}/auth/callback` as `redirectTo`. Ordinary sign-in adds no provider query parameters. Deletion re-verification forces a provider screen with Google's documented `prompt=consent select_account` or GitHub's `prompt=select_account`; an existing provider SSO session may still avoid a fresh password challenge.
+2. Before redirect, the app stores a same-tab OAuth attempt containing only its provider, purpose, an exact allow-listed return path, an optional expected Auth user ID, and a ten-minute expiry. If this state cannot be stored, the flow fails closed before navigation.
+3. The provider authenticates the user through Supabase. The provider client secret exists only in Supabase configuration and never in the static bundle.
+4. On a completed Google sign-in, the synchronous auth event receives the transient provider credential before the safe storage adapter strips it. The app submits that credential directly to Google's revocation endpoint through a hidden form, removes the token-bearing form immediately, and removes the target frame after 15 seconds. This is best effort because the cross-site browser response is not readable.
+5. The existing client callback completes PKCE, consumes the attempt once, and routes only to one of `/`, `/tr`, `/pl`, `/account`, `/tr/account`, or `/pl/account`. Missing, stale, malformed, or mismatched state falls back to `/`.
+6. OAuth metadata can prefill a normalized username suggestion, but it is never auto-claimed. The user must explicitly submit it, and the database unique constraint remains authoritative.
 
-## 3. Google OAuth (PKCE, public client)
+No extra provider API scope or downstream Google/GitHub API is requested by application code. SQL Heist uses the identity data Supabase returns for sign-in and never retains provider credentials. Google's transient credential is used only for the immediate revocation request. GitHub grant revocation requires confidential OAuth-app credentials and therefore cannot be performed safely by this static client; the Privacy notice and deletion runbook direct the user to GitHub's Authorized OAuth Apps settings.
 
-The browser is a **public client** (no client secret) → **PKCE** flow. Google client secret lives in the **Supabase project config**, never in the frontend bundle.
+## Identity linking
 
-```
-1. User clicks "Continue with Google"
-      supabase.auth.signInWithOAuth({ provider:'google',
-        options:{ redirectTo: <app callback URL>, scopes:'email profile' }})
-2. Browser ─▶ Google consent screen (email, profile)
-3. Google ─▶ Supabase callback  https://<ref>.supabase.co/auth/v1/callback
-4. Supabase exchanges the Google code, mints its own session, then
-   redirects to the app's redirectTo with a one-time  ?code=...  (PKCE)
-5. App exchanges code for a session:
-      • Static SPA : supabase.auth.exchangeCodeForSession()  (client, code_verifier from localStorage)
-      • Edge/SSR   : edge route handler runs the exchange and Set-Cookie (httpOnly)  ← recommended
-6. First-ever Google sign-in → create public.profiles (username seeded from Google name, editable)
-```
-- **Scopes:** `email profile` only — no Drive/Contacts/etc. (data minimisation, [30](./30-compliance.md)).
-- **`redirectTo` allow-list:** register exact callback URLs in Supabase; reject open redirects.
-- **Account linking:** if a Google email matches an existing email/password account → linking policy is an open decision (auto-link vs. prompt). Default: prompt, to avoid takeover.
+The approved policy is Supabase automatic identity linking when providers return the same verified email. The sign-in/sign-up UI, Privacy notice, and Terms disclose this before provider use. An email/password identity and Google/GitHub identity can therefore resolve to one Auth user instead of creating parallel profiles.
 
-## 4. Session & cookie strategy (Edge/SSR posture)
+Reference: [Supabase identity linking](https://supabase.com/docs/guides/auth/auth-identity-linking).
 
-`@supabase/ssr` writes the session as httpOnly cookies (names like `sb-<ref>-auth-token`, possibly chunked) **[verify]**. Target attributes:
+## Account export and deletion re-verification
 
-| Cookie | httpOnly | Secure | SameSite | Path | Max-Age / expiry | Notes |
-|---|---|---|---|---|---|---|
-| Access token (JWT) | ✅ | ✅ | **Lax** | `/` | ~**1 h** (JWT `exp`) | short-lived; carries `auth.uid()` used by RLS |
-| Refresh token | ✅ | ✅ | **Lax** | `/` | days–weeks, configurable **[verify]** | **rotated on every use** by GoTrue; reuse-detection revokes the family |
-| PKCE `code_verifier` (transient) | ✅ | ✅ | **Lax** | `/` | until callback | must survive the top-level redirect from Google |
+The JSON export includes only an allow-listed account/provider identity shape: Auth ID, email and timestamps, provider names, safe user metadata, and identity metadata. Password hashes, Supabase session tokens, and provider access/refresh tokens are excluded.
 
-**Why `SameSite=Lax` (not Strict):** the Google→app OAuth return is a top-level cross-site GET; the `code_verifier`/session cookies must ride along on that navigation. `Strict` can drop cookies on that return and break the callback. `Lax` allows top-level GET while still blocking cross-site POST — the right balance. **[verify]** exact behaviour per browser.
+OAuth-only accounts cannot present a password for deletion. Account settings therefore allow re-authentication with a linked Google or GitHub identity:
 
-**Refresh model:** access JWT is short (limits blast radius if leaked); the refresh token is httpOnly, rotates on use, and edge middleware silently refreshes before `exp`. The frontend JS **never** sees the refresh token in this posture.
+- the pre-redirect attempt is bound to the current Auth user ID;
+- a successful matching callback creates a one-time receipt lasting two minutes;
+- consuming that receipt only opens a fresh confirmation dialog; it never submits deletion automatically;
+- the user must retype the username after the provider return and explicitly finish the request while the receipt is valid;
+- the database independently requires a `password` or `oauth` AMR timestamp from the last five minutes;
+- `request_account_deletion(p_expected_user_id)` rejects unless the current `auth.uid()` equals the account that initiated re-verification, then mutates only that caller. This closes a cross-tab session-switch race between re-verification and the RPC request.
 
-**CSRF:** `SameSite=Lax` blocks the common CSRF vector. State-changing calls (score submit) additionally carry the access JWT as a bearer and are verified by the anti-cheat function ([40](./40-anti-cheat.md)); consider a double-submit token if any cookie-authenticated POST is added later.
+The RPC immediately hides and soft-locks the account. Permanent Auth deletion remains the manual operator procedure in [60-account-deletion-runbook.md](./60-account-deletion-runbook.md).
 
-**Sign-out:** clear cookies + call `supabase.auth.signOut()` (revokes the refresh token server-side so a stolen copy dies).
+## Provider configuration and smoke checklist
 
-## 5. How the frontend "holds" the session per posture
+For each provider:
 
-- **Edge/SSR (recommended):** the browser holds only httpOnly cookies (opaque to JS). Edge middleware validates/refreshes on each request and exposes the user to server components; client components learn auth state via a lightweight `/whoami` or an `onAuthStateChange` bridge. RLS keys off the JWT's `sub` = `auth.uid()`.
-- **Static SPA (fallback):** supabase-js keeps the session in `localStorage`, auto-refreshes, and fires `onAuthStateChange`. Simpler, offline-friendly, but XSS-exfiltratable → **hard-require CSP + no raw HTML injection** as the mitigation.
+1. Create the provider OAuth app.
+2. Register Supabase's provider callback: `https://dfehphtgtaghuvquhbmr.supabase.co/auth/v1/callback`.
+3. Store the client ID and secret in Supabase Authentication provider settings only.
+4. Keep the requested identity surface exact: Google `openid`, `.../auth/userinfo.email`, and `.../auth/userinfo.profile`; GitHub `user:email`; pass no application-specific extra scope to `signInWithOAuth`.
+5. For Google, configure `https://sqlheist.com` as the production JavaScript origin, publish `https://sqlheist.com/privacy` and `https://sqlheist.com/terms` on the consent screen, and complete the required app name/logo/brand review. Keep the local origin limited to the explicit development client while testing.
+6. Use the official current Google button asset/specification and keep Google and GitHub options equally prominent.
+7. Enable the provider in Supabase only after its provider/privacy/transfer record is complete.
+8. Keep the Supabase redirect allow-list exact: production and local `/auth/callback`, with no wildcard.
+9. Smoke-test new sign-in, same-verified-email linking, explicit username confirmation, refresh, sign-out, export, and provider-backed deletion re-verification. For Google, confirm the best-effort revoke POST is emitted and no provider token persists. For GitHub, confirm the published separate-revocation instruction remains accurate.
 
-## 6. Anonymous → account migration (one-time import)
-
-Existing players have local progress (`sql-heist:progress:v1`). On first sign-in, offer a **one-time import**: read the local map, submit each completed level to the anti-cheat function for **re-validation** (we do not trust the old client scores blindly — see [40](./40-anti-cheat.md)), and upsert `level_progress` with **max-score-wins** conflict resolution. Import policy (auto vs. prompt, discard vs. keep local) is an open decision.
+Official setup references: [Google](https://supabase.com/docs/guides/auth/social-login/auth-google) and [GitHub](https://supabase.com/docs/guides/auth/social-login/auth-github).

@@ -1,6 +1,6 @@
 # P5 RLS security gate
 
-Date: 2026-08-24
+Date: 2026-08-24; OAuth deletion re-auth revalidated 2026-08-27
 Project: `dfehphtgtaghuvquhbmr` (`eu-west-1`, Postgres 17)
 Result: **PASS**
 
@@ -22,7 +22,7 @@ This is the blocking pre-merge review for the browser-accessible Supabase surfac
 - `leaderboard` exposes exactly `username`, `display_name`, `objectives_cleared`, and `last_active`.
 - The unused `country` field has been removed from the base table, consent RPC, exports, and both public projections.
 - Neither public view exposes a profile UUID or auth email.
-- `get_my_rank()` and `request_account_deletion()` use `SECURITY DEFINER` with `search_path=pg_catalog`.
+- `get_my_rank()` and `request_account_deletion(uuid)` use `SECURITY DEFINER` with `search_path=pg_catalog`.
 - `set_public_profile_consent(boolean, text)` uses `SECURITY DEFINER` with
   `search_path=pg_catalog`, accepts no target user, and is the only browser path
   that can update `leaderboard_opt_in`.
@@ -38,7 +38,7 @@ This is the blocking pre-merge review for the browser-accessible Supabase surfac
 
 ## Adversarial matrix
 
-The live test used two disposable, confirmed Auth users. It executed 116 assertions
+The live test used two disposable, confirmed Auth users. It executed 122 assertions
 through the same publishable-key Data API surface used by the static browser app.
 The reproducible harness is [`../../tests/security/liveRlsGate.mjs`](../../tests/security/liveRlsGate.mjs)
 and requires the explicit guard:
@@ -47,23 +47,23 @@ and requires the explicit guard:
 RUN_LIVE_RLS_GATE=1 node tests/security/liveRlsGate.mjs
 ```
 
-| Boundary                       | Verified result                                                                                                                                                                                                                                                                           |
-| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Profile creation               | A user can insert its own profile with the approved identity columns; removed `country` input and creation on another user's behalf are blocked.                                                                                                                                          |
-| Base profile reads             | A user can read its own row; another authenticated user and anon receive no row.                                                                                                                                                                                                          |
-| Profile writes                 | Own display-name updates succeed; cross-user updates return no row; the removed `country` field is unavailable, while `username`, `leaderboard_opt_in`, and `delete_requested_at` cannot be written directly by the browser.                                                             |
-| Profile deletion               | Cross-user and direct own-profile deletes are denied/no-op; rows remain intact.                                                                                                                                                                                                           |
-| Progress reads/writes          | Own progress reads succeed; direct own/cross-user/anon insert, update, and delete paths are denied as applicable. Anon receives no row and cannot invoke the RPC.                                                                                                                         |
-| Progress merge and bounds      | Repeated `upsert_case_progress` calls preserve the sorted union without loss or duplication. Invalid/oversized identifiers, more than 50 objective entries, and a 101st case row are rejected; an existing case still merges at the row limit.                                            |
-| Public profiles                | Only an explicitly opted-in user appears, through the four-column curated shape. A private user remains absent.                                                                                                                                                                           |
-| Leaderboard                    | Only an explicitly opted-in user appears, through the four-column curated shape. A private user remains absent.                                                                                                                                                                           |
-| Opt-in boundary                | Public opt-in does not grant cross-user access to the underlying profile row.                                                                                                                                                                                                             |
-| Consent evidence               | Only the audited RPC can grant or withdraw public-profile consent. The browser cannot forge, alter, or delete events; another user and anon cannot read them. Events include trusted database time, notice version, purpose, and source.                                                  |
-| Consent retry/version behavior | Same-state retries create no duplicate event; stale grants fail closed; stale clients may always withdraw. Turning opt-in off removes the user from both public views immediately. A new grant is rejected after 100 state-change events while withdrawal remains available.              |
-| Consent caller binding         | The RPC accepts no target UUID and changes only `auth.uid()`; a second authenticated user could not change or read the first user's consent state.                                                                                                                                        |
-| Rank RPC                       | Anon is denied; an opted-in caller receives only `rank` and `objectives_cleared`; a private caller receives no row.                                                                                                                                                                       |
-| Username RPC                   | Anon is denied; an authenticated caller receives only the availability boolean.                                                                                                                                                                                                           |
-| Deletion RPC                   | A recently password-authenticated caller can request deletion only for itself; the request atomically withdraws public consent, records one deletion-source event, and blocks subsequent profile and progress writes. Retries preserve the original timestamp without duplicate evidence. |
+| Boundary                       | Verified result                                                                                                                                                                                                                                                                                                                                                                                              |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Profile creation               | A user can insert its own profile with the approved identity columns; removed `country` input and creation on another user's behalf are blocked.                                                                                                                                                                                                                                                             |
+| Base profile reads             | A user can read its own row; another authenticated user and anon receive no row.                                                                                                                                                                                                                                                                                                                             |
+| Profile writes                 | Own display-name updates succeed; cross-user updates return no row; the removed `country` field is unavailable, while `username`, `leaderboard_opt_in`, and `delete_requested_at` cannot be written directly by the browser.                                                                                                                                                                                 |
+| Profile deletion               | Cross-user and direct own-profile deletes are denied/no-op; rows remain intact.                                                                                                                                                                                                                                                                                                                              |
+| Progress reads/writes          | Own progress reads succeed; direct own/cross-user/anon insert, update, and delete paths are denied as applicable. Anon receives no row and cannot invoke the RPC.                                                                                                                                                                                                                                            |
+| Progress merge and bounds      | Repeated `upsert_case_progress` calls preserve the sorted union without loss or duplication. Invalid/oversized identifiers, more than 50 objective entries, and a 101st case row are rejected; an existing case still merges at the row limit.                                                                                                                                                               |
+| Public profiles                | Only an explicitly opted-in user appears, through the four-column curated shape. A private user remains absent.                                                                                                                                                                                                                                                                                              |
+| Leaderboard                    | Only an explicitly opted-in user appears, through the four-column curated shape. A private user remains absent.                                                                                                                                                                                                                                                                                              |
+| Opt-in boundary                | Public opt-in does not grant cross-user access to the underlying profile row.                                                                                                                                                                                                                                                                                                                                |
+| Consent evidence               | Only the audited RPC can grant or withdraw public-profile consent. The browser cannot forge, alter, or delete events; another user and anon cannot read them. Events include trusted database time, notice version, purpose, and source.                                                                                                                                                                     |
+| Consent retry/version behavior | Same-state retries create no duplicate event; stale grants fail closed; stale clients may always withdraw. Turning opt-in off removes the user from both public views immediately. A new grant is rejected after 100 state-change events while withdrawal remains available.                                                                                                                                 |
+| Consent caller binding         | The RPC accepts no target UUID and changes only `auth.uid()`; a second authenticated user could not change or read the first user's consent state.                                                                                                                                                                                                                                                           |
+| Rank RPC                       | Anon is denied; an opted-in caller receives only `rank` and `objectives_cleared`; a private caller receives no row.                                                                                                                                                                                                                                                                                          |
+| Username RPC                   | Anon is denied; an authenticated caller receives only the availability boolean.                                                                                                                                                                                                                                                                                                                              |
+| Deletion RPC                   | A caller with a recent password or OAuth AMR can request deletion only when the required expected UUID equals `auth.uid()`; a switched user and stale password/OAuth authentication are rejected. The request atomically withdraws public consent, records one deletion-source event, and blocks subsequent profile and progress writes. Retries preserve the original timestamp without duplicate evidence. |
 
 Both disposable Auth users were deleted in a guaranteed cleanup step. A final
 catalog query found zero matching Auth users, profiles, progress rows, and consent
@@ -76,7 +76,7 @@ The live performance advisor returned no findings. The security advisor returned
 1. `public.public_profiles` — `security_definer_view`
 2. `public.leaderboard` — `security_definer_view`
 3. `public.get_my_rank()` — authenticated `SECURITY DEFINER` execution
-4. `public.request_account_deletion()` — authenticated `SECURITY DEFINER` execution
+4. `public.request_account_deletion(uuid)` — authenticated `SECURITY DEFINER` execution
 5. `public.set_public_profile_consent(boolean, text)` — authenticated `SECURITY DEFINER` execution
 6. `public.upsert_case_progress(text, text[])` — authenticated `SECURITY DEFINER` execution
 7. `public.username_available(citext)` — authenticated `SECURITY DEFINER` execution
@@ -85,7 +85,7 @@ These findings are accepted for this design:
 
 - The two views must aggregate across own-row RLS boundaries, but publish only reviewed safe columns from explicitly opted-in, non-deleting profiles. The matrix verified both the column boundary and opt-in/opt-out behavior.
 - `get_my_rank()` must rank across the private aggregate, but is not executable by anon and returns only the caller's rank/count pair.
-- `request_account_deletion()` takes no target identifier, binds its operation to `auth.uid()`, requires recent password authentication, and immediately withdraws public visibility and locks browser writes.
+- `request_account_deletion(p_expected_user_id)` requires the argument to equal `auth.uid()`, requires a recent password or OAuth AMR, and immediately withdraws public visibility and locks browser writes. The live matrix rejects a different expected user even with a fresh OAuth AMR.
 - `set_public_profile_consent(boolean, text)` takes no target identifier, binds
   its operation to `auth.uid()`, rejects stale grants, permits stale withdrawal,
   caps ordinary state changes, and atomically records consent evidence.

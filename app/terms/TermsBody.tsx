@@ -34,7 +34,7 @@ export function TermsBody({ locale }: { locale: Locale }) {
     <ContentPage
       eyebrow={t('terms.eyebrow')}
       title={t('terms.title')}
-      updated="2026-08-23"
+      updated="2026-08-26"
       locale={locale}
       lead={t('terms.lead')}
     >

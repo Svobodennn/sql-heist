@@ -1,7 +1,7 @@
 # Implementation Plan: User Accounts (Supabase, client-only)
 
-> **Status:** PLAN ONLY — no application code in this document. Implement phase-by-phase on branch `auth-accounts`.
-> **Scope:** real accounts (email/password first), cross-device progress sync, a public "casual" leaderboard, and public profiles — all while the app **stays a static export**.
+> **Status:** P0–P5 implemented and verified; P6 Google/GitHub OAuth is in final implementation and verification. Provider app setup and real-provider smoke remain external delivery steps.
+> **Scope:** real accounts (email/password plus Google/GitHub), cross-device progress sync, a public "casual" leaderboard, and public profiles — all while the app **stays a static export**.
 > **Supersedes for build:** the older design set in [`docs/auth/`](./auth/) (00–40) is a valuable reference but was written against a **stale "levels/jobs" model** (`useProgress.ts`, `level_progress`) that no longer exists, and it recommends an **Edge/SSR + service-role** posture. This plan deliberately overrides both — see [§ Deviations](#deviations-from-docsauth).
 
 ## Overview
@@ -11,31 +11,31 @@ Add opt-in user accounts to SQL Heist using **client-only `supabase-js` in the b
 ## Requirements
 
 - Email/password auth with email confirmation (ships first; zero provider config).
-- Google + GitHub OAuth as a **separate later phase** (user provisions the OAuth apps).
+- Google + GitHub OAuth in **Phase 6** (the operator provisions the OAuth apps and Supabase provider secrets).
 - Client-only Supabase: **no** `@supabase/ssr`, **no** middleware, **no** SSR. `output: 'export'` stays.
 - Local-first progress: keep `localStorage` for anonymous play; on login **merge** local → Supabase with **no loss**; then Supabase is the cross-device source of truth.
 - Public leaderboard (MVP is client-submitted → cheatable; label it **"casual"**). Server-validated scores via a future Supabase Edge Function are **out of scope** (documented follow-up).
 - Public profiles exposing **only safe fields** (never email/PII), opt-in only.
 - Full i18n: every new user-facing string keyed in `en`/`tr`/`pl`.
 - Strict layering (`app → features → i18n/ui → lib`) and colocation preserved. `lib/engine` + `lib/schema` **untouched**.
-- GREEN GATE each phase: `npm run typecheck && npm test && npm run build && npm run test:e2e` — plus `get_advisors` clean on every DB phase.
+- GREEN GATE each phase: `npm run typecheck && npm test && npm run build && npm run test:e2e && npm run lint` — plus linked database lint/advisor review on every DB phase.
 
-## Supabase target (already provisioned; MCP connected)
+## Supabase target (already provisioned)
 
 - Project "Sql Heist", ref `dfehphtgtaghuvquhbmr`, eu-west-1, **Postgres 17**. URL `https://dfehphtgtaghuvquhbmr.supabase.co`.
 - Publishable key is new-style `sb_publishable_…` → **public** → `NEXT_PUBLIC_SUPABASE_ANON_KEY` in `.env.local` (gitignored via `.env*.local`).
-- All migrations/RLS/lint are applied **directly via MCP** (`apply_migration` / `execute_sql` / `get_advisors` / `list_tables`) — never handed to the user as SQL to paste.
+- The configured Supabase MCP is read-only. Versioned SQL lives in `supabase/migrations/`; linked mutations run through the Supabase CLI, followed by linked database lint and the live adversarial RLS harness.
 
 ## Deviations from `docs/auth/`
 
 Each deviation is a deliberate, user-approved product call. Naming them here is the "reject the alternative" record.
 
-| Topic | `docs/auth/` recommended | This plan (approved) | Why |
-|---|---|---|---|
-| Front-end posture (open decision #1) | Edge/SSR + `@supabase/ssr`, httpOnly cookies | **Static SPA**, session in `localStorage` via `supabase-js` | Keeps `output: 'export'`; no server runtime. Compensating XSS control already exists: `dangerouslySetInnerHTML` is lint-banned (`react/no-danger: error`). |
-| Score writes (anti-cheat #4) | Service-role Edge Function is the **only** writer; clients default-deny | **Client writes its own rows** under RLS `WITH CHECK (auth.uid() = user_id)` | MVP leaderboard is explicitly "casual/cheatable". RLS still blocks writing/reading **other** users' rows. Edge Function = documented follow-up. |
-| Progress model | `level_progress` / `level_id` / `useProgress.ts` (jobs) | `case_progress` / `case_id` + `completed_objectives text[]` | The shipped game is **cases + objectives** (`useCaseProgress.ts`, key `sql-heist:cases:v1`). The docs' jobs model is stale — `useProgress.ts` no longer exists. |
-| Leaderboard metric | `best_score` from `computeJobScore` server-replay | **Objectives-cleared count** (what the game actually persists) | `computeJobScore`/`starsForScore` exist in `lib/engine/scoring.ts` but are **never called** in app/features; no score is persisted today. Ranking by a value we don't measure would be dishonest. `best_score` column is reserved (nullable) for the future score board. |
+| Topic                                | `docs/auth/` recommended                                                | This plan (approved)                                                         | Why                                                                                                                                                                                                                                                                      |
+| ------------------------------------ | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Front-end posture (open decision #1) | Edge/SSR + `@supabase/ssr`, httpOnly cookies                            | **Static SPA**, session in `localStorage` via `supabase-js`                  | Keeps `output: 'export'`; no server runtime. Compensating XSS control already exists: `dangerouslySetInnerHTML` is lint-banned (`react/no-danger: error`).                                                                                                               |
+| Score writes (anti-cheat #4)         | Service-role Edge Function is the **only** writer; clients default-deny | **Client writes its own rows** under RLS `WITH CHECK (auth.uid() = user_id)` | MVP leaderboard is explicitly "casual/cheatable". RLS still blocks writing/reading **other** users' rows. Edge Function = documented follow-up.                                                                                                                          |
+| Progress model                       | `level_progress` / `level_id` / `useProgress.ts` (jobs)                 | `case_progress` / `case_id` + `completed_objectives text[]`                  | The shipped game is **cases + objectives** (`useCaseProgress.ts`, key `sql-heist:cases:v1`). The docs' jobs model is stale — `useProgress.ts` no longer exists.                                                                                                          |
+| Leaderboard metric                   | `best_score` from `computeJobScore` server-replay                       | **Objectives-cleared count** (what the game actually persists)               | `computeJobScore`/`starsForScore` exist in `lib/engine/scoring.ts` but are **never called** in app/features; no score is persisted today. Ranking by a value we don't measure would be dishonest. `best_score` column is reserved (nullable) for the future score board. |
 
 ## Architecture changes (respecting layering + colocation)
 
@@ -86,21 +86,21 @@ messages/{en,tr,pl}.json     new namespaces: auth, account, leaderboard, profile
 
 Source: `~/.claude/rules/agent-assignment-matrix.md`. All names verified present in `~/.claude/agents/`.
 
-| Phase | Ana Agent | Yedek | QA Agent(s) | Parallel With |
-|-------|-----------|-------|-------------|---------------|
-| P0 Foundation (deps, client, provider, base schema+RLS) | backend-dev | kraken | code-reviewer + security-reviewer + database-reviewer | — |
-| P1 Email auth core (forms, routes, callback, username gate) | backend-dev | frontend-dev | code-reviewer + security-reviewer | — (needs P0) |
-| P2 Progress sync (game lib extension + merge) | kraken | backend-dev | tdd-guide + verifier + code-reviewer | — (needs P0) |
-| P3 Public profiles (view + /u + /account) | frontend-dev | backend-dev | code-reviewer + security-reviewer + database-reviewer | P4 (disjoint files) |
-| P4 Leaderboard (view + /leaderboard) | frontend-dev | spark | code-reviewer + security-reviewer + database-reviewer | P3 (disjoint files) |
-| P5 Finish (i18n routes, RLS review gate, PRODUCT.md, legal) | i18n-expert (+ babel) | frontend-dev | **security-reviewer + database-reviewer (RLS GATE)** → verifier | — |
-| Later: Google/GitHub OAuth | oauth-expert | backend-dev | security-reviewer + verifier | — (post-merge) |
+| Phase                                                       | Ana Agent             | Yedek        | QA Agent(s)                                                     | Parallel With       |
+| ----------------------------------------------------------- | --------------------- | ------------ | --------------------------------------------------------------- | ------------------- |
+| P0 Foundation (deps, client, provider, base schema+RLS)     | backend-dev           | kraken       | code-reviewer + security-reviewer + database-reviewer           | —                   |
+| P1 Email auth core (forms, routes, callback, username gate) | backend-dev           | frontend-dev | code-reviewer + security-reviewer                               | — (needs P0)        |
+| P2 Progress sync (game lib extension + merge)               | kraken                | backend-dev  | tdd-guide + verifier + code-reviewer                            | — (needs P0)        |
+| P3 Public profiles (view + /u + /account)                   | frontend-dev          | backend-dev  | code-reviewer + security-reviewer + database-reviewer           | P4 (disjoint files) |
+| P4 Leaderboard (view + /leaderboard)                        | frontend-dev          | spark        | code-reviewer + security-reviewer + database-reviewer           | P3 (disjoint files) |
+| P5 Finish (i18n routes, RLS review gate, PRODUCT.md, legal) | i18n-expert (+ babel) | frontend-dev | **security-reviewer + database-reviewer (RLS GATE)** → verifier | —                   |
+| P6 Google/GitHub OAuth                                      | oauth-expert          | backend-dev  | legal review + security review + verifier                       | — (after P5)        |
 
 - **UI-component QA** (SignInForm/UserMenu/LeaderboardTable/ProfileView): add **designer** review for brass-noir fidelity (matrix: React UI → optional designer). Rationale for this deviation: new auth UI is the first account surface players see; visual consistency matters.
 - **Plan itself** → **plan-reviewer** before P0 begins (matrix: Plan review).
 - **Parallel groups:** P1 and P2 can run concurrently after P0 (P1 = `features/auth` + `app/auth`; P2 = `features/game/lib`). P3 and P4 can run concurrently (disjoint feature dirs) once P0's schema exists; they share only `messages/*` (coordinate string merges). Each parallel task runs its own Dev-QA loop (`qa-loop.md`).
 
-## Database schema + RLS (applied via MCP, per phase)
+## Database schema + RLS (versioned migrations, applied through the linked CLI)
 
 Principle: **users read/write only their own rows; the public sees only curated, opt-in, safe-column views; base tables are never readable cross-user.** Every table has RLS enabled with explicit policies; absence of a policy = default deny.
 
@@ -199,21 +199,23 @@ grant execute on function public.get_my_rank() to authenticated;
 The public leaderboard/profile need to aggregate **across** users, but base-table RLS restricts each caller to their own rows. Two ways to bridge that:
 
 - **Option A (chosen): definer views (`security_invoker = false`) exposing only a curated safe-column list, filtered to `leaderboard_opt_in = true`; base tables stay own-row-only (never readable cross-user).** Attack surface is exactly the view's column list. Supabase's advisor lints definer views (`security_definer_view`) — that finding is **expected**; it is resolved by review sign-off documenting the safe-column list + opt-in filter, not by silencing.
-- Option B (rejected): `security_invoker = true` views + broad public SELECT policies on the base tables for opt-in rows. Rejected because RLS is **row-level, not column-level** — a public read policy on `profiles` would expose *every* column of opt-in rows to `anon`, widening the surface beyond the safe list.
+- Option B (rejected): `security_invoker = true` views + broad public SELECT policies on the base tables for opt-in rows. Rejected because RLS is **row-level, not column-level** — a public read policy on `profiles` would expose _every_ column of opt-in rows to `anon`, widening the surface beyond the safe list.
 
 **Non-negotiables enforced + audited in the P5 gate:** RLS enabled on every `public` table; email never leaves `auth.users`; no view/function returns `id` or email; cross-user raw read/write returns zero rows / is denied; `get_advisors` (security + performance) is clean or every finding has a written, reviewed justification.
 
 ## Implementation Steps
 
 ### Phase 0: Foundation
+
 **Agents:** backend-dev (implement) → code-reviewer + security-reviewer + database-reviewer (QA)
 **Parallel:** No — P1–P4 depend on it.
-**Goal:** Supabase reachable from the browser, an env-guarded client singleton, a live `AuthProvider`/`useAuth` that reflects session state, and the base schema (`profiles` + `case_progress`) with own-row RLS applied via MCP — with **zero** change to anonymous play.
+**Goal:** Supabase reachable from the browser, an env-guarded client singleton, a live `AuthProvider`/`useAuth` that reflects session state, and the base schema (`profiles` + `case_progress`) with own-row RLS applied through versioned migrations — with **zero** change to anonymous play.
 **Acceptance criteria:**
+
 - `npm run build` still emits static `out/`; `next.config.mjs` `output:'export'` unchanged.
 - With env **absent**, `getSupabase()` returns `null`, no console throw, game + anonymous e2e unaffected (GREEN GATE passes with no secrets).
 - With env **present** (local `.env.local`), `useAuth()` reports `{ user: null }` initially and updates on `onAuthStateChange`.
-- MCP: `list_tables` shows `profiles` + `case_progress` with RLS enabled; `get_advisors` (security) clean.
+- Linked catalog verification shows `profiles` + `case_progress` with RLS enabled; database lint/advisor findings are clean or explicitly reviewed.
 
 1. **Add dependency + env** (Files: `package.json`, `.env.local` [gitignored], `.env.example` [committed])
    - Action: `npm i @supabase/supabase-js`. Add `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY` to `.env.local`; commit a placeholder `.env.example`.
@@ -226,15 +228,20 @@ The public leaderboard/profile need to aggregate **across** users, but base-tabl
      import { createClient, type SupabaseClient } from '@supabase/supabase-js'
      let cached: SupabaseClient | null | undefined
      export function getSupabase(): SupabaseClient | null {
-       if (cached !== undefined) return cached                    // one GoTrueClient only
+       if (cached !== undefined) return cached // one GoTrueClient only
        const url = process.env.NEXT_PUBLIC_SUPABASE_URL
        const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-       cached = url && key
-         ? createClient(url, key, {
-             auth: { persistSession: true, autoRefreshToken: true,
-                     detectSessionInUrl: true, flowType: 'pkce' },
-           })
-         : null                                                   // env missing → auth off
+       cached =
+         url && key
+           ? createClient(url, key, {
+               auth: {
+                 persistSession: true,
+                 autoRefreshToken: true,
+                 detectSessionInUrl: true,
+                 flowType: 'pkce',
+               },
+             })
+           : null // env missing → auth off
        return cached
      }
      ```
@@ -243,7 +250,11 @@ The public leaderboard/profile need to aggregate **across** users, but base-tabl
 3. **AuthProvider + useAuth** (Files: `features/auth/AuthProvider.tsx`, `features/auth/useAuth.ts`, `features/auth/index.ts`)
    - Signatures:
      ```ts
-     interface AuthState { user: User | null; profile: Profile | null; status: 'loading'|'anon'|'authed'|'disabled' }
+     interface AuthState {
+       user: User | null
+       profile: Profile | null
+       status: 'loading' | 'anon' | 'authed' | 'disabled'
+     }
      interface AuthContextValue extends AuthState {
        signInEmail(email: string, password: string): Promise<{ error?: string }>
        signUpEmail(email: string, password: string, username: string): Promise<{ error?: string }>
@@ -259,8 +270,8 @@ The public leaderboard/profile need to aggregate **across** users, but base-tabl
 4. **Wire provider into the shell** (File: `app/layout.tsx`)
    - Action: wrap `{children}` with `<AuthProvider>` **inside** `<I18nProvider>` so auth UI can translate. `app → features` import is allowed. Risk: Low.
 
-5. **Apply base schema via MCP** (no repo files — DB only)
-   - Action: `list_tables` (snapshot) → `apply_migration('auth_core', …)` with the P0 SQL above → `get_advisors('security')` + `get_advisors('performance')` → resolve/annotate findings. Risk: **High** (RLS correctness) — mitigated by database-reviewer QA + the P5 gate re-audit.
+5. **Apply base schema through a versioned migration**
+   - Action: snapshot the linked catalog → commit the migration → apply with the linked Supabase CLI → run database lint/advisor review → resolve or annotate findings. Risk: **High** (RLS correctness) — mitigated by database-reviewer QA + the P5 gate re-audit.
 
 6. **Turn the Navbar stub into a live entry point** (Files: `app/components/Navbar/Navbar.tsx`, minimal)
    - Action: replace the `<a href="#wip">` stub with: `status==='authed'` → `<UserMenu/>` (P1 delivers it; P0 may ship a temporary "Sign out" text), else a real `<Link href="/auth/sign-in">` using existing `nav.signIn`. When `status==='disabled'`, hide the entry entirely. Risk: Low.
@@ -268,10 +279,12 @@ The public leaderboard/profile need to aggregate **across** users, but base-tabl
 **Order:** 1 → 2 → 3 → 4 → 5 → 6. **GREEN GATE** (typecheck+test+build+e2e) + advisors clean.
 
 ### Phase 1: Email auth core
+
 **Agents:** backend-dev (implement) → code-reviewer + security-reviewer (QA); designer reviews the forms.
 **Parallel:** Yes — with Phase 2 (disjoint files: `features/auth` + `app/auth` vs `features/game/lib`).
 **Goal:** a player can sign up (email+password+username), confirm via email, sign in, pick/confirm a unique username, see themselves in the Navbar, and sign out — all on static routes, with the anonymous path untouched.
 **Acceptance criteria:**
+
 - Sign up → confirmation email → click link → lands on `/auth/callback` → session established → `profiles` row created with the chosen username.
 - Duplicate username is rejected gracefully (pre-check RPC + unique-constraint fallback → re-prompt).
 - Session persists across reload/tabs; sign-out revokes it (`supabase.auth.signOut()`).
@@ -299,10 +312,12 @@ The public leaderboard/profile need to aggregate **across** users, but base-tabl
 **Order:** 1 → 2 → 3 → 4 → 5 → 6. **GREEN GATE.** Manual smoke of the real confirm flow against the live project (needs env).
 
 ### Phase 2: Progress sync
+
 **Agents:** kraken (implement, TDD) → tdd-guide + verifier + code-reviewer (QA)
 **Parallel:** Yes — with Phase 1 (touches `features/game/lib`, not `features/auth`).
 **Goal:** logged-in progress round-trips to Supabase and merges local → server with **no loss**; logged-out/`disabled` behavior is byte-identical to today (golden + e2e stay green).
 **Acceptance criteria:**
+
 - On login, local `sql-heist:cases:v1` is unioned into `case_progress` per case; nothing already-cleared is lost either direction.
 - New wins while logged in appear on another device after refresh.
 - Logged out (or env disabled) → only `localStorage` is touched; `tests/e2e/cases.e2e.ts` + `tests/cases/*.golden.test.ts` pass unchanged.
@@ -310,11 +325,14 @@ The public leaderboard/profile need to aggregate **across** users, but base-tabl
 1. **Sync layer** (File: `features/game/lib/progressSync.ts`)
    - Signatures:
      ```ts
-     type CaseProgressMap = Record<string, { objectives: string[] }>  // reuse existing type
-     export async function fetchServerProgress(): Promise<CaseProgressMap>   // select own case_progress
-     export async function pushObjectiveWin(caseId: string, objectiveId: string): Promise<void>  // upsert union
-     export function mergeCaseProgress(local: CaseProgressMap, server: CaseProgressMap): CaseProgressMap // pure set-union
-     export async function mergeLocalIntoServer(local: CaseProgressMap): Promise<CaseProgressMap>        // login handshake
+     type CaseProgressMap = Record<string, { objectives: string[] }> // reuse existing type
+     export async function fetchServerProgress(): Promise<CaseProgressMap> // select own case_progress
+     export async function pushObjectiveWin(caseId: string, objectiveId: string): Promise<void> // upsert union
+     export function mergeCaseProgress(
+       local: CaseProgressMap,
+       server: CaseProgressMap,
+     ): CaseProgressMap // pure set-union
+     export async function mergeLocalIntoServer(local: CaseProgressMap): Promise<CaseProgressMap> // login handshake
      ```
    - Why merge is safe: completion is **monotonic** (an objective is cleared or not; never un-cleared), so per-case set-union is associative, idempotent, and loss-free — no conflict resolution needed. `mergeCaseProgress` is pure → unit-tested with `mocksmith` fixtures. Risk: Medium — covered by tests.
 
@@ -330,36 +348,40 @@ The public leaderboard/profile need to aggregate **across** users, but base-tabl
 **Order:** 1 (+tests) → 2 → 3 → 4. **GREEN GATE** — pay special attention to golden + e2e staying green.
 
 ### Phase 3: Public profiles
+
 **Agents:** frontend-dev (implement) → code-reviewer + security-reviewer + database-reviewer (QA); designer reviews.
 **Parallel:** Yes — with Phase 4 (disjoint feature dirs; coordinate `messages/*` merges).
-**Goal:** an opt-in user has a public profile at `/u?name=<username>` exposing only safe fields; the signed-in user manages their own profile at `/account` (edit display name, toggle leaderboard opt-in, export data, delete account).
+**Goal:** an opt-in user has a public profile at `/u?name=<username>` exposing only safe fields; the signed-in user manages their own profile at `/account` (edit display name, toggle leaderboard opt-in, export data, request deletion).
 **Acceptance criteria:**
+
 - `/u?name=alice` shows Alice's safe public fields **only if** she opted in; otherwise a "private / not found" state (no data leak).
 - No email, no `id`, no other user's raw rows are ever fetched by the profile page (verified against RLS + view).
-- `/account` edits persist (RLS own-row update); opt-in toggle flips board/profile visibility; "Download my data" yields a JSON of the caller's `profiles` + `case_progress`; "Delete account" removes the account (cascades).
+- `/account` edits persist; the consent RPC controls board/profile visibility; "Download my data" yields a safe JSON export; a recently re-authenticated deletion request immediately hides and soft-locks the account, with permanent Auth deletion completed manually within 30 days.
 
-1. **Apply `public_profiles` view via MCP** (DB only) — the P3 migration above; then `get_advisors`. Risk: **High** (leak surface) — reviewed in P5 gate.
+1. **Apply `public_profiles` through a versioned migration** — then run linked lint/advisor review. Risk: **High** (leak surface) — reviewed in P5 gate.
 2. **Profile query helpers** (File: `features/profile/lib/profileQuery.ts`)
    - Signatures: `getPublicProfile(username: string): Promise<PublicProfile | null>` (select from `public_profiles`); `getMyProfile()`, `updateMyProfile(patch)`, `setLeaderboardOptIn(bool)`, `exportMyData(): Promise<Blob>`, `deleteMyAccount()`. Risk: Medium.
 3. **Public profile page** (Files: `app/u/page.tsx` [client, `useSearchParams`], `features/profile/ProfileView/*`)
    - Action: read `?name=`, fetch via `getPublicProfile`, render safe fields + objectives-cleared. Handle empty/not-found/loading. Static-export-safe (single route, query param). Risk: Medium.
 4. **Account page** (Files: `app/account/page.tsx` [client, auth-gated → redirect to `/auth/sign-in` when anon], `features/profile/AccountPanel/*`)
-   - Action: edit form, opt-in toggle (with a one-line consent note), data export button, delete-account with a re-confirm modal. Account deletion note: with client-only Supabase there is no service role in the browser; deletion uses `supabase.auth`-side account deletion where available, otherwise routes through a minimal future Edge Function — **[verify]** the client-only deletion path; if unavailable, ship "request deletion" that flips a `delete_requested` flag + documents the manual/edge step (align with `docs/auth/30-compliance.md §6`). Risk: **High** (erasure correctness) — flagged for the security/compliance review.
+   - Action: edit form, consent-controlled opt-in toggle, safe data export, and recent-auth deletion request. The caller-bound RPC records an idempotent soft lock; the operator deletes `auth.users` under the documented 30-day runbook because no privileged credential may enter the browser. Risk: **High** (erasure correctness) — covered by security/compliance review and the live RLS matrix.
 5. **i18n keys** (`messages/{en,tr,pl}.json`): `profile` + `account` namespaces, all three locales.
 
 **Order:** 1 → 2 → 3 → 4 → 5. **GREEN GATE** + advisors clean.
 
 ### Phase 4: Leaderboard
+
 **Agents:** frontend-dev (implement) → code-reviewer + security-reviewer + database-reviewer (QA); designer reviews.
 **Parallel:** Yes — with Phase 3.
 **Goal:** a public, anon-readable "casual" leaderboard ranking opt-in users by objectives cleared, linking each entry to its public profile, with the signed-in user's own rank shown.
 **Acceptance criteria:**
+
 - Anonymous visitor can read the board (via the `leaderboard` view granted to `anon`).
 - Board shows **only** safe columns; non-opt-in users never appear.
 - Signed-in user sees "your rank" via `get_my_rank()`.
 - UI carries a visible **"casual — scores are client-submitted"** label (honest, per product decision).
 
-1. **Apply `leaderboard` view + `get_my_rank` via MCP** (DB only) — P4 migration; then `get_advisors`. Risk: High — P5 gate.
+1. **Apply `leaderboard` view + `get_my_rank` through a versioned migration** — then run linked lint/advisor review. Risk: High — P5 gate.
 2. **Leaderboard query helpers** (File: `features/leaderboard/lib/leaderboardQuery.ts`)
    - Signatures: `getLeaderboard(limit=50): Promise<LeaderboardRow[]>` (select from view, order client-side by `objectives_cleared desc, last_active asc`), `getMyRank(): Promise<{ rank: number; objectivesCleared: number } | null>`. Risk: Low.
 3. **Leaderboard page** (Files: `app/leaderboard/page.tsx` [client], `features/leaderboard/LeaderboardTable/*`)
@@ -369,10 +391,12 @@ The public leaderboard/profile need to aggregate **across** users, but base-tabl
 **Order:** 1 → 2 → 3 → 4. **GREEN GATE** + advisors clean.
 
 ### Phase 5: Finish — i18n routes, RLS security review gate, PRODUCT.md, legal
+
 **Agents:** i18n-expert (+ babel) implement i18n; **security-reviewer + database-reviewer run the RLS GATE**; then verifier.
 **Parallel:** No — this is the convergence + gate before PR.
 **Goal:** localized routes for the new pages, provable i18n coverage, the security review gate passed, and product/legal docs aligned.
 **Acceptance criteria:**
+
 - `/tr` and `/pl` variants exist for `leaderboard`, `account`, `u` (auth chrome may stay canonical-en); `localeHref` routes stay in-language.
 - An i18n parity test proves `en`/`tr`/`pl` have identical key sets for the new namespaces.
 - **RLS GATE passes** (see below) — blocking for merge.
@@ -384,21 +408,26 @@ The public leaderboard/profile need to aggregate **across** users, but base-tabl
    - Action: assert deep key-set equality across `en`/`tr`/`pl` for `auth`/`account`/`leaderboard`/`profile` (+ new `nav`). Risk: Low.
 3. **RLS SECURITY REVIEW GATE (blocking)** — security-reviewer + database-reviewer:
    - Re-run `get_advisors('security')` + `get_advisors('performance')`; every finding resolved or justified in writing.
-   - Adversarial checks via `execute_sql` as `anon` and as a second `authenticated` user: (a) `select` another user's `profiles`/`case_progress` row → **0 rows**; (b) `update`/`insert` another user's row → **denied**; (c) any view/function output contains **no** `id`/email; (d) non-opt-in users absent from `leaderboard`/`public_profiles`; (e) RLS enabled on every `public` table.
+   - Run `tests/security/liveRlsGate.mjs` through the publishable-key Data API plus its management-SQL catalog checks: (a) another user's `profiles`/`case_progress` row is unreadable and immutable; (b) public views/functions expose no UUID/email; (c) non-opt-in users are absent; (d) every `public` base table has RLS; (e) the harness deletes both disposable users in guaranteed cleanup.
    - Sign-off recorded in the PR. **No merge without it.**
 4. **Docs + product** (Files: `PRODUCT.md`, `app/[locale]/privacy/*` + `app/privacy` copy, `messages/*`)
    - Action: update `PRODUCT.md` (accounts are opt-in; anonymous/offline stays the default; "nothing leaves your machine unless you sign in"); extend privacy/terms for the data-controller posture, opt-in leaderboard consent, and erasure (align with `docs/auth/30-compliance.md`). Risk: Low.
 
 **Order:** 1 → 2 → (3 gate) → 4. **GREEN GATE** + gate sign-off → open PR.
 
-### Later phase (separated): Google + GitHub OAuth
-**Agents:** oauth-expert (implement) → security-reviewer + verifier (QA). **Runs after email auth is merged.**
-**Goal:** add "Continue with Google/GitHub" without disturbing shipped email auth.
-**Acceptance criteria:** OAuth sign-in completes on the static site via the existing `/auth/callback`; account-linking policy defined; redirect allow-list locked down.
-- **User action (external):** create the Google + GitHub OAuth apps; paste client id/secret into **Supabase project config** (never the bundle); register `<origin>/auth/callback` in the provider + Supabase redirect allow-list.
-- **Code:** add `signInWithOAuth({ provider, options:{ redirectTo:'<origin>/auth/callback', scopes:'email profile' }})` buttons to `AuthCard`; the P1 callback already handles the PKCE `?code=` exchange, so no new route. First OAuth sign-in reuses the `UsernameGate` (seed username from provider name).
-- **Account linking:** default to **prompt** on email collision (avoid silent takeover) — a documented decision, not auto-link.
-- Isolated by construction: OAuth touches only `AuthCard` + provider config, so email auth ships and stays green independently.
+### Phase 6: Google + GitHub OAuth
+
+**Goal:** add Google/GitHub sign-in and provider-backed deletion re-verification without changing the static deployment or disturbing email auth.
+**Acceptance criteria:** OAuth returns through the canonical `/auth/callback`; return paths are exact allow-listed same-origin routes; provider tokens are not retained and a transient Google credential is submitted for immediate best-effort revocation; same-verified-email linking is disclosed; OAuth-only accounts can export and request deletion.
+
+1. **OAuth entry points:** `OAuthButtons` appears on sign-in and sign-up and calls `signInWithOAuth` for `google` or `github`. The callback URL is derived from `window.location.origin` and fixed to `/auth/callback`.
+2. **Callback state:** a same-tab `sessionStorage` record stores only provider, purpose, an exact allow-listed return path, optional expected user ID, and a ten-minute expiry. If it cannot be written, OAuth fails closed before navigation. Account-deletion return receipts are one-time, user-bound, and expire after two minutes. Consuming a receipt only opens a fresh confirmation dialog; it never submits deletion automatically. The user must retype the username after the provider return and explicitly finish the request. Deletion re-verification forces the documented provider interaction screen (`consent select_account` for Google; `select_account` for GitHub), while acknowledging that an active provider SSO session may not demand a fresh password.
+3. **Account linking and username:** Supabase's automatic linking for identities with the same verified email is the approved policy and is disclosed before provider sign-in. OAuth metadata may suggest a normalized username, but the user must explicitly submit it; only the username explicitly supplied during email signup may be auto-claimed.
+4. **Token minimisation:** the app keeps the Supabase access/refresh pair required for the browser session but recursively strips `provider_token` and `provider_refresh_token` on storage writes and legacy reads. If persistent browser storage is unavailable, auth uses isolated in-memory storage instead of falling back to unsanitized global storage. A completed Google sign-in uses its transient credential only to submit an immediate best-effort revoke POST; GitHub grant revocation remains user-controlled because its API requires confidential OAuth-app credentials unavailable to the static client.
+5. **Export and deletion:** account export includes a safe allow-list of account/provider identity metadata and excludes session/provider credentials. Deletion accepts a recent password or OAuth AMR proof plus the explicit post-provider confirmation above; its required expected-user argument must equal `auth.uid()` so a cross-tab session switch fails closed. The existing idempotent soft lock/manual permanent deletion workflow remains.
+6. **External provider setup:** create Google and GitHub OAuth apps, store client ID/secrets only in Supabase, enable both providers, and register the Supabase provider callback plus the exact app callback allow-list. Configure only the documented identity/email scopes, Google consent-screen Privacy/Terms URLs, and approved Google branding. Run real Google/GitHub sign-in, linking, username, export, deletion reauth, sign-out, token-persistence, Google revoke-request, and GitHub user-revocation-copy smoke tests after configuration.
+
+**Order:** 1 (+tests) → 2 → 3 → 4 → 5 → legal/security review → full GREEN GATE. Real-provider smoke is the only provider-config-dependent gate.
 
 ## Testing Strategy
 
@@ -410,8 +439,8 @@ Follows the repo's locked test layout: **source dirs hold zero test files**; eve
   - `tests/unit/i18n/authMessages.test.ts` — en/tr/pl key-set parity for new namespaces.
 - **Component (Vitest, jsdom)** — `tests/components/SignInForm.test.tsx`, `UsernameGate.test.tsx`, `LeaderboardTable.test.tsx`, `ProfileView.test.tsx`: render + error/empty/loading states with `getSupabase()` mocked and with the **`disabled`** (env-null) branch (auth UI hidden).
 - **E2E (Playwright)** — keep `tests/e2e/cases.e2e.ts` **unchanged and green** (anonymous path is the regression guard). Add `tests/e2e/auth-anon.e2e.ts` asserting that with **no** Supabase env in the `out/` build, the game plays and no auth UI errors surface. Full signed-in journeys (confirm-email, sync) are **manual/staging** smoke against the live project (they need real email + secrets; do not gate CI on them).
-- **DB/RLS (via MCP `execute_sql`)** — the adversarial cross-user matrix in P5 §3 is the security test; not a Vitest file but a recorded, repeatable script in the PR.
-- **Mock vs real:** unit/component mock Supabase (pure logic + UI); RLS is tested against the **real** project via MCP (policies can't be meaningfully mocked). No new e2e depends on secrets.
+- **DB/RLS (linked CLI + Data API)** — `tests/security/liveRlsGate.mjs` creates two disposable confirmed users, exercises the adversarial matrix against the real project, and guarantees cleanup. It runs only with `RUN_LIVE_RLS_GATE=1`.
+- **Mock vs real:** unit/component tests mock Supabase for pure logic and UI; RLS is tested against the **real** project because policies cannot be meaningfully mocked. No CI e2e requires account secrets.
 
 ## Risks & Mitigations
 
@@ -441,10 +470,11 @@ Follows the repo's locked test layout: **source dirs hold zero test files**; eve
 - [ ] `output:'export'` unchanged; every phase passes `npm run typecheck && npm test && npm run build && npm run test:e2e`.
 - [ ] Anonymous `tests/e2e/cases.e2e.ts` + golden suite stay green throughout (no secrets needed).
 - [ ] Email sign-up → confirm → sign-in → unique username → Navbar reflects auth → sign-out works.
+- [ ] Google/GitHub sign-in → callback → explicit username choice works; same-verified-email linking is disclosed and verified; OAuth reauth can request deletion.
 - [ ] On login, local progress merges into `case_progress` with zero loss; a win syncs across devices.
 - [ ] Public leaderboard is anon-readable, opt-in only, safe columns only, labeled "casual"; "your rank" works.
 - [ ] `/u?name=` shows opt-in public profiles only; non-opt-in is invisible; no email/`id`/cross-user data ever fetched.
-- [ ] `/account` edits profile, toggles opt-in, exports data, and deletes the account (cascade).
+- [ ] `/account` edits profile, toggles opt-in, exports data, and creates a verified deletion soft lock; the operator runbook completes and verifies the cascading Auth deletion.
 - [ ] RLS security gate passed (advisors clean/justified + adversarial cross-user matrix) — **recorded in the PR**.
 - [ ] New pages localized for `/tr` `/pl`; i18n parity test green.
 - [ ] `PRODUCT.md` + privacy/terms updated; `lib/engine`/`lib/schema` untouched.
@@ -458,6 +488,6 @@ Follows the repo's locked test layout: **source dirs hold zero test files**; eve
 ## Open items to confirm at build (`[verify]`)
 
 1. Supabase **Confirm-signup email template** flow (`?code=` PKCE vs `token_hash` OTP) — drives the `/auth/callback` code path.
-2. Client-only **account-deletion** capability vs a minimal deletion Edge Function (P3 §4) — the one spot where "client-only" may need a thin server assist for full erasure.
+2. **Resolved:** client-only settings create a caller-bound, recent-auth soft lock; permanent Auth deletion is an operator action under `docs/auth/60-account-deletion-runbook.md`. No service-role credential or Edge Function is shipped.
 3. **Resolved:** GoTrue and client Zod both require 8+ characters with `a-z`, `A-Z`, `0-9`, and an ASCII symbol. Leaked-password screening remains unavailable on the Hobby plan.
 4. Supabase **region/KVKK transfer basis** for the eu-west-1 project (compliance, counsel).

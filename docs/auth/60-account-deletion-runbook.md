@@ -5,7 +5,7 @@ Owner: SQL Heist operator
 Deadline: complete each verified request within 30 calendar days
 
 The browser can authenticate the user and create an idempotent soft-lock through
-`request_account_deletion()`. It cannot delete `auth.users` without a privileged
+`request_account_deletion(p_expected_user_id)`. It cannot delete `auth.users` without a privileged
 credential, so permanent deletion remains an operator action. Never place a secret or
 service-role credential in the app, this repository, a browser console, or the runbook.
 
@@ -36,14 +36,20 @@ For the selected UUID, confirm that `delete_requested_at` is present and
 `leaderboard_opt_in` is false. The live RLS gate separately verifies that a requested
 account cannot write profile or progress changes and is absent from public views.
 
-Do not ask the user to send a password, access token, or database credential. The RPC
-already requires recent password authentication before it records the request.
+Do not ask the user to send a password, provider token, access token, or database
+credential. The RPC already requires a recent password or OAuth authentication-method
+reference before it records the request; the application additionally binds a
+provider re-authentication return to the same Auth user and consumes it once. Consuming
+that receipt only opens a fresh confirmation dialog: the user must retype the username
+after the provider return and explicitly finish the request before the application calls
+the RPC. The RPC also compares that initiating UUID with its current `auth.uid()` before
+locking any row, so a cross-tab session change fails closed.
 
 ## 3. Permanently delete the Auth user
 
 1. In Supabase Dashboard, open **Authentication → Users**.
 2. Locate the exact Auth UUID from the queue; do not match on username alone.
-3. Note the account email only long enough to send the completion confirmation.
+3. Note the account email and whether a GitHub identity is linked only long enough to send the completion confirmation.
 4. Delete that Auth user.
 
 The foreign keys use `on delete cascade`, so deleting `auth.users` must remove the
@@ -94,10 +100,23 @@ handle that pseudonymous record manually under the applicable right and deadline
 
 ## 6. Provider data
 
-Database deletion cannot directly erase provider request/security logs or rotated
-disaster-recovery copies. Handle those under the provider's documented retention cycle
-or data-subject-request process. Record the current periods and contacts now for active
-providers and before accounts are launched for Supabase.
+Deleting the Supabase Auth user cascades SQL Heist's stored Google/GitHub identity
+metadata, but it does not delete the person's Google or GitHub account or directly erase
+those providers' authentication/security logs. SQL Heist does not retain provider
+access or refresh tokens. After each completed Google sign-in, the browser uses the
+transient credential only to submit an immediate best-effort revocation request and
+cannot read the cross-site response. GitHub authorization may remain because revoking an
+OAuth-app grant requires confidential client credentials that cannot exist in this
+static app. If GitHub was linked, the completion message must tell the person to revoke
+SQL Heist separately under GitHub **Settings → Applications → Authorized OAuth Apps** if
+they want to end that provider authorization. Provider-controlled residual records are
+handled under the provider's retention cycle or data-subject-request process.
+
+Database deletion also cannot directly erase Supabase/provider request or security logs
+or rotated disaster-recovery copies. Handle those under the applicable provider's
+documented retention cycle or rights-request process. Record current periods, contacts,
+data roles, transfer bases, and safeguards before enabling each provider and keep that
+record current.
 
 The completion confirmation and any support/privacy correspondence are processed in the
 published Microsoft Outlook.com/Hotmail contact mailbox. Delete a closed thread within
