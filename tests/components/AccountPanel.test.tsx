@@ -9,16 +9,22 @@ import en from '@/messages/en.json'
 import tr from '@/messages/tr.json'
 
 const {
+  consumeDeletionReauthReceiptMock,
   deleteMyAccountMock,
   exportMyDataMock,
   replaceMock,
+  requestMyAccountDeletionMock,
   setLeaderboardOptInMock,
+  signInOAuthMock,
   updateMyProfileMock,
 } = vi.hoisted(() => ({
+  consumeDeletionReauthReceiptMock: vi.fn(),
   deleteMyAccountMock: vi.fn(),
   exportMyDataMock: vi.fn(),
   replaceMock: vi.fn(),
+  requestMyAccountDeletionMock: vi.fn(),
   setLeaderboardOptInMock: vi.fn(),
+  signInOAuthMock: vi.fn(),
   updateMyProfileMock: vi.fn(),
 }))
 
@@ -31,8 +37,19 @@ vi.mock('@/features/profile/lib/profileQuery', () => ({
   deleteMyAccount: deleteMyAccountMock,
   exportMyData: exportMyDataMock,
   profileFieldsAreValid: (displayName: string) => displayName.trim().length <= 40,
+  requestMyAccountDeletion: requestMyAccountDeletionMock,
   setLeaderboardOptIn: setLeaderboardOptInMock,
   updateMyProfile: updateMyProfileMock,
+}))
+
+vi.mock('@/features/auth/authClient', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/features/auth/authClient')>()),
+  signInOAuth: signInOAuthMock,
+}))
+
+vi.mock('@/features/auth/oauthFlow', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/features/auth/oauthFlow')>()),
+  consumeDeletionReauthReceipt: consumeDeletionReauthReceiptMock,
 }))
 
 import { AccountPanel } from '@/features/profile/AccountPanel'
@@ -46,7 +63,19 @@ const profile: Profile = {
   updatedAt: '2026-08-22T00:00:00.000Z',
 }
 
-const user = { id: profile.id, email: 'ada@example.com' } as User
+const user = {
+  id: profile.id,
+  email: 'ada@example.com',
+  app_metadata: { provider: 'email', providers: ['email'] },
+  user_metadata: {},
+  identities: [{ provider: 'email' }],
+} as unknown as User
+
+const googleUser = {
+  ...user,
+  app_metadata: { provider: 'google', providers: ['google'] },
+  identities: [{ provider: 'google' }],
+} as unknown as User
 
 function makeValue(overrides: Partial<AuthContextValue> = {}): AuthContextValue {
   return {
@@ -82,6 +111,9 @@ beforeEach(() => {
   setLeaderboardOptInMock.mockResolvedValue({})
   exportMyDataMock.mockResolvedValue(new Blob(['{}'], { type: 'application/json' }))
   deleteMyAccountMock.mockResolvedValue(undefined)
+  requestMyAccountDeletionMock.mockResolvedValue(undefined)
+  signInOAuthMock.mockResolvedValue({})
+  consumeDeletionReauthReceiptMock.mockReturnValue(false)
   Object.defineProperty(URL, 'createObjectURL', {
     configurable: true,
     value: vi.fn(() => 'blob:account-export'),
@@ -162,6 +194,7 @@ describe('<AccountPanel>', () => {
     renderPanel(value)
     fireEvent.click(screen.getByRole('button', { name: 'Request account deletion' }))
 
+    expect(screen.getByText(/GitHub authorization may remain/i)).toBeTruthy()
     const submit = screen.getByRole('button', { name: 'Submit deletion request' })
     expect((submit as HTMLButtonElement).disabled).toBe(true)
     fireEvent.change(screen.getByLabelText('Type ada_l to confirm'), {
@@ -198,6 +231,53 @@ describe('<AccountPanel>', () => {
     const password = screen.getByLabelText('Current password')
     expect(password.getAttribute('aria-invalid')).toBe('true')
     expect(password.getAttribute('aria-describedby')).toBe(alert.id)
+  })
+
+  it('uses a linked OAuth identity for an OAuth-only deletion re-authentication', async () => {
+    renderPanel(makeValue({ user: googleUser }))
+    fireEvent.click(screen.getByRole('button', { name: 'Request account deletion' }))
+
+    expect(screen.queryByLabelText('Current password')).toBeNull()
+    const verify = screen.getByRole('button', { name: 'Verify with Google' })
+    expect((verify as HTMLButtonElement).disabled).toBe(true)
+    fireEvent.change(screen.getByLabelText('Type ada_l to confirm'), {
+      target: { value: 'ada_l' },
+    })
+    fireEvent.click(verify)
+
+    await waitFor(() => {
+      expect(signInOAuthMock).toHaveBeenCalledWith('google', {
+        purpose: 'account-deletion',
+        returnTo: '/account',
+        expectedUserId: user.id,
+      })
+    })
+    expect(deleteMyAccountMock).not.toHaveBeenCalled()
+    expect(requestMyAccountDeletionMock).not.toHaveBeenCalled()
+  })
+
+  it('requires a fresh confirmation after consuming a matching OAuth re-auth receipt', async () => {
+    consumeDeletionReauthReceiptMock.mockReturnValueOnce(true).mockReturnValue(false)
+    const value = makeValue({ user: googleUser })
+
+    renderPanel(value)
+
+    expect(
+      await screen.findByText(
+        'Provider verification completed. Type your username again to finish this one-time deletion request.',
+      ),
+    ).toBeTruthy()
+    expect(requestMyAccountDeletionMock).not.toHaveBeenCalled()
+    expect(screen.queryByRole('button', { name: 'Verify with Google' })).toBeNull()
+    fireEvent.change(screen.getByLabelText('Type ada_l to confirm'), {
+      target: { value: 'ada_l' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Finish deletion request' }))
+
+    await waitFor(() => expect(requestMyAccountDeletionMock).toHaveBeenCalledTimes(1))
+    expect(deleteMyAccountMock).not.toHaveBeenCalled()
+    expect(value.signOut).toHaveBeenCalledTimes(1)
+    expect(replaceMock).toHaveBeenCalledWith('/')
   })
 
   it('serializes profile and visibility mutations', async () => {

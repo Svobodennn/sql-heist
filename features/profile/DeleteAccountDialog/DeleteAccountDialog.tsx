@@ -2,16 +2,22 @@
 
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
 import { useTranslation } from '@/i18n/useTranslation'
+import type { OAuthProvider } from '@/features/auth/oauthProfile'
 import styles from './DeleteAccountDialog.module.css'
 
-export type DeleteAccountError = 'reauth' | 'request' | null
+export type DeleteAccountError = 'password' | 'reauth' | 'request' | null
 
 interface DeleteAccountDialogProps {
   username: string
   deleting: boolean
   error: DeleteAccountError
+  hasPasswordIdentity: boolean
+  oauthProviders: readonly OAuthProvider[]
+  oauthReauthReady: boolean
   onClose(): void
-  onConfirm(password: string): void | Promise<void>
+  onConfirmPassword(password: string): void | Promise<void>
+  onConfirmOAuth(provider: OAuthProvider): void | Promise<void>
+  onConfirmOAuthReceipt(): void | Promise<void>
   onEdit(): void
 }
 
@@ -19,8 +25,13 @@ export function DeleteAccountDialog({
   username,
   deleting,
   error,
+  hasPasswordIdentity,
+  oauthProviders,
+  oauthReauthReady,
   onClose,
-  onConfirm,
+  onConfirmPassword,
+  onConfirmOAuth,
+  onConfirmOAuthReceipt,
   onEdit,
 }: DeleteAccountDialogProps) {
   const { t } = useTranslation()
@@ -58,8 +69,13 @@ export function DeleteAccountDialog({
 
   const submit = (event: FormEvent) => {
     event.preventDefault()
-    if (deleting || confirmation !== username || password.length === 0) return
-    void onConfirm(password)
+    if (deleting || confirmation !== username) return
+    if (oauthReauthReady) {
+      void onConfirmOAuthReceipt()
+      return
+    }
+    if (!hasPasswordIdentity || password.length === 0) return
+    void onConfirmPassword(password)
   }
 
   return (
@@ -80,6 +96,11 @@ export function DeleteAccountDialog({
         <p id="delete-modal-body" className={styles.copy}>
           {t('account.deleteModalBody')}
         </p>
+        {oauthReauthReady && (
+          <p className={styles.copy} role="status">
+            {t('account.deleteProviderVerified')}
+          </p>
+        )}
         <form className={styles.form} onSubmit={submit} noValidate>
           <div className={styles.field}>
             <label className={styles.label} htmlFor="delete-confirmation">
@@ -100,43 +121,76 @@ export function DeleteAccountDialog({
               }}
             />
           </div>
-          <div className={styles.field}>
-            <label className={styles.label} htmlFor="delete-password">
-              {t('account.deletePasswordLabel')}
-            </label>
-            <input
-              id="delete-password"
-              className={styles.input}
-              type="password"
-              value={password}
-              autoComplete="current-password"
-              required
-              disabled={deleting}
-              aria-invalid={error === 'reauth' ? true : undefined}
-              aria-describedby={error === 'reauth' ? 'delete-dialog-error' : undefined}
-              onChange={(event) => {
-                setPassword(event.target.value)
-                onEdit()
-              }}
-            />
-          </div>
+          {hasPasswordIdentity && !oauthReauthReady && (
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="delete-password">
+                {t('account.deletePasswordLabel')}
+              </label>
+              <input
+                id="delete-password"
+                className={styles.input}
+                type="password"
+                value={password}
+                autoComplete="current-password"
+                required
+                disabled={deleting}
+                aria-invalid={error === 'password' ? true : undefined}
+                aria-describedby={error === 'password' ? 'delete-dialog-error' : undefined}
+                onChange={(event) => {
+                  setPassword(event.target.value)
+                  onEdit()
+                }}
+              />
+            </div>
+          )}
           {error && (
             <p id="delete-dialog-error" className={styles.error} role="alert">
-              {t(error === 'reauth' ? 'account.errors.reauth' : 'account.errors.delete')}
+              {t(
+                error === 'password'
+                  ? 'account.errors.password'
+                  : error === 'reauth'
+                    ? 'account.errors.reauth'
+                    : 'account.errors.delete',
+              )}
             </p>
           )}
           <div className={styles.actions}>
             <button className="btn btn--ghost" type="button" disabled={deleting} onClick={onClose}>
               {t('account.cancel')}
             </button>
-            <button
-              className="btn btn--danger"
-              type="submit"
-              disabled={deleting || confirmation !== username || password.length === 0}
-            >
-              {deleting ? t('account.deleting') : t('account.deleteConfirm')}
-            </button>
+            {oauthReauthReady ? (
+              <button
+                className="btn btn--danger"
+                type="submit"
+                disabled={deleting || confirmation !== username}
+              >
+                {deleting ? t('account.deleting') : t('account.deleteFinish')}
+              </button>
+            ) : hasPasswordIdentity ? (
+              <button
+                className="btn btn--danger"
+                type="submit"
+                disabled={deleting || confirmation !== username || password.length === 0}
+              >
+                {deleting ? t('account.deleting') : t('account.deleteConfirm')}
+              </button>
+            ) : null}
           </div>
+          {!oauthReauthReady && oauthProviders.length > 0 && (
+            <div className={styles.oauthActions}>
+              {oauthProviders.map((provider) => (
+                <button
+                  key={provider}
+                  className="btn btn--ghost btn--full"
+                  type="button"
+                  disabled={deleting || confirmation !== username}
+                  onClick={() => void onConfirmOAuth(provider)}
+                >
+                  {deleting ? t('account.deleting') : t(`account.deleteWith.${provider}`)}
+                </button>
+              ))}
+            </div>
+          )}
         </form>
       </div>
     </div>

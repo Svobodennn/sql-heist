@@ -6,11 +6,19 @@ import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import { localeHref } from '@/i18n/localeHref'
 import { useTranslation } from '@/i18n/useTranslation'
 import { useAuth } from '@/features/auth/useAuth'
+import { signInOAuth } from '@/features/auth/authClient'
+import { consumeDeletionReauthReceipt } from '@/features/auth/oauthFlow'
+import {
+  getOAuthProviders,
+  hasEmailIdentity,
+  type OAuthProvider,
+} from '@/features/auth/oauthProfile'
 import {
   DISPLAY_NAME_MAX_LENGTH,
   deleteMyAccount,
   exportMyData,
   profileFieldsAreValid,
+  requestMyAccountDeletion,
   setLeaderboardOptIn,
   type ProfileQueryErrorCode,
   updateMyProfile,
@@ -34,9 +42,12 @@ export function AccountPanel() {
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState<DeleteAccountError>(null)
+  const [oauthDeletionReady, setOAuthDeletionReady] = useState(false)
   const mutationInFlight = useRef(false)
   const deleteTriggerRef = useRef<HTMLButtonElement>(null)
   const deletionSubmittedRef = useRef(false)
+  const deletionInFlight = useRef(false)
+  const deletionReceiptCheckedFor = useRef<string | null>(null)
 
   useEffect(() => {
     if (status === 'anon') {
@@ -58,8 +69,46 @@ export function AccountPanel() {
     if (deleting) return
     setDeleteOpen(false)
     setDeleteError(null)
+    setOAuthDeletionReady(false)
     deleteTriggerRef.current?.focus()
   }, [deleting])
+
+  const submitDeletion = useCallback(
+    async (request: () => Promise<void>, reauthError: DeleteAccountError = 'reauth') => {
+      if (deletionInFlight.current) return
+      deletionInFlight.current = true
+      setDeleting(true)
+      setDeleteError(null)
+      try {
+        await request()
+        deletionSubmittedRef.current = true
+        try {
+          await signOut()
+        } catch {
+          // The server-side soft lock already succeeded. Navigation must not turn
+          // a sign-out network failure into a misleading, impossible-to-retry error.
+        }
+        router.replace(localeHref('/', locale))
+      } catch (error) {
+        deletionInFlight.current = false
+        setDeleteOpen(true)
+        setDeleteError(isProfileQueryError(error, 'reauth-failed') ? reauthError : 'request')
+        setDeleting(false)
+      }
+    },
+    [locale, router, signOut],
+  )
+
+  useEffect(() => {
+    if (status !== 'authed' || !user || !profileReady || !profile) return
+    if (deletionReceiptCheckedFor.current === user.id) return
+    deletionReceiptCheckedFor.current = user.id
+    if (!consumeDeletionReauthReceipt(user.id)) return
+
+    setDeleteError(null)
+    setOAuthDeletionReady(true)
+    setDeleteOpen(true)
+  }, [status, user, profileReady, profile])
 
   if (status === 'disabled') {
     return <AccountState title={t('account.disabledTitle')} body={t('account.disabledBody')} />
@@ -150,25 +199,36 @@ export function AccountPanel() {
     }
   }
 
-  const requestDeletion = async (password: string) => {
-    if (deleting) return
+  const requestPasswordDeletion = (password: string) => {
+    void submitDeletion(() => deleteMyAccount(password), 'password')
+  }
+
+  const startOAuthDeletion = async (provider: OAuthProvider) => {
+    if (deletionInFlight.current) return
+    deletionInFlight.current = true
     setDeleting(true)
     setDeleteError(null)
-    try {
-      await deleteMyAccount(password)
-      deletionSubmittedRef.current = true
-      try {
-        await signOut()
-      } catch {
-        // The server-side soft lock already succeeded. Navigation must not turn
-        // a sign-out network failure into a misleading, impossible-to-retry error.
-      }
-      router.replace(localeHref('/', locale))
-    } catch (error) {
-      setDeleteError(isProfileQueryError(error, 'reauth-failed') ? 'reauth' : 'request')
-      setDeleting(false)
-    }
+    setOAuthDeletionReady(false)
+    const result = await signInOAuth(provider, {
+      purpose: 'account-deletion',
+      returnTo: localeHref('/account', locale),
+      expectedUserId: user.id,
+    })
+    if (!result.error) return
+
+    deletionInFlight.current = false
+    setDeleting(false)
+    setDeleteError('request')
   }
+
+  const confirmOAuthDeletion = () => {
+    if (!oauthDeletionReady) return
+    setOAuthDeletionReady(false)
+    void submitDeletion(requestMyAccountDeletion)
+  }
+
+  const oauthProviders = getOAuthProviders(user)
+  const hasPassword = hasEmailIdentity(user)
 
   return (
     <section className={`container ${styles.page}`} aria-labelledby="account-title">
@@ -293,8 +353,13 @@ export function AccountPanel() {
           username={profile.username}
           deleting={deleting}
           error={deleteError}
+          hasPasswordIdentity={hasPassword}
+          oauthProviders={oauthProviders}
+          oauthReauthReady={oauthDeletionReady}
           onClose={closeDelete}
-          onConfirm={requestDeletion}
+          onConfirmPassword={requestPasswordDeletion}
+          onConfirmOAuth={startOAuthDeletion}
+          onConfirmOAuthReceipt={confirmOAuthDeletion}
           onEdit={() => setDeleteError(null)}
         />
       )}

@@ -1,5 +1,6 @@
 import type { SupabaseClient, User } from '@supabase/supabase-js'
 import { getSupabase } from '@/lib/supabase'
+import { getIdentityProviders } from '@/features/auth/oauthProfile'
 
 const PUBLIC_PROFILE_COLUMNS = 'username, display_name, created_at, objectives_cleared'
 const MY_PROFILE_COLUMNS =
@@ -8,9 +9,23 @@ const EXPORT_PROFILE_COLUMNS =
   'id, username, display_name, leaderboard_opt_in, delete_requested_at, created_at, updated_at'
 const EXPORT_PROGRESS_COLUMNS = 'case_id, completed_objectives, best_score, updated_at'
 const EXPORT_CONSENT_COLUMNS = 'id, purpose, action, notice_version, source, occurred_at'
+const SAFE_AUTH_METADATA_KEYS = [
+  'sub',
+  'email',
+  'email_verified',
+  'phone_verified',
+  'username',
+  'name',
+  'full_name',
+  'user_name',
+  'preferred_username',
+  'nickname',
+  'avatar_url',
+  'picture',
+] as const
 
 export const DISPLAY_NAME_MAX_LENGTH = 40
-export const PUBLIC_PROFILE_NOTICE_VERSION = '2026-08-23'
+export const PUBLIC_PROFILE_NOTICE_VERSION = '2026-08-26'
 
 export type ProfileQueryErrorCode =
   'auth-disabled' | 'auth-required' | 'invalid-profile' | 'reauth-failed' | 'request-failed'
@@ -125,6 +140,46 @@ export function profileFieldsAreValid(displayName: string): boolean {
   return displayName.trim().length <= DISPLAY_NAME_MAX_LENGTH
 }
 
+function safeAuthMetadata(value: unknown): Record<string, string | number | boolean | null> {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return {}
+  const metadata = value as Record<string, unknown>
+  const safe: Record<string, string | number | boolean | null> = {}
+
+  for (const key of SAFE_AUTH_METADATA_KEYS) {
+    const field = metadata[key]
+    if (
+      typeof field === 'string' ||
+      typeof field === 'number' ||
+      typeof field === 'boolean' ||
+      field === null
+    ) {
+      safe[key] = field
+    }
+  }
+
+  return safe
+}
+
+function exportAccount(user: User) {
+  return {
+    id: user.id,
+    email: user.email ?? null,
+    created_at: user.created_at,
+    updated_at: user.updated_at ?? null,
+    last_sign_in_at: user.last_sign_in_at ?? null,
+    providers: getIdentityProviders(user),
+    user_metadata: safeAuthMetadata(user.user_metadata),
+    identities: (user.identities ?? []).map((identity) => ({
+      identity_id: identity.identity_id ?? identity.id,
+      provider: identity.provider,
+      created_at: identity.created_at ?? null,
+      updated_at: identity.updated_at ?? null,
+      last_sign_in_at: identity.last_sign_in_at ?? null,
+      identity_data: safeAuthMetadata(identity.identity_data),
+    })),
+  }
+}
+
 async function updateOwnRow(patch: Record<string, string | boolean | null>): Promise<MyProfile> {
   const client = requireClient()
   const user = await requireUser(client)
@@ -211,9 +266,9 @@ export async function exportMyData(): Promise<Blob> {
   throwIfError(consentResult.error)
 
   const payload = {
-    exportVersion: 2,
+    exportVersion: 3,
     exportedAt: new Date().toISOString(),
-    account: { email: user.email ?? null },
+    account: exportAccount(user),
     profiles: profileResult.data ? [profileResult.data as MyProfileRow] : [],
     case_progress: progressResult.data ?? [],
     profile_consent_events: consentResult.data ?? [],
@@ -222,9 +277,38 @@ export async function exportMyData(): Promise<Blob> {
   return new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
 }
 
+async function submitDeletionRequest(client: SupabaseClient, userId: string): Promise<void> {
+  const { data, error } = await client.rpc('request_account_deletion', {
+    p_expected_user_id: userId,
+  })
+  if (!error && data) return
+
+  // The RPC may have committed while its response was lost. Own-row SELECT stays
+  // available after the soft lock, so a recorded timestamp makes this retry a
+  // success instead of presenting an unrecoverable failure to the user.
+  const status = await client
+    .from('profiles')
+    .select('delete_requested_at')
+    .eq('id', userId)
+    .maybeSingle()
+  if (!status.error && status.data?.delete_requested_at) return
+
+  const message = error?.message ?? status.error?.message ?? 'Deletion request failed'
+  const recentAuthRejected = /recent (?:password|oauth|authentication)/i.test(message)
+  throw new ProfileQueryError(recentAuthRejected ? 'reauth-failed' : 'request-failed', message)
+}
+
+// Called only after the OAuth callback has matched the returning session to the
+// original account. The database independently enforces the recent AMR claim.
+export async function requestMyAccountDeletion(): Promise<void> {
+  const client = requireClient()
+  const user = await requireUser(client)
+  await submitDeletionRequest(client, user.id)
+}
+
 // Client-only auth cannot delete auth.users without exposing a service credential.
-// Re-authenticate with the current password, then call the narrowly scoped,
-// server-timestamped RPC that records an idempotent own-account erasure request.
+// Re-authenticate with the current password, then call the same caller-bound,
+// server-timestamped RPC used by the OAuth recent-auth path.
 export async function deleteMyAccount(password: string): Promise<void> {
   const client = requireClient()
   const user = await requireUser(client)
@@ -246,21 +330,5 @@ export async function deleteMyAccount(password: string): Promise<void> {
     throw new ProfileQueryError('reauth-failed', 'Re-authentication failed')
   }
 
-  const { data, error } = await client.rpc('request_account_deletion')
-  if (!error && data) return
-
-  // The RPC may have committed while its response was lost. Own-row SELECT stays
-  // available after the soft lock, so a recorded timestamp makes this retry a
-  // success instead of presenting an unrecoverable failure to the user.
-  const status = await client
-    .from('profiles')
-    .select('delete_requested_at')
-    .eq('id', user.id)
-    .maybeSingle()
-  if (!status.error && status.data?.delete_requested_at) return
-
-  throw new ProfileQueryError(
-    'request-failed',
-    error?.message ?? status.error?.message ?? 'Deletion request failed',
-  )
+  await submitDeletionRequest(client, user.id)
 }

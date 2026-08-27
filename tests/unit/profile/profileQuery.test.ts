@@ -10,11 +10,44 @@ import {
   deleteMyAccount,
   exportMyData,
   getPublicProfile,
+  requestMyAccountDeletion,
   setLeaderboardOptIn,
   updateMyProfile,
 } from '@/features/profile/lib/profileQuery'
 
-const user = { id: 'user-1', email: 'ada@example.com' }
+const user = {
+  id: 'user-1',
+  email: 'ada@example.com',
+  created_at: '2026-08-20T00:00:00.000Z',
+  updated_at: '2026-08-25T00:00:00.000Z',
+  last_sign_in_at: '2026-08-26T00:00:00.000Z',
+  app_metadata: { provider: 'github', providers: ['email', 'github'] },
+  user_metadata: {
+    username: 'ada_l',
+    user_name: 'ada-source',
+    avatar_url: 'https://avatars.example/ada.png',
+    provider_token: 'never-export-user-token',
+  },
+  identities: [
+    {
+      id: 'legacy-identity-id',
+      identity_id: 'github-123',
+      user_id: 'user-1',
+      provider: 'github',
+      created_at: '2026-08-20T00:00:00.000Z',
+      updated_at: '2026-08-25T00:00:00.000Z',
+      last_sign_in_at: '2026-08-26T00:00:00.000Z',
+      identity_data: {
+        email: 'ada@example.com',
+        email_verified: true,
+        user_name: 'ada-source',
+        avatar_url: 'https://avatars.example/ada.png',
+        provider_token: 'never-export-identity-token',
+        access_token: 'never-export-access-token',
+      },
+    },
+  ],
+}
 const profileRow = {
   id: user.id,
   username: 'ada_l',
@@ -45,6 +78,10 @@ beforeEach(() => {
 })
 
 describe('getPublicProfile', () => {
+  it('uses the current public-profile notice version for new consent events', () => {
+    expect(PUBLIC_PROFILE_NOTICE_VERSION).toBe('2026-08-26')
+  })
+
   it('selects only the curated public columns and maps the row', async () => {
     const maybeSingle = vi.fn(async () => ({
       data: {
@@ -145,8 +182,26 @@ describe('own-profile mutations', () => {
       email: user.email,
       password: 'correct horse',
     })
-    expect(rpc).toHaveBeenCalledWith('request_account_deletion')
+    expect(rpc).toHaveBeenCalledWith('request_account_deletion', {
+      p_expected_user_id: user.id,
+    })
     expect(from).not.toHaveBeenCalled()
+  })
+
+  it('calls the same caller-bound deletion RPC after an external recent-auth handshake', async () => {
+    const auth = authReturning()
+    const rpc = vi.fn(async () => ({
+      data: '2026-08-26T00:00:00.000Z',
+      error: null,
+    }))
+    getSupabaseMock.mockReturnValue({ auth, from: vi.fn(), rpc })
+
+    await expect(requestMyAccountDeletion()).resolves.toBeUndefined()
+
+    expect(auth.signInWithPassword).not.toHaveBeenCalled()
+    expect(rpc).toHaveBeenCalledWith('request_account_deletion', {
+      p_expected_user_id: user.id,
+    })
   })
 
   it('does not request deletion when password re-authentication fails', async () => {
@@ -244,8 +299,32 @@ describe('exportMyData', () => {
     const payload = JSON.parse(await blob.text())
 
     expect(payload).toMatchObject({
-      exportVersion: 2,
-      account: { email: user.email },
+      exportVersion: 3,
+      account: {
+        id: user.id,
+        email: user.email,
+        created_at: user.created_at,
+        updated_at: user.updated_at,
+        last_sign_in_at: user.last_sign_in_at,
+        providers: ['email', 'github'],
+        user_metadata: {
+          username: 'ada_l',
+          user_name: 'ada-source',
+          avatar_url: 'https://avatars.example/ada.png',
+        },
+        identities: [
+          {
+            identity_id: 'github-123',
+            provider: 'github',
+            identity_data: {
+              email: 'ada@example.com',
+              email_verified: true,
+              user_name: 'ada-source',
+              avatar_url: 'https://avatars.example/ada.png',
+            },
+          },
+        ],
+      },
       profiles: [profileRow],
       case_progress: [
         {
@@ -273,6 +352,9 @@ describe('exportMyData', () => {
       'id, username, display_name, leaderboard_opt_in, delete_requested_at, created_at, updated_at',
     )
     expect(JSON.stringify(payload)).not.toContain('country')
+    expect(JSON.stringify(payload)).not.toContain('provider_token')
+    expect(JSON.stringify(payload)).not.toContain('access_token')
+    expect(JSON.stringify(payload)).not.toContain('never-export')
     expect(consentOrder).toHaveBeenCalledWith('id', { ascending: true })
     expect(blob.type).toBe('application/json')
   })

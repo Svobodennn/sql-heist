@@ -30,7 +30,7 @@ async function verifySchema() {
       " 'display_update', has_column_privilege('authenticated',",
       "   'public.profiles','display_name','update'),",
       " 'country_exists', exists (select 1",
-      "   from pg_attribute a",
+      '   from pg_attribute a',
       "   where a.attrelid = 'public.profiles'::regclass",
       "     and a.attname = 'country' and not a.attisdropped),",
       " 'profile_delete', has_table_privilege('authenticated',",
@@ -58,7 +58,16 @@ async function verifySchema() {
       "   'authed', has_function_privilege('authenticated', p.oid, 'execute'))",
       '   from pg_proc p join pg_namespace n on n.oid = p.pronamespace',
       "   where n.nspname = 'public'",
-      "     and p.proname = 'upsert_case_progress')",
+      "     and p.proname = 'upsert_case_progress'),",
+      " 'deletion_function', (select jsonb_build_object(",
+      "   'definer', p.prosecdef, 'config', p.proconfig,",
+      "   'args', pg_get_function_identity_arguments(p.oid),",
+      "   'definition', pg_get_functiondef(p.oid),",
+      "   'anon', has_function_privilege('anon', p.oid, 'execute'),",
+      "   'authed', has_function_privilege('authenticated', p.oid, 'execute'))",
+      '   from pg_proc p join pg_namespace n on n.oid = p.pronamespace',
+      "   where n.nspname = 'public'",
+      "     and p.proname = 'request_account_deletion')",
       ') as gate',
     ].join('\n'),
   )
@@ -117,6 +126,24 @@ async function verifySchema() {
     live?.progress_function?.args === 'p_case_id text, p_completed_objectives text[]' &&
       live?.progress_function?.config?.includes('search_path=pg_catalog'),
     'progress RPC has no target user and pins search_path',
+  )
+  check(
+    live?.deletion_function?.definer === true &&
+      live?.deletion_function?.anon === false &&
+      live?.deletion_function?.authed === true,
+    'deletion RPC is authenticated-only SECURITY DEFINER',
+  )
+  check(
+    live?.deletion_function?.args === 'p_expected_user_id uuid' &&
+      live?.deletion_function?.config?.includes('search_path=pg_catalog'),
+    'deletion RPC requires an expected user and pins search_path',
+  )
+  check(
+    live?.deletion_function?.definition?.includes('password') &&
+      live?.deletion_function?.definition?.includes('oauth') &&
+      live?.deletion_function?.definition?.includes('300') &&
+      live?.deletion_function?.definition?.includes('p_expected_user_id'),
+    'deletion RPC binds the target and accepts only recent password or OAuth AMR methods',
   )
 }
 
@@ -404,7 +431,7 @@ async function verifyGrantAndPublicViews(a, b, anon) {
       (
         await anon.rpc('set_public_profile_consent', {
           p_enabled: true,
-          p_notice_version: '2026-08-23',
+          p_notice_version: '2026-08-26',
         })
       ).error,
     ),
@@ -426,7 +453,7 @@ async function verifyGrantAndPublicViews(a, b, anon) {
         user_id: users.a.id,
         purpose: 'public_profile',
         action: 'granted',
-        notice_version: '2026-08-23',
+        notice_version: '2026-08-26',
         source: 'account_settings',
       })
       .select('id'),
@@ -453,7 +480,7 @@ async function verifyGrantAndPublicViews(a, b, anon) {
   const grant = success(
     await a.rpc('set_public_profile_consent', {
       p_enabled: true,
-      p_notice_version: '2026-08-23',
+      p_notice_version: '2026-08-26',
     }),
     'current notice grant succeeds',
   )
@@ -471,7 +498,7 @@ async function verifyGrantAndPublicViews(a, b, anon) {
     events.length === 1 &&
       events[0].action === 'granted' &&
       events[0].purpose === 'public_profile' &&
-      events[0].notice_version === '2026-08-23' &&
+      events[0].notice_version === '2026-08-26' &&
       events[0].source === 'account_settings' &&
       Boolean(events[0].occurred_at),
     'grant records purpose, version, source, and trusted time',
@@ -497,7 +524,7 @@ async function verifyGrantAndPublicViews(a, b, anon) {
   success(
     await a.rpc('set_public_profile_consent', {
       p_enabled: true,
-      p_notice_version: '2026-08-23',
+      p_notice_version: '2026-08-26',
     }),
     'repeated grant succeeds idempotently',
   )
@@ -611,7 +638,7 @@ async function verifyWithdrawalAndBinding(a, b, anon, eventColumns) {
   const grantB = success(
     await b.rpc('set_public_profile_consent', {
       p_enabled: true,
-      p_notice_version: '2026-08-23',
+      p_notice_version: '2026-08-26',
     }),
     'user B grants its own consent',
   )
@@ -627,7 +654,7 @@ async function verifyWithdrawalAndBinding(a, b, anon, eventColumns) {
   success(
     await b.rpc('set_public_profile_consent', {
       p_enabled: false,
-      p_notice_version: '2026-08-23',
+      p_notice_version: '2026-08-26',
     }),
     'user B withdraws its own consent',
   )
@@ -640,7 +667,7 @@ async function verifyConsentQuota(b) {
       '  (user_id, purpose, action, notice_version, source)',
       `select '${users.b.id}'::uuid, 'public_profile',`,
       "       case when series % 2 = 1 then 'granted' else 'withdrawn' end,",
-      "       '2026-08-23', 'account_settings'",
+      "       '2026-08-26', 'account_settings'",
       'from generate_series(1, 98) as series;',
     ].join('\n'),
   )
@@ -650,7 +677,7 @@ async function verifyConsentQuota(b) {
       (
         await b.rpc('set_public_profile_consent', {
           p_enabled: true,
-          p_notice_version: '2026-08-23',
+          p_notice_version: '2026-08-26',
         })
       ).error,
     ),
@@ -674,17 +701,23 @@ async function verifyDeletion(a, anon, eventColumns) {
   success(
     await a.rpc('set_public_profile_consent', {
       p_enabled: true,
-      p_notice_version: '2026-08-23',
+      p_notice_version: '2026-08-26',
     }),
     'user A can re-grant before deletion test',
   )
   check(
-    Boolean((await anon.rpc('request_account_deletion')).error),
+    Boolean(
+      (
+        await anon.rpc('request_account_deletion', {
+          p_expected_user_id: users.a.id,
+        })
+      ).error,
+    ),
     'anonymous deletion RPC is denied',
   )
 
   const deletionTime = success(
-    await a.rpc('request_account_deletion'),
+    await a.rpc('request_account_deletion', { p_expected_user_id: users.a.id }),
     'recent password session requests own deletion',
   )
   check(
@@ -714,12 +747,12 @@ async function verifyDeletion(a, anon, eventColumns) {
     events.length === 4 &&
       lastEvent.action === 'withdrawn' &&
       lastEvent.source === 'account_deletion' &&
-      lastEvent.notice_version === '2026-08-23',
+      lastEvent.notice_version === '2026-08-26',
     'deletion records exactly one trusted withdrawal event',
   )
 
   const deletionRetry = success(
-    await a.rpc('request_account_deletion'),
+    await a.rpc('request_account_deletion', { p_expected_user_id: users.a.id }),
     'deletion retry succeeds idempotently',
   )
   check(
@@ -761,6 +794,64 @@ async function verifyDeletion(a, anon, eventColumns) {
   )
 }
 
+function oauthClaimsSql(authenticatedUserId, expectedUserId, timestampSql) {
+  return [
+    'begin;',
+    "select set_config('request.jwt.claims', jsonb_build_object(",
+    `  'sub', '${authenticatedUserId}',`,
+    "  'role', 'authenticated',",
+    "  'amr', jsonb_build_array(jsonb_build_object(",
+    "    'method', 'oauth',",
+    `    'timestamp', ${timestampSql}`,
+    '  ))',
+    ')::text, true);',
+    `select public.request_account_deletion('${expectedUserId}'::uuid);`,
+    'commit;',
+  ].join('\n')
+}
+
+async function verifyOAuthDeletionAmr() {
+  let staleRejected = false
+  try {
+    await sql(
+      oauthClaimsSql(
+        users.b.id,
+        users.b.id,
+        'extract(epoch from statement_timestamp())::bigint - 301',
+      ),
+    )
+  } catch {
+    staleRejected = true
+  }
+  check(staleRejected, 'deletion RPC rejects an OAuth AMR older than five minutes')
+
+  let switchedUserRejected = false
+  try {
+    await sql(
+      oauthClaimsSql(users.b.id, users.a.id, 'extract(epoch from statement_timestamp())::bigint'),
+    )
+  } catch {
+    switchedUserRejected = true
+  }
+  check(switchedUserRejected, 'deletion RPC rejects a session switched to another user')
+
+  await sql(
+    oauthClaimsSql(users.b.id, users.b.id, 'extract(epoch from statement_timestamp())::bigint'),
+  )
+  const rows = await sql(
+    [
+      'select delete_requested_at',
+      'from public.profiles',
+      `where id = '${users.b.id}'::uuid;`,
+    ].join('\n'),
+  )
+  check(
+    typeof rows[0]?.delete_requested_at === 'string' &&
+      !Number.isNaN(Date.parse(rows[0].delete_requested_at)),
+    'recent OAuth AMR soft-locks only its auth.uid profile',
+  )
+}
+
 async function run() {
   await verifySchema()
   await gate.createUsers()
@@ -787,6 +878,7 @@ async function run() {
   await verifyWithdrawalAndBinding(a, b, anon, eventColumns)
   await verifyConsentQuota(b)
   await verifyDeletion(a, anon, eventColumns)
+  await verifyOAuthDeletionAmr()
 }
 
 let failure
