@@ -13,6 +13,8 @@ import type { User } from '@supabase/supabase-js'
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase'
 import * as authClient from './authClient'
 import type { AuthResult, ProfileRow } from './authClient'
+import { peekOAuthProvider } from './oauthFlow'
+import { revokeUnusedProviderCredential } from './providerCredentialCleanup'
 
 export type AuthStatus = 'loading' | 'anon' | 'authed' | 'disabled'
 
@@ -97,7 +99,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const supabase = getSupabase()
     if (!supabase) return
-    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        revokeUnusedProviderCredential(peekOAuthProvider(), session)
+      }
       const user = session?.user ?? null
       setState((prev) => {
         // Keep an already-loaded profile while the same user stays signed in

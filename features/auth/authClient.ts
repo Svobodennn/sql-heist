@@ -1,4 +1,6 @@
 import { getSupabase } from '@/lib/supabase'
+import { clearOAuthAttempt, rememberOAuthAttempt, type OAuthAttempt } from './oauthFlow'
+import type { OAuthProvider } from './oauthProfile'
 
 // Thin wrappers over supabase-js auth/PostgREST. Every function no-ops with a
 // typed error code when Supabase is not configured, so callers never branch on
@@ -33,6 +35,45 @@ export function mapAuthError(message: string, status?: number): AuthErrorCode {
 
 function callbackUrl(): string {
   return `${window.location.origin}/auth/callback`
+}
+
+function deletionVerificationQueryParams(
+  provider: OAuthProvider,
+  attempt: OAuthAttempt,
+): Record<string, string> | undefined {
+  if (attempt.purpose !== 'account-deletion') return undefined
+
+  // Neither provider guarantees a fresh password challenge while its own SSO
+  // session is active. Use their documented interactive controls so deletion
+  // verification cannot silently skip the provider screen; the callback and RPC
+  // still bind the result to the account that initiated the request.
+  return {
+    prompt: provider === 'google' ? 'consent select_account' : 'select_account',
+  }
+}
+
+export async function signInOAuth(
+  provider: OAuthProvider,
+  attempt: OAuthAttempt,
+): Promise<AuthResult> {
+  const supabase = getSupabase()
+  if (!supabase) return { error: 'auth-disabled' }
+
+  clearPendingEmail()
+  const attemptRemembered = rememberOAuthAttempt(provider, attempt)
+  if (!attemptRemembered) return { error: 'generic' }
+  const queryParams = deletionVerificationQueryParams(provider, attempt)
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider,
+    options: {
+      redirectTo: callbackUrl(),
+      ...(queryParams ? { queryParams } : {}),
+    },
+  })
+  if (!error) return {}
+
+  clearOAuthAttempt()
+  return { error: mapAuthError(error.message, error.status) }
 }
 
 export async function signUpEmail(

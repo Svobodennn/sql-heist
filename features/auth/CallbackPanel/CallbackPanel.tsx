@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from '@/i18n/useTranslation'
 import { useAuth } from '../useAuth'
 import {
@@ -13,6 +13,7 @@ import {
   verifyEmailOtp,
   type AuthErrorCode,
 } from '../authClient'
+import { clearOAuthAttempt, completeOAuthAttempt } from '../oauthFlow'
 import { AuthCard } from '../AuthCard'
 import styles from './CallbackPanel.module.css'
 
@@ -25,32 +26,47 @@ import styles from './CallbackPanel.module.css'
 // the PKCE exchange (no code_verifier here) — the copy covers that honestly.
 export function CallbackPanel() {
   const { t } = useTranslation()
-  const { status } = useAuth()
+  const { status, user } = useAuth()
   const router = useRouter()
+  const routed = useRef(false)
 
   const [failed, setFailed] = useState(false)
   const [pendingEmail, setPendingEmail] = useState<string | null>(null)
-  const [resend, setResend] = useState<{ pending: boolean; done: boolean; error: AuthErrorCode | null }>(
-    { pending: false, done: false, error: null },
-  )
+  const [resend, setResend] = useState<{
+    pending: boolean
+    done: boolean
+    error: AuthErrorCode | null
+  }>({ pending: false, done: false, error: null })
 
   // window is unavailable during prerender — read URL + storage after mount.
   useEffect(() => {
     setPendingEmail(readPendingEmail())
     const search = new URLSearchParams(window.location.search)
     const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''))
-    if (search.get('error') || hash.get('error') || hash.get('error_description')) setFailed(true)
+    if (search.get('error') || hash.get('error') || hash.get('error_description')) {
+      clearOAuthAttempt()
+      setFailed(true)
+    }
     // Fallback path for `{{ .TokenHash }}` email templates (default is `?code=`
     // PKCE, handled by detectSessionInUrl; this only fires when present).
     const tokenHash = search.get('token_hash')
-    if (tokenHash) void verifyEmailOtp(tokenHash).then(({ error }) => error && setFailed(true))
+    if (tokenHash) {
+      void verifyEmailOtp(tokenHash).then(({ error }) => {
+        if (error) setFailed(true)
+      })
+    }
   }, [])
 
   useEffect(() => {
-    if (status !== 'authed') return
+    if (status !== 'authed' || !user || routed.current) return
+    const search = new URLSearchParams(window.location.search)
+    const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''))
+    if (search.get('error') || hash.get('error') || hash.get('error_description')) return
+
+    routed.current = true
     clearPendingEmail()
-    router.replace('/')
-  }, [status, router])
+    router.replace(completeOAuthAttempt(user.id))
+  }, [status, user, router])
 
   // Belt and braces: if the automatic exchange hasn't produced a session after a
   // grace period, try once manually, then declare failure.
@@ -63,7 +79,10 @@ export function CallbackPanel() {
         return
       }
       void exchangeCode(code).then(({ error }) => {
-        if (error) setFailed(true)
+        if (error) {
+          clearOAuthAttempt()
+          setFailed(true)
+        }
       })
     }, 5000)
     return () => clearTimeout(timer)
