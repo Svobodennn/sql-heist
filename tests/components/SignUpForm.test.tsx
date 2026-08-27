@@ -59,6 +59,14 @@ describe('<SignUpForm>', () => {
     expect(screen.queryByRole('button', { name: 'Create account' })).toBeNull()
   })
 
+  it('offers Google and GitHub account creation alongside the email form', () => {
+    renderForm(makeValue())
+
+    expect(screen.getByRole('button', { name: 'Continue with Google' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Continue with GitHub' })).toBeTruthy()
+    expect(screen.getByText('or use email')).toBeTruthy()
+  })
+
   it('client-validates before calling signUpEmail', () => {
     const value = makeValue()
     renderForm(value)
@@ -72,24 +80,36 @@ describe('<SignUpForm>', () => {
 
   it('shows the purpose notice without naming an individual and links to the legal pages', () => {
     renderForm(makeValue())
-    expect(screen.getByText(/we process your email, username, and account progress/i)).toBeTruthy()
+    expect(
+      screen.getByText(/we process your email, username, account progress.*google or github/i),
+    ).toBeTruthy()
     expect(document.body.textContent).not.toContain('Melih Saraç')
-    expect(screen.getByRole('link', { name: 'Privacy notice' }).getAttribute('href')).toBe(
-      '/privacy',
-    )
-    expect(screen.getByRole('link', { name: 'Terms of Use' }).getAttribute('href')).toBe('/terms')
+    expect(
+      screen
+        .getAllByRole('link', { name: 'Privacy notice' })
+        .map((link) => link.getAttribute('href')),
+    ).toEqual(['/privacy', '/privacy'])
+    expect(
+      screen.getAllByRole('link', { name: 'Terms of Use' }).map((link) => link.getAttribute('href')),
+    ).toEqual(['/terms', '/terms'])
   })
 
   it('keeps signup, legal, and sign-in links inside the Turkish locale', () => {
     renderForm(makeValue(), 'tr')
-    expect(screen.getByText(/e-posta adresini, kullanıcı adını ve hesap ilerlemeni işleriz/i)).toBeTruthy()
+    expect(
+      screen.getByText(/e-posta adresini, kullanıcı adını, hesap ilerlemeni.*google veya github/i),
+    ).toBeTruthy()
     expect(document.body.textContent).not.toContain('Melih Saraç')
     expect(
-      screen.getByRole('link', { name: 'Gizlilik ve KVKK Aydınlatma Metni' }).getAttribute('href'),
-    ).toBe('/tr/privacy')
-    expect(screen.getByRole('link', { name: 'Kullanım Koşulları' }).getAttribute('href')).toBe(
-      '/tr/terms',
-    )
+      screen
+        .getAllByRole('link', { name: 'Gizlilik ve KVKK Aydınlatma Metni' })
+        .map((link) => link.getAttribute('href')),
+    ).toEqual(['/tr/privacy', '/tr/privacy'])
+    expect(
+      screen
+        .getAllByRole('link', { name: 'Kullanım Koşulları' })
+        .map((link) => link.getAttribute('href')),
+    ).toEqual(['/tr/terms', '/tr/terms'])
     expect(screen.getByRole('link', { name: 'Giriş yap' }).getAttribute('href')).toBe(
       '/tr/auth/sign-in',
     )

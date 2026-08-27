@@ -59,6 +59,14 @@ describe('<SignInForm>', () => {
     expect(screen.queryByRole('button', { name: 'Sign in' })).toBeNull()
   })
 
+  it('offers Google and GitHub before the email sign-in form', () => {
+    renderWithAuth(makeAuthValue())
+
+    expect(screen.getByRole('button', { name: 'Continue with Google' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Continue with GitHub' })).toBeTruthy()
+    expect(screen.getByText('or use email')).toBeTruthy()
+  })
+
   it('blocks an invalid email client-side and never calls signInEmail', () => {
     const value = makeAuthValue()
     renderWithAuth(value)

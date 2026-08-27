@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 
 import { useTranslation } from '@/i18n/useTranslation'
 import { useAuth } from '../useAuth'
 import { createMyProfile } from '../authClient'
+import { getEmailSignupUsername, suggestOAuthUsername } from '../oauthProfile'
 import { normalizeUsername, validateUsername } from '../validation'
 import { useUsernameAvailability } from '../useUsernameAvailability'
 import styles from './UsernameGate.module.css'
@@ -34,8 +35,8 @@ export function UsernameGate() {
   const needsProfile = status === 'authed' && profileReady && !profile && user !== null
   const open = needsProfile && manualReadyFor === user?.id
   const userId = user?.id ?? null
-  const signupUsername =
-    typeof user?.user_metadata?.username === 'string' ? user.user_metadata.username : ''
+  const signupUsername = user ? getEmailSignupUsername(user) : ''
+  const oauthUsernameSuggestion = user ? suggestOAuthUsername(user) : ''
 
   const liveAvailability = useUsernameAvailability(username, open)
   // A submit-time 23505 wins until the input changes again.
@@ -48,13 +49,14 @@ export function UsernameGate() {
     setSubmitTaken(false)
 
     const candidate = normalizeUsername(signupUsername)
-    setUsername(candidate)
     if (validateUsername(candidate)) {
+      setUsername(normalizeUsername(oauthUsernameSuggestion))
       inFlight.current = false
       setSubmitting(false)
       setManualReadyFor(userId)
       return
     }
+    setUsername(candidate)
 
     let claim = pendingClaim.current
     if (!claim || claim.userId !== userId) {
@@ -82,7 +84,7 @@ export function UsernameGate() {
     return () => {
       active = false
     }
-  }, [needsProfile, userId, signupUsername, adoptProfile])
+  }, [needsProfile, userId, signupUsername, oauthUsernameSuggestion, adoptProfile])
 
   useEffect(() => {
     if (open) inputRef.current?.focus()

@@ -44,17 +44,33 @@
       "available": "Available.",
       "taken": "Taken — try another.",
       "submitting": "Creating account…",
-      "privacyNotice": "We process your email, username, and account progress only to create and sync this optional account. Details:",
+      "privacyNotice": "We process your email, username, account progress and, if you choose Google or GitHub, the identity details that provider returns only to create and sync this optional account. Details:",
       "privacyLink": "Privacy notice",
       "termsNotice": "By creating an account, you accept the",
       "termsLink": "Terms of Use"
     },
+    "oauth": {
+      "continue": {
+        "google": "Continue with Google",
+        "github": "Continue with GitHub"
+      },
+      "loading": {
+        "google": "Opening Google…",
+        "github": "Opening GitHub…"
+      },
+      "linkNotice": "Provider sign-in creates or accesses an optional SQL Heist account and may link to an existing account with the same verified email.",
+      "privacyNotice": "Details:",
+      "privacyLink": "Privacy notice",
+      "termsNotice": "By continuing, you accept the",
+      "termsLink": "Terms of Use",
+      "divider": "or use email"
+    },
     "callback": {
       "stamp": "Agency access",
-      "confirming": "Confirming your email…",
-      "hold": "Hold tight — verifying the link and opening your session.",
-      "errorTitle": "Confirmation didn't complete",
-      "verifyFailed": "The link couldn't be verified in this browser. If you already confirmed elsewhere, just sign in with your password.",
+      "confirming": "Opening your session…",
+      "hold": "Verifying the sign-in response.",
+      "errorTitle": "Sign-in didn't complete",
+      "verifyFailed": "The sign-in response couldn't be verified in this browser. Return to sign in and try again.",
       "goSignIn": "Go to sign in",
       "resend": "Resend confirmation email",
       "resent": "Sent — check your inbox."
@@ -158,7 +174,7 @@
     "visibilityPrivate": "Your profile is private.",
     "viewPublicProfile": "View public profile",
     "dataTitle": "Your data",
-    "dataBody": "Download a JSON copy of your account profile, synced case progress, and public-profile consent history.",
+    "dataBody": "Download a JSON copy of your account and provider identity metadata, profile, synced case progress, and public-profile consent history.",
     "export": "Download my data",
     "exporting": "Preparing download…",
     "exportReady": "Your data download is ready.",
@@ -166,18 +182,25 @@
     "deleteBody": "Request erasure of your account and synced progress. Your profile becomes private immediately, future writes are blocked, and you will be signed out. Final deletion is completed manually within 30 days.",
     "deleteRequest": "Request account deletion",
     "deleteModalTitle": "Submit an erasure request?",
-    "deleteModalBody": "This immediately hides and locks the account. Re-enter your current password to verify it's you. The operator will permanently delete the account and synced data within 30 days.",
+    "deleteModalBody": "This immediately hides and locks the account. Confirm your username, then verify with your password or a linked sign-in provider. The operator will permanently delete the account and synced data within 30 days. Deleting SQL Heist does not delete a provider account. A Google revocation request is submitted after sign-in; GitHub authorization may remain, so revoke SQL Heist separately in GitHub Authorized OAuth Apps if you want to end it.",
     "deleteConfirmLabel": "Type {username} to confirm",
     "deletePasswordLabel": "Current password",
     "cancel": "Cancel",
     "deleteConfirm": "Submit deletion request",
+    "deleteProviderVerified": "Provider verification completed. Type your username again to finish this one-time deletion request.",
+    "deleteFinish": "Finish deletion request",
+    "deleteWith": {
+      "google": "Verify with Google",
+      "github": "Verify with GitHub"
+    },
     "deleting": "Submitting…",
     "errors": {
       "invalidProfile": "Display name must be at most 40 characters.",
       "save": "The profile could not be saved. Try again.",
       "visibility": "Visibility could not be changed. Try again.",
       "export": "Your data could not be prepared. Try again.",
-      "reauth": "That password did not match. Try again.",
+      "password": "That password did not match. Try again.",
+      "reauth": "Your verification expired or could not be confirmed. Try again.",
       "delete": "The deletion request could not be submitted. Try again."
     }
   },
@@ -445,7 +468,7 @@
   "consent": {
     "aria": "Storage notice",
     "title": "This game uses local storage",
-    "body": "SQL Heist uses local storage for language, progress, this notice, and the signed-in session. A pending signup email expires after one hour and is removed the next time the app loads or checks it; clearing site data removes it sooner. No analytics or advertising tracking. Account sync uses Supabase; public profiles require explicit opt-in.",
+    "body": "SQL Heist uses local storage for language, progress, this notice, and the signed-in Supabase session. OAuth return routing and deletion verification use short-lived session storage in the same tab. A pending signup email expires after one hour and is removed the next time the app loads or checks it; clearing site data removes it sooner. No analytics or advertising tracking. Account sync uses Supabase; public profiles require explicit opt-in.",
     "accept": "Got it"
   },
   "privacy": {
@@ -453,7 +476,7 @@
     "title": "Privacy",
     "lead": "Anonymous by default. Optional accounts sync only the data needed for your identity, progress, and chosen public presence.",
     "glanceLabel": "At a glance",
-    "glanceBody": "You can play without an account: gameplay and progress stay in local storage, while the host still receives the normal request needed to serve the site. An optional account sends the account and progress data described below to Supabase. No analytics or advertising trackers are included in this build.",
+    "glanceBody": "You can play without an account: gameplay and progress stay in local storage, while the host still receives the normal request needed to serve the site. An optional account sends the account and progress data described below to Supabase; Google or GitHub is contacted only if you choose that sign-in method. No analytics or advertising trackers are included in this build.",
     "sections": {
       "0": {
         "title": "Controller and contact",
@@ -461,8 +484,8 @@
       },
       "1": {
         "title": "Data we process",
-        "body": "Data is collected electronically: directly from the signup/profile forms and your browser, through Supabase API requests when signed in, and automatically through ordinary hosting requests. Anonymous play does not require a name or email. Your browser stores your language choice and completed case objectives locally; hosting requests may include IP address, user agent, requested URL, and time.",
-        "body2": "If you create an account, we process your email, chosen username, optional display name, public-profile choice and consent history (grant or withdrawal, notice version, source, and time), completed case and objective identifiers, and account/progress timestamps. Your password goes directly to Supabase Auth; only a salted password hash is retained, and the operator cannot read the password. If you email us, we also process your address, message contents, sent/received times, and ordinary mail-routing metadata. We do not send your SQL practice payloads to Supabase or intentionally collect special-category data."
+        "body": "Data is collected electronically: directly from the signup/profile forms and your browser, from Google or GitHub only when you choose that sign-in method, through Supabase API requests when signed in, and automatically through ordinary hosting requests. Anonymous play does not require a name or email. Your browser stores your language choice and completed case objectives locally; hosting requests may include IP address, user agent, requested URL, and time.",
+        "body2": "If you create an account, we process your email, chosen username, optional display name, public-profile choice and consent history (grant or withdrawal, notice version, source, and time), completed case and objective identifiers, and account/progress timestamps. If you choose Google or GitHub, Supabase receives and stores the provider name, provider account identifier, verified email, and available fields such as name, username, and avatar URL as provider identity metadata. We request only sign-in identity/profile access. SQL Heist does not retain provider access or refresh tokens or use them to call provider APIs; a transient Google credential is used only to submit a best-effort revocation request immediately after a completed Google sign-in. Supabase automatically links identities that use the same verified email. Your password, if used, goes directly to Supabase Auth; only a salted password hash is retained, and we cannot read it. If you email us, we also process your address, message contents, sent/received times, and ordinary mail-routing metadata. We do not send your SQL practice payloads to Supabase or intentionally collect special-category data."
       },
       "2": {
         "title": "Local and synced progress",
@@ -470,7 +493,7 @@
       },
       "3": {
         "title": "Purposes and legal bases",
-        "body": "We process account identity, authentication, export, deletion requests, and cross-device progress to provide the optional account service you request (GDPR Article 6(1)(b); KVKK Article 5(2)(c)). Browser storage needed for language, local progress, and an authenticated session is used to deliver those requested features.",
+        "body": "We process account identity, email/password or chosen provider authentication, export, deletion requests, and cross-device progress to provide the optional account service you request (GDPR Article 6(1)(b); KVKK Article 5(2)(c)). Browser storage needed for language, local progress, OAuth return state, deletion re-verification, and an authenticated session is used to deliver those requested features.",
         "body2": "Publishing a profile or leaderboard entry relies on your explicit, revocable choice (GDPR Article 6(1)(a); KVKK explicit consent). Limited hosting and security logs may be processed to operate and protect the service (GDPR Article 6(1)(f); KVKK Article 5(2)(f)). Correspondence is processed to answer support or rights requests and keep required evidence (GDPR Articles 6(1)(b), (c), and (f), as applicable; KVKK Article 5(2)(c), (ç), and (f)). We do not sell data, use it for advertising, or make decisions about you solely by automated means."
       },
       "4": {
@@ -478,23 +501,23 @@
         "body": "Accounts are private by default. If you opt in, your username, optional display name, join date, objectives-cleared count, and activity timestamp may appear publicly. Email and internal user ID are never included. You can withdraw the opt-in from account settings; the profile and leaderboard entry then disappear immediately. We record each actual grant or withdrawal with a database timestamp and notice version so the choice can be demonstrated and respected. The casual leaderboard is based on client-submitted progress and is not a verified competition."
       },
       "5": {
-        "title": "Processors and international transfers",
-        "body": "Cloudflare proxies the sqlheist.com domain and may process request/security data; Vercel serves the static site; Supabase provides authentication and database services for optional accounts; Microsoft Outlook.com/Hotmail handles messages sent to the contact address. The Supabase project database is in its eu-west-1 (Ireland) region. These providers do not receive your local SQL practice payloads from the game.",
-        "body2": "These providers and their disclosed subprocessors may process data outside your country, including outside Türkiye or the EEA. The required transfer mechanisms must be documented for the existing hosting, proxy, and contact-message processing; the corresponding Supabase documentation must be complete before optional accounts are made available. Contact the controller for current provider, subprocessor, transfer-basis, and safeguard details."
+        "title": "Service and sign-in providers; international transfers",
+        "body": "Cloudflare proxies the sqlheist.com domain and may process request/security data; Vercel serves the static site; Supabase provides authentication and database services for optional accounts; Microsoft Outlook.com/Hotmail handles messages sent to the contact address. If you choose provider sign-in, Google or GitHub authenticates you and sends the limited identity data described above to Supabase. The Supabase project database is in its eu-west-1 (Ireland) region. These providers do not receive your local SQL practice payloads from the game.",
+        "body2": "These providers and their disclosed subprocessors may process data outside your country, including outside Türkiye or the EEA, under their own terms and privacy notices where applicable. The required transfer mechanisms must be documented for the existing hosting, proxy, authentication, and contact-message processing. Contact us for current provider, subprocessor, transfer-basis, and safeguard details."
       },
       "6": {
         "title": "Retention and deletion",
         "body": "Local data stays until you clear site data. Account, synced progress, and public-profile consent history remain while the account is active; there is currently no automatic inactive-account purge. Public visibility lasts only while you remain opted in. Closed support/privacy correspondence is deleted within 12 months, unless a law or active claim requires longer retention; it is then deleted when that period or claim ends. After we delete a message from Outlook.com, Microsoft says it generally remains in Deleted Items for about 7 days unless emptied sooner and, after that folder is emptied, can remain in Microsoft's systems for up to 30 days before final deletion unless law requires longer.",
-        "body2": "A deletion request immediately makes the profile private, locks later browser writes, and signs you out. The operator permanently deletes the Auth user and cascading profile, progress, and consent-history rows within 30 days. After completion, a private operator-only ledger keeps only a keyed HMAC of the Auth UUID and request, completion, deadline, and confirmation times for at most 90 days, then it is deleted; it contains no email, username, or raw UUID. If provider logs or disaster-recovery copies contain related data, they remain only until no longer needed for security or until the applicable rolling backup is replaced; exact current periods are available from the controller."
+        "body2": "A deletion request immediately makes the profile private, locks later browser writes, and signs you out. The operator permanently deletes the Auth user and cascading profile, progress, and consent-history rows within 30 days. After completion, a private operator-only ledger keeps only a keyed HMAC of the Auth UUID and request, completion, deadline, and confirmation times for at most 90 days, then it is deleted; it contains no email, username, or raw UUID. SQL Heist submits a best-effort revocation request to Google immediately after each completed Google sign-in but cannot verify the response from this cross-site browser request. GitHub authorization may remain after SQL Heist account deletion; revoke SQL Heist separately in GitHub's Authorized OAuth Apps settings if you want to end it. Deleting SQL Heist does not delete your provider account. If provider logs or disaster-recovery copies contain related data, they remain only until no longer needed for security or until the applicable rolling backup is replaced; exact current periods are available from the controller."
       },
       "7": {
         "title": "Your rights",
-        "body": "Depending on the law that applies to you, you may request access, correction, deletion, restriction, objection, and portability, and may withdraw public-profile consent at any time. Account settings provide a JSON export of your email, profile, synced progress, and public-profile consent history, plus visibility and deletion controls.",
+        "body": "Depending on the law that applies to you, you may request access, correction, deletion, restriction, objection, and portability, and may withdraw public-profile consent at any time. Account settings provide a JSON export of your email, account and provider identity metadata, profile, synced progress, and public-profile consent history, plus visibility and deletion controls.",
         "body2": "Email melih.sarac@hotmail.com for a request the app cannot complete, including a username correction. We may verify your identity and will respond within the applicable legal deadline. You may also complain to your competent data-protection authority, including Türkiye's Personal Data Protection Authority where applicable."
       },
       "8": {
         "title": "Storage, tracking, and security",
-        "body": "This build includes no third-party analytics, advertising trackers, or marketing cookies. It uses browser local storage for language, local progress, this notice, and—only when you sign in—the necessary Supabase session. During signup, the pending email is usable for confirmation/resend for one hour; an expired or malformed entry is removed the next time SQL Heist loads or checks it, and sign-in, sign-out, or clearing site data removes it sooner. Supabase Row Level Security limits base account rows to their owner, but no online system can promise absolute security."
+        "body": "This build includes no third-party analytics, advertising trackers, or marketing cookies. It uses browser local storage for language, local progress, this notice, and—only when you sign in—the necessary Supabase session. A same-tab OAuth return record expires after 10 minutes; a successful deletion re-verification receipt is one-time and expires after 2 minutes. SQL Heist strips Google/GitHub provider tokens from persistent session storage. During email signup, the pending address expires after one hour and is removed on the next load/check; sign-in, sign-out, or clearing site data removes it sooner. Supabase Row Level Security limits base account rows to their owner, but no online system can promise absolute security."
       },
       "9": {
         "title": "Children and changes",
@@ -521,8 +544,8 @@
       },
       "2": {
         "title": "Accounts",
-        "body": "An account is optional. If you create one, provide an email you control, choose a permitted username, protect your credentials, and tell us promptly if you suspect unauthorised access. You are responsible for activity under your session unless applicable law says otherwise.",
-        "body2": "You may export your account data and request deletion from account settings. A request hides and locks the account immediately; permanent deletion is completed manually within 30 days. Our Privacy notice explains the related data processing."
+        "body": "An account is optional. You may use email/password or choose Google or GitHub sign-in. Provide an email you control, choose a permitted username, protect your credentials and linked provider accounts, and tell us promptly if you suspect unauthorised access. Supabase may automatically link sign-in identities that use the same verified email. You are responsible for activity under your session unless applicable law says otherwise.",
+        "body2": "You may export your account data and request deletion from account settings. A request requires recent verification with your password or a linked provider, then hides and locks the account immediately; permanent deletion is completed manually within 30 days. Our Privacy notice explains the related data processing."
       },
       "3": {
         "title": "Public participation",

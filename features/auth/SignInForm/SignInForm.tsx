@@ -9,6 +9,7 @@ import { useAuth } from '../useAuth'
 import { resendSignupEmail, type AuthErrorCode } from '../authClient'
 import { normalizeEmail, validateEmail } from '../validation'
 import { AuthCard } from '../AuthCard'
+import { OAuthButtons } from '../OAuthButtons'
 import styles from './SignInForm.module.css'
 
 export function SignInForm() {
@@ -82,6 +83,7 @@ export function SignInForm() {
         </>
       }
     >
+      <OAuthButtons returnTo={localeHref('/', locale)} />
       <form className={styles.form} onSubmit={onSubmit} noValidate>
         {formError && (
           <div className={styles.alert} role="alert">

@@ -44,17 +44,33 @@
       "available": "Uygun.",
       "taken": "Alınmış — başka bir tane dene.",
       "submitting": "Hesap oluşturuluyor…",
-      "privacyNotice": "Bu isteğe bağlı hesabı oluşturup eşitlemek için yalnızca e-posta adresini, kullanıcı adını ve hesap ilerlemeni işleriz. Ayrıntılar:",
+      "privacyNotice": "Bu isteğe bağlı hesabı oluşturup eşitlemek için e-posta adresini, kullanıcı adını, hesap ilerlemeni ve Google veya GitHub'ı seçersen sağlayıcının döndürdüğü kimlik bilgilerini işleriz. Ayrıntılar:",
       "privacyLink": "Gizlilik ve KVKK Aydınlatma Metni",
       "termsNotice": "Hesap oluşturarak şunları kabul edersin:",
       "termsLink": "Kullanım Koşulları"
     },
+    "oauth": {
+      "continue": {
+        "google": "Google ile devam et",
+        "github": "GitHub ile devam et"
+      },
+      "loading": {
+        "google": "Google açılıyor…",
+        "github": "GitHub açılıyor…"
+      },
+      "linkNotice": "Sağlayıcıyla giriş isteğe bağlı bir SQL Heist hesabı oluşturur veya mevcut hesaba erişir ve aynı doğrulanmış e-postayı kullanan mevcut bir hesaba bağlanabilir.",
+      "privacyNotice": "Ayrıntılar:",
+      "privacyLink": "Gizlilik ve KVKK Aydınlatma Metni",
+      "termsNotice": "Devam ederek şunları kabul edersin:",
+      "termsLink": "Kullanım Koşulları",
+      "divider": "veya e-posta kullan"
+    },
     "callback": {
       "stamp": "Teşkilat erişimi",
-      "confirming": "E-postan onaylanıyor…",
-      "hold": "Bekle — bağlantı doğrulanıyor ve oturumun açılıyor.",
-      "errorTitle": "Onay tamamlanamadı",
-      "verifyFailed": "Bağlantı bu tarayıcıda doğrulanamadı. Onayı zaten yaptıysan şifrenle giriş yapman yeterli.",
+      "confirming": "Oturumun açılıyor…",
+      "hold": "Giriş yanıtı doğrulanıyor.",
+      "errorTitle": "Giriş tamamlanamadı",
+      "verifyFailed": "Giriş yanıtı bu tarayıcıda doğrulanamadı. Giriş sayfasına dönüp yeniden dene.",
       "goSignIn": "Girişe git",
       "resend": "Onay e-postasını yeniden gönder",
       "resent": "Gönderildi — gelen kutunu kontrol et."
@@ -158,7 +174,7 @@
     "visibilityPrivate": "Profilin gizli.",
     "viewPublicProfile": "Herkese açık profili gör",
     "dataTitle": "Verilerin",
-    "dataBody": "Hesap profilinin, senkronize vaka ilerlemenin ve herkese açık profil rıza geçmişinin JSON kopyasını indir.",
+    "dataBody": "Hesabının ve sağlayıcı kimliği üst verilerinin, profilinin, senkronize vaka ilerlemenin ve herkese açık profil rıza geçmişinin JSON kopyasını indir.",
     "export": "Verilerimi indir",
     "exporting": "İndirme hazırlanıyor…",
     "exportReady": "Veri indirmen hazır.",
@@ -166,18 +182,25 @@
     "deleteBody": "Hesabının ve senkronize ilerlemenin silinmesini talep et. Profilin hemen gizlenir, yeni yazmalar engellenir ve oturumun kapatılır. Nihai silme 30 gün içinde elle tamamlanır.",
     "deleteRequest": "Hesap silme talebi oluştur",
     "deleteModalTitle": "Silme talebi gönderilsin mi?",
-    "deleteModalBody": "Bu işlem hesabı hemen gizler ve kilitler. Kimliğini doğrulamak için mevcut şifreni tekrar gir. İşletmeci hesabı ve senkronize verileri 30 gün içinde kalıcı olarak siler.",
+    "deleteModalBody": "Bu işlem hesabı hemen gizler ve kilitler. Kullanıcı adını onayla, ardından şifrenle veya bağlı bir giriş sağlayıcısıyla kimliğini doğrula. İşletmeci hesabı ve senkronize verileri 30 gün içinde kalıcı olarak siler. SQL Heist hesabını silmek sağlayıcı hesabını silmez. Google iptal isteği girişten sonra gönderilir; GitHub yetkilendirmesi kalabilir, sona erdirmek istersen SQL Heist yetkisini GitHub Authorized OAuth Apps ayarlarından ayrıca kaldır.",
     "deleteConfirmLabel": "Onaylamak için {username} yaz",
     "deletePasswordLabel": "Mevcut şifre",
     "cancel": "İptal",
     "deleteConfirm": "Silme talebini gönder",
+    "deleteProviderVerified": "Sağlayıcı doğrulaması tamamlandı. Bu tek kullanımlık silme talebini tamamlamak için kullanıcı adını yeniden yaz.",
+    "deleteFinish": "Silme talebini tamamla",
+    "deleteWith": {
+      "google": "Google ile doğrula",
+      "github": "GitHub ile doğrula"
+    },
     "deleting": "Gönderiliyor…",
     "errors": {
       "invalidProfile": "Görünen ad en fazla 40 karakter olmalıdır.",
       "save": "Profil kaydedilemedi. Tekrar dene.",
       "visibility": "Görünürlük değiştirilemedi. Tekrar dene.",
       "export": "Verilerin hazırlanamadı. Tekrar dene.",
-      "reauth": "Bu şifre eşleşmedi. Tekrar dene.",
+      "password": "Bu şifre eşleşmedi. Tekrar dene.",
+      "reauth": "Doğrulamanın süresi doldu veya doğrulama tamamlanamadı. Tekrar dene.",
       "delete": "Silme talebi gönderilemedi. Tekrar dene."
     }
   },
@@ -445,7 +468,7 @@
   "consent": {
     "aria": "Depolama bildirimi",
     "title": "Bu oyun yerel depolama kullanır",
-    "body": "SQL Heist; dil, ilerleme, bu bildirim ve giriş yapılmış oturum için yerel depolama kullanır. Bekleyen kayıt e-postasının süresi bir saat sonra dolar; uygulama bir sonraki kez yüklediğinde veya kontrol ettiğinde kayıt silinir, site verilerini temizlemek daha erken siler. Analitik veya reklam takibi yoktur. Hesap eşitlemesi Supabase kullanır; herkese açık profiller açık katılım gerektirir.",
+    "body": "SQL Heist; dil, ilerleme, bu bildirim ve giriş yapılmış Supabase oturumu için yerel depolama kullanır. OAuth dönüş yönlendirmesi ve silme doğrulaması aynı sekmede kısa süreli oturum depolaması kullanır. Bekleyen kayıt e-postasının süresi bir saat sonra dolar; uygulama bir sonraki kez yüklediğinde veya kontrol ettiğinde kayıt silinir, site verilerini temizlemek daha erken siler. Analitik veya reklam takibi yoktur. Hesap eşitlemesi Supabase kullanır; herkese açık profiller açık katılım gerektirir.",
     "accept": "Anladım"
   },
   "privacy": {
@@ -453,7 +476,7 @@
     "title": "Gizlilik",
     "lead": "Varsayılan anonimdir. İsteğe bağlı hesaplar yalnızca kimlik, ilerleme ve seçtiğin herkese açık görünürlük için gereken verileri eşitler.",
     "glanceLabel": "Bir bakışta",
-    "glanceBody": "Hesapsız oynayabilirsin: oyun ve ilerleme yerel depolamada kalır; siteyi sunmak için gereken normal istek ise barındırma sağlayıcısına ulaşır. İsteğe bağlı hesap, aşağıda açıklanan hesap ve ilerleme verilerini Supabase'e gönderir. Bu sürümde analitik veya reklam takipçisi yoktur.",
+    "glanceBody": "Hesapsız oynayabilirsin: oyun ve ilerleme yerel depolamada kalır; siteyi sunmak için gereken normal istek ise barındırma sağlayıcısına ulaşır. İsteğe bağlı hesap, aşağıda açıklanan hesap ve ilerleme verilerini Supabase'e gönderir; Google veya GitHub ile yalnızca o giriş yöntemini seçersen iletişim kurulur. Bu sürümde analitik veya reklam takipçisi yoktur.",
     "sections": {
       "0": {
         "title": "Veri sorumlusu ve iletişim",
@@ -461,8 +484,8 @@
       },
       "1": {
         "title": "İşlediğimiz veriler",
-        "body": "Veriler elektronik ortamda; doğrudan kayıt ve profil formlarından ve tarayıcından, giriş yaptığında Supabase API istekleri aracılığıyla ve olağan barındırma istekleriyle otomatik olarak toplanır. Anonim oyun ad veya e-posta istemez. Tarayıcın dil seçimini ve tamamlanan vaka hedeflerini yerel olarak saklar; barındırma istekleri IP adresi, kullanıcı aracısı, istenen URL ve zaman gibi olağan teknik verileri içerebilir.",
-        "body2": "Hesap oluşturursan e-posta adresini, seçtiğin kullanıcı adını, isteğe bağlı görünen adını, herkese açık profil tercihini ve rıza geçmişini (verme veya geri çekme, bildirim sürümü, kaynak ve zaman), tamamlanan vaka ve hedef kimliklerini ve hesap/ilerleme zaman damgalarını işleriz. Parolan doğrudan Supabase Auth'a gider; yalnızca tuzlanmış parola özeti saklanır ve işletmeci parolanı okuyamaz. Bize e-posta gönderirsen adresini, mesaj içeriğini, gönderim/alım zamanlarını ve olağan e-posta yönlendirme üst verilerini de işleriz. SQL pratik girdilerini Supabase'e göndermeyiz ve özel nitelikli kişisel veri toplamayı amaçlamayız."
+        "body": "Veriler elektronik ortamda; doğrudan kayıt ve profil formlarından ve tarayıcından, yalnızca o giriş yöntemini seçtiğinde Google veya GitHub'dan, giriş yaptığında Supabase API istekleri aracılığıyla ve olağan barındırma istekleriyle otomatik olarak toplanır. Anonim oyun ad veya e-posta istemez. Tarayıcın dil seçimini ve tamamlanan vaka hedeflerini yerel olarak saklar; barındırma istekleri IP adresi, kullanıcı aracısı, istenen URL ve zaman gibi olağan teknik verileri içerebilir.",
+        "body2": "Hesap oluşturursan e-posta adresini, seçtiğin kullanıcı adını, isteğe bağlı görünen adını, herkese açık profil tercihini ve rıza geçmişini (verme veya geri çekme, bildirim sürümü, kaynak ve zaman), tamamlanan vaka ve hedef kimliklerini ve hesap/ilerleme zaman damgalarını işleriz. Google veya GitHub'ı seçersen Supabase; sağlayıcı adını, sağlayıcı hesap kimliğini, doğrulanmış e-postayı ve ad, kullanıcı adı ve avatar URL'si gibi mevcut alanları sağlayıcı kimliği üst verisi olarak alır ve saklar. Yalnızca giriş için kimlik/profil erişimi isteriz. SQL Heist sağlayıcı erişim veya yenileme jetonlarını saklamaz ve bunları sağlayıcı API'lerini çağırmak için kullanmaz; geçici Google kimlik bilgisi yalnızca tamamlanan bir Google girişinden hemen sonra en iyi çabayla iptal isteği göndermek için kullanılır. Supabase aynı doğrulanmış e-postayı kullanan kimlikleri otomatik olarak bağlar. Kullanılıyorsa parolan doğrudan Supabase Auth'a gider; yalnızca tuzlanmış parola özeti saklanır ve parolayı okuyamayız. Bize e-posta gönderirsen adresini, mesaj içeriğini, gönderim/alım zamanlarını ve olağan e-posta yönlendirme üst verilerini de işleriz. SQL pratik girdilerini Supabase'e göndermeyiz ve özel nitelikli kişisel veri toplamayı amaçlamayız."
       },
       "2": {
         "title": "Yerel ve eşitlenen ilerleme",
@@ -470,7 +493,7 @@
       },
       "3": {
         "title": "Amaçlar ve hukuki sebepler",
-        "body": "Hesap kimliği, kimlik doğrulama, dışa aktarma, silme talepleri ve cihazlar arası ilerlemeyi, talep ettiğin isteğe bağlı hesap hizmetini sunmak için işleriz (GDPR Madde 6(1)(b); KVKK Madde 5(2)(c)). Dil, yerel ilerleme ve oturum açmış kullanıcı oturumu için gereken tarayıcı depolaması da talep edilen bu özellikleri sunmak amacıyla kullanılır.",
+        "body": "Hesap kimliği, e-posta/parola veya seçtiğin sağlayıcıyla kimlik doğrulama, dışa aktarma, silme talepleri ve cihazlar arası ilerlemeyi, talep ettiğin isteğe bağlı hesap hizmetini sunmak için işleriz (GDPR Madde 6(1)(b); KVKK Madde 5(2)(c)). Dil, yerel ilerleme, OAuth dönüş durumu, silme için yeniden doğrulama ve oturum açmış kullanıcı oturumu için gereken tarayıcı depolaması da talep edilen bu özellikleri sunmak amacıyla kullanılır.",
         "body2": "Profil veya liderlik kaydı yayımlamak açık ve geri alınabilir seçimine dayanır (GDPR Madde 6(1)(a); KVKK açık rıza). Sınırlı barındırma ve güvenlik günlükleri, hizmeti işletmek ve korumak amacıyla işlenebilir (GDPR Madde 6(1)(f); KVKK Madde 5(2)(f)). Yazışmalar; destek veya hak taleplerini yanıtlamak ve gerekli kanıtı tutmak için, duruma göre GDPR Madde 6(1)(b), (c) ve (f) ile KVKK Madde 5(2)(c), (ç) ve (f) kapsamında işlenir. Verileri satmayız, reklam amacıyla kullanmayız ve yalnızca otomatik işlemeye dayalı olarak senin hakkında karar vermeyiz."
       },
       "4": {
@@ -478,23 +501,23 @@
         "body": "Hesaplar varsayılan olarak gizlidir. Katılmayı seçersen kullanıcı adın, isteğe bağlı görünen adın, katılma tarihin, tamamladığın hedef sayısı ve etkinlik zamanın herkese açık görünebilir. E-posta ve iç kullanıcı kimliği hiçbir zaman yayımlanmaz. Hesap ayarlarından katılımı geri çektiğinde profil ve liderlik kaydı hemen kaybolur. Seçimin kanıtlanıp uygulanabilmesi için her gerçek katılım veya geri çekme işlemini veritabanı zamanı ve bildirim sürümüyle kaydederiz. Gayriresmî liderlik tablosu istemci tarafından gönderilen ilerlemeye dayanır; doğrulanmış bir yarışma değildir."
       },
       "5": {
-        "title": "Veri işleyenler ve yurt dışı aktarım",
-        "body": "Cloudflare, sqlheist.com alan adını vekil sunucu olarak yönlendirir ve istek veya güvenlik verilerini işleyebilir; Vercel statik siteyi sunar; Supabase isteğe bağlı hesaplar için kimlik doğrulama ve veritabanı hizmeti sağlar; Microsoft Outlook.com/Hotmail iletişim adresine gönderilen mesajları işler. Supabase proje veritabanı eu-west-1 (İrlanda) bölgesindedir. Bu sağlayıcılar oyundaki yerel SQL pratik girdilerini almaz.",
-        "body2": "Bu sağlayıcılar ve açıkladıkları alt işleyenler, verileri Türkiye veya AEA dışı dâhil başka ülkelerde işleyebilir. Mevcut barındırma, vekil sunucu ve iletişim mesajı işlemleri için gereken aktarım mekanizmaları belgelenmelidir; Supabase'e ilişkin belgeler ise isteğe bağlı hesaplar kullanıma açılmadan önce tamamlanmalıdır. Güncel sağlayıcı, alt işleyen, aktarım dayanağı ve güvence ayrıntıları için veri sorumlusuna ulaşabilirsin."
+        "title": "Hizmet ve giriş sağlayıcıları; yurt dışı aktarım",
+        "body": "Cloudflare, sqlheist.com alan adını vekil sunucu olarak yönlendirir ve istek veya güvenlik verilerini işleyebilir; Vercel statik siteyi sunar; Supabase isteğe bağlı hesaplar için kimlik doğrulama ve veritabanı hizmeti sağlar; Microsoft Outlook.com/Hotmail iletişim adresine gönderilen mesajları işler. Sağlayıcıyla girişi seçersen Google veya GitHub kimliğini doğrular ve yukarıda açıklanan sınırlı kimlik verilerini Supabase'e gönderir. Supabase proje veritabanı eu-west-1 (İrlanda) bölgesindedir. Bu sağlayıcılar oyundaki yerel SQL pratik girdilerini almaz.",
+        "body2": "Bu sağlayıcılar ve açıkladıkları alt işleyenler, kendi koşulları ve geçerli olduğu ölçüde gizlilik bildirimleri kapsamında verileri Türkiye veya AEA dışı dâhil başka ülkelerde işleyebilir. Mevcut barındırma, vekil sunucu, kimlik doğrulama ve iletişim mesajı işlemleri için gereken aktarım mekanizmaları belgelenmelidir. Güncel sağlayıcı, alt işleyen, aktarım dayanağı ve güvence ayrıntıları için veri sorumlusuna ulaşabilirsin."
       },
       "6": {
         "title": "Saklama ve silme",
         "body": "Yerel veriler, site verilerini temizleyene kadar kalır. Hesap, eşitlenen ilerleme ve herkese açık profil rıza geçmişi hesap etkin olduğu sürece tutulur; şu anda otomatik bir etkin olmayan hesap temizliği yoktur. Herkese açık görünürlük yalnızca katılımın sürdüğü sürece devam eder. Kapanan destek/gizlilik yazışmaları 12 ay içinde silinir; kanun veya devam eden bir hukuki talep daha uzun saklamayı gerektirirse ilgili süre ya da talep sona erdiğinde silinir. Bir iletiyi Outlook.com'dan sildikten sonra Microsoft, ileti daha önce boşaltılmadığı sürece genellikle Silinmiş Öğeler'de yaklaşık 7 gün kaldığını; klasör boşaltıldıktan sonra da kanun daha uzun saklama gerektirmedikçe kesin silmeden önce sistemlerinde 30 güne kadar kalabileceğini belirtir.",
-        "body2": "Silme talebi profili hemen gizler, sonraki tarayıcı yazmalarını kilitler ve oturumunu kapatır. İşletmeci Auth kullanıcısını ve ona bağlı profil, ilerleme ve rıza geçmişi satırlarını 30 gün içinde kalıcı olarak siler. Tamamlamadan sonra yalnızca işletmecinin erişebildiği özel bir kayıt, Auth UUID'sinin anahtarlı HMAC değerini ve talep, tamamlama, son tarih ile onay zamanlarını en fazla 90 gün tutar, sonra siler; e-posta, kullanıcı adı veya ham UUID içermez. Sağlayıcı günlükleri veya felaket kurtarma kopyaları ilgili veriyi içeriyorsa yalnızca güvenlik için artık gerek kalmayana ya da geçerli döngüsel yedek değiştirilene kadar tutulur; güncel kesin süreler veri sorumlusundan öğrenilebilir."
+        "body2": "Silme talebi profili hemen gizler, sonraki tarayıcı yazmalarını kilitler ve oturumunu kapatır. İşletmeci Auth kullanıcısını ve ona bağlı profil, ilerleme ve rıza geçmişi satırlarını 30 gün içinde kalıcı olarak siler. Tamamlamadan sonra yalnızca işletmecinin erişebildiği özel bir kayıt, Auth UUID'sinin anahtarlı HMAC değerini ve talep, tamamlama, son tarih ile onay zamanlarını en fazla 90 gün tutar, sonra siler; e-posta, kullanıcı adı veya ham UUID içermez. SQL Heist, tamamlanan her Google girişinden hemen sonra Google'a en iyi çabayla bir yetkilendirme iptal isteği gönderir; ancak tarayıcıdan yapılan bu siteler arası isteğin yanıtını doğrulayamaz. GitHub yetkilendirmesi SQL Heist hesabı silindikten sonra kalabilir; sona erdirmek istersen GitHub'ın Authorized OAuth Apps ayarlarından SQL Heist yetkisini ayrıca kaldır. SQL Heist hesabını silmek sağlayıcı hesabını silmez. Sağlayıcı günlükleri veya felaket kurtarma kopyaları ilgili veriyi içeriyorsa yalnızca güvenlik için artık gerek kalmayana ya da geçerli döngüsel yedek değiştirilene kadar tutulur; güncel kesin süreler veri sorumlusundan öğrenilebilir."
       },
       "7": {
         "title": "Hakların",
-        "body": "Sana uygulanan hukuka göre erişim, düzeltme, silme, işlemenin kısıtlanması, itiraz ve taşınabilirlik talep edebilir; herkese açık profil rızanı her zaman geri çekebilirsin. Hesap ayarları e-posta, profil, eşitlenen ilerleme ve herkese açık profil rıza geçmişinin JSON dışa aktarımını; ayrıca görünürlük ve silme kontrollerini sunar.",
+        "body": "Sana uygulanan hukuka göre erişim, düzeltme, silme, işlemenin kısıtlanması, itiraz ve taşınabilirlik talep edebilir; herkese açık profil rızanı her zaman geri çekebilirsin. Hesap ayarları e-posta, hesap ve sağlayıcı kimliği üst verileri, profil, eşitlenen ilerleme ve herkese açık profil rıza geçmişinin JSON dışa aktarımını; ayrıca görünürlük ve silme kontrollerini sunar.",
         "body2": "Kullanıcı adı düzeltmesi dâhil uygulamanın tamamlayamadığı talepler için melih.sarac@hotmail.com adresine yaz. Kimliğini doğrulamamız gerekebilir ve uygulanabilir yasal süre içinde yanıt veririz. Ayrıca, uygun olduğu durumda Kişisel Verileri Koruma Kurumu dâhil yetkili veri koruma makamına şikâyette bulunabilirsin."
       },
       "8": {
         "title": "Depolama, takip ve güvenlik",
-        "body": "Bu sürüm üçüncü taraf analitiği, reklam takipçisi veya pazarlama çerezi içermez. Dil, yerel ilerleme ve bu bildirim için; yalnızca giriş yaptığında da gerekli Supabase oturumu için tarayıcı yerel depolamasını kullanır. Kayıt sırasında bekleyen e-posta adresi doğrulama ve yeniden gönderme için bir saat kullanılabilir; süresi dolmuş veya bozuk kayıt SQL Heist bir sonraki kez yüklediğinde ya da kontrol ettiğinde silinir, giriş, çıkış veya site verilerini temizleme daha erken siler. Supabase Satır Düzeyi Güvenlik, temel hesap satırlarını sahibine sınırlar; ancak hiçbir çevrim içi sistem mutlak güvenlik sözü veremez."
+        "body": "Bu sürüm üçüncü taraf analitiği, reklam takipçisi veya pazarlama çerezi içermez. Dil, yerel ilerleme ve bu bildirim için; yalnızca giriş yaptığında da gerekli Supabase oturumu için tarayıcı yerel depolamasını kullanır. Aynı sekmedeki OAuth dönüş kaydının süresi 10 dakika sonra dolar; başarılı silme yeniden doğrulama makbuzu tek kullanımlıktır ve 2 dakika sonra sona erer. SQL Heist, Google/GitHub sağlayıcı jetonlarını kalıcı oturum depolamasından çıkarır. Kayıt sırasında bekleyen e-posta adresi doğrulama ve yeniden gönderme için bir saat kullanılabilir; süresi dolmuş veya bozuk kayıt SQL Heist bir sonraki kez yüklediğinde ya da kontrol ettiğinde silinir, giriş, çıkış veya site verilerini temizleme daha erken siler. Supabase Satır Düzeyi Güvenlik, temel hesap satırlarını sahibine sınırlar; ancak hiçbir çevrim içi sistem mutlak güvenlik sözü veremez."
       },
       "9": {
         "title": "Çocuklar ve değişiklikler",
@@ -521,8 +544,8 @@
       },
       "2": {
         "title": "Hesaplar",
-        "body": "Hesap isteğe bağlıdır. Hesap oluşturursan kontrol ettiğin bir e-posta kullan, izin verilen bir kullanıcı adı seç, kimlik bilgilerini koru ve yetkisiz erişimden şüphelenirsen bize hemen bildir. Uygulanabilir hukuk aksini söylemedikçe oturumundaki etkinlikten sen sorumlusun.",
-        "body2": "Hesap verilerini dışa aktarabilir ve hesap ayarlarından silme isteyebilirsin. Talep hesabı hemen gizleyip kilitler; kalıcı silme 30 gün içinde elle tamamlanır. İlgili veri işleme Gizlilik bildiriminde açıklanır."
+        "body": "Hesap isteğe bağlıdır. E-posta/parola kullanabilir veya Google ya da GitHub ile giriş yapabilirsin. Kontrol ettiğin bir e-posta kullan, izin verilen bir kullanıcı adı seç, kimlik bilgilerini ve bağlı sağlayıcı hesaplarını koru ve yetkisiz erişimden şüphelenirsen bize hemen bildir. Supabase aynı doğrulanmış e-postayı kullanan giriş kimliklerini otomatik olarak bağlayabilir. Uygulanabilir hukuk aksini söylemedikçe oturumundaki etkinlikten sen sorumlusun.",
+        "body2": "Hesap verilerini dışa aktarabilir ve hesap ayarlarından silme isteyebilirsin. Talep, parolan veya bağlı bir sağlayıcıyla yakın zamanda yeniden doğrulama gerektirir; ardından hesabı hemen gizleyip kilitler. Kalıcı silme 30 gün içinde elle tamamlanır. İlgili veri işleme Gizlilik bildiriminde açıklanır."
       },
       "3": {
         "title": "Açık katılım",

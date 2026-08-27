@@ -14,6 +14,7 @@ import {
   validateUsername,
 } from '../validation'
 import { AuthCard } from '../AuthCard'
+import { OAuthButtons } from '../OAuthButtons'
 import styles from './SignUpForm.module.css'
 
 export function SignUpForm() {
@@ -122,6 +123,7 @@ export function SignUpForm() {
         </>
       }
     >
+      <OAuthButtons returnTo={localeHref('/', locale)} />
       <form className={styles.form} onSubmit={onSubmit} noValidate>
         {formError && (
           <div className={styles.alert} role="alert">

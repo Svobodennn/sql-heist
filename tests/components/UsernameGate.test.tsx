@@ -37,6 +37,11 @@ afterEach(() => {
 
 const authedUser = { id: 'user-1', user_metadata: { username: 'Neo_01' } } as unknown as User
 const userWithoutSignupUsername = { id: 'user-1', user_metadata: {} } as unknown as User
+const githubUser = {
+  id: 'user-1',
+  app_metadata: { provider: 'github', providers: ['github'] },
+  user_metadata: { user_name: 'Café-Noir' },
+} as unknown as User
 
 function makeValue(overrides: Partial<AuthContextValue> = {}): AuthContextValue {
   return {
@@ -77,6 +82,13 @@ describe('<UsernameGate>', () => {
     renderGate(makeValue({ user: userWithoutSignupUsername }))
 
     expect(await screen.findByRole('dialog')).toBeTruthy()
+    expect(createMyProfile).not.toHaveBeenCalled()
+  })
+
+  it('prefills but never automatically claims an OAuth provider suggestion', async () => {
+    renderGate(makeValue({ user: githubUser }))
+
+    expect(((await screen.findByLabelText('Username')) as HTMLInputElement).value).toBe('cafe_noir')
     expect(createMyProfile).not.toHaveBeenCalled()
   })
 
