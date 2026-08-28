@@ -7,7 +7,7 @@ import { localeHref } from '@/i18n/localeHref'
 import { useTranslation } from '@/i18n/useTranslation'
 import { useAuth } from '../useAuth'
 import { resendSignupEmail, type AuthErrorCode } from '../authClient'
-import { normalizeEmail, validateEmail } from '../validation'
+import { EMAIL_MAX_LENGTH, normalizeEmail, validateEmail } from '../validation'
 import { AuthCard } from '../AuthCard'
 import { OAuthButtons } from '../OAuthButtons'
 import styles from './SignInForm.module.css'
@@ -119,6 +119,7 @@ export function SignInForm() {
             className={styles.input}
             type="email"
             autoComplete="email"
+            maxLength={EMAIL_MAX_LENGTH}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             aria-invalid={fieldError.email ? true : undefined}

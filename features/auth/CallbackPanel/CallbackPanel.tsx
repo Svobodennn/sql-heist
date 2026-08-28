@@ -10,7 +10,6 @@ import {
   exchangeCode,
   readPendingEmail,
   resendSignupEmail,
-  verifyEmailOtp,
   type AuthErrorCode,
 } from '../authClient'
 import { clearOAuthAttempt, completeOAuthAttempt } from '../oauthFlow'
@@ -46,14 +45,6 @@ export function CallbackPanel() {
     if (search.get('error') || hash.get('error') || hash.get('error_description')) {
       clearOAuthAttempt()
       setFailed(true)
-    }
-    // Fallback path for `{{ .TokenHash }}` email templates (default is `?code=`
-    // PKCE, handled by detectSessionInUrl; this only fires when present).
-    const tokenHash = search.get('token_hash')
-    if (tokenHash) {
-      void verifyEmailOtp(tokenHash).then(({ error }) => {
-        if (error) setFailed(true)
-      })
     }
   }, [])
 

@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
+  EMAIL_MAX_LENGTH,
+  USERNAME_MAX_LENGTH,
   normalizeEmail,
   normalizeUsername,
   validateEmail,
@@ -13,6 +15,9 @@ describe('auth field validators (return i18n keys, null = valid)', () => {
     expect(validateEmail('  ada@example.com  ')).toBeNull() // schema trims first
     expect(validateEmail('not-an-email')).toBe('auth.validation.email')
     expect(validateEmail('')).toBe('auth.validation.email')
+    expect(validateEmail(`${'a'.repeat(EMAIL_MAX_LENGTH)}@example.com`)).toBe(
+      'auth.validation.email',
+    )
   })
 
   it('requires 8+ chars with lowercase, uppercase, a digit, and a symbol', () => {
@@ -28,9 +33,9 @@ describe('auth field validators (return i18n keys, null = valid)', () => {
   it('enforces the DB username CHECK: ^[a-z0-9_]{3,20}$', () => {
     expect(validateUsername('neo')).toBeNull()
     expect(validateUsername('agent_47')).toBeNull()
-    expect(validateUsername('a'.repeat(20))).toBeNull()
+    expect(validateUsername('a'.repeat(USERNAME_MAX_LENGTH))).toBeNull()
     expect(validateUsername('ab')).toBe('auth.validation.username') // too short
-    expect(validateUsername('a'.repeat(21))).toBe('auth.validation.username') // too long
+    expect(validateUsername('a'.repeat(USERNAME_MAX_LENGTH + 1))).toBe('auth.validation.username') // too long
     expect(validateUsername('Neo')).toBe('auth.validation.username') // uppercase
     expect(validateUsername('neo!')).toBe('auth.validation.username') // symbol
     expect(validateUsername('ne o')).toBe('auth.validation.username') // space

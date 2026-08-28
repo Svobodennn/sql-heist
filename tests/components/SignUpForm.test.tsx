@@ -8,6 +8,7 @@ import type { Locale } from '@/i18n/config'
 import { createTranslator } from '@/i18n/translate'
 import en from '@/messages/en.json'
 import tr from '@/messages/tr.json'
+import { EMAIL_MAX_LENGTH, USERNAME_MAX_LENGTH } from '@/features/auth/validation'
 
 vi.hoisted(() => {
   delete process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -78,6 +79,14 @@ describe('<SignUpForm>', () => {
     expect(screen.getByText('Enter a valid email address.')).toBeTruthy()
   })
 
+  it('caps email and username inputs at their validated boundaries', () => {
+    renderForm(makeValue())
+    expect(screen.getByLabelText('Email').getAttribute('maxlength')).toBe(String(EMAIL_MAX_LENGTH))
+    expect(screen.getByLabelText('Username').getAttribute('maxlength')).toBe(
+      String(USERNAME_MAX_LENGTH),
+    )
+  })
+
   it('shows the purpose notice without naming an individual and links to the legal pages', () => {
     renderForm(makeValue())
     expect(
@@ -90,7 +99,9 @@ describe('<SignUpForm>', () => {
         .map((link) => link.getAttribute('href')),
     ).toEqual(['/privacy', '/privacy'])
     expect(
-      screen.getAllByRole('link', { name: 'Terms of Use' }).map((link) => link.getAttribute('href')),
+      screen
+        .getAllByRole('link', { name: 'Terms of Use' })
+        .map((link) => link.getAttribute('href')),
     ).toEqual(['/terms', '/terms'])
   })
 
@@ -128,15 +139,14 @@ describe('<SignUpForm>', () => {
     })
   })
 
-  it('surfaces a mapped signup error as an alert', async () => {
+  it('shows the same check-inbox result when an existing account response reaches the form', async () => {
     const value = makeValue({ signUpEmail: vi.fn(async () => ({ error: 'user-exists' as const })) })
     renderForm(value)
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'ada@example.com' } })
     fireEvent.change(screen.getByLabelText('Username'), { target: { value: 'ada_l' } })
     fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'Hunter22!' } })
     fireEvent.click(screen.getByRole('button', { name: 'Create account' }))
-    await waitFor(() =>
-      expect(screen.getByRole('alert').textContent).toContain('This email already has an account.'),
-    )
+    await waitFor(() => expect(screen.getByText(/check your inbox/i)).toBeTruthy())
+    expect(screen.queryByRole('alert')).toBeNull()
   })
 })

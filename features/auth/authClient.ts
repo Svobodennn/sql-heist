@@ -93,10 +93,14 @@ export async function signUpEmail(
       emailRedirectTo: callbackUrl(),
     },
   })
-  if (error) return { error: mapAuthError(error.message, error.status) }
-  // With confirmations on, signing up an already-confirmed email returns a
-  // "user" with no identities instead of an error (anti-enumeration behavior).
-  if (data.user && (data.user.identities?.length ?? 0) === 0) return { error: 'user-exists' }
+  if (error) {
+    const mapped = mapAuthError(error.message, error.status)
+    return mapped === 'user-exists' ? {} : { error: mapped }
+  }
+  // Supabase intentionally returns an identity-less user for an existing email.
+  // Preserve that indistinguishable success response instead of rebuilding an
+  // account-existence oracle in the client.
+  if (data.user && (data.user.identities?.length ?? 0) === 0) return {}
   return {}
 }
 
@@ -123,16 +127,6 @@ export async function exchangeCode(code: string): Promise<AuthResult> {
   return error ? { error: mapAuthError(error.message, error.status) } : {}
 }
 
-// Fallback for email templates built on `{{ .TokenHash }}` instead of the
-// default `?code=` PKCE link. Harmless to keep even on the PKCE flow (the
-// callback only calls it when a `token_hash` param is actually present).
-export async function verifyEmailOtp(tokenHash: string): Promise<AuthResult> {
-  const supabase = getSupabase()
-  if (!supabase) return { error: 'auth-disabled' }
-  const { error } = await supabase.auth.verifyOtp({ type: 'email', token_hash: tokenHash })
-  return error ? { error: mapAuthError(error.message, error.status) } : {}
-}
-
 export async function resendSignupEmail(email: string): Promise<AuthResult> {
   const supabase = getSupabase()
   if (!supabase) return { error: 'auth-disabled' }
@@ -144,14 +138,12 @@ export async function resendSignupEmail(email: string): Promise<AuthResult> {
   return error ? { error: mapAuthError(error.message, error.status) } : {}
 }
 
-// Best-effort pre-check for signup/gate UX; the unique constraint is the real
-// arbiter (a 23505 on insert is still handled). `null` = could not check.
-export async function usernameAvailable(username: string): Promise<boolean | null> {
-  const supabase = getSupabase()
-  if (!supabase) return null
-  const { data, error } = await supabase.rpc('username_available', { p_username: username })
-  if (error) return null
-  return Boolean(data)
+// Kept as a compatibility seam for the existing hook. Browser-side availability
+// probing is disabled; profile INSERT plus the unique constraint is the arbiter.
+export async function usernameAvailable(_username: string): Promise<boolean | null> {
+  // The private-name probe is intentionally disabled. Profile INSERT plus the
+  // unique constraint is the only browser-visible collision check.
+  return null
 }
 
 export interface ProfileRow {

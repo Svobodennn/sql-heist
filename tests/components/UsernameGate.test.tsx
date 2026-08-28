@@ -17,7 +17,7 @@ vi.mock('@/features/auth/authClient', () => ({
   usernameAvailable: vi.fn(async () => true),
 }))
 
-import { createMyProfile } from '@/features/auth/authClient'
+import { createMyProfile, usernameAvailable } from '@/features/auth/authClient'
 
 function mkRow(): ProfileRow {
   return {
@@ -83,6 +83,15 @@ describe('<UsernameGate>', () => {
 
     expect(await screen.findByRole('dialog')).toBeTruthy()
     expect(createMyProfile).not.toHaveBeenCalled()
+  })
+
+  it('does not probe private username reservations while the fallback dialog is open', async () => {
+    renderGate(makeValue({ user: userWithoutSignupUsername }))
+
+    const input = (await screen.findByLabelText('Username')) as HTMLInputElement
+    expect(input.getAttribute('maxlength')).toBe('20')
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    expect(usernameAvailable).not.toHaveBeenCalled()
   })
 
   it('prefills but never automatically claims an OAuth provider suggestion', async () => {

@@ -7,7 +7,10 @@ import { I18nContext } from '@/i18n/I18nProvider'
 import { createTranslator } from '@/i18n/translate'
 import en from '@/messages/en.json'
 
-const { replaceMock } = vi.hoisted(() => ({ replaceMock: vi.fn() }))
+const { replaceMock, verifyEmailOtpMock } = vi.hoisted(() => ({
+  replaceMock: vi.fn(),
+  verifyEmailOtpMock: vi.fn(async () => ({})),
+}))
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn(), replace: replaceMock, prefetch: vi.fn() }),
@@ -18,7 +21,7 @@ vi.mock('@/features/auth/authClient', () => ({
   exchangeCode: vi.fn(async () => ({})),
   readPendingEmail: vi.fn(() => null),
   resendSignupEmail: vi.fn(async () => ({})),
-  verifyEmailOtp: vi.fn(async () => ({})),
+  verifyEmailOtp: verifyEmailOtpMock,
 }))
 
 import { CallbackPanel } from '@/features/auth/CallbackPanel'
@@ -89,5 +92,13 @@ describe('<CallbackPanel>', () => {
     await waitFor(() => expect(replaceMock).toHaveBeenCalledWith('/'))
     expect(consumeDeletionReauthReceipt('user-1')).toBe(false)
     expect(consumeDeletionReauthReceipt('user-2')).toBe(false)
+  })
+
+  it('never consumes an unbound token_hash bearer from the callback URL', () => {
+    window.history.replaceState(null, '', '/auth/callback?token_hash=attacker-controlled')
+
+    renderCallback()
+
+    expect(verifyEmailOtpMock).not.toHaveBeenCalled()
   })
 })

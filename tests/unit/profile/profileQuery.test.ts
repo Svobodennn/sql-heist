@@ -119,6 +119,12 @@ describe('getPublicProfile', () => {
     await expect(getPublicProfile('hidden')).resolves.toBeNull()
   })
 
+  it('rejects malformed and SQL-shaped usernames before constructing a request', async () => {
+    await expect(getPublicProfile("neo' or true--")).resolves.toBeNull()
+    await expect(getPublicProfile('<script>alert(1)</script>')).resolves.toBeNull()
+    expect(getSupabaseMock).not.toHaveBeenCalled()
+  })
+
   it('fails explicitly when Supabase is disabled', async () => {
     getSupabaseMock.mockReturnValue(null)
     await expect(getPublicProfile('ada_l')).rejects.toMatchObject({ code: 'auth-disabled' })

@@ -1,6 +1,7 @@
 import type { SupabaseClient, User } from '@supabase/supabase-js'
 import { getSupabase } from '@/lib/supabase'
 import { getIdentityProviders } from '@/features/auth/oauthProfile'
+import { validateUsername } from '@/features/auth/validation'
 
 const PUBLIC_PROFILE_COLUMNS = 'username, display_name, created_at, objectives_cleared'
 const MY_PROFILE_COLUMNS =
@@ -195,7 +196,7 @@ async function updateOwnRow(patch: Record<string, string | boolean | null>): Pro
 
 export async function getPublicProfile(username: string): Promise<PublicProfile | null> {
   const candidate = username.trim().toLowerCase()
-  if (!candidate) return null
+  if (validateUsername(candidate)) return null
 
   const client = requireClient()
   const { data, error } = await client

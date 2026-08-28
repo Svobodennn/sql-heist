@@ -62,6 +62,22 @@ describe('<ProfileView>', () => {
     expect(document.body.textContent).not.toContain('@example.com')
   })
 
+  it('renders a hostile display name as text instead of HTML', async () => {
+    query.name = 'ada_l'
+    getPublicProfileMock.mockResolvedValue({
+      username: 'ada_l',
+      displayName: '<img src=x onerror=alert(1)>',
+      createdAt: '2026-08-22T00:00:00.000Z',
+      objectivesCleared: 7,
+    })
+    render(<ProfileView />)
+
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: '<img src=x onerror=alert(1)>' })).toBeTruthy(),
+    )
+    expect(document.querySelector('img')).toBeNull()
+  })
+
   it('renders a generic unavailable state when the request fails', async () => {
     query.name = 'ada_l'
     getPublicProfileMock.mockRejectedValue(new Error('database detail'))

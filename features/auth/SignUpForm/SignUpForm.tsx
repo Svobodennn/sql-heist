@@ -7,6 +7,8 @@ import { useTranslation } from '@/i18n/useTranslation'
 import { useAuth } from '../useAuth'
 import { rememberPendingEmail, resendSignupEmail, type AuthErrorCode } from '../authClient'
 import {
+  EMAIL_MAX_LENGTH,
+  USERNAME_MAX_LENGTH,
   normalizeEmail,
   normalizeUsername,
   validateEmail,
@@ -104,7 +106,7 @@ export function SignUpForm() {
     const { error } = await signUpEmail(cleanEmail, password, cleanUsername)
     inFlight.current = false
     setSubmitting(false)
-    if (error) {
+    if (error && error !== 'user-exists') {
       setFormError(error)
       return
     }
@@ -128,11 +130,6 @@ export function SignUpForm() {
         {formError && (
           <div className={styles.alert} role="alert">
             <p>{t(`auth.errors.${formError}`)}</p>
-            {formError === 'user-exists' && (
-              <Link className={styles.alertAction} href={localeHref('/auth/sign-in', locale)}>
-                {t('auth.signUp.goSignIn')}
-              </Link>
-            )}
           </div>
         )}
 
@@ -145,6 +142,7 @@ export function SignUpForm() {
             className={styles.input}
             type="email"
             autoComplete="email"
+            maxLength={EMAIL_MAX_LENGTH}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             aria-invalid={fieldError.email ? true : undefined}
@@ -165,6 +163,7 @@ export function SignUpForm() {
             type="text"
             autoComplete="username"
             spellCheck={false}
+            maxLength={USERNAME_MAX_LENGTH}
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             aria-invalid={fieldError.username ? true : undefined}

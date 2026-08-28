@@ -5,8 +5,7 @@ import { useTranslation } from '@/i18n/useTranslation'
 import { useAuth } from '../useAuth'
 import { createMyProfile } from '../authClient'
 import { getEmailSignupUsername, suggestOAuthUsername } from '../oauthProfile'
-import { normalizeUsername, validateUsername } from '../validation'
-import { useUsernameAvailability } from '../useUsernameAvailability'
+import { normalizeUsername, USERNAME_MAX_LENGTH, validateUsername } from '../validation'
 import styles from './UsernameGate.module.css'
 
 interface PendingProfileClaim {
@@ -37,10 +36,6 @@ export function UsernameGate() {
   const userId = user?.id ?? null
   const signupUsername = user ? getEmailSignupUsername(user) : ''
   const oauthUsernameSuggestion = user ? suggestOAuthUsername(user) : ''
-
-  const liveAvailability = useUsernameAvailability(username, open)
-  // A submit-time 23505 wins until the input changes again.
-  const availability = submitTaken ? 'taken' : liveAvailability
 
   useEffect(() => {
     if (!needsProfile || !userId) return
@@ -136,13 +131,9 @@ export function UsernameGate() {
 
   const statusLine = fieldError
     ? t(fieldError)
-    : availability === 'checking'
-      ? t('auth.gate.checking')
-      : availability === 'available'
-        ? t('auth.gate.available')
-        : availability === 'taken'
-          ? t('auth.gate.taken')
-          : t('auth.gate.usernameHint')
+    : submitTaken
+      ? t('auth.gate.taken')
+      : t('auth.gate.usernameHint')
 
   return (
     <div className={styles.overlay}>
@@ -174,18 +165,19 @@ export function UsernameGate() {
             type="text"
             autoComplete="username"
             spellCheck={false}
+            maxLength={USERNAME_MAX_LENGTH}
             value={username}
             onChange={(e) => {
               setUsername(e.target.value)
               setFieldError(null)
               setSubmitTaken(false)
             }}
-            aria-invalid={fieldError || availability === 'taken' ? true : undefined}
+            aria-invalid={fieldError || submitTaken ? true : undefined}
             aria-describedby="gate-username-status"
           />
           <p
             id="gate-username-status"
-            className={fieldError || availability === 'taken' ? styles.statusError : styles.status}
+            className={fieldError || submitTaken ? styles.statusError : styles.status}
             role="status"
             aria-live="polite"
           >
@@ -194,7 +186,7 @@ export function UsernameGate() {
           <button
             type="submit"
             className="btn btn--primary btn--full"
-            disabled={submitting || availability === 'taken'}
+            disabled={submitting || submitTaken}
             aria-busy={submitting}
           >
             {submitting ? t('auth.gate.submitting') : t('auth.gate.submit')}

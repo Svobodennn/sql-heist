@@ -4,10 +4,12 @@ import { z } from 'zod'
 // format, while Supabase Auth requires the same password length and four ASCII
 // character classes. Keep the client and project Auth settings in sync.
 export const USERNAME_PATTERN = /^[a-z0-9_]{3,20}$/
+export const USERNAME_MAX_LENGTH = 20
+export const EMAIL_MAX_LENGTH = 254
 export const PASSWORD_MIN_LENGTH = 8
-export const PASSWORD_SYMBOLS = "!@#$%^&*()_+-=[]{};'\\:\"|<>?,./`~"
+export const PASSWORD_SYMBOLS = '!@#$%^&*()_+-=[]{};\'\\:"|<>?,./`~'
 
-export const emailSchema = z.string().trim().email()
+export const emailSchema = z.string().trim().max(EMAIL_MAX_LENGTH).email()
 export const passwordSchema = z
   .string()
   .min(PASSWORD_MIN_LENGTH)

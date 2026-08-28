@@ -1,11 +1,17 @@
 // @vitest-environment jsdom
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+const { getSupabaseMock } = vi.hoisted(() => ({ getSupabaseMock: vi.fn() }))
+
+vi.mock('@/lib/supabase', () => ({ getSupabase: getSupabaseMock }))
+
 import {
   clearExpiredPendingEmail,
   mapAuthError,
   readPendingEmail,
   rememberPendingEmail,
+  signUpEmail,
 } from '@/features/auth/authClient'
 
 // GoTrue only returns English strings; this pins the best-effort mapping so a
@@ -71,5 +77,40 @@ describe('pending signup email', () => {
     clearExpiredPendingEmail()
 
     expect(window.localStorage.length).toBe(0)
+  })
+})
+
+describe('signup enumeration resistance', () => {
+  beforeEach(() => {
+    getSupabaseMock.mockReset()
+  })
+
+  it('returns the same success shape when Supabase hides an existing account', async () => {
+    const signUp = vi.fn(async () => ({
+      data: { user: { identities: [] } },
+      error: null,
+    }))
+    getSupabaseMock.mockReturnValue({ auth: { signUp } })
+
+    await expect(signUpEmail('ada@example.com', 'Agent47!', 'ada_l')).resolves.toEqual({})
+  })
+
+  it('also masks an explicit already-registered response without hiding other failures', async () => {
+    const signUp = vi
+      .fn()
+      .mockResolvedValueOnce({
+        data: { user: null },
+        error: { message: 'User already registered', status: 422 },
+      })
+      .mockResolvedValueOnce({
+        data: { user: null },
+        error: { message: 'Email rate limit exceeded', status: 429 },
+      })
+    getSupabaseMock.mockReturnValue({ auth: { signUp } })
+
+    await expect(signUpEmail('ada@example.com', 'Agent47!', 'ada_l')).resolves.toEqual({})
+    await expect(signUpEmail('ada@example.com', 'Agent47!', 'ada_l')).resolves.toEqual({
+      error: 'rate-limited',
+    })
   })
 })

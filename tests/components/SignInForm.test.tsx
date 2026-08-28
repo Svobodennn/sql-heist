@@ -8,6 +8,7 @@ import type { Locale } from '@/i18n/config'
 import { createTranslator } from '@/i18n/translate'
 import en from '@/messages/en.json'
 import tr from '@/messages/tr.json'
+import { EMAIL_MAX_LENGTH } from '@/features/auth/validation'
 
 // No Supabase env in the test process → module-level guard resolves 'disabled';
 // the anon/authed flows below are driven through a mocked context instead.
@@ -75,6 +76,11 @@ describe('<SignInForm>', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Sign in' }))
     expect(screen.getByText('Enter a valid email address.')).toBeTruthy()
     expect(value.signInEmail).not.toHaveBeenCalled()
+  })
+
+  it('caps the email field at the validated address boundary', () => {
+    renderWithAuth(makeAuthValue())
+    expect(screen.getByLabelText('Email').getAttribute('maxlength')).toBe(String(EMAIL_MAX_LENGTH))
   })
 
   it('surfaces a mapped auth error as an alert', async () => {
