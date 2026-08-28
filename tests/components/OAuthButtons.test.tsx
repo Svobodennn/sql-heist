@@ -48,7 +48,11 @@ describe('<OAuthButtons>', () => {
 
     cleanup()
     renderButtons()
-    fireEvent.click(screen.getByRole('button', { name: 'Continue with GitHub' }))
+    const githubButton = screen.getByRole('button', { name: 'Continue with GitHub' })
+    const githubMark = githubButton.querySelector('svg[aria-hidden="true"]')
+    expect(githubMark).toBeTruthy()
+    expect(githubMark?.getAttribute('focusable')).toBe('false')
+    fireEvent.click(githubButton)
     await waitFor(() =>
       expect(signInOAuthMock).toHaveBeenCalledWith('github', {
         purpose: 'sign-in',
