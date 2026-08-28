@@ -82,4 +82,4 @@ This is a **learning project**. The intentionally "vulnerable" query building in
 
 ## Credits
 
-- The logo/favicon mark [“Cowled” by Lorc](https://game-icons.net/1x1/lorc/cowled.html) is used under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/); SQL Heist changes its colour and size.
+- The logo/favicon is a modified form of [“Cowled” by Lorc](https://game-icons.net/1x1/lorc/cowled.html), used under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/); SQL Heist changes its geometry, colour, and size and adds database tiers to the lower cowl.
