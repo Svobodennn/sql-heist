@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   authCallback: undefined as undefined | ((event: string, session: Session | null) => void),
   claimAnonymousCaseProgress: vi.fn(),
   cacheAccountCaseProgress: vi.fn(),
+  mergeAndCacheAccountCaseProgress: vi.fn(),
   mergeLocalIntoServer: vi.fn(),
   peekOAuthProvider: vi.fn(),
   revokeUnusedProviderCredential: vi.fn(),
@@ -20,6 +21,7 @@ vi.mock('@/lib/supabase', () => ({
 vi.mock('@/features/game/lib/useCaseProgress', () => ({
   claimAnonymousCaseProgress: mocks.claimAnonymousCaseProgress,
   cacheAccountCaseProgress: mocks.cacheAccountCaseProgress,
+  mergeAndCacheAccountCaseProgress: mocks.mergeAndCacheAccountCaseProgress,
 }))
 
 vi.mock('@/features/game/lib/progressSync', () => ({
@@ -50,6 +52,7 @@ beforeEach(() => {
   mocks.getSupabase.mockReset()
   mocks.claimAnonymousCaseProgress.mockReset()
   mocks.cacheAccountCaseProgress.mockReset()
+  mocks.mergeAndCacheAccountCaseProgress.mockReset()
   mocks.mergeLocalIntoServer.mockReset()
   mocks.peekOAuthProvider.mockReset()
   mocks.revokeUnusedProviderCredential.mockReset()
@@ -69,6 +72,7 @@ beforeEach(() => {
   })
   mocks.mergeLocalIntoServer.mockResolvedValue({})
   mocks.cacheAccountCaseProgress.mockReturnValue(true)
+  mocks.mergeAndCacheAccountCaseProgress.mockReturnValue({})
   mocks.peekOAuthProvider.mockReturnValue(null)
 })
 
@@ -91,7 +95,8 @@ describe('<AuthProvider> progress handshake', () => {
       'the-front-door': { objectives: ['bypass-login'] },
     })
     expect(mocks.claimAnonymousCaseProgress).toHaveBeenCalledWith('user-1')
-    expect(mocks.cacheAccountCaseProgress).toHaveBeenCalledWith('user-1', {})
+    expect(mocks.mergeAndCacheAccountCaseProgress).toHaveBeenCalledWith('user-1', {})
+    expect(mocks.cacheAccountCaseProgress).not.toHaveBeenCalled()
 
     act(() => mocks.authCallback?.('TOKEN_REFRESHED', { user } as Session))
     await Promise.resolve()
@@ -119,5 +124,31 @@ describe('<AuthProvider> progress handshake', () => {
       expect(mocks.revokeUnusedProviderCredential).toHaveBeenCalledWith('google', session),
     )
     await waitFor(() => expect(mocks.mergeLocalIntoServer).toHaveBeenCalledTimes(1))
+  })
+
+  it('does not cache a completed handshake after the user signs out', async () => {
+    const user = { id: 'user-1' } as User
+    let resolveMerge!: (value: Record<string, { objectives: string[] }>) => void
+    mocks.mergeLocalIntoServer.mockReturnValue(
+      new Promise((resolve) => {
+        resolveMerge = resolve
+      }),
+    )
+
+    render(
+      <AuthProvider>
+        <span>game</span>
+      </AuthProvider>,
+    )
+
+    act(() => mocks.authCallback?.('SIGNED_IN', { user } as Session))
+    await waitFor(() => expect(mocks.mergeLocalIntoServer).toHaveBeenCalledTimes(1))
+    act(() => mocks.authCallback?.('SIGNED_OUT', null))
+    await act(async () => {
+      resolveMerge({ 'the-vault': { objectives: ['extract-ledger'] } })
+      await Promise.resolve()
+    })
+
+    expect(mocks.mergeAndCacheAccountCaseProgress).not.toHaveBeenCalled()
   })
 })

@@ -98,6 +98,33 @@ describe('useCaseProgress auth sync', () => {
     ).toEqual(merged)
   })
 
+  it('preserves a win recorded while the authenticated fetch is still pending', async () => {
+    syncMocks.status = 'authed'
+    syncMocks.userId = 'user-a'
+    let resolveServer!: (value: { 'the-front-door': { objectives: string[] } }) => void
+    syncMocks.fetchServerProgress.mockReturnValue(
+      new Promise((resolve) => {
+        resolveServer = resolve
+      }),
+    )
+
+    render(<ProgressProbe />)
+
+    await waitFor(() => expect(syncMocks.fetchServerProgress).toHaveBeenCalledTimes(1))
+    recordAccountObjectiveWin('user-a', 'the-vault', 'extract-ledger')
+    resolveServer({
+      'the-front-door': { objectives: ['map-schema'] },
+    })
+
+    const merged = {
+      'the-vault': { objectives: ['extract-ledger'] },
+      'the-front-door': { objectives: ['map-schema'] },
+    }
+    await waitFor(() => expect(screen.getByTestId('progress').dataset.ready).toBe('true'))
+    expect(screen.getByTestId('progress').textContent).toBe(JSON.stringify(merged))
+    expect(readAccountCaseProgress('user-a')).toEqual(merged)
+  })
+
   it('falls back to local progress when the authenticated fetch fails', async () => {
     syncMocks.status = 'authed'
     syncMocks.userId = 'user-a'

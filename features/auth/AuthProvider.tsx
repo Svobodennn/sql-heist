@@ -161,11 +161,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       import('@/features/game/lib/progressSync'),
     ])
       .then(
-        ([{ cacheAccountCaseProgress, claimAnonymousCaseProgress }, { mergeLocalIntoServer }]) => {
+        ([
+          { claimAnonymousCaseProgress, mergeAndCacheAccountCaseProgress },
+          { mergeLocalIntoServer },
+        ]) => {
           if (!active) return
           const claimed = claimAnonymousCaseProgress(userId)
           return mergeLocalIntoServer(claimed).then((merged) => {
-            cacheAccountCaseProgress(userId, merged)
+            if (active) mergeAndCacheAccountCaseProgress(userId, merged)
           })
         },
       )

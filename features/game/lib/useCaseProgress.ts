@@ -76,6 +76,15 @@ export function cacheAccountCaseProgress(userId: string, records: CaseProgressMa
   }
 }
 
+export function mergeAndCacheAccountCaseProgress(
+  userId: string,
+  incoming: CaseProgressMap,
+): CaseProgressMap {
+  const merged = mergeCaseProgress(readAccountCaseProgress(userId), incoming)
+  cacheAccountCaseProgress(userId, merged)
+  return merged
+}
+
 export function recordAccountObjectiveWin(
   userId: string,
   caseId: string,
@@ -170,8 +179,8 @@ export function useCaseProgress(): { records: CaseProgressMap; ready: boolean } 
         const server = await fetchServerProgress()
         if (cancelled) return
         const merged = mergeCaseProgress(local, server)
-        cacheAccountCaseProgress(userId, merged)
-        setRecords(merged)
+        const cached = mergeAndCacheAccountCaseProgress(userId, merged)
+        setRecords((current) => mergeCaseProgress(current, cached))
       } catch {
         // The local cache remains authoritative while the network is unavailable.
       } finally {
