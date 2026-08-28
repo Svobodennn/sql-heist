@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { z } from 'zod'
 import { useAuth } from '@/features/auth/useAuth'
-import { fetchServerProgress, mergeCaseProgress } from './progressSync'
+import { fetchServerProgress, mergeCaseProgress, subtractCaseProgress } from './progressSync'
 
 // Per-objective case progress (docs/cases-design.md — "Progress in localStorage:
 // per-objective completion within a case; case done when all pass"). On-device
@@ -15,6 +15,8 @@ import { fetchServerProgress, mergeCaseProgress } from './progressSync'
 export type CaseProgressMap = Record<string, { objectives: string[] }>
 
 const STORAGE_KEY = 'sql-heist:cases:v1'
+const ACCOUNT_STORAGE_PREFIX = 'sql-heist:cases:user:'
+const ANONYMOUS_SCOPE = 'anonymous'
 
 // localStorage is user-writable and outlives app versions, so a stored blob can be
 // corrupt, truncated, or a legacy shape. Validate at the boundary instead of
@@ -48,10 +50,62 @@ export function recordObjectiveWin(caseId: string, objectiveId: string): void {
   }
 }
 
-export function completedObjectiveIds(
+export function accountCaseProgressStorageKey(userId: string): string {
+  return `${ACCOUNT_STORAGE_PREFIX}${userId}:v1`
+}
+
+export function readAccountCaseProgress(userId: string): CaseProgressMap {
+  if (typeof window === 'undefined' || !userId) return {}
+  try {
+    const raw = window.localStorage.getItem(accountCaseProgressStorageKey(userId))
+    if (!raw) return {}
+    const parsed = caseProgressSchema.safeParse(JSON.parse(raw))
+    return parsed.success ? parsed.data : {}
+  } catch {
+    return {}
+  }
+}
+
+export function cacheAccountCaseProgress(userId: string, records: CaseProgressMap): boolean {
+  if (typeof window === 'undefined' || !userId) return false
+  try {
+    window.localStorage.setItem(accountCaseProgressStorageKey(userId), JSON.stringify(records))
+    return true
+  } catch {
+    return false
+  }
+}
+
+export function recordAccountObjectiveWin(
+  userId: string,
   caseId: string,
-  records: CaseProgressMap,
-): Set<string> {
+  objectiveId: string,
+): void {
+  const records = readAccountCaseProgress(userId)
+  const completed = new Set(records[caseId]?.objectives ?? [])
+  completed.add(objectiveId)
+  cacheAccountCaseProgress(userId, {
+    ...records,
+    [caseId]: { objectives: [...completed] },
+  })
+}
+
+export function claimAnonymousCaseProgress(userId: string): CaseProgressMap {
+  const anonymous = readCaseProgress()
+  const claimed = mergeCaseProgress(readAccountCaseProgress(userId), anonymous)
+  if (!cacheAccountCaseProgress(userId, claimed) || typeof window === 'undefined') return claimed
+
+  try {
+    const remaining = subtractCaseProgress(readCaseProgress(), anonymous)
+    if (Object.keys(remaining).length === 0) window.localStorage.removeItem(STORAGE_KEY)
+    else window.localStorage.setItem(STORAGE_KEY, JSON.stringify(remaining))
+  } catch {
+    // The account copy is already safe; a duplicate anonymous cache is harmless.
+  }
+  return claimed
+}
+
+export function completedObjectiveIds(caseId: string, records: CaseProgressMap): Set<string> {
   return new Set(records[caseId]?.objectives ?? [])
 }
 
@@ -80,41 +134,48 @@ export function caseCompletion(
 // `ready` guards a hydration mismatch: the server renders the empty baseline, then
 // the client fills real progress after mount (mirrors useProgress).
 export function useCaseProgress(): { records: CaseProgressMap; ready: boolean } {
-  const { status: authStatus } = useAuth()
+  const { status: authStatus, user } = useAuth()
+  const userId = user?.id ?? null
   const [records, setRecords] = useState<CaseProgressMap>({})
   const [ready, setReady] = useState(false)
-  const [serverReady, setServerReady] = useState(false)
+  const [recordsScope, setRecordsScope] = useState<string | null>(null)
+  const [serverReadyFor, setServerReadyFor] = useState<string | null>(null)
 
   useEffect(() => {
     setRecords(readCaseProgress())
+    setRecordsScope(ANONYMOUS_SCOPE)
     setReady(true)
   }, [])
 
   useEffect(() => {
-    if (authStatus !== 'authed') {
-      setServerReady(false)
+    if (authStatus === 'loading') {
+      setServerReadyFor(null)
+      return
+    }
+    if (authStatus !== 'authed' || !userId) {
+      setRecords(readCaseProgress())
+      setRecordsScope(ANONYMOUS_SCOPE)
+      setServerReadyFor(null)
       return
     }
 
     let cancelled = false
-    setServerReady(false)
+    const local = mergeCaseProgress(readAccountCaseProgress(userId), readCaseProgress())
+    setRecords(local)
+    setRecordsScope(userId)
+    setServerReadyFor(null)
 
     const syncServerProgress = async () => {
       try {
         const server = await fetchServerProgress()
         if (cancelled) return
-
-        for (const [caseId, progress] of Object.entries(server)) {
-          for (const objectiveId of progress.objectives) {
-            recordObjectiveWin(caseId, objectiveId)
-          }
-        }
-
-        setRecords(mergeCaseProgress(readCaseProgress(), server))
+        const merged = mergeCaseProgress(local, server)
+        cacheAccountCaseProgress(userId, merged)
+        setRecords(merged)
       } catch {
         // The local cache remains authoritative while the network is unavailable.
       } finally {
-        if (!cancelled) setServerReady(true)
+        if (!cancelled) setServerReadyFor(userId)
       }
     }
 
@@ -122,10 +183,14 @@ export function useCaseProgress(): { records: CaseProgressMap; ready: boolean } 
     return () => {
       cancelled = true
     }
-  }, [authStatus])
+  }, [authStatus, userId])
 
   const syncedReady =
-    authStatus === 'loading' ? false : authStatus === 'authed' ? ready && serverReady : ready
+    authStatus === 'loading'
+      ? false
+      : authStatus === 'authed' && userId
+        ? ready && recordsScope === userId && serverReadyFor === userId
+        : ready && recordsScope === ANONYMOUS_SCOPE
 
   return { records, ready: syncedReady }
 }

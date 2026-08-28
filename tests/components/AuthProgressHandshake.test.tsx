@@ -5,7 +5,8 @@ import type { Session, User } from '@supabase/supabase-js'
 const mocks = vi.hoisted(() => ({
   getSupabase: vi.fn(),
   authCallback: undefined as undefined | ((event: string, session: Session | null) => void),
-  readCaseProgress: vi.fn(),
+  claimAnonymousCaseProgress: vi.fn(),
+  cacheAccountCaseProgress: vi.fn(),
   mergeLocalIntoServer: vi.fn(),
   peekOAuthProvider: vi.fn(),
   revokeUnusedProviderCredential: vi.fn(),
@@ -17,7 +18,8 @@ vi.mock('@/lib/supabase', () => ({
 }))
 
 vi.mock('@/features/game/lib/useCaseProgress', () => ({
-  readCaseProgress: mocks.readCaseProgress,
+  claimAnonymousCaseProgress: mocks.claimAnonymousCaseProgress,
+  cacheAccountCaseProgress: mocks.cacheAccountCaseProgress,
 }))
 
 vi.mock('@/features/game/lib/progressSync', () => ({
@@ -46,7 +48,8 @@ const profileRow = {
 beforeEach(() => {
   mocks.authCallback = undefined
   mocks.getSupabase.mockReset()
-  mocks.readCaseProgress.mockReset()
+  mocks.claimAnonymousCaseProgress.mockReset()
+  mocks.cacheAccountCaseProgress.mockReset()
   mocks.mergeLocalIntoServer.mockReset()
   mocks.peekOAuthProvider.mockReset()
   mocks.revokeUnusedProviderCredential.mockReset()
@@ -61,10 +64,11 @@ beforeEach(() => {
   })
 
   mocks.getSupabase.mockReturnValue({ auth: { onAuthStateChange }, from })
-  mocks.readCaseProgress.mockReturnValue({
+  mocks.claimAnonymousCaseProgress.mockReturnValue({
     'the-front-door': { objectives: ['bypass-login'] },
   })
   mocks.mergeLocalIntoServer.mockResolvedValue({})
+  mocks.cacheAccountCaseProgress.mockReturnValue(true)
   mocks.peekOAuthProvider.mockReturnValue(null)
 })
 
@@ -86,6 +90,8 @@ describe('<AuthProvider> progress handshake', () => {
     expect(mocks.mergeLocalIntoServer).toHaveBeenCalledWith({
       'the-front-door': { objectives: ['bypass-login'] },
     })
+    expect(mocks.claimAnonymousCaseProgress).toHaveBeenCalledWith('user-1')
+    expect(mocks.cacheAccountCaseProgress).toHaveBeenCalledWith('user-1', {})
 
     act(() => mocks.authCallback?.('TOKEN_REFRESHED', { user } as Session))
     await Promise.resolve()

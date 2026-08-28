@@ -61,6 +61,21 @@ export function mergeCaseProgress(
   )
 }
 
+export function subtractCaseProgress(
+  current: CaseProgressMap,
+  adopted: CaseProgressMap,
+): CaseProgressMap {
+  return Object.fromEntries(
+    Object.entries(current).flatMap(([caseId, progress]) => {
+      const adoptedObjectives = new Set(adopted[caseId]?.objectives ?? [])
+      const remaining = [...new Set(progress.objectives)].filter(
+        (objectiveId) => !adoptedObjectives.has(objectiveId),
+      )
+      return remaining.length > 0 ? [[caseId, { objectives: remaining }]] : []
+    }),
+  )
+}
+
 export async function mergeLocalIntoServer(local: CaseProgressMap): Promise<CaseProgressMap> {
   const server = await fetchServerProgress()
   const merged = mergeCaseProgress(local, server)

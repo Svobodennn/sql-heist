@@ -9,6 +9,7 @@ import {
   mergeCaseProgress,
   mergeLocalIntoServer,
   pushObjectiveWin,
+  subtractCaseProgress,
 } from '@/features/game/lib/progressSync'
 
 interface MockSupabaseOptions {
@@ -89,6 +90,33 @@ describe('mergeCaseProgress', () => {
 
     expect(mergeCaseProgress(merged, server)).toEqual(merged)
     expect(mergeCaseProgress(merged, merged)).toEqual(merged)
+  })
+})
+
+describe('subtractCaseProgress', () => {
+  it('retires only the adopted objectives and preserves newer anonymous wins', () => {
+    const current = {
+      'the-front-door': { objectives: ['bypass-login', 'map-schema'] },
+      'the-vault': { objectives: ['extract-ledger'] },
+    }
+    const adopted = {
+      'the-front-door': { objectives: ['bypass-login'] },
+    }
+
+    expect(subtractCaseProgress(current, adopted)).toEqual({
+      'the-front-door': { objectives: ['map-schema'] },
+      'the-vault': { objectives: ['extract-ledger'] },
+    })
+    expect(current['the-front-door'].objectives).toEqual(['bypass-login', 'map-schema'])
+    expect(adopted['the-front-door'].objectives).toEqual(['bypass-login'])
+  })
+
+  it('drops empty cases and is idempotent', () => {
+    const current = { 'the-front-door': { objectives: ['bypass-login'] } }
+    const adopted = { 'the-front-door': { objectives: ['bypass-login'] } }
+
+    expect(subtractCaseProgress(current, adopted)).toEqual({})
+    expect(subtractCaseProgress(subtractCaseProgress(current, adopted), adopted)).toEqual({})
   })
 })
 

@@ -160,12 +160,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       import('@/features/game/lib/useCaseProgress'),
       import('@/features/game/lib/progressSync'),
     ])
-      .then(([{ readCaseProgress }, { mergeLocalIntoServer }]) => {
-        if (!active) return
-        return mergeLocalIntoServer(readCaseProgress())
-      })
+      .then(
+        ([{ cacheAccountCaseProgress, claimAnonymousCaseProgress }, { mergeLocalIntoServer }]) => {
+          if (!active) return
+          const claimed = claimAnonymousCaseProgress(userId)
+          return mergeLocalIntoServer(claimed).then((merged) => {
+            cacheAccountCaseProgress(userId, merged)
+          })
+        },
+      )
       .catch(() => {
-        // Progress stays local; a later sign-in starts a fresh handshake.
+        // Claimed progress stays in the account cache; a later sign-in retries.
       })
 
     return () => {

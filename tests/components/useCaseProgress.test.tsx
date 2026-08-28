@@ -3,11 +3,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const syncMocks = vi.hoisted(() => ({
   status: 'disabled' as 'loading' | 'anon' | 'authed' | 'disabled',
+  userId: null as string | null,
   fetchServerProgress: vi.fn(),
 }))
 
 vi.mock('@/features/auth/useAuth', () => ({
-  useAuth: () => ({ status: syncMocks.status }),
+  useAuth: () => ({
+    status: syncMocks.status,
+    user: syncMocks.userId ? { id: syncMocks.userId } : null,
+  }),
 }))
 
 vi.mock('@/features/game/lib/progressSync', async (importOriginal) => {
@@ -15,7 +19,13 @@ vi.mock('@/features/game/lib/progressSync', async (importOriginal) => {
   return { ...actual, fetchServerProgress: syncMocks.fetchServerProgress }
 })
 
-import { useCaseProgress } from '@/features/game/lib/useCaseProgress'
+import {
+  accountCaseProgressStorageKey,
+  claimAnonymousCaseProgress,
+  readAccountCaseProgress,
+  recordAccountObjectiveWin,
+  useCaseProgress,
+} from '@/features/game/lib/useCaseProgress'
 
 const STORAGE_KEY = 'sql-heist:cases:v1'
 
@@ -30,6 +40,7 @@ function ProgressProbe() {
 
 beforeEach(() => {
   syncMocks.status = 'disabled'
+  syncMocks.userId = null
   syncMocks.fetchServerProgress.mockReset()
   window.localStorage.clear()
 })
@@ -52,8 +63,9 @@ describe('useCaseProgress auth sync', () => {
     },
   )
 
-  it('waits for an authenticated fetch, unions both sources, and caches the result locally', async () => {
+  it('waits for an authenticated fetch and caches the union only under that account', async () => {
     syncMocks.status = 'authed'
+    syncMocks.userId = 'user-a'
     const local = { 'the-front-door': { objectives: ['bypass-login'] } }
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(local))
     let resolveServer!: (value: {
@@ -80,11 +92,15 @@ describe('useCaseProgress auth sync', () => {
     }
     await waitFor(() => expect(screen.getByTestId('progress').dataset.ready).toBe('true'))
     expect(screen.getByTestId('progress').textContent).toBe(JSON.stringify(merged))
-    expect(JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? '{}')).toEqual(merged)
+    expect(JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? '{}')).toEqual(local)
+    expect(
+      JSON.parse(window.localStorage.getItem(accountCaseProgressStorageKey('user-a')) ?? '{}'),
+    ).toEqual(merged)
   })
 
   it('falls back to local progress when the authenticated fetch fails', async () => {
     syncMocks.status = 'authed'
+    syncMocks.userId = 'user-a'
     const local = { 'the-quiet-room': { objectives: ['probe-pin'] } }
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(local))
     syncMocks.fetchServerProgress.mockRejectedValue(new Error('offline'))
@@ -94,5 +110,27 @@ describe('useCaseProgress auth sync', () => {
     await waitFor(() => expect(screen.getByTestId('progress').dataset.ready).toBe('true'))
     expect(screen.getByTestId('progress').textContent).toBe(JSON.stringify(local))
     expect(syncMocks.fetchServerProgress).toHaveBeenCalledTimes(1)
+  })
+
+  it('claims anonymous progress into one account without exposing it to another account', () => {
+    const anonymous = { 'the-front-door': { objectives: ['bypass-login'] } }
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(anonymous))
+
+    expect(claimAnonymousCaseProgress('user-a')).toEqual(anonymous)
+    expect(readAccountCaseProgress('user-a')).toEqual(anonymous)
+    expect(readAccountCaseProgress('user-b')).toEqual({})
+    expect(window.localStorage.getItem(STORAGE_KEY)).toBeNull()
+  })
+
+  it('records an authenticated win without mutating anonymous progress', () => {
+    const anonymous = { 'the-front-door': { objectives: ['bypass-login'] } }
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(anonymous))
+
+    recordAccountObjectiveWin('user-a', 'the-vault', 'extract-ledger')
+
+    expect(readAccountCaseProgress('user-a')).toEqual({
+      'the-vault': { objectives: ['extract-ledger'] },
+    })
+    expect(JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? '{}')).toEqual(anonymous)
   })
 })
