@@ -20,9 +20,12 @@ import { canOpenHint, shouldSuggestHint } from '@/lib/engine/scoring'
 import { cx } from '@/ui/cx'
 import { useTranslation } from '@/i18n/useTranslation'
 import { localeHref } from '@/i18n/localeHref'
+import { useAuth } from '@/features/auth/useAuth'
 import { useCaseEngine } from '../../lib/useCaseEngine'
+import { pushObjectiveWin } from '../../lib/progressSync'
 import {
   completedObjectiveIds,
+  recordAccountObjectiveWin,
   recordObjectiveWin,
   useCaseProgress,
 } from '../../lib/useCaseProgress'
@@ -86,6 +89,8 @@ function clearedInputs(inputs: Record<string, string>): Record<string, string> {
 
 export function CasePlayer({ gameCase }: { gameCase: Case }) {
   const { t, locale } = useTranslation()
+  const { status: authStatus, user: authUser } = useAuth()
+  const authUserId = authUser?.id ?? null
   const reduce = useReducedMotion()
   const objectives = gameCase.objectives
   const { status, run, commit, reset, retry } = useCaseEngine(gameCase)
@@ -182,7 +187,14 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
       push('success', t('game.toast.won'))
       if (!completedIds.has(obj.id)) {
         commit(index) // Model A: this run's DB state becomes the next objective's start.
-        recordObjectiveWin(gameCase.id, obj.id)
+        if (authStatus === 'authed' && authUserId) {
+          recordAccountObjectiveWin(authUserId, gameCase.id, obj.id)
+        } else {
+          recordObjectiveWin(gameCase.id, obj.id)
+        }
+        if (authStatus === 'authed') {
+          void pushObjectiveWin(gameCase.id, obj.id).catch(() => {})
+        }
         setSolvedInputs((prev) => ({ ...prev, [obj.id]: inputs })) // the winning payload, for the debrief
         const next = new Set(completedIds)
         next.add(obj.id)
@@ -210,7 +222,19 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
           : "Nothing came back — that one didn't land.",
       )
     }
-  }, [selectedIndex, objectives, uiByObjective, run, gameCase, push, t, commit, completedIds])
+  }, [
+    selectedIndex,
+    objectives,
+    uiByObjective,
+    run,
+    gameCase,
+    push,
+    t,
+    commit,
+    completedIds,
+    authStatus,
+    authUserId,
+  ])
 
   const handleChange = useCallback(
     (field: string, value: string) => {
@@ -296,7 +320,10 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
         ? t('game.case.announce.closed')
         : stage === 'payoff'
           ? objective.payoff
-            ? t('game.case.announce.clearedGot', { index: selectedIndex + 1, got: objective.payoff.got })
+            ? t('game.case.announce.clearedGot', {
+                index: selectedIndex + 1,
+                got: objective.payoff.got,
+              })
             : t('game.case.announce.cleared', { index: selectedIndex + 1 })
           : t('game.case.announce.active', {
               index: selectedIndex + 1,
@@ -381,7 +408,11 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
                     onStart={handleStart}
                   />
                 ) : stage === 'closed' ? (
-                  <CaseClosed gameCase={gameCase} solvedInputs={solvedInputs} onReplay={handleReplay} />
+                  <CaseClosed
+                    gameCase={gameCase}
+                    solvedInputs={solvedInputs}
+                    onReplay={handleReplay}
+                  />
                 ) : stage === 'payoff' ? (
                   <ObjectivePayoff
                     index={selectedIndex}

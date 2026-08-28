@@ -41,7 +41,6 @@ create table public.profiles (
   username           citext unique not null,          -- public handle (may be a pseudonym)
   display_name       text,
   leaderboard_opt_in boolean not null default false,   -- explicit opt-in; see 30-compliance
-  country            text,                              -- optional, for regional boards (open)
   created_at         timestamptz not null default now(),
   updated_at         timestamptz not null default now()
 );

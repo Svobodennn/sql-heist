@@ -5,11 +5,21 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { cx } from '@/ui/cx'
 import { Logo } from '../Logo'
-import { IconMenu, IconClose, IconUser, IconHome, IconBoard, IconHelpCircle } from '../icons'
+import {
+  IconMenu,
+  IconClose,
+  IconUser,
+  IconHome,
+  IconBoard,
+  IconTrophy,
+  IconHelpCircle,
+} from '../icons'
 import { ShareButton } from '../ShareButton'
 import { LanguageSwitcher } from '../LanguageSwitcher'
 import { useTranslation } from '@/i18n/useTranslation'
 import { localeHref } from '@/i18n/localeHref'
+import { useAuth } from '@/features/auth/useAuth'
+import { UserMenu } from '@/features/auth/UserMenu'
 import styles from './Navbar.module.css'
 
 // Icons are decorative (aria-hidden in <Base>); the translated text stays the
@@ -17,8 +27,26 @@ import styles from './Navbar.module.css'
 const NAV_LINKS = [
   { href: '/', key: 'nav.home', Icon: IconHome },
   { href: '/cases', key: 'nav.jobs', Icon: IconBoard },
+  { href: '/leaderboard', key: 'nav.leaderboard', Icon: IconTrophy },
   { href: '/help', key: 'nav.help', Icon: IconHelpCircle },
 ] as const
+
+// Auth entry point (desktop + mobile). Env-less builds ('disabled') render nothing;
+// 'loading' renders like 'anon' — that IS what the prerendered HTML contains, so
+// hydration never mismatches. Interactive auth pages have localized static variants;
+// the email callback remains canonical inside localeHref.
+function AuthEntry() {
+  const { status } = useAuth()
+  const { locale, t } = useTranslation()
+  if (status === 'disabled') return null
+  if (status === 'authed') return <UserMenu />
+  return (
+    <Link href={localeHref('/auth/sign-in', locale)} className={styles.signin}>
+      <IconUser size={18} />
+      <span>{t('nav.signIn')}</span>
+    </Link>
+  )
+}
 
 // Site chrome. Rendered once from app/layout.tsx so it wraps every route. Sticky
 // at top:0 (see Navbar.module.css); the in-game chrome (case header + objectives
@@ -77,11 +105,7 @@ export function Navbar() {
         <div className={styles.actions}>
           <ShareButton />
           <LanguageSwitcher />
-          {/* Stubbed auth entry point — accounts land in WS5. */}
-          <a href="#wip" className={styles.signin} title={t('nav.signInTitle')}>
-            <IconUser size={18} />
-            <span>{t('nav.signIn')}</span>
-          </a>
+          <AuthEntry />
         </div>
 
         <button
@@ -118,10 +142,7 @@ export function Navbar() {
         <div className={styles.mobileActions}>
           <ShareButton compact />
           <LanguageSwitcher />
-          <a href="#wip" className={styles.signin} title={t('nav.signInTitle')}>
-            <IconUser size={18} />
-            <span>{t('nav.signIn')}</span>
-          </a>
+          <AuthEntry />
         </div>
       </div>
     </header>

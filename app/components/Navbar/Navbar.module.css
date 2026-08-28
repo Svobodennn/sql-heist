@@ -94,6 +94,10 @@
   font-weight: 500;
   font-size: 0.9375rem;
   border: 1px solid var(--border-strong);
+  /* Element-agnostic: the authed state renders a <button>, not an <a>. */
+  background: transparent;
+  font-family: inherit;
+  cursor: pointer;
 }
 .signin:hover {
   color: var(--primary);
@@ -163,7 +167,7 @@
   border-top: 1px solid var(--border);
 }
 
-@media (min-width: 768px) {
+@media (min-width: 1100px) {
   .links,
   .actions {
     display: flex;

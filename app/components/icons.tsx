@@ -38,7 +38,14 @@ export const IconClose = (p: IconProps) => (
 )
 
 // Generic icons shared with the game feature live in the ui/ layer (one source).
-export { IconArrowRight, IconBoard, IconCheck, IconChevronDown, IconGlobe } from '@/ui/icons'
+export {
+  IconArrowRight,
+  IconBoard,
+  IconCheck,
+  IconChevronDown,
+  IconGlobe,
+  IconUser,
+} from '@/ui/icons'
 
 // Share = a link handed off (node + outgoing arc).
 export const IconShare = (p: IconProps) => (
@@ -58,14 +65,6 @@ export const IconLink = (p: IconProps) => (
   </Base>
 )
 
-// Sign-in entry point (stub → WS5).
-export const IconUser = (p: IconProps) => (
-  <Base {...p}>
-    <circle cx="12" cy="8" r="3.5" />
-    <path d="M5 20a7 7 0 0 1 14 0" />
-  </Base>
-)
-
 export const IconMail = (p: IconProps) => (
   <Base {...p}>
     <rect x="3" y="5" width="18" height="14" rx="2" />
@@ -81,6 +80,15 @@ export const IconHome = (p: IconProps) => (
     <path d="M3 10.75 12 4l9 6.75" />
     <path d="M5.5 9.5V19a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V9.5" />
     <path d="M9.75 20v-5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75v5" />
+  </Base>
+)
+
+// Leaderboard = a trophy cup.
+export const IconTrophy = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M8 4h8v4a4 4 0 0 1-8 0V4Z" />
+    <path d="M8 6H5v1a4 4 0 0 0 4 4M16 6h3v1a4 4 0 0 1-4 4" />
+    <path d="M12 12v4M8 20h8M9 16h6v4" />
   </Base>
 )
 

@@ -5,6 +5,8 @@ import { Navbar } from './components/Navbar'
 import { Footer } from './components/Footer'
 import { CookieConsent } from './components/CookieConsent'
 import { I18nProvider } from '@/i18n/I18nProvider'
+import { AuthProvider } from '@/features/auth/AuthProvider'
+import { UsernameGate } from '@/features/auth/UsernameGate'
 import { SITE_URL, SITE_NAME, SITE_TAGLINE, SITE_DESCRIPTION } from './siteConfig'
 import styles from './layout.module.css'
 import './globals.css'
@@ -71,14 +73,21 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           Skip to content
         </a>
         <I18nProvider>
-          <div className={styles.chrome}>
-            <Navbar />
-            <div id="main-content" tabIndex={-1} className={styles.main}>
-              {children}
+          {/* AuthProvider sits INSIDE I18nProvider so auth UI can translate. With
+              no Supabase env it is a pass-through ('disabled') — anonymous play
+              never touches it. */}
+          <AuthProvider>
+            <div className={styles.chrome}>
+              <Navbar />
+              <div id="main-content" tabIndex={-1} className={styles.main}>
+                {children}
+              </div>
+              <Footer />
             </div>
-            <Footer />
-          </div>
-          <CookieConsent />
+            <CookieConsent />
+            {/* Renders nothing until an authed user has no profiles row yet. */}
+            <UsernameGate />
+          </AuthProvider>
         </I18nProvider>
       </body>
     </html>

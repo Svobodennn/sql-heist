@@ -10,9 +10,9 @@ The guiding idea: **you can't defend what you don't understand.** See the attack
 
 Yes. SQL Heist is a **teaching tool**, in the spirit of OWASP Juice Shop, PortSwigger's Web Security Academy, and SQL Noir:
 
-- **100% client-side, local sandbox.** A real (tiny) SQLite database runs *inside your browser* via [`sql.js`](https://sql.js.org) (SQLite compiled to WebAssembly). Your payloads genuinely work against it — but there is **no real target, no backend, and no network**.
+- **100% client-side, local sandbox.** A real (tiny) SQLite database runs *inside your browser* via [`sql.js`](https://sql.js.org) (SQLite compiled to WebAssembly). Your payloads genuinely work against it, but never reach a real target or a remote execution backend. Optional account sync is separate from the practice target.
 - **Defense-first.** Every attack is paired with the exact parameterized query that neutralizes it.
-- No credentials, no live systems, nothing leaves your machine.
+- No live-system credentials or targets. Practice payloads stay in the browser; only players who choose an account send identity and completed-objective data to Supabase for sync.
 
 ## How it plays
 
@@ -38,13 +38,14 @@ Eight objectives across three cases; each objective teaches one distinct techniq
 
 - **Next.js** (App Router) + **TypeScript**
 - **sql.js** — SQLite compiled to WebAssembly: the real database engine, running in the browser
-- 100% client-side, **static export** — deployable to any static host
+- Client-only Supabase auth and progress sync — optional; anonymous local play remains the default
+- **Static export** — deployable to any static host, with no Next.js server runtime
 - **Data-driven cases**: each case is a JSON file; adding or editing a case does not touch the engine
 - **i18n** — English, Turkish, Polish, on per-locale static routes (`/` · `/tr` · `/pl`)
 
 ## Status
 
-✅ **Live** — deployed to Vercel at <https://sql-heist.vercel.app>.
+✅ **Live** — deployed to Vercel at <https://sqlheist.com>.
 
 - Core engine (query composer, SQLite runner, win evaluator, case session) — fully test-covered
 - Three cases · eight objectives · defense debrief with the parameterized fix across 10 backend stacks
@@ -81,4 +82,4 @@ This is a **learning project**. The intentionally "vulnerable" query building in
 
 ## Credits
 
-- The logo/favicon mark ("cowled") is from [game-icons.net](https://game-icons.net), licensed under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/).
+- The logo/favicon is a modified form of [“Cowled” by Lorc](https://game-icons.net/1x1/lorc/cowled.html), used under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/); SQL Heist changes its geometry, colour, and size and adds database tiers to the lower cowl.

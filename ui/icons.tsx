@@ -60,3 +60,10 @@ export const IconGlobe = (p: IconProps) => (
     <path d="M4 12h16M12 4c2.5 2.5 2.5 13 0 16M12 4c-2.5 2.5-2.5 13 0 16" />
   </Base>
 )
+
+export const IconUser = (p: IconProps) => (
+  <Base {...p}>
+    <circle cx="12" cy="8" r="3.5" />
+    <path d="M5 20a7 7 0 0 1 14 0" />
+  </Base>
+)

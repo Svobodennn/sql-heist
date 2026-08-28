@@ -2,13 +2,207 @@
   "nav": {
     "home": "Home",
     "jobs": "Cases",
+    "leaderboard": "Leaderboard",
     "help": "Help",
     "signIn": "Sign in",
-    "signInTitle": "Accounts are coming soon",
+    "signOut": "Sign out",
+    "account": "Account",
     "brandAria": "SQL Heist — home",
     "primaryAria": "Primary",
     "openMenu": "Open menu",
     "closeMenu": "Close menu"
+  },
+  "auth": {
+    "signIn": {
+      "stamp": "Agency access",
+      "title": "Sign in",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign in",
+      "noAccount": "No account yet?",
+      "goSignUp": "Create one",
+      "resend": "Resend confirmation email",
+      "resent": "Confirmation email sent.",
+      "submitting": "Signing in…"
+    },
+    "signUp": {
+      "stamp": "New operative",
+      "title": "Create account",
+      "email": "Email",
+      "username": "Username",
+      "usernameHint": "3–20 characters: a–z, 0–9, _",
+      "password": "Password",
+      "passwordHint": "At least 8 characters, including a–z, A–Z, 0–9, and an ASCII symbol.",
+      "submit": "Create account",
+      "haveAccount": "Already have an account?",
+      "goSignIn": "Sign in",
+      "checkInboxTitle": "Check your inbox",
+      "checkInbox": "We sent a confirmation link to {email}. Open it in this browser to finish setup.",
+      "resend": "Resend email",
+      "resent": "Sent — check your inbox (and spam).",
+      "checking": "Checking availability…",
+      "available": "Available.",
+      "taken": "Taken — try another.",
+      "submitting": "Creating account…",
+      "privacyNotice": "We process your email, username, account progress and, if you choose Google or GitHub, the identity details that provider returns only to create and sync this optional account. Details:",
+      "privacyLink": "Privacy notice",
+      "termsNotice": "By creating an account, you accept the",
+      "termsLink": "Terms of Use"
+    },
+    "oauth": {
+      "continue": {
+        "google": "Continue with Google",
+        "github": "Continue with GitHub"
+      },
+      "loading": {
+        "google": "Opening Google…",
+        "github": "Opening GitHub…"
+      },
+      "linkNotice": "Provider sign-in creates or accesses an optional SQL Heist account and may link to an existing account with the same verified email.",
+      "privacyNotice": "Details:",
+      "privacyLink": "Privacy notice",
+      "termsNotice": "By continuing, you accept the",
+      "termsLink": "Terms of Use",
+      "divider": "or use email"
+    },
+    "callback": {
+      "stamp": "Agency access",
+      "confirming": "Opening your session…",
+      "hold": "Verifying the sign-in response.",
+      "errorTitle": "Sign-in didn't complete",
+      "verifyFailed": "The sign-in response couldn't be verified in this browser. Return to sign in and try again.",
+      "goSignIn": "Go to sign in",
+      "resend": "Resend confirmation email",
+      "resent": "Sent — check your inbox."
+    },
+    "gate": {
+      "stamp": "Choose your alias",
+      "title": "Pick a username",
+      "desc": "Your account username. It stays private until you opt in to a public profile. Lowercase letters, digits and underscore only.",
+      "username": "Username",
+      "submit": "Claim it",
+      "signOut": "Sign out instead",
+      "checking": "Checking availability…",
+      "available": "Available.",
+      "taken": "Taken — try another.",
+      "submitting": "Claiming…",
+      "usernameHint": "3–20 characters: a–z, 0–9, _"
+    },
+    "validation": {
+      "email": "Enter a valid email address.",
+      "password": "Use at least 8 characters, including a–z, A–Z, 0–9, and an ASCII symbol.",
+      "username": "3–20 characters: a–z, 0–9, _"
+    },
+    "errors": {
+      "auth-disabled": "Accounts are unavailable right now — the game works without them.",
+      "invalid-credentials": "Wrong email or password.",
+      "email-not-confirmed": "Email not confirmed yet — check your inbox.",
+      "user-exists": "This email already has an account.",
+      "weak-password": "Use at least 8 characters, including a–z, A–Z, 0–9, and an ASCII symbol.",
+      "rate-limited": "Too many attempts — wait a minute and try again.",
+      "username-taken": "That username is taken.",
+      "generic": "Something went wrong. Try again."
+    },
+    "menu": {
+      "openAria": "Account menu: {username}",
+      "listAria": "Account"
+    }
+  },
+  "profile": {
+    "stamp": "Public dossier",
+    "emptyTitle": "No operative specified",
+    "emptyBody": "Add a username to the dossier URL to look up an opted-in operative.",
+    "browseCases": "Browse cases",
+    "loading": "Opening dossier…",
+    "loadingBody": "Checking the public records.",
+    "privateTitle": "Private or not found",
+    "privateBody": "This operative does not exist or has chosen to stay out of public records.",
+    "errorTitle": "Couldn't open this dossier",
+    "errorBody": "Public profiles are unavailable right now. Try again shortly.",
+    "objectivesCleared": "Objectives cleared",
+    "joined": "Joined"
+  },
+  "leaderboard": {
+    "stamp": "Agency rankings",
+    "title": "Casual leaderboard",
+    "intro": "Opted-in operatives ranked by objectives cleared.",
+    "casualLabel": "Casual board",
+    "casualBody": "Progress is submitted by players' browsers and is not independently verified.",
+    "loading": "Opening the ledger…",
+    "loadingBody": "Fetching public operative records.",
+    "emptyTitle": "No operatives on the board",
+    "emptyBody": "No one has opted into the public leaderboard yet.",
+    "errorTitle": "Couldn't open the leaderboard",
+    "errorBody": "The public board is unavailable right now. Try again shortly.",
+    "browseCases": "Browse cases",
+    "tableCaption": "Opted-in operative rankings",
+    "tableRegionAria": "Leaderboard results",
+    "scrollHint": "Scroll horizontally to see every column.",
+    "rank": "Rank",
+    "operative": "Operative",
+    "objectives": "Objectives",
+    "lastActive": "Last active",
+    "neverActive": "No synced activity",
+    "yourRank": "Your rank",
+    "rankLoading": "Finding your position…",
+    "rankError": "Your rank is unavailable right now.",
+    "rankObjectives": "Objectives cleared: {count}",
+    "notRanked": "You are not on the board.",
+    "notRankedBody": "Opt in from your account to appear.",
+    "manageVisibility": "Manage visibility"
+  },
+  "account": {
+    "stamp": "Operative file",
+    "title": "Your account",
+    "lede": "Manage the identity and synced data attached to your SQL Heist account.",
+    "disabledTitle": "Accounts unavailable",
+    "disabledBody": "The game still works offline without an account.",
+    "loading": "Loading account…",
+    "loadingBody": "Checking your authenticated profile.",
+    "profileTitle": "Profile details",
+    "username": "Username",
+    "usernameLocked": "Usernames cannot be changed yet.",
+    "displayName": "Display name",
+    "save": "Save profile",
+    "saving": "Saving…",
+    "saved": "Profile saved.",
+    "visibilityTitle": "Public visibility",
+    "visibilityLabel": "Show my profile publicly",
+    "visibilityConsent": "Opting in publishes your username, display name, join date, objectives cleared and last synced activity time. You can withdraw at any time.",
+    "visibilityPrivacyLink": "Privacy notice",
+    "visibilityPublic": "Your public profile is visible.",
+    "visibilityPrivate": "Your profile is private.",
+    "viewPublicProfile": "View public profile",
+    "dataTitle": "Your data",
+    "dataBody": "Download a JSON copy of your account and provider identity metadata, profile, synced case progress, and public-profile consent history.",
+    "export": "Download my data",
+    "exporting": "Preparing download…",
+    "exportReady": "Your data download is ready.",
+    "deleteTitle": "Deletion request",
+    "deleteBody": "Request erasure of your account and synced progress. Your profile becomes private immediately, future writes are blocked, and you will be signed out. Final deletion is completed manually within 30 days.",
+    "deleteRequest": "Request account deletion",
+    "deleteModalTitle": "Submit an erasure request?",
+    "deleteModalBody": "This immediately hides and locks the account. Confirm your username, then verify with your password or a linked sign-in provider. The operator will permanently delete the account and synced data within 30 days. Deleting SQL Heist does not delete a provider account. A Google revocation request is submitted after sign-in; GitHub authorization may remain, so revoke SQL Heist separately in GitHub Authorized OAuth Apps if you want to end it.",
+    "deleteConfirmLabel": "Type {username} to confirm",
+    "deletePasswordLabel": "Current password",
+    "cancel": "Cancel",
+    "deleteConfirm": "Submit deletion request",
+    "deleteProviderVerified": "Provider verification completed. Type your username again to finish this one-time deletion request.",
+    "deleteFinish": "Finish deletion request",
+    "deleteWith": {
+      "google": "Verify with Google",
+      "github": "Verify with GitHub"
+    },
+    "deleting": "Submitting…",
+    "errors": {
+      "invalidProfile": "Display name must be at most 40 characters.",
+      "save": "The profile could not be saved. Try again.",
+      "visibility": "Visibility could not be changed. Try again.",
+      "export": "Your data could not be prepared. Try again.",
+      "password": "That password did not match. Try again.",
+      "reauth": "Your verification expired or could not be confirmed. Try again.",
+      "delete": "The deletion request could not be submitted. Try again."
+    }
   },
   "lang": {
     "triggerAria": "Language: {language}",
@@ -34,7 +228,7 @@
     "linkPrivacy": "Privacy",
     "linkTerms": "Terms",
     "linkContact": "Contact",
-    "note": "Runs entirely in your browser. No server, no net.",
+    "note": "The practice database runs locally. Account sync is optional.",
     "alsoTry": "also try",
     "copyright": "© {year} SQL Heist"
   },
@@ -55,7 +249,7 @@
       "facts": {
         "0": {
           "k": "Where",
-          "v": "100% in your browser. Nothing ever touches the network."
+          "v": "The practice database and every payload run in your browser; account sync is separate and optional."
         },
         "1": {
           "k": "Against",
@@ -66,7 +260,7 @@
           "v": "No real target — the only thing you can break is the sandbox."
         }
       },
-      "safe": "Safe by design — no accounts, no downloads, no setup."
+      "safe": "Safe by design — no account needed, no downloads, no setup."
     },
     "how": {
       "eyebrow": "The Job",
@@ -109,11 +303,11 @@
     "faqTeasers": {
       "0": {
         "q": "Is this legal?",
-        "a": "Yes. Every job runs entirely in your browser against a sandboxed SQLite database that ships with the game. No real systems, no network calls — nothing to break but the practice target."
+        "a": "Yes. Every job targets only the sandboxed SQLite database in your browser. The practice payload never reaches a real system; site delivery and optional account sync are separate from the target."
       },
       "1": {
         "q": "Do I need to install anything?",
-        "a": "No. It runs in a modern browser. The SQLite engine loads on demand the first time you need it — no accounts, no downloads, no setup."
+        "a": "No. It runs in a modern browser. The SQLite engine loads on demand the first time you need it — no account needed, no downloads, no setup."
       },
       "2": {
         "q": "Do I need to know SQL already?",
@@ -229,11 +423,11 @@
     "items": {
       "0": {
         "q": "Is this legal?",
-        "a": "Yes. Every job runs entirely in your browser against a sandboxed SQLite database that ships with the game. There are no real systems on the other side, no network calls, and nothing to break but the practice target."
+        "a": "Yes. Every job targets only the sandboxed SQLite database in your browser. The practice payload never reaches a real system; site delivery and optional account sync are separate from the target."
       },
       "1": {
         "q": "Do I need to install anything?",
-        "a": "No. It runs in a modern browser. The database engine (SQLite compiled to WebAssembly) loads on demand the first time you need it — no accounts, no downloads, no setup."
+        "a": "No. It runs in a modern browser. The database engine (SQLite compiled to WebAssembly) loads on demand the first time you need it — no account needed, no downloads, no setup."
       },
       "2": {
         "q": "Do I need to know SQL already?",
@@ -245,7 +439,7 @@
       },
       "4": {
         "q": "Where is my progress saved?",
-        "a": "On this device, in your browser's local storage. There's no account and no server, so we never see it. Clear your browser data — or open the game somewhere else — and you start fresh."
+        "a": "On this device, in your browser's local storage. Anonymous play uses no account and no server, so we never see it — sign in and your progress also syncs to your account. Clear your browser data, or open the game somewhere else, and local play starts fresh."
       },
       "5": {
         "q": "Does it cost anything?",
@@ -274,40 +468,61 @@
   "consent": {
     "aria": "Storage notice",
     "title": "This game uses local storage",
-    "body": "SQL Heist keeps your progress and language choice in your browser's local storage. No tracking, no analytics, no ad cookies — and nothing ever leaves your device.",
+    "body": "SQL Heist uses local storage for language, progress, this notice, and the signed-in Supabase session. OAuth return routing and deletion verification use short-lived session storage in the same tab. A pending signup email expires after one hour and is removed the next time the app loads or checks it; clearing site data removes it sooner. No analytics or advertising tracking. Account sync uses Supabase; public profiles require explicit opt-in.",
     "accept": "Got it"
   },
   "privacy": {
     "eyebrow": "The Fine Print",
     "title": "Privacy",
-    "lead": "Short version: we don't collect you. The long version is below, and it's still short.",
+    "lead": "Anonymous by default. Optional accounts sync only the data needed for your identity, progress, and chosen public presence.",
     "glanceLabel": "At a glance",
-    "glanceBody": "No accounts. No tracking. No analytics in this build. Your progress lives in your browser's local storage on your device — we have no server that can read it.",
+    "glanceBody": "You can play without an account: gameplay and progress stay in local storage, while the host still receives the normal request needed to serve the site. An optional account sends the account and progress data described below to Supabase; Google or GitHub is contacted only if you choose that sign-in method. No analytics or advertising trackers are included in this build.",
     "sections": {
       "0": {
-        "title": "What we collect",
-        "body": "Nothing that identifies you. SQL Heist has no account system in this build, no sign-up, and no login (the “Sign in” link is a placeholder for a future release). We don't ask for your name, email, or anything else to play."
+        "title": "Controller and contact",
+        "body": "We operate SQL Heist and act as the data controller for the processing described in this notice. Privacy and data-rights requests can be sent to melih.sarac@hotmail.com."
       },
       "1": {
-        "title": "What stays on your device",
-        "body": "Your progress — which jobs you've finished and your best scores — is saved in your browser's local storage, on your device. It never leaves the browser and we have no way to read it. Clearing your browser data removes it."
+        "title": "Data we process",
+        "body": "Data is collected electronically: directly from the signup/profile forms and your browser, from Google or GitHub only when you choose that sign-in method, through Supabase API requests when signed in, and automatically through ordinary hosting requests. Anonymous play does not require a name or email. Your browser stores your language choice and completed case objectives locally; hosting requests may include IP address, user agent, requested URL, and time.",
+        "body2": "If you create an account, we process your email, chosen username, optional display name, public-profile choice and consent history (grant or withdrawal, notice version, source, and time), completed case and objective identifiers, and account/progress timestamps. If you choose Google or GitHub, Supabase receives and stores the provider name, provider account identifier, verified email, and available fields such as name, username, and avatar URL as provider identity metadata. We request only sign-in identity/profile access. SQL Heist does not retain provider access or refresh tokens or use them to call provider APIs; a transient Google credential is used only to submit a best-effort revocation request immediately after a completed Google sign-in. Supabase automatically links identities that use the same verified email. Your password, if used, goes directly to Supabase Auth; only a salted password hash is retained, and we cannot read it. If you email us, we also process your address, message contents, sent/received times, and ordinary mail-routing metadata. We do not send your SQL practice payloads to Supabase or intentionally collect special-category data."
       },
       "2": {
-        "title": "Cookies and tracking",
-        "body": "The game sets no tracking or advertising cookies and includes no third-party analytics in this build. If that ever changes, we'll update this page and this date before it does."
+        "title": "Local and synced progress",
+        "body": "Progress is always written to your browser first. While signed in, completed-objective sets are also merged into your account so progress can move across devices without deleting either copy. Clearing browser data removes the local copy, not the account copy; signing out does not erase either. Account settings let you export or request deletion of the synced copy."
       },
       "3": {
-        "title": "Third parties",
-        "body": "The game is a static site. Fonts are bundled at build time and the database engine runs locally in your browser, so ordinary play makes no third-party requests. Whoever hosts the site may keep standard server logs (such as IP addresses) for security and operations; that handling is governed by the host's own policies."
+        "title": "Purposes and legal bases",
+        "body": "We process account identity, email/password or chosen provider authentication, export, deletion requests, and cross-device progress to provide the optional account service you request (GDPR Article 6(1)(b); KVKK Article 5(2)(c)). Browser storage needed for language, local progress, OAuth return state, deletion re-verification, and an authenticated session is used to deliver those requested features.",
+        "body2": "Publishing a profile or leaderboard entry relies on your explicit, revocable choice (GDPR Article 6(1)(a); KVKK explicit consent). Limited hosting and security logs may be processed to operate and protect the service (GDPR Article 6(1)(f); KVKK Article 5(2)(f)). Correspondence is processed to answer support or rights requests and keep required evidence (GDPR Articles 6(1)(b), (c), and (f), as applicable; KVKK Article 5(2)(c), (ç), and (f)). We do not sell data, use it for advertising, or make decisions about you solely by automated means."
       },
       "4": {
-        "title": "Children",
-        "body": "SQL Heist is a learning tool aimed at developers. It isn't directed at children under 13 and doesn't knowingly collect their data."
+        "title": "Public profile and casual leaderboard",
+        "body": "Accounts are private by default. If you opt in, your username, optional display name, join date, objectives-cleared count, and activity timestamp may appear publicly. Email and internal user ID are never included. You can withdraw the opt-in from account settings; the profile and leaderboard entry then disappear immediately. We record each actual grant or withdrawal with a database timestamp and notice version so the choice can be demonstrated and respected. The casual leaderboard is based on client-submitted progress and is not a verified competition."
       },
       "5": {
-        "title": "Changes",
-        "body": "If we update how any of this works, we'll revise this page and the “last updated” date above. Questions? ",
-        "link": "Reach the crew"
+        "title": "Service and sign-in providers; international transfers",
+        "body": "Cloudflare proxies the sqlheist.com domain and may process request/security data; Vercel serves the static site; Supabase provides authentication and database services for optional accounts; Microsoft Outlook.com/Hotmail handles messages sent to the contact address. If you choose provider sign-in, Google or GitHub authenticates you and sends the limited identity data described above to Supabase. The Supabase project database is in its eu-west-1 (Ireland) region. These providers do not receive your local SQL practice payloads from the game.",
+        "body2": "These providers and their disclosed subprocessors may process data outside your country, including outside Türkiye or the EEA, under their own terms and privacy notices where applicable. The required transfer mechanisms must be documented for the existing hosting, proxy, authentication, and contact-message processing. Contact us for current provider, subprocessor, transfer-basis, and safeguard details."
+      },
+      "6": {
+        "title": "Retention and deletion",
+        "body": "Local data stays until you clear site data. Account, synced progress, and public-profile consent history remain while the account is active; there is currently no automatic inactive-account purge. Public visibility lasts only while you remain opted in. Closed support/privacy correspondence is deleted within 12 months, unless a law or active claim requires longer retention; it is then deleted when that period or claim ends. After we delete a message from Outlook.com, Microsoft says it generally remains in Deleted Items for about 7 days unless emptied sooner and, after that folder is emptied, can remain in Microsoft's systems for up to 30 days before final deletion unless law requires longer.",
+        "body2": "A deletion request immediately makes the profile private, locks later browser writes, and signs you out. The operator permanently deletes the Auth user and cascading profile, progress, and consent-history rows within 30 days. After completion, a private operator-only ledger keeps only a keyed HMAC of the Auth UUID and request, completion, deadline, and confirmation times for at most 90 days, then it is deleted; it contains no email, username, or raw UUID. SQL Heist submits a best-effort revocation request to Google immediately after each completed Google sign-in but cannot verify the response from this cross-site browser request. GitHub authorization may remain after SQL Heist account deletion; revoke SQL Heist separately in GitHub's Authorized OAuth Apps settings if you want to end it. Deleting SQL Heist does not delete your provider account. If provider logs or disaster-recovery copies contain related data, they remain only until no longer needed for security or until the applicable rolling backup is replaced; exact current periods are available from the controller."
+      },
+      "7": {
+        "title": "Your rights",
+        "body": "Depending on the law that applies to you, you may request access, correction, deletion, restriction, objection, and portability, and may withdraw public-profile consent at any time. Account settings provide a JSON export of your email, account and provider identity metadata, profile, synced progress, and public-profile consent history, plus visibility and deletion controls.",
+        "body2": "Email melih.sarac@hotmail.com for a request the app cannot complete, including a username correction. We may verify your identity and will respond within the applicable legal deadline. You may also complain to your competent data-protection authority, including Türkiye's Personal Data Protection Authority where applicable."
+      },
+      "8": {
+        "title": "Storage, tracking, and security",
+        "body": "This build includes no third-party analytics, advertising trackers, or marketing cookies. It uses browser local storage for language, local progress, this notice, and—only when you sign in—the necessary Supabase session. A same-tab OAuth return record expires after 10 minutes; a successful deletion re-verification receipt is one-time and expires after 2 minutes. SQL Heist strips Google/GitHub provider tokens from persistent session storage. During email signup, the pending address expires after one hour and is removed on the next load/check; sign-in, sign-out, or clearing site data removes it sooner. Supabase Row Level Security limits base account rows to their owner, but no online system can promise absolute security."
+      },
+      "9": {
+        "title": "Children and changes",
+        "body": "SQL Heist is an educational tool aimed at developers and is not directed at children. If you are below the age required to manage an online account where you live, do not create one without a parent or guardian. We will revise this notice and the date above before materially changing these practices. Questions or requests? ",
+        "link": "Contact the controller"
       }
     }
   },
@@ -316,11 +531,11 @@
     "title": "Terms of Use",
     "lead": "Play the game, learn the trade, keep it clean. The details:",
     "shortLabel": "The short of it",
-    "shortBody": "A free, educational game. Use what it teaches only on systems you own or are authorised to test — everything else is a crime, and it's on you.",
+    "shortBody": "A free, educational game with optional accounts. Use what it teaches only on systems you own or are authorised to test — everything else is your responsibility.",
     "sections": {
       "0": {
         "title": "The deal",
-        "body": "SQL Heist is a free, educational game about how SQL injection works and how to defend against it. By using it, you agree to these terms. If you don't, don't use it."
+        "body": "We operate SQL Heist as a free, educational game about how SQL injection works and how to defend against it. By using it, you agree to these terms. If you don't, don't use it."
       },
       "1": {
         "title": "Acceptable use",
@@ -328,18 +543,33 @@
         "body2": "Don't try to abuse, overload, or reverse the game itself to reach anything other than the practice content it ships with."
       },
       "2": {
+        "title": "Accounts",
+        "body": "An account is optional. You may use email/password or choose Google or GitHub sign-in. Provide an email you control, choose a permitted username, protect your credentials and linked provider accounts, and tell us promptly if you suspect unauthorised access. Supabase may automatically link sign-in identities that use the same verified email. You are responsible for activity under your session unless applicable law says otherwise.",
+        "body2": "You may export your account data and request deletion from account settings. A request requires recent verification with your password or a linked provider, then hides and locks the account immediately; permanent deletion is completed manually within 30 days. Our Privacy notice explains the related data processing."
+      },
+      "3": {
+        "title": "Public participation",
+        "body": "Public profiles and the casual leaderboard are opt-in. If you join, the public fields described in the Privacy notice can be seen by anyone until you opt out. Do not use a username or display name to impersonate, harass, or publish unlawful content.",
+        "body2": "Leaderboard progress is submitted by browser clients and can be inaccurate or manipulated. It is for informal learning only: no prize, employment decision, security certification, or verified competitive result depends on it."
+      },
+      "4": {
+        "title": "Availability and enforcement",
+        "body": "We may change, pause, or discontinue features, and may restrict an account when reasonably necessary for security, abuse prevention, legal compliance, or protection of other users. We will not use this clause to remove rights that applicable law makes mandatory."
+      },
+      "5": {
         "title": "No warranty",
         "body": "The game and its content are provided “as is,” without warranties of any kind. It's a teaching tool, not professional security advice, and we don't promise it is error-free or fit for any particular purpose. Real systems are more complicated than a practice target."
       },
-      "3": {
+      "6": {
         "title": "Limitation of liability",
-        "body": "To the fullest extent allowed by law, the makers of SQL Heist aren't liable for any damages arising from your use of the game or the skills it teaches."
+        "body": "To the fullest extent allowed by law, we are not liable for damages arising from your use of the game or the skills it teaches."
       },
-      "4": {
+      "7": {
         "title": "Content",
-        "body": "The game's writing, characters, art, and code are ours unless noted otherwise. SQL is SQL — the language and the concepts belong to everyone. Don't repackage the game as your own."
+        "body": "The game's writing, characters, art, and code are owned by the operator unless noted otherwise. SQL is SQL — the language and the concepts belong to everyone. Don't repackage the game as your own.",
+        "body2": "The “Cowled” mark is by Lorc (https://game-icons.net/1x1/lorc/cowled.html), used under CC BY 3.0 (https://creativecommons.org/licenses/by/3.0/); SQL Heist changes its colour and size."
       },
-      "5": {
+      "8": {
         "title": "Changes",
         "body": "We may update these terms; when we do, we'll revise the date above. Continuing to play after a change means you accept it. Questions? ",
         "link": "Reach the crew"

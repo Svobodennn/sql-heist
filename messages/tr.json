@@ -2,13 +2,207 @@
   "nav": {
     "home": "Ana sayfa",
     "jobs": "İşler",
+    "leaderboard": "Sıralama",
     "help": "Yardım",
     "signIn": "Giriş yap",
-    "signInTitle": "Hesaplar çok yakında geliyor",
+    "signOut": "Çıkış yap",
+    "account": "Hesap",
     "brandAria": "SQL Heist — ana sayfa",
     "primaryAria": "Birincil",
     "openMenu": "Menüyü aç",
     "closeMenu": "Menüyü kapat"
+  },
+  "auth": {
+    "signIn": {
+      "stamp": "Teşkilat erişimi",
+      "title": "Giriş yap",
+      "email": "E-posta",
+      "password": "Şifre",
+      "submit": "Giriş yap",
+      "noAccount": "Hesabın yok mu?",
+      "goSignUp": "Hesap oluştur",
+      "resend": "Onay e-postasını yeniden gönder",
+      "resent": "Onay e-postası gönderildi.",
+      "submitting": "Giriş yapılıyor…"
+    },
+    "signUp": {
+      "stamp": "Yeni operatör",
+      "title": "Hesap oluştur",
+      "email": "E-posta",
+      "username": "Kullanıcı adı",
+      "usernameHint": "3–20 karakter: a–z, 0–9, _",
+      "password": "Şifre",
+      "passwordHint": "En az 8 karakter; a–z, A–Z, 0–9 ve bir ASCII sembolü kullan.",
+      "submit": "Hesap oluştur",
+      "haveAccount": "Zaten hesabın var mı?",
+      "goSignIn": "Giriş yap",
+      "checkInboxTitle": "Gelen kutunu kontrol et",
+      "checkInbox": "{email} adresine bir onay bağlantısı gönderdik. Kurulumu bitirmek için bağlantıyı bu tarayıcıda aç.",
+      "resend": "E-postayı yeniden gönder",
+      "resent": "Gönderildi — gelen kutunu (ve spam klasörünü) kontrol et.",
+      "checking": "Uygunluk kontrol ediliyor…",
+      "available": "Uygun.",
+      "taken": "Alınmış — başka bir tane dene.",
+      "submitting": "Hesap oluşturuluyor…",
+      "privacyNotice": "Bu isteğe bağlı hesabı oluşturup eşitlemek için e-posta adresini, kullanıcı adını, hesap ilerlemeni ve Google veya GitHub'ı seçersen sağlayıcının döndürdüğü kimlik bilgilerini işleriz. Ayrıntılar:",
+      "privacyLink": "Gizlilik ve KVKK Aydınlatma Metni",
+      "termsNotice": "Hesap oluşturarak şunları kabul edersin:",
+      "termsLink": "Kullanım Koşulları"
+    },
+    "oauth": {
+      "continue": {
+        "google": "Google ile devam et",
+        "github": "GitHub ile devam et"
+      },
+      "loading": {
+        "google": "Google açılıyor…",
+        "github": "GitHub açılıyor…"
+      },
+      "linkNotice": "Sağlayıcıyla giriş isteğe bağlı bir SQL Heist hesabı oluşturur veya mevcut hesaba erişir ve aynı doğrulanmış e-postayı kullanan mevcut bir hesaba bağlanabilir.",
+      "privacyNotice": "Ayrıntılar:",
+      "privacyLink": "Gizlilik ve KVKK Aydınlatma Metni",
+      "termsNotice": "Devam ederek şunları kabul edersin:",
+      "termsLink": "Kullanım Koşulları",
+      "divider": "veya e-posta kullan"
+    },
+    "callback": {
+      "stamp": "Teşkilat erişimi",
+      "confirming": "Oturumun açılıyor…",
+      "hold": "Giriş yanıtı doğrulanıyor.",
+      "errorTitle": "Giriş tamamlanamadı",
+      "verifyFailed": "Giriş yanıtı bu tarayıcıda doğrulanamadı. Giriş sayfasına dönüp yeniden dene.",
+      "goSignIn": "Girişe git",
+      "resend": "Onay e-postasını yeniden gönder",
+      "resent": "Gönderildi — gelen kutunu kontrol et."
+    },
+    "gate": {
+      "stamp": "Takma adını seç",
+      "title": "Bir kullanıcı adı seç",
+      "desc": "Hesabının kullanıcı adı. Herkese açık profile katılana kadar gizli kalır. Yalnızca küçük harf, rakam ve alt çizgi.",
+      "username": "Kullanıcı adı",
+      "submit": "Adı kap",
+      "signOut": "Vazgeç, çıkış yap",
+      "checking": "Uygunluk kontrol ediliyor…",
+      "available": "Uygun.",
+      "taken": "Alınmış — başka bir tane dene.",
+      "submitting": "Alınıyor…",
+      "usernameHint": "3–20 karakter: a–z, 0–9, _"
+    },
+    "validation": {
+      "email": "Geçerli bir e-posta adresi gir.",
+      "password": "En az 8 karakter; a–z, A–Z, 0–9 ve bir ASCII sembolü kullan.",
+      "username": "3–20 karakter: a–z, 0–9, _"
+    },
+    "errors": {
+      "auth-disabled": "Hesaplar şu anda kullanılamıyor — oyun onlarsız da çalışır.",
+      "invalid-credentials": "E-posta veya şifre hatalı.",
+      "email-not-confirmed": "E-posta henüz onaylanmadı — gelen kutunu kontrol et.",
+      "user-exists": "Bu e-postanın zaten bir hesabı var.",
+      "weak-password": "En az 8 karakter; a–z, A–Z, 0–9 ve bir ASCII sembolü kullan.",
+      "rate-limited": "Çok fazla deneme — bir dakika bekleyip tekrar dene.",
+      "username-taken": "Bu kullanıcı adı alınmış.",
+      "generic": "Bir şeyler ters gitti. Tekrar dene."
+    },
+    "menu": {
+      "openAria": "Hesap menüsü: {username}",
+      "listAria": "Hesap"
+    }
+  },
+  "profile": {
+    "stamp": "Herkese açık dosya",
+    "emptyTitle": "Operatör belirtilmedi",
+    "emptyBody": "Herkese açık olmayı seçmiş bir operatörü aramak için dosya bağlantısına kullanıcı adı ekle.",
+    "browseCases": "İşlere göz at",
+    "loading": "Dosya açılıyor…",
+    "loadingBody": "Herkese açık kayıtlar kontrol ediliyor.",
+    "privateTitle": "Gizli veya bulunamadı",
+    "privateBody": "Bu operatör mevcut değil ya da herkese açık kayıtlarda görünmemeyi seçmiş.",
+    "errorTitle": "Bu dosya açılamadı",
+    "errorBody": "Herkese açık profillere şu anda ulaşılamıyor. Kısa süre sonra tekrar dene.",
+    "objectivesCleared": "Tamamlanan hedefler",
+    "joined": "Katılma tarihi"
+  },
+  "leaderboard": {
+    "stamp": "Ajans sıralaması",
+    "title": "Gayriresmî sıralama",
+    "intro": "Herkese açık olmayı seçen operatörler, tamamlanan hedef sayısına göre sıralanır.",
+    "casualLabel": "Gayriresmî pano",
+    "casualBody": "İlerleme oyuncuların tarayıcılarından gönderilir ve bağımsız olarak doğrulanmaz.",
+    "loading": "Kayıt defteri açılıyor…",
+    "loadingBody": "Herkese açık operatör kayıtları getiriliyor.",
+    "emptyTitle": "Panoda henüz operatör yok",
+    "emptyBody": "Henüz kimse herkese açık sıralamaya katılmadı.",
+    "errorTitle": "Sıralama açılamadı",
+    "errorBody": "Herkese açık panoya şu anda ulaşılamıyor. Kısa süre sonra tekrar dene.",
+    "browseCases": "İşlere göz at",
+    "tableCaption": "Herkese açık olmayı seçen operatörlerin sıralaması",
+    "tableRegionAria": "Sıralama sonuçları",
+    "scrollHint": "Tüm sütunları görmek için yatay kaydır.",
+    "rank": "Sıra",
+    "operative": "Operatör",
+    "objectives": "Hedefler",
+    "lastActive": "Son etkinlik",
+    "neverActive": "Senkronize etkinlik yok",
+    "yourRank": "Sıralaman",
+    "rankLoading": "Konumun bulunuyor…",
+    "rankError": "Sıralamana şu anda ulaşılamıyor.",
+    "rankObjectives": "Tamamlanan hedefler: {count}",
+    "notRanked": "Panoda yer almıyorsun.",
+    "notRankedBody": "Görünmek için hesap ayarlarından katıl.",
+    "manageVisibility": "Görünürlüğü yönet"
+  },
+  "account": {
+    "stamp": "Operatör dosyası",
+    "title": "Hesabın",
+    "lede": "SQL Heist hesabına bağlı kimliği ve senkronize verileri yönet.",
+    "disabledTitle": "Hesaplar kullanılamıyor",
+    "disabledBody": "Oyun hesap olmadan çevrimdışı çalışmaya devam eder.",
+    "loading": "Hesap yükleniyor…",
+    "loadingBody": "Kimliği doğrulanmış profilin kontrol ediliyor.",
+    "profileTitle": "Profil bilgileri",
+    "username": "Kullanıcı adı",
+    "usernameLocked": "Kullanıcı adları henüz değiştirilemiyor.",
+    "displayName": "Görünen ad",
+    "save": "Profili kaydet",
+    "saving": "Kaydediliyor…",
+    "saved": "Profil kaydedildi.",
+    "visibilityTitle": "Herkese açık görünürlük",
+    "visibilityLabel": "Profilimi herkese açık göster",
+    "visibilityConsent": "İzin verdiğinde kullanıcı adın, görünen adın, katılma tarihin, tamamladığın hedefler ve son senkronize etkinlik zamanın yayımlanır. İznini istediğin zaman geri çekebilirsin.",
+    "visibilityPrivacyLink": "Gizlilik bildirimi",
+    "visibilityPublic": "Herkese açık profilin görünür.",
+    "visibilityPrivate": "Profilin gizli.",
+    "viewPublicProfile": "Herkese açık profili gör",
+    "dataTitle": "Verilerin",
+    "dataBody": "Hesabının ve sağlayıcı kimliği üst verilerinin, profilinin, senkronize vaka ilerlemenin ve herkese açık profil rıza geçmişinin JSON kopyasını indir.",
+    "export": "Verilerimi indir",
+    "exporting": "İndirme hazırlanıyor…",
+    "exportReady": "Veri indirmen hazır.",
+    "deleteTitle": "Silme talebi",
+    "deleteBody": "Hesabının ve senkronize ilerlemenin silinmesini talep et. Profilin hemen gizlenir, yeni yazmalar engellenir ve oturumun kapatılır. Nihai silme 30 gün içinde elle tamamlanır.",
+    "deleteRequest": "Hesap silme talebi oluştur",
+    "deleteModalTitle": "Silme talebi gönderilsin mi?",
+    "deleteModalBody": "Bu işlem hesabı hemen gizler ve kilitler. Kullanıcı adını onayla, ardından şifrenle veya bağlı bir giriş sağlayıcısıyla kimliğini doğrula. İşletmeci hesabı ve senkronize verileri 30 gün içinde kalıcı olarak siler. SQL Heist hesabını silmek sağlayıcı hesabını silmez. Google iptal isteği girişten sonra gönderilir; GitHub yetkilendirmesi kalabilir, sona erdirmek istersen SQL Heist yetkisini GitHub Authorized OAuth Apps ayarlarından ayrıca kaldır.",
+    "deleteConfirmLabel": "Onaylamak için {username} yaz",
+    "deletePasswordLabel": "Mevcut şifre",
+    "cancel": "İptal",
+    "deleteConfirm": "Silme talebini gönder",
+    "deleteProviderVerified": "Sağlayıcı doğrulaması tamamlandı. Bu tek kullanımlık silme talebini tamamlamak için kullanıcı adını yeniden yaz.",
+    "deleteFinish": "Silme talebini tamamla",
+    "deleteWith": {
+      "google": "Google ile doğrula",
+      "github": "GitHub ile doğrula"
+    },
+    "deleting": "Gönderiliyor…",
+    "errors": {
+      "invalidProfile": "Görünen ad en fazla 40 karakter olmalıdır.",
+      "save": "Profil kaydedilemedi. Tekrar dene.",
+      "visibility": "Görünürlük değiştirilemedi. Tekrar dene.",
+      "export": "Verilerin hazırlanamadı. Tekrar dene.",
+      "password": "Bu şifre eşleşmedi. Tekrar dene.",
+      "reauth": "Doğrulamanın süresi doldu veya doğrulama tamamlanamadı. Tekrar dene.",
+      "delete": "Silme talebi gönderilemedi. Tekrar dene."
+    }
   },
   "lang": {
     "triggerAria": "Dil: {language}",
@@ -34,7 +228,7 @@
     "linkPrivacy": "Gizlilik",
     "linkTerms": "Koşullar",
     "linkContact": "İletişim",
-    "note": "Tamamen tarayıcında çalışır. Sunucu yok, ağ yok.",
+    "note": "Pratik veritabanı yerel olarak çalışır. Hesap eşitlemesi isteğe bağlıdır.",
     "alsoTry": "ayrıca dene",
     "copyright": "© {year} SQL Heist"
   },
@@ -55,7 +249,7 @@
       "facts": {
         "0": {
           "k": "Nerede",
-          "v": "%100 tarayıcında. Hiçbir şey asla ağa dokunmaz."
+          "v": "Pratik veritabanı ve tüm girdiler tarayıcında çalışır; hesap eşitleme ayrı ve isteğe bağlıdır."
         },
         "1": {
           "k": "Neye karşı",
@@ -66,7 +260,7 @@
           "v": "Gerçek hedef yok — kırabileceğin tek şey korumalı alan."
         }
       },
-      "safe": "Tasarımı gereği güvenli — hesap yok, indirme yok, kurulum yok."
+      "safe": "Tasarımı gereği güvenli — hesap gerekmez, indirme yok, kurulum yok."
     },
     "how": {
       "eyebrow": "İş",
@@ -109,11 +303,11 @@
     "faqTeasers": {
       "0": {
         "q": "Bu yasal mı?",
-        "a": "Evet. Her iş tamamen tarayıcında, oyunla birlikte gelen korumalı bir SQLite veritabanına karşı çalışır. Gerçek sistem yok, ağ çağrısı yok — pratik hedefinden başka kıracak bir şey de yok."
+        "a": "Evet. Her iş yalnızca tarayıcındaki korumalı SQLite veritabanını hedefler. Pratik girdisi hiçbir gerçek sisteme ulaşmaz; site sunumu ve isteğe bağlı hesap eşitleme hedeften ayrıdır."
       },
       "1": {
         "q": "Bir şey kurmam gerekiyor mu?",
-        "a": "Hayır. Modern bir tarayıcıda çalışır. SQLite motoru ilk ihtiyaç duyduğunda, istek üzerine yüklenir — hesap yok, indirme yok, kurulum yok."
+        "a": "Hayır. Modern bir tarayıcıda çalışır. SQLite motoru ilk ihtiyaç duyduğunda, istek üzerine yüklenir — hesap gerekmez, indirme yok, kurulum yok."
       },
       "2": {
         "q": "SQL biliyor olmam gerekiyor mu?",
@@ -229,11 +423,11 @@
     "items": {
       "0": {
         "q": "Bu yasal mı?",
-        "a": "Evet. Her iş tamamen tarayıcında, oyunla birlikte gelen korumalı bir SQLite veritabanına karşı çalışır. Karşı tarafta gerçek sistem yok, ağ çağrısı yok ve pratik hedefinden başka kıracak bir şey de yok."
+        "a": "Evet. Her iş yalnızca tarayıcındaki korumalı SQLite veritabanını hedefler. Pratik girdisi hiçbir gerçek sisteme ulaşmaz; site sunumu ve isteğe bağlı hesap eşitleme hedeften ayrıdır."
       },
       "1": {
         "q": "Bir şey kurmam gerekiyor mu?",
-        "a": "Hayır. Modern bir tarayıcıda çalışır. Veritabanı motoru (WebAssembly'ye derlenmiş SQLite), ilk ihtiyaç duyduğunda istek üzerine yüklenir — hesap yok, indirme yok, kurulum yok."
+        "a": "Hayır. Modern bir tarayıcıda çalışır. Veritabanı motoru (WebAssembly'ye derlenmiş SQLite), ilk ihtiyaç duyduğunda istek üzerine yüklenir — hesap gerekmez, indirme yok, kurulum yok."
       },
       "2": {
         "q": "Zaten SQL biliyor olmam gerekiyor mu?",
@@ -245,7 +439,7 @@
       },
       "4": {
         "q": "İlerlemem nerede kaydediliyor?",
-        "a": "Bu cihazda, tarayıcının yerel depolamasında. Hesap ve sunucu olmadığından onu asla görmeyiz. Tarayıcı verilerini temizle — ya da oyunu başka bir yerde aç — ve baştan başlarsın."
+        "a": "Bu cihazda, tarayıcının yerel depolamasında. Anonim oyun hesap ve sunucu kullanmaz, bu yüzden onu asla görmeyiz — giriş yaparsan ilerlemen ayrıca hesabına eşitlenir. Tarayıcı verilerini temizle ya da oyunu başka bir yerde aç, yerel oyun baştan başlar."
       },
       "5": {
         "q": "Herhangi bir ücreti var mı?",
@@ -274,40 +468,61 @@
   "consent": {
     "aria": "Depolama bildirimi",
     "title": "Bu oyun yerel depolama kullanır",
-    "body": "SQL Heist, ilerlemeni ve dil seçimini tarayıcının yerel depolamasında tutar. Takip yok, analitik yok, reklam çerezi yok — ve hiçbir şey asla cihazından çıkmaz.",
+    "body": "SQL Heist; dil, ilerleme, bu bildirim ve giriş yapılmış Supabase oturumu için yerel depolama kullanır. OAuth dönüş yönlendirmesi ve silme doğrulaması aynı sekmede kısa süreli oturum depolaması kullanır. Bekleyen kayıt e-postasının süresi bir saat sonra dolar; uygulama bir sonraki kez yüklediğinde veya kontrol ettiğinde kayıt silinir, site verilerini temizlemek daha erken siler. Analitik veya reklam takibi yoktur. Hesap eşitlemesi Supabase kullanır; herkese açık profiller açık katılım gerektirir.",
     "accept": "Anladım"
   },
   "privacy": {
     "eyebrow": "Küçük Yazılar",
     "title": "Gizlilik",
-    "lead": "Kısa versiyon: seni toplamıyoruz. Uzun versiyon aşağıda, o da yine kısa.",
+    "lead": "Varsayılan anonimdir. İsteğe bağlı hesaplar yalnızca kimlik, ilerleme ve seçtiğin herkese açık görünürlük için gereken verileri eşitler.",
     "glanceLabel": "Bir bakışta",
-    "glanceBody": "Hesap yok. Takip yok. Bu sürümde analitik yok. İlerlemen, cihazındaki tarayıcının yerel depolamasında durur — onu okuyabilecek bir sunucumuz yok.",
+    "glanceBody": "Hesapsız oynayabilirsin: oyun ve ilerleme yerel depolamada kalır; siteyi sunmak için gereken normal istek ise barındırma sağlayıcısına ulaşır. İsteğe bağlı hesap, aşağıda açıklanan hesap ve ilerleme verilerini Supabase'e gönderir; Google veya GitHub ile yalnızca o giriş yöntemini seçersen iletişim kurulur. Bu sürümde analitik veya reklam takipçisi yoktur.",
     "sections": {
       "0": {
-        "title": "Ne topluyoruz",
-        "body": "Seni tanımlayan hiçbir şey. SQL Heist'in bu sürümde hesap sistemi, kayıt ve giriş yok (“Giriş yap” bağlantısı, gelecekteki bir sürüm için yer tutucudur). Oynaman için adını, e-postanı ya da başka bir şeyi istemeyiz."
+        "title": "Veri sorumlusu ve iletişim",
+        "body": "SQL Heist'i işletir ve bu bildirimde açıklanan veri işleme faaliyetleri için veri sorumlusu olarak hareket ederiz. Gizlilik ve kişisel veri haklarına ilişkin taleplerini melih.sarac@hotmail.com adresine gönderebilirsin."
       },
       "1": {
-        "title": "Cihazında ne kalır",
-        "body": "İlerlemen — hangi işleri bitirdiğin ve en iyi puanların — cihazında, tarayıcının yerel depolamasına kaydedilir. Tarayıcıdan asla çıkmaz ve onu okumanın bir yolu bizde yok. Tarayıcı verilerini temizlemen onu siler."
+        "title": "İşlediğimiz veriler",
+        "body": "Veriler elektronik ortamda; doğrudan kayıt ve profil formlarından ve tarayıcından, yalnızca o giriş yöntemini seçtiğinde Google veya GitHub'dan, giriş yaptığında Supabase API istekleri aracılığıyla ve olağan barındırma istekleriyle otomatik olarak toplanır. Anonim oyun ad veya e-posta istemez. Tarayıcın dil seçimini ve tamamlanan vaka hedeflerini yerel olarak saklar; barındırma istekleri IP adresi, kullanıcı aracısı, istenen URL ve zaman gibi olağan teknik verileri içerebilir.",
+        "body2": "Hesap oluşturursan e-posta adresini, seçtiğin kullanıcı adını, isteğe bağlı görünen adını, herkese açık profil tercihini ve rıza geçmişini (verme veya geri çekme, bildirim sürümü, kaynak ve zaman), tamamlanan vaka ve hedef kimliklerini ve hesap/ilerleme zaman damgalarını işleriz. Google veya GitHub'ı seçersen Supabase; sağlayıcı adını, sağlayıcı hesap kimliğini, doğrulanmış e-postayı ve ad, kullanıcı adı ve avatar URL'si gibi mevcut alanları sağlayıcı kimliği üst verisi olarak alır ve saklar. Yalnızca giriş için kimlik/profil erişimi isteriz. SQL Heist sağlayıcı erişim veya yenileme jetonlarını saklamaz ve bunları sağlayıcı API'lerini çağırmak için kullanmaz; geçici Google kimlik bilgisi yalnızca tamamlanan bir Google girişinden hemen sonra en iyi çabayla iptal isteği göndermek için kullanılır. Supabase aynı doğrulanmış e-postayı kullanan kimlikleri otomatik olarak bağlar. Kullanılıyorsa parolan doğrudan Supabase Auth'a gider; yalnızca tuzlanmış parola özeti saklanır ve parolayı okuyamayız. Bize e-posta gönderirsen adresini, mesaj içeriğini, gönderim/alım zamanlarını ve olağan e-posta yönlendirme üst verilerini de işleriz. SQL pratik girdilerini Supabase'e göndermeyiz ve özel nitelikli kişisel veri toplamayı amaçlamayız."
       },
       "2": {
-        "title": "Çerezler ve takip",
-        "body": "Oyun, bu sürümde hiçbir takip ya da reklam çerezi ayarlamaz ve üçüncü taraf analitiği içermez. Bu durum bir gün değişirse, değişmeden önce bu sayfayı ve bu tarihi güncelleriz."
+        "title": "Yerel ve eşitlenen ilerleme",
+        "body": "İlerleme her zaman önce tarayıcına yazılır. Giriş yaptığında tamamlanan hedef kümeleri ayrıca hesabınla birleştirilir; böylece iki kopyadan biri silinmeden cihazlar arasında taşınır. Tarayıcı verilerini temizlemek yerel kopyayı siler, hesap kopyasını silmez; çıkış yapmak da hiçbirini silmez. Hesap ayarlarından eşitlenen kopyayı dışa aktarabilir veya silinmesini isteyebilirsin."
       },
       "3": {
-        "title": "Üçüncü taraflar",
-        "body": "Oyun, statik bir sitedir. Yazı tipleri derleme sırasında paket içine gömülür ve veritabanı motoru tarayıcında yerel olarak çalışır, dolayısıyla olağan oyun hiçbir üçüncü taraf isteği yapmaz. Siteyi barındıran taraf, güvenlik ve operasyon amacıyla standart sunucu günlükleri (IP adresleri gibi) tutabilir; bu işleme, barındırıcının kendi politikalarına tabidir."
+        "title": "Amaçlar ve hukuki sebepler",
+        "body": "Hesap kimliği, e-posta/parola veya seçtiğin sağlayıcıyla kimlik doğrulama, dışa aktarma, silme talepleri ve cihazlar arası ilerlemeyi, talep ettiğin isteğe bağlı hesap hizmetini sunmak için işleriz (GDPR Madde 6(1)(b); KVKK Madde 5(2)(c)). Dil, yerel ilerleme, OAuth dönüş durumu, silme için yeniden doğrulama ve oturum açmış kullanıcı oturumu için gereken tarayıcı depolaması da talep edilen bu özellikleri sunmak amacıyla kullanılır.",
+        "body2": "Profil veya liderlik kaydı yayımlamak açık ve geri alınabilir seçimine dayanır (GDPR Madde 6(1)(a); KVKK açık rıza). Sınırlı barındırma ve güvenlik günlükleri, hizmeti işletmek ve korumak amacıyla işlenebilir (GDPR Madde 6(1)(f); KVKK Madde 5(2)(f)). Yazışmalar; destek veya hak taleplerini yanıtlamak ve gerekli kanıtı tutmak için, duruma göre GDPR Madde 6(1)(b), (c) ve (f) ile KVKK Madde 5(2)(c), (ç) ve (f) kapsamında işlenir. Verileri satmayız, reklam amacıyla kullanmayız ve yalnızca otomatik işlemeye dayalı olarak senin hakkında karar vermeyiz."
       },
       "4": {
-        "title": "Çocuklar",
-        "body": "SQL Heist, geliştiricilere yönelik bir öğrenme aracıdır. 13 yaşın altındaki çocuklara yönelik değildir ve bilerek onların verilerini toplamaz."
+        "title": "Herkese açık profil ve gayriresmî liderlik tablosu",
+        "body": "Hesaplar varsayılan olarak gizlidir. Katılmayı seçersen kullanıcı adın, isteğe bağlı görünen adın, katılma tarihin, tamamladığın hedef sayısı ve etkinlik zamanın herkese açık görünebilir. E-posta ve iç kullanıcı kimliği hiçbir zaman yayımlanmaz. Hesap ayarlarından katılımı geri çektiğinde profil ve liderlik kaydı hemen kaybolur. Seçimin kanıtlanıp uygulanabilmesi için her gerçek katılım veya geri çekme işlemini veritabanı zamanı ve bildirim sürümüyle kaydederiz. Gayriresmî liderlik tablosu istemci tarafından gönderilen ilerlemeye dayanır; doğrulanmış bir yarışma değildir."
       },
       "5": {
-        "title": "Değişiklikler",
-        "body": "Bunların herhangi birinin işleyişini güncellersek, bu sayfayı ve yukarıdaki “son güncelleme” tarihini gözden geçiririz. Soru mu var? ",
-        "link": "Ekibe ulaş"
+        "title": "Hizmet ve giriş sağlayıcıları; yurt dışı aktarım",
+        "body": "Cloudflare, sqlheist.com alan adını vekil sunucu olarak yönlendirir ve istek veya güvenlik verilerini işleyebilir; Vercel statik siteyi sunar; Supabase isteğe bağlı hesaplar için kimlik doğrulama ve veritabanı hizmeti sağlar; Microsoft Outlook.com/Hotmail iletişim adresine gönderilen mesajları işler. Sağlayıcıyla girişi seçersen Google veya GitHub kimliğini doğrular ve yukarıda açıklanan sınırlı kimlik verilerini Supabase'e gönderir. Supabase proje veritabanı eu-west-1 (İrlanda) bölgesindedir. Bu sağlayıcılar oyundaki yerel SQL pratik girdilerini almaz.",
+        "body2": "Bu sağlayıcılar ve açıkladıkları alt işleyenler, kendi koşulları ve geçerli olduğu ölçüde gizlilik bildirimleri kapsamında verileri Türkiye veya AEA dışı dâhil başka ülkelerde işleyebilir. Mevcut barındırma, vekil sunucu, kimlik doğrulama ve iletişim mesajı işlemleri için gereken aktarım mekanizmaları belgelenmelidir. Güncel sağlayıcı, alt işleyen, aktarım dayanağı ve güvence ayrıntıları için veri sorumlusuna ulaşabilirsin."
+      },
+      "6": {
+        "title": "Saklama ve silme",
+        "body": "Yerel veriler, site verilerini temizleyene kadar kalır. Hesap, eşitlenen ilerleme ve herkese açık profil rıza geçmişi hesap etkin olduğu sürece tutulur; şu anda otomatik bir etkin olmayan hesap temizliği yoktur. Herkese açık görünürlük yalnızca katılımın sürdüğü sürece devam eder. Kapanan destek/gizlilik yazışmaları 12 ay içinde silinir; kanun veya devam eden bir hukuki talep daha uzun saklamayı gerektirirse ilgili süre ya da talep sona erdiğinde silinir. Bir iletiyi Outlook.com'dan sildikten sonra Microsoft, ileti daha önce boşaltılmadığı sürece genellikle Silinmiş Öğeler'de yaklaşık 7 gün kaldığını; klasör boşaltıldıktan sonra da kanun daha uzun saklama gerektirmedikçe kesin silmeden önce sistemlerinde 30 güne kadar kalabileceğini belirtir.",
+        "body2": "Silme talebi profili hemen gizler, sonraki tarayıcı yazmalarını kilitler ve oturumunu kapatır. İşletmeci Auth kullanıcısını ve ona bağlı profil, ilerleme ve rıza geçmişi satırlarını 30 gün içinde kalıcı olarak siler. Tamamlamadan sonra yalnızca işletmecinin erişebildiği özel bir kayıt, Auth UUID'sinin anahtarlı HMAC değerini ve talep, tamamlama, son tarih ile onay zamanlarını en fazla 90 gün tutar, sonra siler; e-posta, kullanıcı adı veya ham UUID içermez. SQL Heist, tamamlanan her Google girişinden hemen sonra Google'a en iyi çabayla bir yetkilendirme iptal isteği gönderir; ancak tarayıcıdan yapılan bu siteler arası isteğin yanıtını doğrulayamaz. GitHub yetkilendirmesi SQL Heist hesabı silindikten sonra kalabilir; sona erdirmek istersen GitHub'ın Authorized OAuth Apps ayarlarından SQL Heist yetkisini ayrıca kaldır. SQL Heist hesabını silmek sağlayıcı hesabını silmez. Sağlayıcı günlükleri veya felaket kurtarma kopyaları ilgili veriyi içeriyorsa yalnızca güvenlik için artık gerek kalmayana ya da geçerli döngüsel yedek değiştirilene kadar tutulur; güncel kesin süreler veri sorumlusundan öğrenilebilir."
+      },
+      "7": {
+        "title": "Hakların",
+        "body": "Sana uygulanan hukuka göre erişim, düzeltme, silme, işlemenin kısıtlanması, itiraz ve taşınabilirlik talep edebilir; herkese açık profil rızanı her zaman geri çekebilirsin. Hesap ayarları e-posta, hesap ve sağlayıcı kimliği üst verileri, profil, eşitlenen ilerleme ve herkese açık profil rıza geçmişinin JSON dışa aktarımını; ayrıca görünürlük ve silme kontrollerini sunar.",
+        "body2": "Kullanıcı adı düzeltmesi dâhil uygulamanın tamamlayamadığı talepler için melih.sarac@hotmail.com adresine yaz. Kimliğini doğrulamamız gerekebilir ve uygulanabilir yasal süre içinde yanıt veririz. Ayrıca, uygun olduğu durumda Kişisel Verileri Koruma Kurumu dâhil yetkili veri koruma makamına şikâyette bulunabilirsin."
+      },
+      "8": {
+        "title": "Depolama, takip ve güvenlik",
+        "body": "Bu sürüm üçüncü taraf analitiği, reklam takipçisi veya pazarlama çerezi içermez. Dil, yerel ilerleme ve bu bildirim için; yalnızca giriş yaptığında da gerekli Supabase oturumu için tarayıcı yerel depolamasını kullanır. Aynı sekmedeki OAuth dönüş kaydının süresi 10 dakika sonra dolar; başarılı silme yeniden doğrulama makbuzu tek kullanımlıktır ve 2 dakika sonra sona erer. SQL Heist, Google/GitHub sağlayıcı jetonlarını kalıcı oturum depolamasından çıkarır. Kayıt sırasında bekleyen e-posta adresi doğrulama ve yeniden gönderme için bir saat kullanılabilir; süresi dolmuş veya bozuk kayıt SQL Heist bir sonraki kez yüklediğinde ya da kontrol ettiğinde silinir, giriş, çıkış veya site verilerini temizleme daha erken siler. Supabase Satır Düzeyi Güvenlik, temel hesap satırlarını sahibine sınırlar; ancak hiçbir çevrim içi sistem mutlak güvenlik sözü veremez."
+      },
+      "9": {
+        "title": "Çocuklar ve değişiklikler",
+        "body": "SQL Heist geliştiricilere yönelik eğitici bir araçtır ve çocuklara yönelik değildir. Yaşadığın yerde çevrim içi hesap yönetmek için gereken yaşın altındaysan ebeveyn veya vasi olmadan hesap oluşturma. Bu uygulamaları önemli ölçüde değiştirmeden önce bildirimi ve yukarıdaki tarihi güncelleriz. Soru veya talep mi var? ",
+        "link": "Veri sorumlusuna ulaş"
       }
     }
   },
@@ -316,7 +531,7 @@
     "title": "Kullanım Koşulları",
     "lead": "Oyunu oyna, mesleği öğren, temiz kal. Detaylar:",
     "shortLabel": "Kısacası",
-    "shortBody": "Ücretsiz, eğitici bir oyun. Öğrettiklerini yalnızca sana ait olan ya da test etmeye yetkili olduğun sistemlerde kullan — geri kalan her şey suçtur ve sorumlusu sensin.",
+    "shortBody": "İsteğe bağlı hesapları olan ücretsiz, eğitici bir oyun. Öğrettiklerini yalnızca sana ait olan ya da test etmeye yetkili olduğun sistemlerde kullan — diğer her şey senin sorumluluğundadır.",
     "sections": {
       "0": {
         "title": "Anlaşma",
@@ -328,18 +543,33 @@
         "body2": "Oyunun kendisini, birlikte geldiği pratik içeriğinin dışında bir şeye ulaşmak için kötüye kullanmaya, aşırı yüklemeye ya da tersine mühendislik yapmaya çalışma."
       },
       "2": {
+        "title": "Hesaplar",
+        "body": "Hesap isteğe bağlıdır. E-posta/parola kullanabilir veya Google ya da GitHub ile giriş yapabilirsin. Kontrol ettiğin bir e-posta kullan, izin verilen bir kullanıcı adı seç, kimlik bilgilerini ve bağlı sağlayıcı hesaplarını koru ve yetkisiz erişimden şüphelenirsen bize hemen bildir. Supabase aynı doğrulanmış e-postayı kullanan giriş kimliklerini otomatik olarak bağlayabilir. Uygulanabilir hukuk aksini söylemedikçe oturumundaki etkinlikten sen sorumlusun.",
+        "body2": "Hesap verilerini dışa aktarabilir ve hesap ayarlarından silme isteyebilirsin. Talep, parolan veya bağlı bir sağlayıcıyla yakın zamanda yeniden doğrulama gerektirir; ardından hesabı hemen gizleyip kilitler. Kalıcı silme 30 gün içinde elle tamamlanır. İlgili veri işleme Gizlilik bildiriminde açıklanır."
+      },
+      "3": {
+        "title": "Açık katılım",
+        "body": "Açık profiller ve gündelik liderlik tablosu isteğe bağlıdır. Katılırsan Gizlilik bildiriminde açıklanan açık alanları, ayrılana kadar herkes görebilir. Kullanıcı adı veya görünen ad alanını kimliğe bürünmek, taciz etmek ya da hukuka aykırı içerik yayımlamak için kullanma.",
+        "body2": "Liderlik ilerlemesi tarayıcı istemcileri tarafından gönderilir ve hatalı ya da manipüle edilmiş olabilir. Yalnızca gayriresmî öğrenme içindir; hiçbir ödül, işe alım kararı, güvenlik sertifikası veya doğrulanmış yarışma sonucu buna dayanmaz."
+      },
+      "4": {
+        "title": "Kullanılabilirlik ve yaptırım",
+        "body": "Özellikleri değiştirebilir, duraklatabilir veya sona erdirebilir; güvenlik, kötüye kullanımı önleme, hukuka uyum ya da diğer kullanıcıları koruma için makul ölçüde gerekli olduğunda bir hesabı kısıtlayabiliriz. Bu maddeyi, uygulanabilir hukukun zorunlu kıldığı hakları kaldırmak için kullanmayız."
+      },
+      "5": {
         "title": "Garanti yok",
         "body": "Oyun ve içeriği “olduğu gibi”, hiçbir türde garanti verilmeden sunulur. Bu bir öğretim aracıdır, profesyonel güvenlik tavsiyesi değil ve hatasız olduğunu ya da belirli bir amaca uygun olduğunu vaat etmeyiz. Gerçek sistemler, bir pratik hedeften daha karmaşıktır."
       },
-      "3": {
+      "6": {
         "title": "Sorumluluğun sınırlandırılması",
         "body": "Yasanın izin verdiği azami ölçüde, SQL Heist'in yapımcıları, oyunu ya da öğrettiği becerileri kullanmandan doğan hiçbir zarardan sorumlu değildir."
       },
-      "4": {
+      "7": {
         "title": "İçerik",
-        "body": "Aksi belirtilmedikçe oyunun metni, karakterleri, sanatı ve kodu bize aittir. SQL, SQL'dir — dil ve kavramlar herkese aittir. Oyunu kendininmiş gibi yeniden paketleme."
+        "body": "Aksi belirtilmedikçe oyunun metni, karakterleri, görselleri ve kodu bize aittir. SQL, SQL'dir — dil ve kavramlar herkese aittir. Oyunu kendininmiş gibi yeniden paketleme.",
+        "body2": "“Cowled” işareti Lorc'a aittir (https://game-icons.net/1x1/lorc/cowled.html) ve CC BY 3.0 (https://creativecommons.org/licenses/by/3.0/) kapsamında kullanılır; SQL Heist renk ve boyutunu değiştirmiştir."
       },
-      "5": {
+      "8": {
         "title": "Değişiklikler",
         "body": "Bu koşulları güncelleyebiliriz; güncellediğimizde yukarıdaki tarihi gözden geçiririz. Bir değişiklikten sonra oynamayı sürdürmen, onu kabul ettiğin anlamına gelir. Soru mu var? ",
         "link": "Ekibe ulaş"
