@@ -3,14 +3,15 @@
 > **Status:** DESIGN ONLY — posture and requirements, **not legal advice**. Legal specifics marked **[verify]** must be confirmed with counsel; KVKK/GDPR details evolve (cutoff 2026-01).
 > The moment we ship accounts, **we become a data controller** ([00 §0](./00-decision.md)). This doc scopes the resulting duties.
 
-> **2026-08-27 implementation note:** this file predates the shipped case-based,
+> **2026-08-28 implementation note:** this file predates the shipped case-based,
 > client-only design and remains historical reference only. Current product truth lives
 > in [`../auth-plan.md`](../auth-plan.md), the public Privacy/Terms pages, the live
 > [`50-rls-gate.md`](./50-rls-gate.md), and
 > [`60-account-deletion-runbook.md`](./60-account-deletion-runbook.md). In particular,
 > the current build has no analytics, marketing cookies, `level_progress`, or server-side
-> score events. Browser-only Google/GitHub OAuth is implemented, but each provider remains
-> disabled until its external app configuration, provider record, and live smoke test are complete.
+> score events. Browser-only Google/GitHub OAuth is implemented and configured; real sign-in
+> plus explicit username selection passed, while the remaining provider-specific smoke matrix
+> in [`../auth-plan.md`](../auth-plan.md) is still an external delivery gate.
 
 ## Current provider readiness
 
@@ -21,16 +22,16 @@ unresolved duties are current-production remediation rather than account-launch 
 Supabase account processing must not be deployed until its remaining transfer and legal
 requirements are complete. Technical RLS completion does not resolve these duties.
 
-| Provider / duty             | Current status                                                                                                                                                                                               | Required action / deadline                                                                                                                                                                                    |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Vercel                      | **Blocked:** Hobby (free); the published Vercel processor DPA expressly applies only to Pro and Enterprise                                                                                                   | Remediate the current production host now: move to a DPA-covered arrangement (for example, reviewed Cloudflare Pages self-serve) or obtain qualified approval for another documented data-role basis          |
-| Supabase                    | **Provider contract recorded:** Free use accepts the Terms of Service; those Terms incorporate the current DPA, which is effective with the Agreement                                                        | Retain the versions below and complete the separate KVKK transfer mechanism before optional accounts are deployed                                                                                             |
-| Cloudflare                  | **Provider contract recorded:** the Free self-serve relationship is governed by the Self-Serve Subscription Agreement, which incorporates the current DPA                                                    | Retain the versions below and complete the KVKK transfer mechanism for the current proxy/request processing now                                                                                               |
-| Microsoft Outlook / Hotmail | **Blocked:** Free consumer mailbox under the Microsoft Services Agreement/Privacy Statement; no customer processor DPA or Türkiye-specific transfer arrangement was identified                               | Remediate the current published contact channel now: move to a DPA-covered mailbox or obtain qualified approval and document the provider's role plus transfer mechanism                                      |
-| Google OAuth                | **Pending enablement:** static sign-in requests only `openid`, `userinfo.email`, and `userinfo.profile`; provider tokens are not retained and the client submits an immediate best-effort revocation request | Before enabling, configure consent-screen Privacy/Terms URLs, approved branding, exact scopes, provider role/retention/transfer evidence, and complete a real-account smoke test                              |
-| GitHub OAuth                | **Pending enablement:** Supabase requests `user:email`; provider tokens are not retained, but grant revocation requires confidential OAuth-app credentials and is not available to the static client         | Before enabling, record provider role/retention/transfer evidence, verify the consent screen, smoke-test the flow, and retain the public instruction for user-controlled revocation in Authorized OAuth Apps  |
-| KVKK international transfer | **Blocked:** no adequacy decision, Türkiye standard contract, signature, or notification has been documented for the recurring provider transfers                                                            | Document the lawful route now for current host/proxy/contact transfers and before account launch for Supabase; if using a standard contract, sign the official form and notify KVKK within five business days |
-| GDPR Article 27             | **Blocked pending facts:** the `/pl` service can indicate offering a service to people in the EU; the operator's EEA establishment and representative/exception analysis have not been recorded              | Resolve territorial scope for the current service now; if Article 3(2) applies without an EEA establishment or exception, appoint an EU representative and publish its identity/contact before proceeding     |
+| Provider / duty             | Current status                                                                                                                                                                                                           | Required action / deadline                                                                                                                                                                                    |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Vercel                      | **Blocked:** Hobby (free); the published Vercel processor DPA expressly applies only to Pro and Enterprise                                                                                                               | Remediate the current production host now: move to a DPA-covered arrangement (for example, reviewed Cloudflare Pages self-serve) or obtain qualified approval for another documented data-role basis          |
+| Supabase                    | **Provider contract recorded:** Free use accepts the Terms of Service; those Terms incorporate the current DPA, which is effective with the Agreement                                                                    | Retain the versions below and complete the separate KVKK transfer mechanism before optional accounts are deployed                                                                                             |
+| Cloudflare                  | **Provider contract recorded:** the Free self-serve relationship is governed by the Self-Serve Subscription Agreement, which incorporates the current DPA                                                                | Retain the versions below and complete the KVKK transfer mechanism for the current proxy/request processing now                                                                                               |
+| Microsoft Outlook / Hotmail | **Blocked:** Free consumer mailbox under the Microsoft Services Agreement/Privacy Statement; no customer processor DPA or Türkiye-specific transfer arrangement was identified                                           | Remediate the current published contact channel now: move to a DPA-covered mailbox or obtain qualified approval and document the provider's role plus transfer mechanism                                      |
+| Google OAuth                | **Configured; basic smoke passed:** static sign-in requests only `openid`, `userinfo.email`, and `userinfo.profile`; provider tokens are not retained and the client submits an immediate best-effort revocation request | Complete the remaining same-email linking, export, deletion-reauth, sign-out, token-retention, and revoke-request smoke checks; retain provider role/retention/transfer evidence                              |
+| GitHub OAuth                | **Configured; basic smoke passed:** Supabase requests `user:email`; provider tokens are not retained, but grant revocation requires confidential OAuth-app credentials and is not available to the static client         | Complete the remaining linking, export, deletion-reauth, sign-out, token-retention, and revocation-copy smoke checks; retain public user-controlled revocation instructions and provider evidence             |
+| KVKK international transfer | **Blocked:** no adequacy decision, Türkiye standard contract, signature, or notification has been documented for the recurring provider transfers                                                                        | Document the lawful route now for current host/proxy/contact transfers and before account launch for Supabase; if using a standard contract, sign the official form and notify KVKK within five business days |
+| GDPR Article 27             | **Blocked pending facts:** the `/pl` service can indicate offering a service to people in the EU; the operator's EEA establishment and representative/exception analysis have not been recorded                          | Resolve territorial scope for the current service now; if Article 3(2) applies without an EEA establishment or exception, appoint an EU representative and publish its identity/contact before proceeding     |
 
 ### Provider contract review record (2026-08-24)
 
@@ -124,21 +125,21 @@ blocker in the table above.
 
 ## 3. Lawful basis (per purpose)
 
-| Purpose                               | GDPR basis                                  | KVKK basis           | Rationale                                                            |
-| ------------------------------------- | ------------------------------------------- | -------------------- | -------------------------------------------------------------------- |
-| Account + cross-device sync           | **Art. 6(1)(b)** contract                   | contract / açık rıza | user requested an account to sync progress                           |
-| Session/auth cookies                  | **strictly necessary** (ePrivacy exemption) | zorunlu çerez        | required to deliver the requested login                              |
-| Public leaderboard (username + score) | **Art. 6(1)(a) consent** (opt-in)           | **açık rıza**        | publishing a handle publicly should be an explicit choice, revocable |
-| Security logs / rate-limiting (IP)    | **Art. 6(1)(f)** legitimate interest        | meşru menfaat        | abuse prevention; balancing test on file                             |
-| Analytics (if any)                    | **consent**                                 | açık rıza            | non-essential → requires opt-in banner                               |
+| Purpose                                         | GDPR basis                                  | KVKK basis           | Rationale                                                            |
+| ----------------------------------------------- | ------------------------------------------- | -------------------- | -------------------------------------------------------------------- |
+| Account + cross-device sync                     | **Art. 6(1)(b)** contract                   | contract / açık rıza | user requested an account to sync progress                           |
+| Supabase session in browser storage             | **strictly necessary** (ePrivacy exemption) | zorunlu depolama     | required only after the user requests persistent sign-in             |
+| Public leaderboard (username + objective count) | **Art. 6(1)(a) consent** (opt-in)           | **açık rıza**        | publishing a handle publicly should be an explicit choice, revocable |
+| Security logs / rate-limiting (IP)              | **Art. 6(1)(f)** legitimate interest        | meşru menfaat        | abuse prevention; balancing test on file                             |
+| Analytics (if any)                              | **consent**                                 | açık rıza            | non-essential → requires opt-in banner                               |
 
 **Key stance:** the leaderboard is **opt-in** (`leaderboard_opt_in` defaults `false`, [10 §3.1](./10-schema.md)); consent is granular and **withdrawable** (leaving the board = flip the flag, row disappears from the aggregate).
 
-## 4. Cookie policy & consent banner
+## 4. Browser storage notice & future consent gate
 
-Because the only cookies we _need_ are the **strictly-necessary session cookies**, the banner requirement depends on whether we add non-essential cookies:
+The current application code sets no analytics, advertising, or marketing cookies. It uses `localStorage` for locale, local/account progress, the notice acknowledgement, an expiring pending signup address, and the necessary Supabase session after sign-in; OAuth return state uses expiring same-tab `sessionStorage`.
 
-- **If we ship NO analytics/marketing cookies (recommended for MVP):** a **cookie notice** (informational, in the privacy policy + a small link) suffices — **no consent gate** for strictly-necessary auth cookies. This is the cleanest posture and keeps the offline/anonymous default friction-free.
+- **Current build:** `CookieConsent` is an informational, dismissible storage notice, not consent for optional processing. The Privacy notice records the keys, purpose, and lifetime; no account or game feature is blocked behind acceptance.
 - **If analytics/marketing are added:** a **full consent banner** is required, meeting EDPB/KVKK expectations **[verify]**:
   - Granular categories (necessary always-on; analytics/marketing opt-in).
   - **"Reject all" as easy as "Accept all"** (equal prominence, same layer).
@@ -146,18 +147,18 @@ Because the only cookies we _need_ are the **strictly-necessary session cookies*
   - Consent logged with timestamp + version; re-prompt on policy change; easy withdrawal.
   - KVKK: pair with an _aydınlatma metni_ (privacy notice) presented before/at collection.
 
-**Deliverables regardless:** a **Privacy Policy** and a **Cookie Policy** page (EN + TR given KVKK/audience), listing each cookie, purpose, and lifetime; link both from the auth screens and footer.
+**Current deliverable:** the localized Privacy notice and root storage notice cover application-owned storage. Reassess provider-set cookies and add a separate cookie policy before introducing any non-essential storage.
 
 ## 5. Data-subject rights & flows
 
-| Right (GDPR / KVKK)                   | How we satisfy it                                                                                    |
-| ------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| **Access**                            | in-app "Download my data" → JSON export of `profiles` + `level_progress` (+ email from `auth.users`) |
-| **Rectification**                     | edit `display_name`/`username` in profile settings                                                   |
-| **Erasure / "right to be forgotten"** | self-serve "Delete my account" (see §6)                                                              |
-| **Portability**                       | the same JSON export (structured, machine-readable)                                                  |
-| **Objection / withdraw consent**      | toggle `leaderboard_opt_in` off (leave the board); withdraw analytics consent                        |
-| **Restriction**                       | flag account to suspend processing pending a dispute                                                 |
+| Right (GDPR / KVKK)                   | How we satisfy it                                                                                                           |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| **Access**                            | in-app "Download my data" → JSON export of safe account/identity metadata, `profiles`, `case_progress`, and consent history |
+| **Rectification**                     | edit `display_name`; username is an immutable account identifier, with manual rights handling available through Contact     |
+| **Erasure / "right to be forgotten"** | self-serve verified soft-lock followed by the operator deletion runbook (see §6)                                            |
+| **Portability**                       | the same JSON export (structured, machine-readable)                                                                         |
+| **Objection / withdraw consent**      | toggle `leaderboard_opt_in` off; no analytics consent exists in the current build                                           |
+| **Restriction**                       | contact the operator to request restriction; the deletion soft-lock is not presented as a general restriction workflow      |
 
 Respond within **GDPR 1 month** (extendable) / **KVKK "en kısa sürede", ≤30 days** **[verify]**.
 
@@ -165,17 +166,17 @@ Respond within **GDPR 1 month** (extendable) / **KVKK "en kısa sürede", ≤30 
 
 ```
 User → "Delete my account" (requires re-auth)
-  1. Soft-lock the account (block new writes), show a short grace/undo window (optional).
-  2. Delete auth.users row  ──cascade──▶ profiles ──cascade──▶ level_progress, score_events
-     (single-point deletion via on-delete-cascade, [10 §5]).
-  3. Row vanishes from the leaderboard automatically (it's an aggregate over deleted rows).
-  4. Purge/anonymise PII (IP) from security logs on the normal log-retention cycle.
-  5. Backups: PII persists in backups until they rotate out — DOCUMENT this (see §7);
+  1. Record an idempotent soft lock that blocks new writes and immediately removes public visibility.
+  2. The operator verifies the request, records pseudonymous completion evidence, then deletes auth.users.
+  3. auth.users deletion ──cascade──▶ profiles ──cascade──▶ case_progress, profile_consent_events.
+  4. The row stays absent from the leaderboard throughout the request and deletion.
+  5. Purge/anonymise PII (IP) from security logs on the normal log-retention cycle.
+  6. Backups: PII persists in backups until they rotate out — DOCUMENT this (see §7);
      re-deletion is applied if a backup is ever restored.
-  6. Confirm completion to the user in-app + by email.
+  7. Confirm completion through the verified contact channel.
 ```
 
-- **Erasure vs. audit:** `score_events` is deleted with the user (it's personal data). If an anonymised anti-cheat signal must survive, keep only a **non-identifying aggregate** (e.g. counts), never the `user_id` or payload hash. Decide in WS5.
+- **Erasure evidence:** no account/profile/progress/consent row survives. The operator retains only the keyed-HMAC completion record described above for at most 90 days; it contains no raw account UUID, email, or username.
 
 ## 7. Retention
 
@@ -185,7 +186,8 @@ User → "Delete my account" (requires re-auth)
 | Inactive accounts  | proposal: **delete after 24 months** inactivity (notify first) **[verify]** | scheduled job                                   |
 | Security logs (IP) | **30–90 days** then purge/anonymise                                         | rolling window                                  |
 | Backups / PITR     | vendor window (e.g. ~**7–30 days** **[verify]**)                            | rotation; erasure propagates as backups age out |
-| Consent records    | duration of processing + limitation period **[verify]**                     | account deletion + N                            |
+| Consent records    | while the account exists; erased by the account cascade                     | permanent account deletion                      |
+| Deletion evidence  | no later than 90 days after completion                                      | operator runbook purge deadline                 |
 
 ## 8. Cross-border transfer & residency (KVKK-critical)
 

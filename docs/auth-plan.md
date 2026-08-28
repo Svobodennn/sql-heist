@@ -1,6 +1,6 @@
 # Implementation Plan: User Accounts (Supabase, client-only)
 
-> **Status:** P0–P5 implemented and verified; P6 Google/GitHub OAuth is in final implementation and verification. Provider app setup and real-provider smoke remain external delivery steps.
+> **Status:** P0–P6 implemented. Google and GitHub sign-in/username smoke passed; the provider-specific linking, export, deletion-reauth, token-retention, and revocation checklist remains an external delivery gate.
 > **Scope:** real accounts (email/password plus Google/GitHub), cross-device progress sync, a public "casual" leaderboard, and public profiles — all while the app **stays a static export**.
 > **Supersedes for build:** the older design set in [`docs/auth/`](./auth/) (00–40) is a valuable reference but was written against a **stale "levels/jobs" model** (`useProgress.ts`, `level_progress`) that no longer exists, and it recommends an **Edge/SSR + service-role** posture. This plan deliberately overrides both — see [§ Deviations](#deviations-from-docsauth).
 
@@ -104,19 +104,23 @@ Source: `~/.claude/rules/agent-assignment-matrix.md`. All names verified present
 
 Principle: **users read/write only their own rows; the public sees only curated, opt-in, safe-column views; base tables are never readable cross-user.** Every table has RLS enabled with explicit policies; absence of a policy = default deny.
 
-**P0 migration — `auth_core` (tables + own-row RLS + username RPC):**
+**P0 migration — [`20260822220000_auth_core.sql`](../supabase/migrations/20260822220000_auth_core.sql) (tables + own-row RLS + username RPC):** The historical baseline includes the then-current nullable `country` column because the later recorded migrations retire and drop it. The final schema has no country field. Its guards make it a no-op on the already-provisioned production project.
 
 ```sql
-create extension if not exists citext;
+create extension if not exists citext with schema extensions;
 
 create table public.profiles (
   id                 uuid primary key references auth.users(id) on delete cascade,
-  username           citext unique not null,
+  username           extensions.citext unique not null,
   display_name       text,
+  country            text,                              -- historical; dropped by 20260824203000
   leaderboard_opt_in boolean not null default false,   -- explicit opt-in; nothing public until true
   created_at         timestamptz not null default now(),
   updated_at         timestamptz not null default now(),
-  constraint username_format check (username ~ '^[a-z0-9_]{3,20}$')
+  constraint username_format check (username ~ '^[a-z0-9_]{3,20}$'),
+  constraint display_name_bounded check (
+    display_name is null or char_length(display_name) between 1 and 40
+  )
 );
 alter table public.profiles enable row level security;
 create policy profiles_select_own on public.profiles for select using (auth.uid() = id);
@@ -131,7 +135,9 @@ create table public.case_progress (
   completed_objectives text[] not null default '{}',         -- mirrors localStorage sql-heist:cases:v1
   best_score           int   check (best_score between 0 and 1200),  -- RESERVED (future score board); unused in MVP
   updated_at           timestamptz not null default now(),
-  primary key (user_id, case_id)
+  primary key (user_id, case_id),
+  constraint case_id_bounded check (char_length(case_id) between 1 and 64),
+  constraint objectives_bounded check (cardinality(completed_objectives) <= 50)
 );
 alter table public.case_progress enable row level security;
 create policy cp_select_own on public.case_progress for select using (auth.uid() = user_id);
@@ -140,12 +146,13 @@ create policy cp_update_own on public.case_progress for update
   using (auth.uid() = user_id) with check (auth.uid() = user_id);
 -- NO delete policy (progress is monotonic; deletion cascades from the account).
 
--- Best-effort availability check for signup UX; the citext unique constraint is the real arbiter.
-create or replace function public.username_available(p_username citext)
-returns boolean language sql stable security definer set search_path = public as $$
+-- Historical helper. The final hardening migration revokes browser execution;
+-- profile INSERT plus the unique constraint is the only collision arbiter.
+create function public.username_available(p_username extensions.citext)
+returns boolean language sql stable security definer set search_path = public, extensions as $$
   select not exists (select 1 from public.profiles where username = p_username);
 $$;
-grant execute on function public.username_available(citext) to anon, authenticated;
+grant execute on function public.username_available(extensions.citext) to anon, authenticated;
 ```
 
 **P3 migration — `public_profiles` view (safe columns, opt-in only):**
@@ -286,22 +293,22 @@ The public leaderboard/profile need to aggregate **across** users, but base-tabl
 **Acceptance criteria:**
 
 - Sign up → confirmation email → click link → lands on `/auth/callback` → session established → `profiles` row created with the chosen username.
-- Duplicate username is rejected gracefully (pre-check RPC + unique-constraint fallback → re-prompt).
+- Duplicate username is rejected gracefully by profile `INSERT` plus the unique constraint (`23505` → re-prompt); private-name availability probing is disabled.
 - Session persists across reload/tabs; sign-out revokes it (`supabase.auth.signOut()`).
 - All new strings exist in `en`/`tr`/`pl`. Anonymous e2e still green.
 
 1. **Auth client wrappers** (File: `features/auth/authClient.ts`)
-   - Signatures: `signUpEmail(email,password,username)` → `supabase.auth.signUp({ email, password, options:{ data:{ username }, emailRedirectTo: <origin>/auth/callback }})`; `signInEmail`, `signOut`, `exchangeCode(code)`, `verifyEmailOtp(token_hash)`. All no-op with a typed error when `getSupabase()` is `null`. Risk: Low.
+   - Signatures: `signUpEmail(email,password,username)` → `supabase.auth.signUp({ email, password, options:{ data:{ username }, emailRedirectTo: <origin>/auth/callback }})`; `signInEmail`, `signOut`, `exchangeCode(code)`. All no-op with a typed error when `getSupabase()` is `null`. Risk: Low.
 
 2. **Sign-in / sign-up UI** (Files: `features/auth/AuthCard/*`, `features/auth/SignInForm/*`, `features/auth/SignUpForm/*`)
    - Action: colocated components (`X.tsx`+`X.module.css`+`index.ts`) built from `.panel` + `.btn`/`.btn--primary`/`.btn--full` + brass tokens. Zod-validate inputs (email, password ≥ configured min, username `^[a-z0-9_]{3,20}$`) before submit; show inline errors. Risk: Medium (form/error states) — mitigated by component tests.
 
 3. **Username gate + profile creation** (Files: `features/auth/UsernameGate/*`, `features/auth/useAuth.ts` `refreshProfile`)
-   - Action: after first confirmed sign-in, if no `profiles` row, show `UsernameGate`: pre-check `username_available` RPC (debounced), then `insert` the row (RLS `profiles_insert_self`). On `23505` unique violation → inline "taken, try another". Seed the desired username from `user_metadata.username` captured at signup. Risk: Medium (collision timing) — pre-check + constraint fallback covers it.
+   - Action: after first confirmed sign-in, if no `profiles` row, show `UsernameGate`, then `insert` the row (RLS `profiles_insert_self`). On `23505`, first recover an own row created by another tab; otherwise show inline "taken, try another". Seed only an email-signup username from `user_metadata.username`; OAuth metadata is a suggestion that requires explicit submit. Risk: Medium (collision timing) — the unique constraint is the sole arbiter.
    - Decision (rejected alternative): a `handle_new_user` DB trigger could auto-create the profile, but it moves collision handling server-side where UX is worse; client-side creation keeps the flow visible/testable.
 
 4. **Static callback page** (File: `app/auth/callback/page.tsx` — client, **canonical non-localized URL**)
-   - Action: on mount, let `detectSessionInUrl` consume `?code=` (PKCE) via `exchangeCodeForSession`; if the email template uses `token_hash`, call `verifyEmailOtp({ type:'email', token_hash })` instead. Then redirect to `next` param or `/account`. Show a minimal "confirming…" panel + an error path with a "resend" affordance. Risk: **High** (email-confirm on a static site) — see Risks; requires a **[verify]** of the Supabase email template + adding the callback to the redirect allow-list.
+   - Action: on mount, let `detectSessionInUrl` consume the default-template `?code=` PKCE response via `exchangeCodeForSession`, with one delayed manual exchange fallback in the same browser. Then redirect through the exact stored OAuth return path or `/`. Show a minimal "confirming…" panel plus an error/resend path. Risk: **High** (email-confirm on a static site) — the verifier exists only in the browser that started signup, so the failure copy explicitly covers cross-browser opens.
 
 5. **Routes + Navbar UserMenu** (Files: `app/auth/sign-in/page.tsx`, `app/auth/sign-up/page.tsx`, `features/auth/UserMenu/*`)
    - Action: thin client pages rendering the forms; `UserMenu` shows username + links to `/account`, `/leaderboard`, and Sign out. Risk: Low.
@@ -337,13 +344,13 @@ The public leaderboard/profile need to aggregate **across** users, but base-tabl
    - Why merge is safe: completion is **monotonic** (an objective is cleared or not; never un-cleared), so per-case set-union is associative, idempotent, and loss-free — no conflict resolution needed. `mergeCaseProgress` is pure → unit-tested with `mocksmith` fixtures. Risk: Medium — covered by tests.
 
 2. **Extend the read hook** (File: `features/game/lib/useCaseProgress.ts` — additive only)
-   - Action: keep `readCaseProgress`/`recordObjectiveWin`/`caseCompletion` **exactly as-is** (golden/e2e depend on their pure localStorage behavior). Add, inside `useCaseProgress()`, an auth-aware branch: when `useAuth().status==='authed'`, after the existing localStorage read, `fetchServerProgress()` + `mergeCaseProgress` and set the merged map (localStorage stays the offline cache). When not authed → current behavior verbatim. `ready` still guards hydration. Risk: Medium (hydration/order) — the anon branch is unchanged so regressions are contained.
+   - Action: keep `readCaseProgress`/`recordObjectiveWin`/`caseCompletion` **exactly as-is** for anonymous play. The authenticated branch reads the user-scoped cache, fetches server progress, and set-unions the result with the **current** cache again before writing; a win recorded while the fetch is pending therefore cannot be replaced by an older snapshot. When not authed → current behavior verbatim. `ready` still guards hydration. Risk: Medium (hydration/order) — covered by a deferred-fetch concurrent-win regression test.
 
 3. **Login handshake** (File: `features/auth/AuthProvider.tsx`)
-   - Action: on transition to `authed`, call `mergeLocalIntoServer(readCaseProgress())` once. Risk: Low.
+   - Action: after the authenticated profile exists, atomically claim anonymous progress into the user-scoped cache and call `mergeLocalIntoServer(claimed)` once. Re-union the response with the current cache and ignore a late response after sign-out/user switch. Risk: Low.
 
 4. **Write-through on win** (File: `features/game/components/CasePlayer/CasePlayer.tsx`, minimal at line ~185)
-   - Action: right after the existing `recordObjectiveWin(gameCase.id, obj.id)` (unchanged), if authed, fire-and-forget `pushObjectiveWin(gameCase.id, obj.id)` (errors swallowed → play never blocks). No other game logic changes; the frozen engine is untouched. Risk: Medium — mitigated by keeping it additive + non-blocking.
+   - Action: authenticated wins go to `recordAccountObjectiveWin(userId, caseId, objectiveId)`; anonymous/disabled wins keep the original `recordObjectiveWin` path. Authenticated wins also fire-and-forget `pushObjectiveWin` (errors swallowed → play never blocks); a later login retries from the preserved account cache. No engine logic changes. Risk: Medium — mitigated by monotonic union and account isolation.
 
 **Order:** 1 (+tests) → 2 → 3 → 4. **GREEN GATE** — pay special attention to golden + e2e staying green.
 
@@ -425,7 +432,7 @@ The public leaderboard/profile need to aggregate **across** users, but base-tabl
 3. **Account linking and username:** Supabase's automatic linking for identities with the same verified email is the approved policy and is disclosed before provider sign-in. OAuth metadata may suggest a normalized username, but the user must explicitly submit it; only the username explicitly supplied during email signup may be auto-claimed.
 4. **Token minimisation:** the app keeps the Supabase access/refresh pair required for the browser session but recursively strips `provider_token` and `provider_refresh_token` on storage writes and legacy reads. If persistent browser storage is unavailable, auth uses isolated in-memory storage instead of falling back to unsanitized global storage. A completed Google sign-in uses its transient credential only to submit an immediate best-effort revoke POST; GitHub grant revocation remains user-controlled because its API requires confidential OAuth-app credentials unavailable to the static client.
 5. **Export and deletion:** account export includes a safe allow-list of account/provider identity metadata and excludes session/provider credentials. Deletion accepts a recent password or OAuth AMR proof plus the explicit post-provider confirmation above; its required expected-user argument must equal `auth.uid()` so a cross-tab session switch fails closed. The existing idempotent soft lock/manual permanent deletion workflow remains.
-6. **External provider setup:** create Google and GitHub OAuth apps, store client ID/secrets only in Supabase, enable both providers, and register the Supabase provider callback plus the exact app callback allow-list. Configure only the documented identity/email scopes, Google consent-screen Privacy/Terms URLs, and approved Google branding. Run real Google/GitHub sign-in, linking, username, export, deletion reauth, sign-out, token-persistence, Google revoke-request, and GitHub user-revocation-copy smoke tests after configuration.
+6. **External provider setup:** Google and GitHub apps are configured, their secrets live only in Supabase, and real sign-in plus explicit username selection passed. Before merge, complete and record the remaining real-account matrix: same-email linking, export, deletion reauth, sign-out, token persistence, Google revoke request, and GitHub user-revocation copy.
 
 **Order:** 1 (+tests) → 2 → 3 → 4 → 5 → legal/security review → full GREEN GATE. Real-provider smoke is the only provider-config-dependent gate.
 
@@ -447,9 +454,9 @@ Follows the repo's locked test layout: **source dirs hold zero test files**; eve
 - **RLS leak (SECURITY-CRITICAL).** This app teaches SQLi; a policy hole is disaster-class.
   - Mitigation: RLS on every table; own-row policies with `WITH CHECK`; public data only through curated definer views (safe columns + opt-in filter); base tables never cross-user readable; `get_advisors` on every DB phase; **blocking** P5 adversarial review; email confined to `auth.users`.
 - **Progress-merge data loss.** A bad merge could wipe a device's clears.
-  - Mitigation: completion is monotonic → per-case **set union** (associative, idempotent, loss-free); never overwrite server with empty local; pure `mergeCaseProgress` exhaustively unit-tested; write-through is additive to the untouched localStorage core.
+  - Mitigation: completion is monotonic → per-case **set union** (associative, idempotent, loss-free); every async response is re-unioned with the current user-scoped cache before writing; never overwrite server with empty local; pure merge plus deferred-fetch concurrent-win behavior are unit/component tested.
 - **Email-confirm / OAuth redirect on a static site.** No server to handle the callback; the PKCE `code_verifier` and email token must round-trip client-side.
-  - Mitigation: single client `/auth/callback` page using `detectSessionInUrl` + `exchangeCodeForSession`, with a `verifyOtp({type:'email',token_hash})` fallback; register the exact callback in the Supabase redirect allow-list; **[verify]** the Confirm-signup email template matches the chosen flow before P1 sign-off; ship a resend/error path.
+  - Mitigation: single client `/auth/callback` page using `detectSessionInUrl` + `exchangeCodeForSession`; the live default template and exact redirect allow-list use same-browser PKCE `?code=`. The callback ships a resend/error path and does not accept a separate `token_hash` flow.
 - **Cheatable leaderboard.** Client-only writes mean a user can inflate **their own** rows.
   - Mitigation: accepted for v1 and **labeled "casual"** in UI; RLS still blocks writing/reading other users' rows; `best_score` bounded by CHECK; documented follow-up = a Supabase **Edge Function** doing server replay (the `docs/auth/40-anti-cheat.md` design) — out of scope here.
 - **Session persistence / multiple clients.** Duplicate `GoTrueClient` instances corrupt session state.
@@ -487,7 +494,7 @@ Follows the repo's locked test layout: **source dirs hold zero test files**; eve
 
 ## Open items to confirm at build (`[verify]`)
 
-1. Supabase **Confirm-signup email template** flow (`?code=` PKCE vs `token_hash` OTP) — drives the `/auth/callback` code path.
+1. **Resolved:** Supabase's default confirm-signup template produces same-browser PKCE `?code=` links; the live email flow passed and `/auth/callback` intentionally has no `token_hash` branch.
 2. **Resolved:** client-only settings create a caller-bound, recent-auth soft lock; permanent Auth deletion is an operator action under `docs/auth/60-account-deletion-runbook.md`. No service-role credential or Edge Function is shipped.
 3. **Resolved:** GoTrue and client Zod both require 8+ characters with `a-z`, `A-Z`, `0-9`, and an ASCII symbol. Leaked-password screening remains unavailable on the Hobby plan.
 4. Supabase **region/KVKK transfer basis** for the eu-west-1 project (compliance, counsel).
