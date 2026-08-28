@@ -43,6 +43,16 @@ async function verifySchema() {
       "   'public.case_progress','update'),",
       " 'progress_delete', has_table_privilege('authenticated',",
       "   'public.case_progress','delete'),",
+      " 'unsafe_table_grant_count', (select count(*) from information_schema.table_privileges",
+      "   where table_schema = 'public'",
+      "     and table_name in ('profiles', 'case_progress', 'profile_consent_events')",
+      "     and grantee in ('PUBLIC', 'anon', 'authenticated')",
+      "     and privilege_type in ('TRUNCATE', 'TRIGGER', 'REFERENCES')),",
+      " 'anon_base_select_count', (select count(*) from information_schema.table_privileges",
+      "   where table_schema = 'public'",
+      "     and table_name in ('profiles', 'case_progress', 'profile_consent_events')",
+      "     and grantee in ('PUBLIC', 'anon')",
+      "     and privilege_type = 'SELECT'),",
       " 'function', (select jsonb_build_object(",
       "   'definer', p.prosecdef, 'config', p.proconfig,",
       "   'args', pg_get_function_identity_arguments(p.oid),",
@@ -59,6 +69,12 @@ async function verifySchema() {
       '   from pg_proc p join pg_namespace n on n.oid = p.pronamespace',
       "   where n.nspname = 'public'",
       "     and p.proname = 'upsert_case_progress'),",
+      " 'username_function', (select jsonb_build_object(",
+      "   'anon', has_function_privilege('anon', p.oid, 'execute'),",
+      "   'authed', has_function_privilege('authenticated', p.oid, 'execute'))",
+      '   from pg_proc p join pg_namespace n on n.oid = p.pronamespace',
+      "   where n.nspname = 'public'",
+      "     and p.proname = 'username_available'),",
       " 'deletion_function', (select jsonb_build_object(",
       "   'definer', p.prosecdef, 'config', p.proconfig,",
       "   'args', pg_get_function_identity_arguments(p.oid),",
@@ -106,6 +122,14 @@ async function verifySchema() {
     'progress is browser-readable but directly immutable',
   )
   check(
+    live?.unsafe_table_grant_count === 0,
+    'browser roles have no TRUNCATE, TRIGGER, or REFERENCES grants on base tables',
+  )
+  check(
+    live?.anon_base_select_count === 0,
+    'anonymous roles have no direct SELECT grant on private base tables',
+  )
+  check(
     live?.function?.definer === true &&
       live?.function?.anon === false &&
       live?.function?.authed === true,
@@ -126,6 +150,10 @@ async function verifySchema() {
     live?.progress_function?.args === 'p_case_id text, p_completed_objectives text[]' &&
       live?.progress_function?.config?.includes('search_path=pg_catalog'),
     'progress RPC has no target user and pins search_path',
+  )
+  check(
+    live?.username_function?.anon === false && live?.username_function?.authed === false,
+    'private username availability RPC is unavailable to browser roles',
   )
   check(
     live?.deletion_function?.definer === true &&
@@ -577,11 +605,8 @@ async function verifyRankAndUsername(a, b, anon) {
     'anonymous username probing is denied',
   )
   check(
-    success(
-      await b.rpc('username_available', { p_username: candidate }),
-      'authenticated username check succeeds',
-    ) === true,
-    'username RPC returns one availability boolean',
+    Boolean((await b.rpc('username_available', { p_username: candidate })).error),
+    'authenticated username probing is denied',
   )
 }
 
