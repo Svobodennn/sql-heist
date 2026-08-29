@@ -103,6 +103,9 @@ export function Navbar() {
         </ul>
 
         <div className={styles.actions}>
+          <span className={styles.systemStatus} aria-label="System online">
+            SYSTEM: ONLINE
+          </span>
           <ShareButton />
           <LanguageSwitcher />
           <AuthEntry />
@@ -140,6 +143,9 @@ export function Navbar() {
           })}
         </ul>
         <div className={styles.mobileActions}>
+          <span className={styles.systemStatus} aria-label="System online">
+            SYSTEM: ONLINE
+          </span>
           <ShareButton compact />
           <LanguageSwitcher />
           <AuthEntry />

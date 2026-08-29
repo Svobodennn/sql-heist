@@ -7,6 +7,7 @@ import { CookieConsent } from './components/CookieConsent'
 import { I18nProvider } from '@/i18n/I18nProvider'
 import { AuthProvider } from '@/features/auth/AuthProvider'
 import { UsernameGate } from '@/features/auth/UsernameGate'
+import { CinematicCursor } from './components/CinematicCursor'
 import { SITE_URL, SITE_NAME, SITE_TAGLINE, SITE_DESCRIPTION } from './siteConfig'
 import styles from './layout.module.css'
 import './globals.css'
@@ -87,6 +88,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <CookieConsent />
             {/* Renders nothing until an authed user has no profiles row yet. */}
             <UsernameGate />
+            <CinematicCursor />
           </AuthProvider>
         </I18nProvider>
       </body>

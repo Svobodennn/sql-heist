@@ -100,6 +100,28 @@
   --font-display: var(--font-display-src), 'Space Grotesk', system-ui, sans-serif;
   --font-sans: var(--font-sans-src), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-mono-src), ui-monospace, 'SFMono-Regular', monospace;
+
+  /* Cinematic Breach visual layer. Existing semantic tokens above stay stable
+     so legacy chrome—especially the approved footer—does not get reskinned by
+     the overhaul indirectly. New/overhauled surfaces opt into these tokens. */
+  --breach-black: #06080a;
+  --breach-black-soft: #090d10;
+  --breach-panel: #0c1115;
+  --breach-panel-raised: #11171b;
+  --breach-panel-warm: #17130c;
+  --breach-line: #293239;
+  --breach-line-soft: #1b2328;
+  --breach-white: #f4f0e8;
+  --breach-muted: #a7adb1;
+  --breach-dim: #8b949a;
+  --breach-gold: #e3a83e;
+  --breach-gold-light: #f2c266;
+  --breach-red: #ff5c4f;
+  --breach-green: #45c776;
+  --breach-violet: #c481ff;
+  --breach-blue: #6fb7ed;
+  --breach-shell: 1376px;
+  --breach-ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ---------- Base ---------- */
@@ -120,13 +142,20 @@ html {
 body {
   margin: 0;
   min-height: 100dvh;
-  background: var(--bg);
+  background:
+    radial-gradient(circle at 78% 8%, rgba(227, 168, 62, 0.055), transparent 28rem),
+    linear-gradient(180deg, var(--breach-black-soft), var(--breach-black));
   color: var(--text);
   font-family: var(--font-sans);
   font-size: 16px; /* body-font min on mobile */
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+::selection {
+  color: var(--breach-black);
+  background: var(--breach-gold-light);
 }
 
 h1,
@@ -310,6 +339,58 @@ textarea.mono {
     border-color var(--dur-fast) var(--ease-out);
 }
 
+/* The cursor component owns movement; the native-cursor reset is global because
+   CSS Modules reject document-root selectors. Text-entry controls deliberately
+   retain the platform text caret. */
+@media (pointer: fine) and (hover: hover) and (forced-colors: none) {
+  .cursor-enhanced,
+  .cursor-enhanced body,
+  .cursor-enhanced a,
+  .cursor-enhanced button,
+  .cursor-enhanced summary,
+  .cursor-enhanced [role='button'],
+  .cursor-enhanced [data-magnetic] {
+    cursor: none;
+  }
+
+  .cursor-enhanced input,
+  .cursor-enhanced textarea,
+  .cursor-enhanced select,
+  .cursor-enhanced [contenteditable='true'] {
+    cursor: text;
+  }
+}
+
+/* Route-local reveal system. Content remains visible without JS; the client
+   effect adds `motion-ready` only after it can observe and reveal safely. */
+.motion-ready [data-reveal] {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 600ms var(--breach-ease),
+    transform 600ms var(--breach-ease);
+}
+
+.motion-ready [data-reveal='left'] {
+  transform: translateX(-20px);
+}
+
+.motion-ready [data-reveal='right'] {
+  transform: translateX(20px);
+}
+
+.motion-ready [data-reveal][data-reveal-visible='true'] {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+@media (max-width: 900px) {
+  .motion-ready [data-reveal='left'],
+  .motion-ready [data-reveal='right'] {
+    transform: translateY(16px);
+  }
+}
+
 /* ---------- Keyframes (GPU-only: opacity/transform) ---------- */
 @keyframes shimmer {
   from {
@@ -349,5 +430,12 @@ textarea.mono {
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .motion-ready [data-reveal] {
+    opacity: 1;
+    transform: none;
   }
 }

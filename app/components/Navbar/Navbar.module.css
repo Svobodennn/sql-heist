@@ -41,6 +41,33 @@
   display: none;
 }
 
+.systemStatus {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding-inline: 11px;
+  border: 1px solid #244c34;
+  border-radius: 4px;
+  color: var(--breach-green);
+  background: rgba(15, 42, 25, 0.45);
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.systemStatus::before {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 50%;
+  background: currentColor;
+  content: '';
+}
+
 .links {
   list-style: none;
   margin: 0;

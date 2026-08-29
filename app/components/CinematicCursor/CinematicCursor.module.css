@@ -1,0 +1,70 @@
+.cursor {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: none;
+  pointer-events: none;
+}
+
+.ring,
+.dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.ring {
+  width: 34px;
+  height: 34px;
+  border: 1px solid color-mix(in srgb, var(--breach-gold-light) 82%, transparent);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--breach-gold) 3%, transparent);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--breach-gold) 9%, transparent);
+  transition:
+    opacity 160ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--breach-red);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--breach-red) 42%, transparent);
+  transition:
+    opacity 120ms ease,
+    background-color 180ms ease;
+}
+
+.visible:not(.isText) .ring {
+  opacity: 0.9;
+}
+
+.visible:not(.isText) .dot {
+  opacity: 1;
+}
+
+.magnetic .ring {
+  border-color: var(--breach-red);
+  box-shadow: 0 0 26px color-mix(in srgb, var(--breach-red) 18%, transparent);
+}
+
+.magnetic .dot {
+  background: var(--breach-white);
+}
+
+@media (pointer: fine) and (hover: hover) and (forced-colors: none) {
+  .cursor {
+    display: block;
+  }
+}
+
+@media (forced-colors: active), (prefers-reduced-motion: reduce) {
+  .cursor {
+    display: none;
+  }
+}
