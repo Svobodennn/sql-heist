@@ -1,95 +1,147 @@
 .page {
-  padding-block: var(--space-12);
+  width: min(var(--breach-shell), calc(100% - 48px));
+  max-width: var(--breach-shell);
+  padding: 26px 0 clamp(64px, 8vw, 112px);
 }
 
 .intro {
+  position: relative;
+  min-height: 330px;
+  max-width: none;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--space-3);
-  max-width: 52rem;
-  margin-inline: auto;
+  justify-content: flex-end;
+  gap: 13px;
+  overflow: hidden;
+  isolation: isolate;
+  margin: 0;
+  padding: clamp(28px, 5vw, 64px);
+  border: 1px solid var(--breach-line);
+  background: var(--breach-panel);
+}
+
+.intro::before,
+.intro::after {
+  position: absolute;
+  inset: 0;
+  content: '';
+  pointer-events: none;
+}
+
+.intro::before {
+  z-index: -2;
+  background: url('/cinematic-breach/case-vault.webp') center 60% / cover no-repeat;
+  filter: contrast(1.12) saturate(0.7);
+  transform: scale(1.015);
+}
+
+.intro::after {
+  z-index: -1;
+  background:
+    linear-gradient(90deg, rgba(6, 8, 10, 0.97), rgba(6, 8, 10, 0.48) 70%, rgba(6, 8, 10, 0.76)),
+    linear-gradient(0deg, rgba(6, 8, 10, 0.99), transparent 78%);
 }
 
 .title {
-  color: var(--text);
-  font-size: clamp(2rem, 7vw, 3.5rem);
+  max-width: 980px;
+  margin: 0;
+  color: var(--breach-white);
+  font-family: var(--font-brand);
+  font-size: clamp(3.8rem, 8vw, 8rem);
+  font-weight: 400;
+  line-height: 0.86;
+  letter-spacing: 0.008em;
+  text-transform: uppercase;
+  text-wrap: balance;
 }
 
 .lede {
-  max-width: 62ch;
-  color: var(--text-secondary);
-  font-size: 1.0625rem;
+  max-width: 66ch;
+  color: var(--breach-muted);
+  font-size: 1rem;
+  line-height: 1.65;
 }
 
 .disclosure {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2) var(--space-3);
-  margin-top: var(--space-2);
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid color-mix(in srgb, var(--primary) 45%, var(--border));
-  border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--primary) 8%, var(--surface));
-  color: var(--text-secondary);
+  gap: 8px 12px;
+  margin-top: 3px;
+  padding: 11px 13px;
+  border: 1px solid #665535;
+  border-radius: 0;
+  color: var(--breach-muted);
+  background: rgba(35, 27, 12, 0.64);
+  font-size: 0.8125rem;
 }
 
 .disclosure strong {
-  color: var(--primary);
+  color: var(--breach-gold-light);
 }
 
 .rankCard,
 .board,
 .state {
-  max-width: 68rem;
-  margin: var(--space-8) auto 0;
+  max-width: none;
+  margin: 14px auto 0;
+  border-radius: 0;
+  background: var(--breach-panel);
+  box-shadow: none;
 }
 
 .rankCard {
+  min-height: 120px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
-  padding: var(--space-4) var(--space-6);
-  border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
+  gap: 18px;
+  padding: 20px clamp(20px, 3vw, 34px);
+  border: 1px solid #5d4b2a;
+  border-left: 4px solid var(--breach-gold);
 }
 
 .rankValue {
-  margin-top: var(--space-1);
-  color: var(--primary);
-  font-size: 2rem;
-  font-weight: 700;
+  margin-top: 4px;
+  color: var(--breach-gold-light);
+  font-size: clamp(2.3rem, 5vw, 4rem);
+  font-weight: 800;
+  line-height: 1;
 }
 
 .rankCopy {
-  margin-top: var(--space-2);
-  color: var(--text);
-  font-weight: 600;
+  margin-top: 8px;
+  color: var(--breach-white);
+  font-weight: 700;
 }
 
 .rankMeta {
-  color: var(--text-secondary);
+  color: var(--breach-muted);
+  line-height: 1.55;
 }
 
 .board {
   padding: 0;
   overflow: hidden;
+  border: 1px solid var(--breach-line);
 }
 
 .tableWrap {
   overflow-x: auto;
+  overscroll-behavior-x: contain;
   -webkit-overflow-scrolling: touch;
 }
 
 .tableWrap:focus-visible {
-  outline-offset: -3px;
+  outline-offset: -4px;
 }
 
 .scrollHint {
-  padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid var(--border);
-  background: var(--surface-raised);
-  color: var(--text-secondary);
+  margin: 0;
+  padding: 12px 15px;
+  border-bottom: 1px solid var(--breach-line);
+  color: var(--breach-muted);
+  background: var(--breach-panel-raised);
   font-size: 0.8125rem;
 }
 
@@ -102,17 +154,18 @@
 
 .table th,
 .table td {
-  padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid var(--border);
+  padding: 15px 17px;
+  border-bottom: 1px solid var(--breach-line);
+  color: var(--breach-muted);
   vertical-align: middle;
 }
 
 .table th {
-  background: var(--surface-raised);
-  color: var(--text-secondary);
+  color: var(--breach-dim);
+  background: #090d10;
   font-family: var(--font-mono);
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.6875rem;
+  font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -122,57 +175,73 @@
 }
 
 .table tbody tr:hover {
-  background: color-mix(in srgb, var(--primary) 4%, transparent);
+  background: rgba(227, 168, 62, 0.045);
 }
 
 .position,
 .objectives {
-  color: var(--primary);
-  font-weight: 700;
+  color: var(--breach-gold-light) !important;
+  font-weight: 800;
 }
 
 .operative {
   display: inline-flex;
   flex-direction: column;
-  gap: var(--space-1);
-  color: var(--text);
-  font-weight: 600;
+  gap: 4px;
+  color: var(--breach-white);
+  font-weight: 700;
 }
 
 .operative span:last-child {
-  color: var(--text-muted);
+  color: var(--breach-dim);
   font-size: 0.8125rem;
   font-weight: 400;
 }
 
 .state {
+  min-height: 260px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--space-4);
-  padding: clamp(var(--space-6), 6vw, var(--space-12));
+  justify-content: center;
+  gap: 16px;
+  padding: clamp(24px, 5vw, 58px);
+  border: 1px solid var(--breach-line);
 }
 
 .state h2 {
-  color: var(--text);
-  font-size: clamp(1.5rem, 5vw, 2.25rem);
+  color: var(--breach-white);
+  font-size: clamp(1.7rem, 5vw, 2.7rem);
 }
 
 .state p {
   max-width: 58ch;
-  color: var(--text-secondary);
+  color: var(--breach-muted);
+  line-height: 1.6;
 }
 
-@media (max-width: 639px) {
-  .rankCard {
-    align-items: flex-start;
-    flex-direction: column;
-    padding-inline: var(--space-4);
-  }
+@media (max-width: 700px) {
+  .page { width: min(100% - 28px, var(--breach-shell)); padding-top: 14px; }
+  .intro { min-height: 360px; padding: 24px 20px; }
+  .title { font-size: clamp(3.6rem, 18vw, 6.2rem); }
+  .rankCard { align-items: flex-start; flex-direction: column; }
 }
 
 @media (min-width: 800px) {
-  .scrollHint {
+  .scrollHint { display: none; }
+}
+
+@media (forced-colors: active) {
+  .intro,
+  .rankCard,
+  .board,
+  .state {
+    border: 2px solid CanvasText;
+    background: Canvas;
+  }
+
+  .intro::before,
+  .intro::after {
     display: none;
   }
 }

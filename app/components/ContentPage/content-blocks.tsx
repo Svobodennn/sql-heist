@@ -17,7 +17,7 @@ export function Section({
   children: ReactNode
 }) {
   return (
-    <section id={id} className={styles.section}>
+    <section id={id} className={styles.section} data-reveal>
       <h2>{title}</h2>
       {children}
     </section>
@@ -47,7 +47,7 @@ export function LegalSection({
   children: ReactNode
 }) {
   return (
-    <section id={id} className={styles.legalSection}>
+    <section id={id} className={styles.legalSection} data-reveal>
       <h2 className={styles.legalH2}>
         <span className={styles.legalNum} aria-hidden="true" />
         <span>{title}</span>

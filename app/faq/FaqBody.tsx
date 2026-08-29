@@ -33,7 +33,7 @@ export function FaqBody({ locale }: { locale: Locale }) {
       <h2 className="sr-only">{t('faq.srHeading')}</h2>
       <div className={styles.faqList}>
         {items.map((item, i) => (
-          <details key={i} className={styles.faq}>
+          <details key={i} className={styles.faq} data-reveal>
             <summary className={styles.faqSummary}>
               <span>{item.q}</span>
               <span className={styles.faqIcon} aria-hidden="true" />

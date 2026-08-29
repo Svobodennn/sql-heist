@@ -33,7 +33,7 @@ export function ContentPage({
     <main className={styles.page}>
       <header className={styles.hero}>
         <div className="container">
-          <div className={styles.heroInner}>
+          <div className={styles.heroInner} data-reveal="left">
             <Logo size={30} className={styles.heroMark} />
             <span className="stamp">{eyebrow}</span>
             <h1 className={styles.title}>{title}</h1>
