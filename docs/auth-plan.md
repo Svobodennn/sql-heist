@@ -1,6 +1,6 @@
 # Implementation Plan: User Accounts (Supabase, client-only)
 
-> **Status:** P0–P6 implemented. Google and GitHub sign-in/username smoke passed; the provider-specific linking, export, deletion-reauth, token-retention, and revocation checklist remains an external delivery gate.
+> **Status:** P0–P6 implemented and merged. Google and GitHub sign-in/username smoke passed; the provider-specific linking, export, deletion-reauth, token-retention, and revocation checklist remains an external delivery gate. The post-theme normal and explicit env-less static gates were revalidated on 2026-08-29.
 > **Scope:** real accounts (email/password plus Google/GitHub), cross-device progress sync, a public "casual" leaderboard, and public profiles — all while the app **stays a static export**.
 > **Supersedes for build:** the older design set in [`docs/auth/`](./auth/) (00–40) is a valuable reference but was written against a **stale "levels/jobs" model** (`useProgress.ts`, `level_progress`) that no longer exists, and it recommends an **Edge/SSR + service-role** posture. This plan deliberately overrides both — see [§ Deviations](#deviations-from-docsauth).
 
@@ -474,23 +474,23 @@ Follows the repo's locked test layout: **source dirs hold zero test files**; eve
 
 ## Success Criteria
 
-- [ ] `output:'export'` unchanged; every phase passes `npm run typecheck && npm test && npm run build && npm run test:e2e`.
-- [ ] Anonymous `tests/e2e/cases.e2e.ts` + golden suite stay green throughout (no secrets needed).
-- [ ] Email sign-up → confirm → sign-in → unique username → Navbar reflects auth → sign-out works.
-- [ ] Google/GitHub sign-in → callback → explicit username choice works; same-verified-email linking is disclosed and verified; OAuth reauth can request deletion.
-- [ ] On login, local progress merges into `case_progress` with zero loss; a win syncs across devices.
-- [ ] Public leaderboard is anon-readable, opt-in only, safe columns only, labeled "casual"; "your rank" works.
-- [ ] `/u?name=` shows opt-in public profiles only; non-opt-in is invisible; no email/`id`/cross-user data ever fetched.
-- [ ] `/account` edits profile, toggles opt-in, exports data, and creates a verified deletion soft lock; the operator runbook completes and verifies the cascading Auth deletion.
-- [ ] RLS security gate passed (advisors clean/justified + adversarial cross-user matrix) — **recorded in the PR**.
-- [ ] New pages localized for `/tr` `/pl`; i18n parity test green.
-- [ ] `PRODUCT.md` + privacy/terms updated; `lib/engine`/`lib/schema` untouched.
+- [x] `output:'export'` unchanged; every phase passes `npm run typecheck && npm test && npm run build && npm run test:e2e`.
+- [x] Anonymous `tests/e2e/cases.e2e.ts` + golden suite stay green throughout (no secrets needed).
+- [x] Email sign-up → confirm → sign-in → unique username → Navbar reflects auth → sign-out works.
+- [ ] Google/GitHub sign-in → callback → explicit username choice is implemented and basic provider smoke passed; the real-account linking, export, deletion-reauth, sign-out, token-retention, Google revoke-request, and GitHub revocation-copy matrix remains an external delivery gate.
+- [x] On login, local progress merges into `case_progress` with zero loss; a win syncs across devices.
+- [x] Public leaderboard is anon-readable, opt-in only, safe columns only, labeled "casual"; "your rank" works.
+- [x] `/u?name=` shows opt-in public profiles only; non-opt-in is invisible; no email/`id`/cross-user data is exposed.
+- [x] `/account` edits profile, toggles opt-in, exports data, and creates a verified deletion soft lock; permanent deletion is completed through [`docs/auth/60-account-deletion-runbook.md`](./auth/60-account-deletion-runbook.md).
+- [x] RLS security gate passed (advisors clean/justified + adversarial cross-user matrix) and was recorded for delivery.
+- [x] New pages are localized for `/tr` and `/pl`; i18n parity tests are green.
+- [x] `PRODUCT.md` + privacy/terms updated; `lib/engine`/`lib/schema` untouched.
 
 ## Branching & delivery
 
-- **Branch:** `git fetch origin` → branch `auth-accounts` off **current `origin/main`** → then edit. Larger feature → PR at the end (not direct-to-main).
+- **Branch:** `auth-accounts` was delivered through PR #1 and merged into `main`; the post-auth OAuth follow-up is also present in the theme branch's verified `main` base. Cinematic Breach integration is isolated on `cinematic-breach-theme`.
 - **Commits:** one scoped commit per logical phase; `type(scope): desc` (English, lowercase, single line, **no** AI trailer); get explicit approval before each commit/push.
-- **PR:** opened only after the P5 RLS gate signs off. Body = "what & why" only (no test-plan/boilerplate/AI note). Do not merge with `--delete-branch`.
+- **PR:** the auth PR completed after the P5 RLS gate. Any future theme or auth follow-up PR still requires fresh explicit approval and a concise "what & why" body (no test-plan/boilerplate/AI note).
 
 ## Open items to confirm at build (`[verify]`)
 
