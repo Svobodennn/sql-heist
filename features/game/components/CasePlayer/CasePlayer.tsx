@@ -43,6 +43,11 @@ import { ToastStack } from '../Toast'
 import { IconArrowLeft } from '../icons'
 import { ObjectiveConsole } from './ObjectiveConsole'
 import { CaseClosed } from './CaseClosed'
+import {
+  createObjectiveReceipt,
+  retainFirstObjectiveReceipt,
+  type ObjectiveReceiptMap,
+} from './objectiveReceipt'
 import styles from './CasePlayer.module.css'
 
 // The case orchestrator (docs/cases-design.md §UI) — reworked to a GUIDED, step-by-
@@ -98,11 +103,11 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
   const { toasts, push, dismiss } = useToasts()
 
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set())
-  // The exact inputs that WON each objective this session — threaded into the case-
-  // closed debrief so its "move" shows what the player actually typed, not the canonical
-  // solution. Empty on a cold revisit (payloads aren't persisted) → CaseClosed falls back
-  // to the authored expectedSolution.
-  const [solvedInputs, setSolvedInputs] = useState<Record<string, Record<string, string>>>({})
+  // One immutable receipt from the FIRST winning run of each objective this session.
+  // The raw move, WAF-effective composed SQL, result, and signal are captured from the
+  // same run. Receipts are session-only; a cold revisit gets canonical input but no
+  // fabricated runtime evidence.
+  const [receipts, setReceipts] = useState<ObjectiveReceiptMap>({})
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [uiByObjective, setUiByObjective] = useState<Record<string, ObjectiveUi>>(() =>
     initUi(objectives),
@@ -164,6 +169,9 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
     const composed = compose(obj.query.template, inputs, obj.query.inputFilter)
     const signal = deriveSignal(objectiveAsLevel(gameCase, obj), composed, result)
     const evaluation = evaluate(obj.winCondition, toWinContext(result, inputs))
+    const winningReceipt = evaluation.won
+      ? createObjectiveReceipt(inputs, composed, result, signal)
+      : null
 
     setUiByObjective((prev) => {
       const cur = prev[obj.id]
@@ -184,6 +192,9 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
     }
 
     if (evaluation.won) {
+      if (winningReceipt) {
+        setReceipts((prev) => retainFirstObjectiveReceipt(prev, obj.id, winningReceipt))
+      }
       push('success', t('game.toast.won'))
       if (!completedIds.has(obj.id)) {
         commit(index) // Model A: this run's DB state becomes the next objective's start.
@@ -195,7 +206,6 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
         if (authStatus === 'authed') {
           void pushObjectiveWin(gameCase.id, obj.id).catch(() => {})
         }
-        setSolvedInputs((prev) => ({ ...prev, [obj.id]: inputs })) // the winning payload, for the debrief
         const next = new Set(completedIds)
         next.add(obj.id)
         setCompletedIds(next)
@@ -337,7 +347,7 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
   const handleReplay = useCallback(() => {
     reset()
     setCompletedIds(new Set())
-    setSolvedInputs({})
+    setReceipts({})
     setSelectedIndex(0)
     setUiByObjective(initUi(objectives))
     setNotebook(initNotebook(gameCase.database.visibleSchema))
@@ -349,7 +359,7 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
 
   return (
     <LazyMotion features={domAnimation} strict>
-      <div className={styles.shell}>
+      <div className={styles.shell} data-case-id={gameCase.id}>
         <div className={cx('container', styles.inner)}>
           <header className={styles.caseHeader}>
             <div className={styles.caseHeaderMain}>
@@ -410,7 +420,7 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
                 ) : stage === 'closed' ? (
                   <CaseClosed
                     gameCase={gameCase}
-                    solvedInputs={solvedInputs}
+                    receipts={receipts}
                     onReplay={handleReplay}
                   />
                 ) : stage === 'payoff' ? (

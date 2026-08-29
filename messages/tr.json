@@ -827,6 +827,10 @@
         "defenseSub": "Yaptığın her hamle ve onu kapatacak tek satır kod.",
         "objective": "Hedef {index}",
         "move": "Hamle",
+        "yourMove": "Hamlen",
+        "composedSql": "Oluşturulan SQL",
+        "observedResult": "Gözlenen sonuç",
+        "sessionEvidenceMissing": "Bu yeniden ziyarette çalışma sonucu yok. Yakalamak için vakayı tekrar oyna.",
         "replay": "Bu vakayı tekrar oyna",
         "back": "Panoya dön"
       },

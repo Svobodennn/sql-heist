@@ -1,224 +1,261 @@
-/* Outer stack: the shared stack selector sits above the vuln↔secure grid so one
-   control visibly governs both panels. */
 .compare {
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: 14px;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-4);
-}
-@media (min-width: 1024px) {
-  .grid {
-    grid-template-columns: 1fr 1fr;
-    align-items: start;
-  }
-}
-
-.panel {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-.vuln {
-  border-color: color-mix(in srgb, var(--danger) 40%, var(--border));
-}
-.secure {
-  border-color: color-mix(in srgb, var(--success) 40%, var(--border));
-}
-
-.head {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-4);
-  font-weight: 700;
-  font-size: 0.8125rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  border-bottom: 1px solid var(--border);
-}
-.vuln .head {
-  color: var(--danger);
-  background: var(--danger-subtle);
-}
-.secure .head {
-  color: var(--success);
-  background: var(--success-subtle);
-}
-.lang {
-  margin-left: auto;
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  color: var(--text-muted);
-  letter-spacing: 0;
-  text-transform: none;
-}
-
-/* Shared stack selector: a standalone raised card above BOTH panels, holding
-   level 1 (language) and, when present, level 2 (framework). Level 2 is separated
-   from level 1 by its own top rule (.fwBar). */
 .selector {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--surface);
   overflow: hidden;
+  border: 1px solid var(--breach-line);
+  border-radius: 0;
+  background: rgba(11, 15, 18, 0.9);
 }
 
-/* ── Level 1 — language: single row, scrolls horizontally on overflow ── */
 .langBar {
   position: relative;
 }
+
 .langScroller {
   display: flex;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-4);
+  gap: 9px;
+  padding: 14px 16px;
   overflow-x: auto;
   overflow-y: hidden;
-  scroll-behavior: smooth; /* auto under prefers-reduced-motion (globals.css) */
-  -webkit-overflow-scrolling: touch; /* iOS momentum */
+  scroll-behavior: smooth;
   overscroll-behavior-x: contain;
-  scrollbar-width: none; /* hidden but keyboard/pointer scrollable (Firefox) */
-}
-.langScroller::-webkit-scrollbar {
-  display: none; /* hidden but keyboard/pointer scrollable (WebKit) */
-}
-.langTab {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  flex: 0 0 auto; /* never shrink -> row overflows -> scrolls right, no wrap */
-  min-height: 40px;
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
-  background: transparent;
-  color: var(--text-secondary);
-  font-family: var(--font-sans);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  white-space: nowrap;
-  cursor: pointer;
-  transition:
-    color var(--dur-fast) var(--ease-out),
-    background-color var(--dur-fast) var(--ease-out),
-    border-color var(--dur-fast) var(--ease-out);
-}
-.langGlyph {
-  flex-shrink: 0;
-  color: var(--text-muted);
-  transition: color var(--dur-fast) var(--ease-out);
-}
-.langTab:hover {
-  color: var(--text);
-  border-color: var(--border-strong);
-}
-.langTab:hover .langGlyph {
-  color: var(--text-secondary);
-}
-.langTabActive,
-.langTabActive:hover {
-  color: var(--success);
-  background: var(--success-subtle);
-  border-color: color-mix(in srgb, var(--success) 45%, var(--border));
-}
-.langTabActive .langGlyph {
-  color: var(--success);
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Right/left scroll affordance — fades in only when the row continues offscreen. */
+.langScroller::-webkit-scrollbar {
+  display: none;
+}
+
+.langTab {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  padding: 9px 13px;
+  border: 1px solid var(--breach-line);
+  border-radius: 999px;
+  color: var(--breach-dim);
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 750;
+  white-space: nowrap;
+  transition:
+    color var(--dur-fast) var(--breach-ease),
+    border-color var(--dur-fast) var(--breach-ease),
+    background-color var(--dur-fast) var(--breach-ease);
+}
+
+.langGlyph {
+  flex: none;
+  color: currentColor;
+}
+
+.langTab:hover {
+  border-color: #47535b;
+  color: var(--breach-white);
+}
+
+.langTabActive,
+.langTabActive:hover {
+  border-color: #3f7656;
+  color: var(--breach-green);
+  background: rgba(27, 70, 44, 0.36);
+}
+
 .fade {
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 2.75rem;
-  pointer-events: none;
+  width: 46px;
   opacity: 0;
-  transition: opacity var(--dur-normal) var(--ease-out);
+  pointer-events: none;
+  transition: opacity var(--dur-normal) var(--breach-ease);
 }
+
 .fadeStart {
   left: 0;
-  background: linear-gradient(to right, var(--surface), transparent);
+  background: linear-gradient(90deg, var(--breach-panel), transparent);
 }
+
 .fadeEnd {
   right: 0;
-  background: linear-gradient(to left, var(--surface), transparent);
+  background: linear-gradient(-90deg, var(--breach-panel), transparent);
 }
+
 .fadeOn {
   opacity: 1;
 }
 
-/* ── Level 2 — framework/driver: segmented chips, only when a language has >1 ── */
 .fwBar {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-4);
-  border-top: 1px solid var(--border);
+  gap: 9px;
+  padding: 14px 16px;
+  border-top: 1px solid var(--breach-line);
 }
+
 .fwChip {
+  min-height: 38px;
   display: inline-flex;
   align-items: center;
-  min-height: 34px;
-  padding: var(--space-1) var(--space-3);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  border: 1px solid var(--breach-line);
+  border-radius: 3px;
+  color: var(--breach-dim);
   background: transparent;
-  color: var(--text-secondary);
+  cursor: pointer;
   font-family: var(--font-mono);
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 750;
   white-space: nowrap;
-  cursor: pointer;
   transition:
-    color var(--dur-fast) var(--ease-out),
-    background-color var(--dur-fast) var(--ease-out),
-    border-color var(--dur-fast) var(--ease-out);
+    color var(--dur-fast) var(--breach-ease),
+    border-color var(--dur-fast) var(--breach-ease),
+    background-color var(--dur-fast) var(--breach-ease);
 }
+
 .fwChip:hover {
-  color: var(--success);
-  border-color: color-mix(in srgb, var(--success) 30%, var(--border));
+  border-color: #3f7656;
+  color: var(--breach-green);
 }
+
 .fwChipActive,
 .fwChipActive:hover {
-  color: var(--success);
-  background: color-mix(in srgb, var(--success) 12%, transparent);
-  border-color: color-mix(in srgb, var(--success) 45%, var(--border));
+  border-color: #3f7656;
+  color: var(--breach-green);
+  background: rgba(27, 70, 44, 0.36);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+}
+
+.panel {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--breach-line);
+  border-radius: 0;
+  background: #070a0c;
+}
+
+.vuln {
+  border-color: #6d3935;
+}
+
+.secure {
+  border-color: #3a6c4f;
+}
+
+.head {
+  min-height: 60px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  margin: 0;
+  padding: 15px 18px;
+  border-bottom: 1px solid currentColor;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.vuln .head {
+  color: var(--breach-red);
+  background: rgba(70, 22, 19, 0.56);
+}
+
+.secure .head {
+  color: var(--breach-green);
+  background: rgba(12, 50, 29, 0.55);
+}
+
+.lang {
+  color: var(--breach-dim);
+  font-size: 0.6875rem;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .code {
+  min-height: 210px;
   margin: 0;
-  padding: var(--space-3) 0;
-  overflow-x: auto;
+  padding: 20px 0;
+  overflow: auto;
+  color: #d9d6d0;
+  background: #070a0c;
   font-size: 0.8125rem;
-  line-height: 1.6;
-  background: var(--noir-900);
+  line-height: 1.75;
 }
+
 .line {
+  min-width: max-content;
   display: flex;
 }
+
 .ln {
-  flex-shrink: 0;
-  width: 2.5rem;
-  padding-right: var(--space-3);
+  width: 2.7rem;
+  flex: none;
+  padding-right: 12px;
+  color: var(--breach-dim);
   text-align: right;
-  color: var(--text-muted);
   user-select: none;
 }
+
 .src {
+  padding-right: 18px;
+  color: #d9d6d0;
   white-space: pre;
-  color: var(--text);
-  padding-right: var(--space-4);
 }
 
 .caption {
-  padding: var(--space-3) var(--space-4);
+  min-height: 62px;
+  margin: 0;
+  padding: 14px 18px;
+  border-top: 1px solid var(--breach-line);
+  color: var(--breach-muted);
   font-size: 0.8125rem;
-  color: var(--text-secondary);
-  border-top: 1px solid var(--border);
+  line-height: 1.5;
+}
+
+@media (min-width: 980px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 620px) {
+  .code {
+    min-height: 0;
+    font-size: 0.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .langScroller {
+    scroll-behavior: auto;
+  }
+}
+
+@media (forced-colors: active) {
+  .selector,
+  .panel {
+    border: 2px solid CanvasText;
+    background: Canvas;
+  }
 }

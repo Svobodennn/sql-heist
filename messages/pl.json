@@ -827,6 +827,10 @@
         "defenseSub": "Każdy twój ruch i ta jedna linia kodu, która by go zamknęła.",
         "objective": "Cel {index}",
         "move": "Ruch",
+        "yourMove": "Twój ruch",
+        "composedSql": "Złożone SQL",
+        "observedResult": "Zaobserwowany wynik",
+        "sessionEvidenceMissing": "W tej ponownej wizycie nie ma wyniku wykonania. Zagraj sprawę ponownie, aby go przechwycić.",
         "replay": "Zagraj tę sprawę ponownie",
         "back": "Powrót do tablicy"
       },

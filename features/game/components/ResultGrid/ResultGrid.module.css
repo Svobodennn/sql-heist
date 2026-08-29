@@ -1,117 +1,151 @@
 .wrap {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
+  min-width: 0;
   overflow: hidden;
+  border: 1px solid var(--breach-line);
+  border-radius: 0;
+  background: #090d10;
 }
 
 .empty {
-  padding: var(--space-6);
+  min-height: 112px;
+  display: grid;
+  place-items: center;
+  padding: 24px;
 }
+
 .emptyText {
-  color: var(--text-muted);
+  margin: 0;
+  color: var(--breach-muted);
   font-size: 0.875rem;
 }
 
-/* Loading skeleton (shown only past the 300ms delay — parent-gated). */
 .skeletonRow {
   position: relative;
-  height: 20px;
-  margin: var(--space-3) var(--space-4);
-  border-radius: 4px;
-  background: var(--surface-raised);
+  height: 22px;
+  margin: 14px 16px;
   overflow: hidden;
+  background: var(--breach-panel-raised);
 }
+
 .shimmer {
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.055), transparent);
   animation: shimmer 1.2s linear infinite;
 }
 
-/* Verbatim SQLite error — crimson, monospaced, exact. */
 .error {
-  padding: var(--space-4);
-  border-color: var(--danger-solid);
-  background: var(--danger-subtle);
+  display: grid;
+  gap: 10px;
+  padding: 18px;
+  border-color: #713530;
+  background: rgba(49, 16, 13, 0.72);
 }
+
 .errorHead {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  color: var(--danger);
-  font-weight: 600;
+  gap: 8px;
+  margin: 0;
+  color: var(--breach-red);
   font-size: 0.75rem;
-  letter-spacing: 0.14em;
-  margin-bottom: var(--space-2);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
+
 .errorMsg {
   margin: 0;
-  color: var(--danger);
+  color: #ff8b82;
   font-size: 0.9375rem;
+  line-height: 1.65;
   white-space: pre-wrap;
   word-break: break-word;
 }
+
 .errorGloss {
-  margin-top: var(--space-2);
-  color: var(--text-secondary);
+  margin: 0;
+  color: var(--breach-muted);
   font-size: 0.8125rem;
 }
 
 .scroll {
   overflow-x: auto;
+  overscroll-behavior-x: contain;
 }
+
 .table {
   width: 100%;
+  min-width: 520px;
   border-collapse: collapse;
   font-size: 0.875rem;
 }
-.table th {
-  text-align: left;
-  padding: var(--space-2) var(--space-3);
-  color: var(--text-muted);
-  font-weight: 600;
-  font-size: 0.75rem;
-  letter-spacing: 0.06em;
-  border-bottom: 1px solid var(--border-strong);
-  white-space: nowrap;
-}
+
+.table th,
 .table td {
-  padding: var(--space-2) var(--space-3);
-  border-bottom: 1px solid var(--border);
-  color: var(--text);
+  padding: 12px 14px;
+  text-align: left;
   vertical-align: top;
 }
+
+.table th {
+  border-bottom: 1px solid #39434a;
+  color: var(--breach-dim);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.table td {
+  border-bottom: 1px solid var(--breach-line);
+  color: #dad5cf;
+  overflow-wrap: anywhere;
+}
+
 .table tbody tr:hover {
-  background: var(--surface-raised);
+  background: rgba(227, 168, 62, 0.035);
 }
 
 .lootRow {
-  background: color-mix(in srgb, var(--success) 8%, transparent);
-  animation: loot-pulse 1.4s var(--ease-out) 1;
+  background: rgba(69, 199, 118, 0.08);
+  box-shadow: inset 3px 0 0 var(--breach-green);
+  animation: loot-pulse 1.4s var(--breach-ease) 1;
 }
+
 .lootCell {
-  color: var(--success);
-  font-weight: 600;
+  color: var(--breach-green) !important;
+  font-weight: 750;
 }
+
 .lootTag {
+  width: max-content;
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  margin-left: var(--space-2);
-  padding: 1px 6px;
-  border-radius: var(--radius-full);
-  background: var(--success-subtle);
-  color: var(--success);
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  vertical-align: middle;
+  gap: 4px;
+  margin-left: 8px;
+  padding: 3px 6px;
+  border: 1px solid #286c47;
+  color: var(--breach-green);
+  background: rgba(12, 42, 26, 0.7);
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .meta {
-  padding: var(--space-2) var(--space-3);
-  color: var(--text-muted);
+  margin: 0;
+  padding: 9px 13px;
+  border-top: 1px solid var(--breach-line);
+  color: var(--breach-dim);
   font-size: 0.75rem;
-  border-top: 1px solid var(--border);
+}
+
+@media (forced-colors: active) {
+  .wrap,
+  .lootRow {
+    border: 2px solid CanvasText;
+    background: Canvas;
+  }
 }

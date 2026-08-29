@@ -1,57 +1,72 @@
 .frame {
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-md);
-  background: var(--surface-raised);
+  min-width: 0;
   overflow: hidden;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--breach-line);
+  border-radius: 0;
+  background: var(--breach-panel-raised);
+  box-shadow: none;
 }
 
 .bar {
+  min-height: 48px;
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-2) var(--space-3);
-  background: var(--noir-800);
-  border-bottom: 1px solid var(--border);
+  gap: 12px;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--breach-line);
+  background: #080b0d;
 }
 
 .dots {
   display: inline-flex;
   gap: 6px;
-  flex-shrink: 0;
+  flex: none;
 }
+
 .dots i {
-  width: 10px;
-  height: 10px;
-  border-radius: var(--radius-full);
-  background: var(--border-strong);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--breach-line);
+}
+
+.dots i:first-child {
+  background: #6d3935;
 }
 
 .address {
+  min-width: 0;
+  flex: 1;
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  flex: 1;
-  min-width: 0;
-  padding: 6px var(--space-3);
-  border-radius: var(--radius-full);
-  background: var(--noir-900);
-  color: var(--text-muted);
-  font-size: 0.8125rem;
+  gap: 8px;
+  padding: 7px 10px;
+  border: 1px solid var(--breach-line-soft);
+  border-radius: 0;
+  color: var(--breach-dim);
+  background: var(--breach-black);
+  font-size: 0.75rem;
 }
+
 .url {
   overflow: hidden;
+  color: var(--breach-muted);
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: var(--text-secondary);
 }
 
 .viewport {
-  padding: var(--space-6);
-  background: var(--surface);
+  min-width: 0;
+  padding: clamp(20px, 3vw, 38px);
+  background:
+    radial-gradient(circle at 50% -10%, rgba(227, 168, 62, 0.045), transparent 18rem),
+    #0c1115;
 }
-@media (min-width: 640px) {
-  .viewport {
-    padding: var(--space-8);
+
+@media (forced-colors: active) {
+  .frame,
+  .address {
+    border: 2px solid CanvasText;
+    background: Canvas;
   }
 }

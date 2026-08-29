@@ -827,6 +827,10 @@
         "defenseSub": "Every move you pulled, and the one line of code that would have shut it.",
         "objective": "Objective {index}",
         "move": "The move",
+        "yourMove": "Your move",
+        "composedSql": "Composed SQL",
+        "observedResult": "Observed result",
+        "sessionEvidenceMissing": "No runtime result in this revisit. Replay the case to capture one.",
         "replay": "Play this case again",
         "back": "Back to the board"
       },
