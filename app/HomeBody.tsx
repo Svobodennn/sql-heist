@@ -47,7 +47,7 @@ export function HomeBody({ locale }: { locale: Locale }) {
         <div className={styles.heroScan} aria-hidden="true" />
 
         <div className={styles.heroInner}>
-          <div className={styles.heroLeft}>
+          <div className={styles.heroLeft} data-reveal="left">
             <p className={styles.slate}>
               <span className={styles.recDot} aria-hidden="true" />
               <span className="stamp">{hero.eyebrow}</span>
@@ -90,7 +90,7 @@ export function HomeBody({ locale }: { locale: Locale }) {
           {/* The wire: your input has stopped being data. The payload types itself
               in (pure CSS), the caret sits where you typed, and everything past the
               -- is dead code. Decorative — hidden from assistive tech. */}
-          <div className={styles.heroSlab} aria-hidden="true">
+          <div className={styles.heroSlab} aria-hidden="true" data-reveal="right">
             <div className={styles.slabBar}>
               <span>meridian · /login</span>
               <span className={styles.slabDots}>
@@ -139,7 +139,7 @@ export function HomeBody({ locale }: { locale: Locale }) {
       {/* ---------- What is this — case-file dossier ---------- */}
       <section className={styles.section} aria-labelledby="what-heading">
         <div className="container">
-          <div className={styles.dossier}>
+          <div className={styles.dossier} data-reveal>
             <div className={styles.dossierTab}>
               <span className="stamp">{what.eyebrow}</span>
               <span className={styles.classified}>{what.stamp}</span>
@@ -171,7 +171,7 @@ export function HomeBody({ locale }: { locale: Locale }) {
       {/* ---------- How it works — the five moves ---------- */}
       <section id="how-it-works" className={styles.section} aria-labelledby="how-heading">
         <div className="container">
-          <div className={styles.sectionHead}>
+          <div className={styles.sectionHead} data-reveal>
             <span className="stamp">{how.eyebrow}</span>
             <h2 id="how-heading" className={styles.sectionTitle}>
               {how.title}
@@ -181,7 +181,7 @@ export function HomeBody({ locale }: { locale: Locale }) {
 
           <ol className={styles.loop}>
             {loop.map((step, i) => (
-              <li key={step.title} className={styles.loopStep}>
+              <li key={step.title} className={styles.loopStep} data-reveal>
                 <span className={styles.loopNum} aria-hidden="true">
                   {String(i + 1).padStart(2, '0')}
                 </span>
@@ -196,14 +196,14 @@ export function HomeBody({ locale }: { locale: Locale }) {
       {/* ---------- FAQ — native <details>, no JS ---------- */}
       <section className={styles.section} aria-labelledby="faq-heading">
         <div className="container">
-          <div className={styles.sectionHead}>
+          <div className={styles.sectionHead} data-reveal>
             <span className="stamp">{faq.eyebrow}</span>
             <h2 id="faq-heading" className={styles.sectionTitle}>
               {faq.title}
             </h2>
           </div>
 
-          <div className={styles.faqList}>
+          <div className={styles.faqList} data-reveal>
             {faqTeasers.map((item) => (
               <details key={item.q} className={styles.faq}>
                 <summary className={styles.faqSummary}>
@@ -229,7 +229,7 @@ export function HomeBody({ locale }: { locale: Locale }) {
       {/* ---------- Closer — a word from the Fixer ---------- */}
       <section className={styles.closer} aria-labelledby="closer-heading">
         <div className="container">
-          <div className={styles.closerInner}>
+          <div className={styles.closerInner} data-reveal>
             <Logo size={34} className={styles.closerMark} />
             <p className={styles.fixer}>
               <span className={styles.fixerName}>{closer.fixerName}</span>

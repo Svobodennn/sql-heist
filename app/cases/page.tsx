@@ -15,8 +15,6 @@ export const metadata: Metadata = {
 // progress from localStorage.
 export default function CaseBoardPage() {
   return (
-    <div className="container">
-      <CaseBoard cases={getCaseMetas()} />
-    </div>
+    <CaseBoard cases={getCaseMetas()} />
   )
 }

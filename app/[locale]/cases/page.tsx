@@ -18,8 +18,6 @@ export async function generateMetadata({
 export default async function LocaleCaseBoard({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
   return (
-    <div className="container">
-      <CaseBoard cases={getCaseMetas(locale as Locale)} />
-    </div>
+    <CaseBoard cases={getCaseMetas(locale as Locale)} />
   )
 }
