@@ -12,6 +12,8 @@ describe('<HomeBody> Cinematic Breach production composition', () => {
     expect(screen.getByText('LIVE FIRE: USERS.SEARCH')).toBeTruthy()
     expect(screen.getByText('EXECUTED SQL')).toBeTruthy()
     expect(screen.getByText('3 ROWS')).toBeTruthy()
+    expect(screen.queryByText('VIEW SECURE VERSION')).toBeNull()
+    expect(screen.getByTestId('data-flow-schematic')).toBeTruthy()
 
     const caseDeck = screen.getByRole('region', { name: /choose the next door/i })
     const caseLinks = within(caseDeck).getAllByRole('link')

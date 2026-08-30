@@ -99,7 +99,7 @@
 
 .heroTitle {
   margin: 26px 0 0;
-  font: 900 clamp(116px, 13vw, 210px) / 0.72 var(--font-brand);
+  font: 900 clamp(116px, 13vw, 210px) / 0.94 var(--font-brand);
   letter-spacing: -0.03em;
   text-transform: uppercase;
   text-shadow: 0 8px 34px rgba(0, 0, 0, 0.45);
@@ -210,8 +210,7 @@
   backdrop-filter: blur(18px);
 }
 
-.liveFireHeader,
-.liveFireFooter {
+.liveFireHeader {
   min-height: 48px;
   display: flex;
   align-items: center;
@@ -411,10 +410,6 @@
   font: 700 10px/1 var(--font-mono);
 }
 
-.liveFireFooter {
-  border-top: 1px solid var(--home-line-soft);
-}
-
 .heroMethod {
   grid-column: 1 / -1;
   align-self: end;
@@ -432,15 +427,7 @@
 .heroMethod li {
   position: relative;
   min-height: 125px;
-  padding: 20px 28px 10px 0;
-}
-
-.heroMethod li:not(:last-child)::after {
-  content: '→';
-  position: absolute;
-  right: 18px;
-  top: 24px;
-  color: var(--home-dim);
+  padding: 20px 12px 10px 0;
 }
 
 .heroMethod span {
@@ -534,8 +521,9 @@
 .faqCopy h2,
 .launchCard h2 {
   margin: 16px 0 0;
-  font: 900 clamp(62px, 7vw, 120px) / 0.84 var(--font-brand);
-  letter-spacing: -0.02em;
+  font: 900 clamp(62px, 7vw, 120px) / 1.14 var(--font-brand);
+  letter-spacing: -0.015em;
+  text-wrap: balance;
   text-transform: uppercase;
 }
 
@@ -672,9 +660,7 @@
   display: grid;
   grid-template-columns: 0.55fr 1.45fr;
   gap: 60px;
-  background:
-    radial-gradient(circle at 20% 40%, #15110a 0, transparent 35%),
-    var(--home-black);
+  background: radial-gradient(circle at 20% 40%, #15110a 0, transparent 35%), var(--home-black);
 }
 
 .proofCopy {
@@ -694,6 +680,8 @@
 }
 
 .proofCopy h2 span {
+  display: block;
+  margin-top: 0.15em;
   color: var(--home-gold);
 }
 
@@ -780,102 +768,7 @@
   min-height: 540px;
   display: grid;
   place-items: center;
-  overflow: hidden;
-}
-
-.databaseVisual::before,
-.databaseVisual::after {
-  content: '';
-  position: absolute;
-  width: 390px;
-  height: 160px;
-  border: 1px solid #614719;
-  border-radius: 50%;
-  transform: rotate(-8deg);
-}
-
-.databaseVisual::after {
-  width: 490px;
-  height: 220px;
-  border-style: dashed;
-  opacity: 0.55;
-}
-
-.dbCore {
-  position: relative;
-  z-index: 2;
-  width: 200px;
-  height: 280px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-around;
-  border: 1px solid #765522;
-  border-radius: 50%;
-  color: var(--home-gold);
-  background: linear-gradient(90deg, #18130b, #493313 50%, #18130b);
-  box-shadow:
-    inset 0 0 50px #000,
-    0 0 60px rgba(227, 168, 62, 0.12);
-}
-
-.dbCore::before,
-.dbCore::after {
-  content: '';
-  position: absolute;
-  width: 100%;
-  height: 42px;
-  border: 1px solid #765522;
-  border-radius: 50%;
-}
-
-.dbCore::before {
-  top: 20px;
-}
-
-.dbCore::after {
-  bottom: 20px;
-}
-
-.dbCore b {
-  width: 76px;
-  height: 76px;
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--home-gold);
-  border-radius: 50%;
-  font: 900 23px/1 var(--font-brand);
-}
-
-.dbCore span {
-  font: 700 8px/1 var(--font-mono);
-}
-
-.databaseVisual > i {
-  position: absolute;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--home-gold);
-  box-shadow: 0 0 18px var(--home-gold);
-  animation: orbit 6s ease-in-out infinite alternate;
-}
-
-.databaseVisual > i:nth-of-type(1) {
-  left: 15%;
-  top: 25%;
-}
-
-.databaseVisual > i:nth-of-type(2) {
-  right: 12%;
-  top: 48%;
-  animation-delay: -2s;
-}
-
-.databaseVisual > i:nth-of-type(3) {
-  left: 25%;
-  bottom: 18%;
-  animation-delay: -4s;
+  min-width: 0;
 }
 
 .queryCompare {
@@ -1145,12 +1038,6 @@
     url('/hero-vault-brass.webp') 70% center / cover;
 }
 
-@keyframes orbit {
-  to {
-    transform: translate(60px, 35px);
-  }
-}
-
 @keyframes typePayload {
   from {
     max-width: 0;
@@ -1351,8 +1238,7 @@
 
   .databaseVisual {
     min-height: 360px;
-    margin-inline: -40px;
-    transform: scale(0.84);
+    margin-inline: 0;
   }
 
   .queryCompare article {
@@ -1380,7 +1266,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .databaseVisual > i,
   .typedPayload,
   .typedCaret,
   .tickerTrack {

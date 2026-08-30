@@ -1,0 +1,295 @@
+.frame {
+  position: relative;
+  width: min(100%, 520px);
+  min-height: 540px;
+  overflow: hidden;
+  isolation: isolate;
+  margin-inline: auto;
+  border: 1px solid var(--home-line);
+  background:
+    linear-gradient(rgba(227, 168, 62, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(227, 168, 62, 0.025) 1px, transparent 1px),
+    radial-gradient(circle at 70% 38%, rgba(227, 168, 62, 0.065), transparent 15rem), #070a0c;
+  background-size:
+    24px 24px,
+    24px 24px,
+    auto,
+    auto;
+}
+
+.frame::before,
+.frame::after {
+  position: absolute;
+  z-index: 4;
+  width: 30px;
+  height: 30px;
+  border-color: var(--home-gold);
+  content: '';
+  pointer-events: none;
+}
+
+.frame::before {
+  left: 10px;
+  top: 10px;
+  border-left: 1px solid;
+  border-top: 1px solid;
+}
+
+.frame::after {
+  right: 10px;
+  bottom: 10px;
+  border-right: 1px solid;
+  border-bottom: 1px solid;
+}
+
+.scan {
+  position: absolute;
+  z-index: 3;
+  inset: -20% 0 auto;
+  height: 90px;
+  pointer-events: none;
+  background: linear-gradient(transparent, rgba(227, 168, 62, 0.055), transparent);
+  animation: scan 7s linear infinite;
+}
+
+.wires {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.wires path {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+}
+
+.baseWire {
+  stroke: #453c2b;
+  stroke-width: 1;
+}
+
+.inputRail,
+.unsafeRail,
+.safeRail {
+  stroke-width: 2;
+  stroke-linecap: square;
+  stroke-dasharray: 3 13;
+  animation: packets 1.15s linear infinite;
+}
+
+.inputRail {
+  stroke: var(--home-gold);
+}
+
+.unsafeRail {
+  stroke: var(--home-red);
+}
+
+.safeRail {
+  stroke: var(--home-green);
+  animation-duration: 1.45s;
+}
+
+.node {
+  position: absolute;
+  z-index: 2;
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+  padding: 13px;
+  border: 1px solid #57472b;
+  background: rgba(8, 11, 13, 0.96);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.24);
+}
+
+.node p,
+.node code,
+.node span {
+  margin: 0;
+  font-family: var(--font-mono);
+}
+
+.node p {
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--home-line-soft);
+  color: var(--home-gold);
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.node code {
+  overflow: hidden;
+  color: var(--home-muted);
+  font-size: clamp(0.58rem, 1.55vw, 0.68rem);
+  line-height: 1.45;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.node code b {
+  color: var(--home-red);
+  font-weight: 700;
+}
+
+.node > span {
+  color: var(--home-dim);
+  font-size: 0.54rem;
+  letter-spacing: 0.07em;
+}
+
+.payload {
+  left: 4%;
+  top: 11%;
+  width: 28%;
+}
+
+.composer {
+  right: 5%;
+  top: 7%;
+  width: 53%;
+}
+
+.parser {
+  left: 4%;
+  top: 46%;
+  width: 40%;
+  border-color: color-mix(in srgb, var(--home-red) 58%, var(--home-line));
+}
+
+.boundary {
+  right: 5%;
+  top: 46%;
+  width: 47%;
+  border-color: color-mix(in srgb, var(--home-green) 45%, var(--home-line));
+}
+
+.boundary code b {
+  color: var(--home-green);
+}
+
+.database {
+  left: 18%;
+  right: 8%;
+  bottom: 7%;
+  padding-top: 18px;
+  border-radius: 50% / 16%;
+}
+
+.database::before {
+  position: absolute;
+  left: -1px;
+  right: -1px;
+  top: 13px;
+  height: 26px;
+  border: 1px solid #6e5427;
+  border-radius: 50%;
+  content: '';
+  pointer-events: none;
+}
+
+.database p,
+.database .tables {
+  position: relative;
+  z-index: 1;
+}
+
+.tables {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.tables span {
+  display: grid;
+  gap: 5px;
+  padding: 8px;
+  border: 1px solid var(--home-line-soft);
+  color: var(--home-dim);
+  font-size: 0.54rem;
+  line-height: 1.4;
+}
+
+.tables b {
+  color: var(--home-gold-light);
+}
+
+.legend {
+  position: absolute;
+  z-index: 2;
+  left: 4%;
+  bottom: 9%;
+  display: grid;
+  gap: 8px;
+  font: 800 0.5rem/1.2 var(--font-mono);
+  letter-spacing: 0.06em;
+}
+
+.unsafe {
+  color: var(--home-red) !important;
+}
+
+.safe {
+  color: var(--home-green) !important;
+}
+
+@keyframes packets {
+  to {
+    stroke-dashoffset: -32;
+  }
+}
+
+@keyframes scan {
+  to {
+    transform: translateY(760px);
+  }
+}
+
+@media (max-width: 520px) {
+  .frame {
+    min-height: 500px;
+  }
+
+  .node {
+    padding: 10px;
+  }
+
+  .node p {
+    font-size: 0.52rem;
+  }
+
+  .legend {
+    display: none;
+  }
+
+  .database {
+    left: 8%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scan,
+  .inputRail,
+  .unsafeRail,
+  .safeRail {
+    animation: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .frame,
+  .node,
+  .database::before,
+  .tables span {
+    border: 2px solid CanvasText;
+    background: Canvas;
+  }
+
+  .scan {
+    display: none;
+  }
+}

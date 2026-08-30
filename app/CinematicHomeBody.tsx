@@ -3,6 +3,7 @@ import Link from 'next/link'
 import type { Locale } from '@/i18n/config'
 import { localeHref } from '@/i18n/localeHref'
 import { IconArrowRight, IconCheck } from '@/app/components/icons'
+import { DataFlowSchematic } from '@/app/components/DataFlowSchematic'
 import { Logo } from '@/app/components/Logo'
 import { JsonLd } from '@/app/components/JsonLd'
 import { artworkForCase } from '@/features/game/components/CaseCard/caseArtwork'
@@ -105,9 +106,6 @@ function LiveFirePanel() {
         </p>
         <strong>0 ROWS</strong>
       </div>
-      <footer className={styles.liveFireFooter}>
-        VIEW SECURE VERSION <span aria-hidden="true">⌄</span>
-      </footer>
     </article>
   )
 }
@@ -257,11 +255,7 @@ function CaseDeck({
   )
 }
 
-function QueryCompare({
-  copy,
-}: {
-  copy: ReturnType<typeof buildHomeContent>['copy']['proof']
-}) {
+function QueryCompare({ copy }: { copy: ReturnType<typeof buildHomeContent>['copy']['proof'] }) {
   return (
     <div className={styles.queryCompare} data-reveal="right">
       <article className={styles.vulnerable}>
@@ -272,10 +266,13 @@ function QueryCompare({
         <pre>
           <code>
             <span className={styles.codeComment}>{'// Input is inserted into source'}</span>
-            {`\n`}const q = <span className={styles.codeString}>&quot;SELECT id, username, role</span>
+            {`\n`}const q ={' '}
+            <span className={styles.codeString}>&quot;SELECT id, username, role</span>
             {`\n  `}
-            <span className={styles.codeString}>FROM users WHERE username = &apos;&quot;</span> +{' '}
-            <mark>input</mark> + <span className={styles.codeString}>&quot;&apos;&quot;</span>;
+            <span className={styles.codeString}>
+              FROM users WHERE username = &apos;&quot;
+            </span> + <mark>input</mark> +{' '}
+            <span className={styles.codeString}>&quot;&apos;&quot;</span>;
           </code>
         </pre>
         <span className={styles.fieldLabel}>{copy.userInput}</span>
@@ -294,7 +291,8 @@ function QueryCompare({
         <pre>
           <code>
             <span className={styles.codeComment}>{'// Structure and value stay separate'}</span>
-            {`\n`}const q = <span className={styles.codeString}>&quot;SELECT id, username, role</span>
+            {`\n`}const q ={' '}
+            <span className={styles.codeString}>&quot;SELECT id, username, role</span>
             {`\n  `}
             <span className={styles.codeString}>FROM users WHERE username = </span>
             <mark>?</mark>
@@ -327,9 +325,7 @@ function DatabaseProof({
         <div className={styles.proofHeading}>
           <Eyebrow>{what.eyebrow}</Eyebrow>
           <h2 id="proof-title">
-            {what.title}
-            <br />
-            <span>{what.titleAccent}</span>
+            {what.title} <span>{what.titleAccent}</span>
           </h2>
         </div>
         <div className={styles.proofSide}>
@@ -354,15 +350,8 @@ function DatabaseProof({
         <p>{what.safeDetail}</p>
       </div>
 
-      <div className={styles.databaseVisual} aria-hidden="true" data-reveal="scale">
-        <div className={styles.dbCore}>
-          <span>USERS</span>
-          <b>SQL</b>
-          <span>SESSIONS</span>
-        </div>
-        <i />
-        <i />
-        <i />
+      <div className={styles.databaseVisual} data-reveal="scale">
+        <DataFlowSchematic />
       </div>
 
       <QueryCompare copy={proof} />
@@ -393,9 +382,7 @@ function FaqSection({
     <section className={styles.safetyFaq} aria-labelledby="faq-title">
       <header className={styles.faqCopy} data-reveal="left">
         <Eyebrow>{copy.eyebrow}</Eyebrow>
-        <h2 id="faq-title">
-          {copy.title}
-        </h2>
+        <h2 id="faq-title">{copy.title}</h2>
         <p>{copy.lede}</p>
         <Link href={localeHref('/faq', locale)} className={styles.faqMore}>
           {copy.more} <IconArrowRight size={17} />
