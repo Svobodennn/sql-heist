@@ -301,7 +301,10 @@
       "secureNote": "Girdi veri olarak kalır. Sorgu yapısı değişemez.",
       "steps": {
         "0": { "title": "Saldırıyı çalıştır", "blurb": "Enjekte edilmiş değeri gönder." },
-        "1": { "title": "Sonucu gözlemle", "blurb": "Kullanıcının almaması gereken satırları gör." },
+        "1": {
+          "title": "Sonucu gözlemle",
+          "blurb": "Kullanıcının almaması gereken satırları gör."
+        },
         "2": { "title": "Düzeltmeye geç", "blurb": "Parametreli sorguyu kullan." },
         "3": { "title": "Yeniden çalıştır", "blurb": "Aynı girdiyi tekrar gönder." },
         "4": { "title": "Güvenli olduğunu doğrula", "blurb": "Yalnızca amaçlanan veri döner." }
@@ -721,7 +724,16 @@
       "signIn": "Giriş yap",
       "search": "Ara",
       "submit": "Gönder",
-      "reconNote": "Bu form, tezgâhın arkasındaki bir sorguyla konuşuyor. Ya girdin sadece bir isim gibi ele alınmazsa ne olur?"
+      "reconNote": "Bu form, tezgâhın arkasındaki bir sorguyla konuşuyor. Ya girdin sadece bir isim gibi ele alınmazsa ne olur?",
+      "staffAccess": "Personel erişimi",
+      "recordsSearch": "Kayıt arama",
+      "badgeLookup": "Rozet sorgulama",
+      "requestVerification": "Talep doğrulama",
+      "privateNetwork": "Özel ağ",
+      "navOverview": "Genel bakış",
+      "navDirectory": "Dizin",
+      "navSupport": "Destek",
+      "encrypted": "Şifreli bağlantı"
     },
     "recon": {
       "stamp": "Keşif",
@@ -881,8 +893,15 @@
         "meta": "{count} hedef — teker teker. Her biri sana ne yapacağını, neden yapacağını ve başardığını nasıl anlayacağını söyler.",
         "take": "Vakayı al"
       },
+      "review": {
+        "aria": "Hedef incelemesi",
+        "stamp": "Adım 02 / hedef",
+        "instruction": "Hedefe dokunmadan önce yaklaşımı ve başarı koşulunu oku.",
+        "enter": "Operasyona gir"
+      },
       "announce": {
         "briefing": "Vaka brifingi: {title}",
+        "review": "Hedef {index}/{total} incelemesi: {goal}",
         "closed": "Vaka kapandı",
         "cleared": "Hedef {index} tamamlandı",
         "clearedGot": "Hedef {index} tamamlandı: {got}",

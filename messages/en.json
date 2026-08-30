@@ -721,7 +721,16 @@
       "signIn": "Sign in",
       "search": "Search",
       "submit": "Submit",
-      "reconNote": "This form talks to a query behind the counter. What happens if your input isn't treated as just a name?"
+      "reconNote": "This form talks to a query behind the counter. What happens if your input isn't treated as just a name?",
+      "staffAccess": "Staff access",
+      "recordsSearch": "Records search",
+      "badgeLookup": "Badge lookup",
+      "requestVerification": "Request verification",
+      "privateNetwork": "Private network",
+      "navOverview": "Overview",
+      "navDirectory": "Directory",
+      "navSupport": "Support",
+      "encrypted": "Encrypted connection"
     },
     "recon": {
       "stamp": "Recon",
@@ -881,8 +890,15 @@
         "meta": "{count} objectives — one at a time. Each one tells you what to do, why, and how you’ll know it landed.",
         "take": "Take the case"
       },
+      "review": {
+        "aria": "Objective review",
+        "stamp": "Step 02 / objective",
+        "instruction": "Read the angle and success condition before touching the target.",
+        "enter": "Enter operation"
+      },
       "announce": {
         "briefing": "Case briefing: {title}",
+        "review": "Review objective {index} of {total}: {goal}",
         "closed": "Case closed",
         "cleared": "Objective {index} cleared",
         "clearedGot": "Objective {index} cleared: {got}",

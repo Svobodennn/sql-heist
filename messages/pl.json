@@ -301,7 +301,10 @@
       "secureNote": "Dane pozostają danymi. Struktura zapytania nie może się zmienić.",
       "steps": {
         "0": { "title": "Uruchom atak", "blurb": "Wyślij wstrzykniętą wartość." },
-        "1": { "title": "Obserwuj wynik", "blurb": "Zobacz wiersze, których użytkownik nie powinien dostać." },
+        "1": {
+          "title": "Obserwuj wynik",
+          "blurb": "Zobacz wiersze, których użytkownik nie powinien dostać."
+        },
         "2": { "title": "Przełącz na poprawkę", "blurb": "Użyj zapytania parametryzowanego." },
         "3": { "title": "Uruchom ponownie", "blurb": "Wyślij dokładnie te same dane." },
         "4": { "title": "Potwierdź bezpieczeństwo", "blurb": "Wracają tylko zamierzone dane." }
@@ -721,7 +724,16 @@
       "signIn": "Zaloguj się",
       "search": "Szukaj",
       "submit": "Wyślij",
-      "reconNote": "Ten formularz rozmawia z zapytaniem za ladą. Co się stanie, jeśli twój wpis nie zostanie potraktowany tylko jako nazwa?"
+      "reconNote": "Ten formularz rozmawia z zapytaniem za ladą. Co się stanie, jeśli twój wpis nie zostanie potraktowany tylko jako nazwa?",
+      "staffAccess": "Dostęp personelu",
+      "recordsSearch": "Wyszukiwanie rekordów",
+      "badgeLookup": "Wyszukiwanie identyfikatora",
+      "requestVerification": "Weryfikacja żądania",
+      "privateNetwork": "Sieć prywatna",
+      "navOverview": "Przegląd",
+      "navDirectory": "Katalog",
+      "navSupport": "Pomoc",
+      "encrypted": "Połączenie szyfrowane"
     },
     "recon": {
       "stamp": "Rozpoznanie",
@@ -881,8 +893,15 @@
         "meta": "{count} cele — po kolei. Każdy mówi ci, co zrobić, dlaczego i skąd będziesz wiedzieć, że się udało.",
         "take": "Weź sprawę"
       },
+      "review": {
+        "aria": "Przegląd celu",
+        "stamp": "Krok 02 / cel",
+        "instruction": "Przeczytaj podejście i warunek sukcesu, zanim wejdziesz do systemu.",
+        "enter": "Wejdź do operacji"
+      },
       "announce": {
         "briefing": "Odprawa sprawy: {title}",
+        "review": "Przegląd celu {index} z {total}: {goal}",
         "closed": "Sprawa zamknięta",
         "cleared": "Cel {index} ukończony",
         "clearedGot": "Cel {index} ukończony: {got}",

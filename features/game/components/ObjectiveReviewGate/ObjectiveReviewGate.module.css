@@ -1,0 +1,55 @@
+.gate {
+  display: grid;
+  gap: 14px;
+}
+
+.phase {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 14px 16px;
+  border: 1px solid var(--breach-line);
+  background: #080b0d;
+}
+
+.phase p {
+  max-width: 64ch;
+  margin: 0;
+  color: var(--breach-muted);
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  text-align: right;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 18px;
+  border: 1px solid var(--breach-line);
+  border-top-color: #705629;
+  background: rgba(12, 17, 21, 0.92);
+}
+
+@media (max-width: 620px) {
+  .phase {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .phase p {
+    text-align: left;
+  }
+
+  .actions > :global(.btn) {
+    width: 100%;
+  }
+}
+
+@media (forced-colors: active) {
+  .phase,
+  .actions {
+    border: 2px solid CanvasText;
+    background: Canvas;
+  }
+}

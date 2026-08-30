@@ -5,6 +5,7 @@ import type { InputField, SurfaceKind } from '@/lib/schema/level'
 import { cx } from '@/ui/cx'
 import { useTranslation } from '@/i18n/useTranslation'
 import { Button } from '../Button'
+import { targetPresentation, targetUrl } from './targetPresentation'
 import styles from './MimicSurface.module.css'
 
 // THE FRONT (docs/04-frontend-ux.md §5.3): the mimic app the victim sees. Fields
@@ -15,21 +16,8 @@ import styles from './MimicSurface.module.css'
 // SSR has no layout; fall back to useEffect on the server render pass.
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
-export function mimicUrl(appName: string, surface: SurfaceKind): string {
-  const slug =
-    appName
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '') || 'target'
-  const path =
-    surface === 'login-form'
-      ? '/login'
-      : surface === 'search-box'
-        ? '/search'
-        : surface === 'profile-lookup'
-          ? '/profile'
-          : '/?q='
-  return `${slug}.internal${path}`
+export function mimicUrl(caseId: string, appName: string, surface: SurfaceKind): string {
+  return targetUrl(caseId, appName, surface)
 }
 
 function AutoGrowField({
@@ -71,6 +59,7 @@ function AutoGrowField({
 }
 
 interface MimicSurfaceProps {
+  caseId: string
   surface: SurfaceKind
   appName: string
   fields: InputField[]
@@ -82,6 +71,7 @@ interface MimicSurfaceProps {
 }
 
 export function MimicSurface({
+  caseId,
   surface,
   appName,
   fields,
@@ -92,58 +82,93 @@ export function MimicSurface({
   className,
 }: MimicSurfaceProps) {
   const { t } = useTranslation()
+  const target = targetPresentation(caseId, appName)
   const submitLabel =
     surface === 'login-form'
       ? t('game.mimic.signIn')
       : surface === 'search-box'
         ? t('game.mimic.search')
         : t('game.mimic.submit')
+  const surfaceLabel =
+    surface === 'login-form'
+      ? t('game.mimic.staffAccess')
+      : surface === 'search-box'
+        ? t('game.mimic.recordsSearch')
+        : surface === 'profile-lookup'
+          ? t('game.mimic.badgeLookup')
+          : t('game.mimic.requestVerification')
 
   return (
     <form
       className={cx(styles.surface, className)}
+      data-target={target.theme}
       onSubmit={(e) => {
         e.preventDefault()
         if (interactive) onSubmit?.()
       }}
     >
-      <p className={styles.appName}>{appName}</p>
+      <header className={styles.siteHeader}>
+        <span className={styles.monogram} aria-hidden="true">
+          {target.monogram}
+        </span>
+        <span className={styles.identity}>
+          <strong>{appName}</strong>
+          <small>{target.division}</small>
+        </span>
+        <span className={styles.network}>{t('game.mimic.privateNetwork')}</span>
+      </header>
 
-      <div className={styles.fields}>
-        {fields.map((field) => (
-          <div key={field.name} className={styles.fieldBlock}>
-            <label htmlFor={`field-${field.name}`} className={styles.label}>
-              {field.label}
-            </label>
-            {field.type === 'password' ? (
-              <input
-                id={`field-${field.name}`}
-                type="password"
-                className={cx('mono', styles.input, styles.inputSingle)}
-                value={values[field.name] ?? ''}
-                placeholder={field.placeholder}
-                readOnly={!interactive}
-                spellCheck={false}
-                aria-label={field.label}
-                onChange={(e) => onChange?.(field.name, e.target.value)}
-              />
-            ) : (
-              <AutoGrowField
-                field={field}
-                value={values[field.name] ?? ''}
-                onChange={(v) => onChange?.(field.name, v)}
-                readOnly={!interactive}
-              />
-            )}
-          </div>
-        ))}
+      <nav className={styles.siteNav} aria-hidden="true">
+        <span>{t('game.mimic.navOverview')}</span>
+        <span>{t('game.mimic.navDirectory')}</span>
+        <span>{t('game.mimic.navSupport')}</span>
+      </nav>
+
+      <div className={styles.siteBody}>
+        <p className={styles.surfaceLabel}>{surfaceLabel}</p>
+        <h3 className={styles.appName}>{appName}</h3>
+
+        <div className={styles.fields}>
+          {fields.map((field) => (
+            <div key={field.name} className={styles.fieldBlock}>
+              <label htmlFor={`field-${field.name}`} className={styles.label}>
+                {field.label}
+              </label>
+              {field.type === 'password' ? (
+                <input
+                  id={`field-${field.name}`}
+                  type="password"
+                  className={cx('mono', styles.input, styles.inputSingle)}
+                  value={values[field.name] ?? ''}
+                  placeholder={field.placeholder}
+                  readOnly={!interactive}
+                  spellCheck={false}
+                  aria-label={field.label}
+                  onChange={(e) => onChange?.(field.name, e.target.value)}
+                />
+              ) : (
+                <AutoGrowField
+                  field={field}
+                  value={values[field.name] ?? ''}
+                  onChange={(value) => onChange?.(field.name, value)}
+                  readOnly={!interactive}
+                />
+              )}
+            </div>
+          ))}
+        </div>
+
+        <Button type="submit" variant="primary" full disabled={!interactive}>
+          {submitLabel}
+        </Button>
+
+        {!interactive && <p className={styles.reconNote}>{t('game.mimic.reconNote')}</p>}
+
+        <footer className={styles.siteFooter}>
+          <span>{target.host}</span>
+          <span>{t('game.mimic.encrypted')}</span>
+        </footer>
       </div>
-
-      <Button type="submit" variant="primary" full disabled={!interactive}>
-        {submitLabel}
-      </Button>
-
-      {!interactive && <p className={styles.reconNote}>{t('game.mimic.reconNote')}</p>}
     </form>
   )
 }

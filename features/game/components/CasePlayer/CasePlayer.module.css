@@ -68,7 +68,12 @@
 .caseHeader::after {
   z-index: -1;
   background:
-    linear-gradient(90deg, rgba(6, 8, 10, 0.96) 0 28%, rgba(6, 8, 10, 0.52) 63%, rgba(6, 8, 10, 0.82)),
+    linear-gradient(
+      90deg,
+      rgba(6, 8, 10, 0.96) 0 28%,
+      rgba(6, 8, 10, 0.52) 63%,
+      rgba(6, 8, 10, 0.82)
+    ),
     linear-gradient(0deg, rgba(6, 8, 10, 0.98), transparent 76%);
 }
 
@@ -93,7 +98,7 @@
   font-family: var(--font-brand);
   font-size: clamp(3.5rem, 7vw, 7.25rem);
   font-weight: 400;
-  line-height: 0.86;
+  line-height: 1.02;
   letter-spacing: 0.008em;
   text-transform: uppercase;
   text-wrap: balance;
@@ -156,52 +161,18 @@
   gap: 14px;
 }
 
-.recap {
-  border: 1px solid var(--breach-line);
-  background: rgba(9, 13, 16, 0.88);
-}
-
-.recapSummary {
-  min-height: 50px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 16px;
-  color: var(--breach-muted);
-  cursor: pointer;
-  font-size: 0.75rem;
-  list-style: none;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.recapSummary::-webkit-details-marker {
-  display: none;
-}
-
-.recapSummary:hover {
-  color: var(--breach-white);
-  background: rgba(227, 168, 62, 0.035);
-}
-
-.recapChevron {
-  flex: none;
-  color: var(--breach-dim);
-  transition: transform var(--dur-fast) var(--breach-ease);
-}
-
-.recap[open] .recapChevron {
-  transform: rotate(180deg);
-}
-
-.recapBody {
+.reconGrid {
+  min-width: 0;
   display: grid;
-  gap: 12px;
-  padding: 16px;
-  border-top: 1px solid var(--breach-line-soft);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 14px;
 }
 
-.recapHead,
+.reconGrid > * {
+  min-width: 0;
+}
+
 .sqlLabel,
 .moveLabel {
   margin: 0;
@@ -211,44 +182,6 @@
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-}
-
-.recapTables {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.recapTable {
-  display: inline-flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 9px 11px;
-  border: 1px solid var(--breach-line-soft);
-  background: #080b0d;
-}
-
-.recapTableName {
-  color: var(--breach-blue);
-  font-size: 0.75rem;
-  font-weight: 800;
-}
-
-.recapCols {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 5px;
-}
-
-.recapCol {
-  padding: 2px 6px;
-  color: var(--breach-muted);
-  background: var(--breach-panel-raised);
-  font-size: 0.6875rem;
 }
 
 .split {
@@ -370,7 +303,7 @@
   font-family: var(--font-brand);
   font-size: clamp(4.5rem, 10vw, 9.5rem);
   font-weight: 400;
-  line-height: 0.79;
+  line-height: 1.02;
   letter-spacing: 0.008em;
   text-transform: uppercase;
   text-wrap: balance;
@@ -608,6 +541,10 @@
 
   .receiptResult {
     grid-column: 1;
+  }
+
+  .reconGrid {
+    grid-template-columns: 1fr;
   }
 }
 
