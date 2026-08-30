@@ -222,6 +222,43 @@
   white-space: pre;
 }
 
+.tokenPlain {
+  color: #d9d6d0;
+}
+
+.tokenKeyword {
+  color: #8dbde3;
+}
+
+.tokenString {
+  color: #dfbd6b;
+}
+
+.tokenNumber {
+  color: #d99572;
+}
+
+.tokenComment {
+  color: #747f87;
+  font-style: italic;
+}
+
+.tokenOperator {
+  color: #aeb4b9;
+}
+
+.tokenType {
+  color: #c7a5dd;
+}
+
+.tokenFunction {
+  color: #79c59a;
+}
+
+.tokenVariable {
+  color: #ddd6c7;
+}
+
 .caption {
   min-height: 62px;
   margin: 0;
