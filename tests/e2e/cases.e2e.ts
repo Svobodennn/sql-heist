@@ -11,6 +11,7 @@ interface CaseSpec {
   number: string
   title: string
   headline: string
+  goals: string[]
   steps: Step[]
 }
 
@@ -20,6 +21,11 @@ const CASES: CaseSpec[] = [
     number: '001',
     title: 'The Front Door',
     headline: "WE'RE IN.",
+    goals: [
+      'Get inside as an administrator.',
+      'List the rooms Meridian keeps off its own floor plan.',
+      'Pull the offshore ledger you just mapped off the shopping page.',
+    ],
     steps: [
       { username: "' OR '1'='1' -- ", password: 'x' },
       { q: "' UNION SELECT name, sql FROM sqlite_master -- " },
@@ -31,6 +37,11 @@ const CASES: CaseSpec[] = [
     number: '002',
     title: 'The Quiet Room',
     headline: 'IT TALKED.',
+    goals: [
+      'Read one digit of the master PIN from a yes/no tell.',
+      "Prove the pried PIN is live — read it off the vault gate's clock.",
+      'Force a duplicate error that names the hidden claims table.',
+    ],
     steps: [
       { code: "' OR (SELECT substr(master_pin,1,1) FROM vault_config WHERE id=1)='7' -- " },
       { token: "' OR (SELECT master_pin FROM vault_config WHERE id=1)='7731' -- " },
@@ -42,6 +53,10 @@ const CASES: CaseSpec[] = [
     number: '003',
     title: 'The Vault',
     headline: "VAULT'S OPEN.",
+    goals: [
+      "Slip the blocked phrase past the doorman and lift the vault's door key.",
+      "Stack a write onto the badge read and flip the vault's ACL to OPEN.",
+    ],
     steps: [
       { q: "' UNION/**/SELECT schematic, loot FROM archive_ledger -- " },
       {
@@ -69,6 +84,9 @@ async function enterFirstObjective(page: Page): Promise<void> {
   await dismissCookie(page)
   await page.locator('[data-case-id="the-front-door"] a').click()
   await page.getByRole('button', { name: 'Take the case' }).click()
+  await expect(page.getByRole('heading', { name: CASES[0].goals[0] })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Send it' })).toHaveCount(0)
+  await page.getByRole('button', { name: 'Enter operation' }).click()
   await expect(page.getByRole('button', { name: 'Send it' })).toBeEnabled({ timeout: 20000 })
 }
 
@@ -96,21 +114,54 @@ test.describe('Case board return navigation', () => {
   })
 })
 
+test.describe('Mobile case navigation', () => {
+  test.use({ viewport: { width: 390, height: 844 } })
+
+  test('keeps the command sheet and live operation inside the viewport', async ({ page }) => {
+    await page.goto('/cases/the-front-door')
+    await dismissCookie(page)
+
+    await page.getByRole('button', { name: 'Open menu' }).click()
+    const menu = page.getByRole('dialog', { name: 'Primary' })
+    await expect(menu).toBeVisible()
+
+    const menuBounds = await menu.boundingBox()
+    expect(menuBounds?.width).toBe(390)
+    expect(menuBounds?.height).toBeGreaterThanOrEqual(840)
+
+    await page.getByRole('button', { name: 'Close menu' }).click()
+    await page.getByRole('button', { name: 'Take the case' }).click()
+    await page.getByRole('button', { name: 'Enter operation' }).click()
+    await expect(page.getByRole('button', { name: 'Send it' })).toBeEnabled({ timeout: 20000 })
+
+    const viewportWidth = await page.evaluate(() => document.documentElement.clientWidth)
+    const contentWidth = await page.evaluate(() => document.documentElement.scrollWidth)
+    expect(contentWidth).toBe(viewportWidth)
+  })
+})
+
 for (const gameCase of CASES) {
   test.describe(`Case ${gameCase.number} — ${gameCase.title}`, () => {
     test('plays through every objective to the case-closed payoff', async ({ page }) => {
       await page.goto(`/cases/${gameCase.id}`)
       await dismissCookie(page)
 
-      // v2 flow: briefing gate first, then step through objectives.
+      // Guided flow: briefing → objective review → operation for every objective.
       await page.getByRole('button', { name: 'Take the case' }).click()
-      // Engine loads WASM during the briefing read — wait until the wire is armed.
-      await expect(page.getByRole('button', { name: 'Send it' })).toBeEnabled({ timeout: 20000 })
 
       const total = gameCase.steps.length
       for (let i = 0; i < total; i++) {
         await test.step(`objective ${i + 1}/${total}`, async () => {
+          // The player reads the objective before entering, and the same banner
+          // remains visible above the live target once the operation opens.
+          await expect(page.getByRole('heading', { name: gameCase.goals[i] })).toBeVisible()
+          await page.getByRole('button', { name: 'Enter operation' }).click()
+          await expect(page.getByRole('heading', { name: gameCase.goals[i] })).toBeVisible()
           await expect(page.getByText(`Objective ${i + 1}/${total}`)).toBeVisible()
+          // Engine loads WASM while the brief/review is read — wait until armed.
+          await expect(page.getByRole('button', { name: 'Send it' })).toBeEnabled({
+            timeout: 20000,
+          })
           await fillAndSend(page, gameCase.steps[i])
           // A win lands on the payoff screen; Next advances (last Next → case closed).
           const next = page.getByRole('button', { name: 'Next' })
