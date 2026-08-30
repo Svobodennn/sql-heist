@@ -30,7 +30,7 @@ export interface CursorEligibility {
 }
 
 const RING_RADIUS = 17
-const FOLLOW_EASING = 0.18
+const FOLLOW_EASING = 0.42
 
 export function stepFollowAxis(
   current: FollowAxisState,

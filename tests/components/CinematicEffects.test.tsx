@@ -39,6 +39,10 @@ describe('<CinematicCursor>', () => {
     const cancel = vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => undefined)
 
     const view = render(<CinematicCursor />)
+    const cursor = view.container.querySelector<HTMLElement>('[aria-hidden="true"]')!
+
+    fireEvent.pointerMove(cursor, { clientX: 20, clientY: 30 })
+    fireEvent.pointerMove(cursor, { clientX: 40, clientY: 50 })
 
     expect(document.documentElement.classList.contains('cursor-enhanced')).toBe(true)
     expect(view.container.querySelector('[aria-hidden="true"]')).not.toBeNull()
@@ -69,6 +73,47 @@ describe('<CinematicCursor>', () => {
     fireEvent.pointerMove(view.getByLabelText('SQL input'), { clientX: 20, clientY: 30 })
 
     expect(view.container.querySelector('[aria-hidden="true"]')?.className).toContain('isText')
+  })
+
+  it('measures a magnetic target once until its geometry is invalidated', () => {
+    const pointer = media(true)
+    const reduced = media(false)
+    vi.spyOn(window, 'matchMedia').mockImplementation((query) =>
+      query.includes('prefers-reduced-motion') ? reduced : pointer,
+    )
+    vi.spyOn(window, 'requestAnimationFrame').mockReturnValue(9)
+
+    const view = render(
+      <>
+        <CinematicCursor />
+        <button type="button" data-magnetic>
+          Cases
+        </button>
+      </>,
+    )
+    const target = view.getByRole('button', { name: 'Cases' })
+    const readBounds = vi.spyOn(target, 'getBoundingClientRect').mockReturnValue({
+      x: 10,
+      y: 20,
+      left: 10,
+      top: 20,
+      right: 110,
+      bottom: 60,
+      width: 100,
+      height: 40,
+      toJSON: () => ({}),
+    })
+
+    fireEvent.pointerMove(target, { clientX: 20, clientY: 30 })
+    fireEvent.pointerMove(target, { clientX: 30, clientY: 35 })
+    fireEvent.pointerMove(target, { clientX: 40, clientY: 40 })
+
+    expect(readBounds).toHaveBeenCalledOnce()
+
+    fireEvent.scroll(window)
+    fireEvent.pointerMove(target, { clientX: 45, clientY: 42 })
+
+    expect(readBounds).toHaveBeenCalledTimes(2)
   })
 })
 

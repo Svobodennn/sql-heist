@@ -30,6 +30,8 @@ interface CursorElements {
   readonly dot: HTMLSpanElement
 }
 
+const SETTLE_EPSILON = 0.12
+
 function createAxis(position: number): FollowAxisState {
   return { position, velocity: 0 }
 }
@@ -54,6 +56,16 @@ function stepRingState(current: RingState, target: RingTarget): RingState {
   }
 }
 
+function isRingSettled(state: RingState, target: RingTarget): boolean {
+  return (
+    Math.abs(state.x.position - target.x) <= SETTLE_EPSILON &&
+    Math.abs(state.y.position - target.y) <= SETTLE_EPSILON &&
+    Math.abs(state.width.position - target.width) <= SETTLE_EPSILON &&
+    Math.abs(state.height.position - target.height) <= SETTLE_EPSILON &&
+    Math.abs(state.radius.position - target.radius) <= SETTLE_EPSILON
+  )
+}
+
 function closestTarget(target: EventTarget | null, selector: string): Element | null {
   return target instanceof Element ? target.closest(selector) : null
 }
@@ -73,9 +85,13 @@ function readMagneticBounds(target: Element, view: Window): MagneticBounds {
 
 function applyRingState(ring: HTMLSpanElement, state: RingState) {
   ring.style.transform = `translate3d(${state.x.position}px, ${state.y.position}px, 0)`
-  ring.style.width = `${state.width.position}px`
-  ring.style.height = `${state.height.position}px`
-  ring.style.borderRadius = `${state.radius.position}px`
+
+  const width = `${state.width.position}px`
+  const height = `${state.height.position}px`
+  const radius = `${state.radius.position}px`
+  if (ring.style.width !== width) ring.style.width = width
+  if (ring.style.height !== height) ring.style.height = height
+  if (ring.style.borderRadius !== radius) ring.style.borderRadius = radius
 }
 
 function translateDot(dot: HTMLSpanElement, pointer: { readonly x: number; readonly y: number }, pressed: boolean) {
@@ -98,29 +114,64 @@ export function installMagneticCursor(
     let pointer = { x: -100, y: -100 }
     let ringState = createRingState(resolveRingTarget(pointer))
     let magneticBounds: MagneticBounds | null = null
+    let activeMagneticTarget: Element | null = null
+    let activeTextTarget: Element | null = null
     let pressed = false
     let visible = false
-    let frameId = 0
+    let frameId: number | null = null
 
     const updatePointerMode = (target: EventTarget | null) => {
-      const textTarget = closestTarget(target, TEXT_SELECTOR)
-      const magneticTarget = textTarget ? null : closestTarget(target, INTERACTIVE_SELECTOR)
+      const nextTextTarget = closestTarget(target, TEXT_SELECTOR)
+      const nextMagneticTarget = nextTextTarget
+        ? null
+        : closestTarget(target, INTERACTIVE_SELECTOR)
 
-      magneticBounds = magneticTarget ? readMagneticBounds(magneticTarget, view) : null
-      elements.cursor.classList.toggle(styles.isText, Boolean(textTarget))
-      elements.cursor.classList.toggle(styles.magnetic, Boolean(magneticTarget))
+      if (
+        nextTextTarget === activeTextTarget &&
+        nextMagneticTarget === activeMagneticTarget
+      ) {
+        return false
+      }
+
+      activeTextTarget = nextTextTarget
+      activeMagneticTarget = nextMagneticTarget
+      magneticBounds = nextMagneticTarget ? readMagneticBounds(nextMagneticTarget, view) : null
+      elements.cursor.classList.toggle(styles.isText, Boolean(nextTextTarget))
+      elements.cursor.classList.toggle(styles.magnetic, Boolean(nextMagneticTarget))
+      return true
+    }
+
+    const tick = () => {
+      frameId = null
+      if (!visible) return
+
+      const target = resolveRingTarget(pointer, magneticBounds)
+      const nextState = stepRingState(ringState, target)
+      const settled = isRingSettled(nextState, target)
+      ringState = settled ? createRingState(target) : nextState
+      applyRingState(elements.ring, ringState)
+
+      if (!settled) frameId = view.requestAnimationFrame(tick)
+    }
+
+    const scheduleFrame = () => {
+      if (visible && frameId === null) frameId = view.requestAnimationFrame(tick)
     }
 
     const onMove = (event: PointerEvent) => {
       pointer = { x: event.clientX, y: event.clientY }
-      updatePointerMode(event.target)
+      const modeChanged = updatePointerMode(event.target)
       translateDot(elements.dot, pointer, pressed)
 
       if (!visible) {
         visible = true
-        ringState = createRingState(resolveRingTarget(pointer))
+        ringState = createRingState(resolveRingTarget(pointer, magneticBounds))
+        applyRingState(elements.ring, ringState)
         elements.cursor.classList.add(styles.visible)
+        return
       }
+
+      if (modeChanged || !magneticBounds) scheduleFrame()
     }
     const setPressed = (nextPressed: boolean) => {
       pressed = nextPressed
@@ -130,16 +181,17 @@ export function installMagneticCursor(
     const release = () => setPressed(false)
     const hide = () => {
       visible = false
+      if (frameId !== null) view.cancelAnimationFrame(frameId)
+      frameId = null
       elements.cursor.classList.remove(styles.visible)
     }
     const clearMagneticBounds = () => {
+      if (!activeMagneticTarget) return
+
+      activeMagneticTarget = null
       magneticBounds = null
       elements.cursor.classList.remove(styles.magnetic)
-    }
-    const tick = () => {
-      ringState = stepRingState(ringState, resolveRingTarget(pointer, magneticBounds))
-      applyRingState(elements.ring, ringState)
-      frameId = view.requestAnimationFrame(tick)
+      scheduleFrame()
     }
 
     doc.addEventListener('pointermove', onMove, { passive: true })
@@ -149,11 +201,11 @@ export function installMagneticCursor(
     doc.documentElement.addEventListener('pointerleave', hide)
     view.addEventListener('blur', hide)
     view.addEventListener('scroll', clearMagneticBounds, { passive: true })
+    view.addEventListener('resize', clearMagneticBounds, { passive: true })
     doc.documentElement.classList.add('cursor-enhanced')
-    frameId = view.requestAnimationFrame(tick)
 
     return () => {
-      view.cancelAnimationFrame(frameId)
+      if (frameId !== null) view.cancelAnimationFrame(frameId)
       doc.removeEventListener('pointermove', onMove)
       doc.removeEventListener('pointerdown', press)
       doc.removeEventListener('pointerup', release)
@@ -161,6 +213,7 @@ export function installMagneticCursor(
       doc.documentElement.removeEventListener('pointerleave', hide)
       view.removeEventListener('blur', hide)
       view.removeEventListener('scroll', clearMagneticBounds)
+      view.removeEventListener('resize', clearMagneticBounds)
       doc.documentElement.classList.remove('cursor-enhanced')
       elements.cursor.classList.remove(styles.visible, styles.magnetic, styles.isText)
     }

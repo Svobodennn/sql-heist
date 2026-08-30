@@ -7,12 +7,12 @@ import {
 } from '@/app/components/CinematicCursor/cursorMath'
 
 describe('production cinematic cursor math', () => {
-  it('eases toward the pointer without mutating the prior state', () => {
+  it('follows the pointer quickly without mutating the prior state', () => {
     const current = Object.freeze({ position: 0, velocity: 0 })
 
     const next = stepFollowAxis(current, 100)
 
-    expect(next).toEqual({ position: 18, velocity: 18 })
+    expect(next).toEqual({ position: 42, velocity: 42 })
     expect(current).toEqual({ position: 0, velocity: 0 })
   })
 
