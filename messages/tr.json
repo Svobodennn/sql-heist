@@ -242,34 +242,75 @@
       "secondaryCta": "Nasıl çalışır"
     },
     "what": {
-      "eyebrow": "İş Dosyası · 001",
-      "stamp": "Gizli",
-      "title": "Kilidi öğrenmek için soygunu öğren",
-      "lede": "SQL Heist, eğitici bir SQL enjeksiyonu oyunudur. Saldırıyı gerçek bir veritabanına karşı çevirir, sonra seni durdurması gereken kodu incelersin — saldırı, savunmayı her dersten iyi öğretir.",
+      "eyebrow": "Gerçek veritabanı · güvenli oyun alanı",
+      "stamp": "Tasarımı gereği güvenli",
+      "title": "Gerçek SQL üzerinde çalış.",
+      "titleAccent": "Kır. Düzelt. Anla.",
+      "lede": "Her vaka tarayıcındaki SQLite üzerinde çalışır. Hedef izole edilir, yeniden tohumlanır ve istediğin an sıfırlanabilir.",
       "facts": {
         "0": {
-          "k": "Nerede",
-          "v": "Pratik veritabanı ve tüm girdiler tarayıcında çalışır; hesap eşitleme ayrı ve isteğe bağlıdır."
+          "k": "İzole hedef",
+          "v": "Pratik veritabanın bu cihazda kalır."
         },
         "1": {
-          "k": "Neye karşı",
-          "v": "Gerçek bir SQLite motoru; her çalıştırma için sıfırdan tohumlanır."
+          "k": "İstediğin an sıfırla",
+          "v": "Vakayı başlangıç durumuna döndür."
         },
         "2": {
-          "k": "Risk",
-          "v": "Gerçek hedef yok — kırabileceğin tek şey korumalı alan."
+          "k": "Oyuncak değil, gerçek",
+          "v": "Gerçek SQL motoru. Gözlemlenebilir sonuçlar."
         }
       },
-      "safe": "Tasarımı gereği güvenli — hesap gerekmez, indirme yok, kurulum yok."
+      "safe": "Tasarımı gereği güvenli",
+      "safeDetail": "Gerçek hedef yok. Girdin hiçbir harici sisteme gönderilmez."
     },
     "how": {
-      "eyebrow": "İş",
+      "eyebrow": "Beş hamlelik soygun",
       "title": "Her seferinde beş hamle",
       "lede": "Her iş aynı yayı izler, böylece nerede olduğunu her an tam bilirsin."
     },
+    "cases": {
+      "eyebrow": "Üç vaka · tek rota",
+      "title": "Sonraki kapıyı seç.",
+      "lede": "Giderek zorlaşan üç vakada {objectives} görev. Her çalıştırma sıfırdan tohumlanmış yerel bir veritabanı alır.",
+      "objectiveLabel": "görev",
+      "cta": "Vakaya gir",
+      "cards": {
+        "frontDoor": {
+          "difficulty": "Başlangıç",
+          "description": "Gürültülü bir vitrin, kimlik doğrulama yolu ve açığı ele veren canlı bir sorgu."
+        },
+        "quietRoom": {
+          "difficulty": "Orta",
+          "description": "Sonuç kaybolur. Zamanlama, hata davranışı ve dikkatli sorular geride kalanı açığa çıkarır."
+        },
+        "vault": {
+          "difficulty": "İleri",
+          "description": "Filtreler açık yolu korur. Anahtar kelime engellemenin neden gerçek bir sınırın yerini tutmadığını öğren."
+        }
+      }
+    },
+    "proof": {
+      "vulnerableTitle": "SAVUNMASIZ: BİRLEŞTİRME",
+      "vulnerableRisk": "ENJEKSİYON RİSKİ",
+      "secureTitle": "GÜVENLİ: PARAMETRELİ SORGU",
+      "secureSafe": "GÜVENLİ",
+      "userInput": "KULLANICI GİRDİSİ",
+      "boundInput": "PARAMETRE BAĞLANDI, ÇALIŞTIRILMADI",
+      "vulnerableNote": "Değer dizgeden kaçar ve sorgu mantığını yeniden yazar.",
+      "secureNote": "Girdi veri olarak kalır. Sorgu yapısı değişemez.",
+      "steps": {
+        "0": { "title": "Saldırıyı çalıştır", "blurb": "Enjekte edilmiş değeri gönder." },
+        "1": { "title": "Sonucu gözlemle", "blurb": "Kullanıcının almaması gereken satırları gör." },
+        "2": { "title": "Düzeltmeye geç", "blurb": "Parametreli sorguyu kullan." },
+        "3": { "title": "Yeniden çalıştır", "blurb": "Aynı girdiyi tekrar gönder." },
+        "4": { "title": "Güvenli olduğunu doğrula", "blurb": "Yalnızca amaçlanan veri döner." }
+      }
+    },
     "faq": {
-      "eyebrow": "Dobra Cevaplar",
-      "title": "İlk işinden önce",
+      "eyebrow": "Operatör desteği",
+      "title": "Uçuş öncesi kontrol.",
+      "lede": "Her şey izole, sıfırlanabilir ve öğrenmek için yapılmış. İlk operasyondan önce sorularını temizle.",
       "more": "Neo'nun verdiği her cevabı oku"
     },
     "closer": {
