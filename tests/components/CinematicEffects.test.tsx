@@ -1,11 +1,18 @@
 import { cleanup, fireEvent, render } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { CinematicCursor } from '@/app/components/CinematicCursor'
-import { installScrollReveal } from '@/app/components/ScrollReveal/ScrollReveal'
+import { installScrollReveal, ScrollReveal } from '@/app/components/ScrollReveal/ScrollReveal'
+
+const { pathnameMock } = vi.hoisted(() => ({ pathnameMock: vi.fn() }))
+
+vi.mock('next/navigation', () => ({ usePathname: pathnameMock }))
 
 afterEach(() => {
   cleanup()
-  document.documentElement.classList.remove('cursor-enhanced', 'motion-ready')
+  pathnameMock.mockReset()
+  vi.unstubAllGlobals()
+  document.documentElement.classList.remove('cursor-enhanced')
+  document.body.innerHTML = ''
 })
 
 function media(matches: boolean) {
@@ -66,6 +73,42 @@ describe('<CinematicCursor>', () => {
 })
 
 describe('installScrollReveal', () => {
+  it('rebinds reveal targets when the persistent template receives a new route', () => {
+    const observed: Element[] = []
+    const disconnect = vi.fn()
+
+    class FakeObserver {
+      constructor(_callback: IntersectionObserverCallback) {}
+      observe = (target: Element) => observed.push(target)
+      unobserve = vi.fn()
+      disconnect = disconnect
+    }
+
+    vi.spyOn(window, 'matchMedia').mockReturnValue(media(false))
+    vi.stubGlobal('IntersectionObserver', FakeObserver)
+    pathnameMock.mockReturnValue('/cases/the-front-door')
+
+    const view = render(
+      <main>
+        <section data-reveal>Active objective</section>
+        <ScrollReveal />
+      </main>,
+    )
+
+    expect(observed.some((target) => target.textContent === 'Active objective')).toBe(true)
+
+    pathnameMock.mockReturnValue('/cases')
+    view.rerender(
+      <main>
+        <section data-reveal>Case board</section>
+        <ScrollReveal />
+      </main>,
+    )
+
+    expect(disconnect).toHaveBeenCalledOnce()
+    expect(observed.some((target) => target.textContent === 'Case board')).toBe(true)
+  })
+
   it('reveals intersecting and keyboard-focused content, then disconnects cleanly', () => {
     document.body.innerHTML = `
       <main id="root">
@@ -93,10 +136,14 @@ describe('installScrollReveal', () => {
     })
     const targets = root.querySelectorAll<HTMLElement>('[data-reveal]')
 
-    expect(document.documentElement.classList.contains('motion-ready')).toBe(true)
+    expect(root.getAttribute('data-motion-ready')).toBe('true')
+    expect(document.documentElement.classList.contains('motion-ready')).toBe(false)
     expect(observe).toHaveBeenCalledTimes(2)
 
-    callback([{ isIntersecting: true, target: targets[1] } as unknown as IntersectionObserverEntry], {} as IntersectionObserver)
+    callback(
+      [{ isIntersecting: true, target: targets[1] } as unknown as IntersectionObserverEntry],
+      {} as IntersectionObserver,
+    )
     expect(targets[1].getAttribute('data-reveal-visible')).toBe('true')
 
     fireEvent.focusIn(root.querySelector('button')!)
@@ -104,7 +151,42 @@ describe('installScrollReveal', () => {
 
     cleanupReveal()
     expect(disconnect).toHaveBeenCalledOnce()
-    expect(document.documentElement.classList.contains('motion-ready')).toBe(false)
+    expect(root.hasAttribute('data-motion-ready')).toBe(false)
+  })
+
+  it('keeps reveal readiness owned by each route root during overlapping transitions', () => {
+    document.body.innerHTML = `
+      <main id="route-a"><section data-reveal>Old route</section></main>
+      <main id="route-b"><section data-reveal>New route</section></main>
+    `
+    class FakeObserver {
+      constructor(_callback: IntersectionObserverCallback) {}
+      observe = vi.fn()
+      unobserve = vi.fn()
+      disconnect = vi.fn()
+    }
+
+    const routeA = document.querySelector<HTMLElement>('#route-a')!
+    const routeB = document.querySelector<HTMLElement>('#route-b')!
+    const cleanupA = installScrollReveal(routeA, {
+      reducedMotion: false,
+      Observer: FakeObserver as unknown as typeof IntersectionObserver,
+    })
+    const cleanupB = installScrollReveal(routeB, {
+      reducedMotion: false,
+      Observer: FakeObserver as unknown as typeof IntersectionObserver,
+    })
+
+    expect(routeA.getAttribute('data-motion-ready')).toBe('true')
+    expect(routeB.getAttribute('data-motion-ready')).toBe('true')
+
+    cleanupA()
+
+    expect(routeA.hasAttribute('data-motion-ready')).toBe(false)
+    expect(routeB.getAttribute('data-motion-ready')).toBe('true')
+
+    cleanupB()
+    expect(routeB.hasAttribute('data-motion-ready')).toBe(false)
   })
 
   it('leaves content visible when reduced motion is requested', () => {
@@ -113,6 +195,7 @@ describe('installScrollReveal', () => {
 
     const cleanupReveal = installScrollReveal(root, { reducedMotion: true })
 
+    expect(root.hasAttribute('data-motion-ready')).toBe(false)
     expect(document.documentElement.classList.contains('motion-ready')).toBe(false)
     expect(root.querySelector('[data-reveal]')?.hasAttribute('data-reveal-visible')).toBe(false)
     cleanupReveal()

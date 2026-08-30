@@ -361,9 +361,9 @@ textarea.mono {
   }
 }
 
-/* Route-local reveal system. Content remains visible without JS; the client
-   effect adds `motion-ready` only after it can observe and reveal safely. */
-.motion-ready [data-reveal] {
+/* Route-local reveal system. Content remains visible without JS; each template
+   root opts in only after its own observer is ready. */
+[data-motion-ready='true'] [data-reveal] {
   opacity: 0;
   transform: translateY(20px);
   transition:
@@ -371,22 +371,22 @@ textarea.mono {
     transform 600ms var(--breach-ease);
 }
 
-.motion-ready [data-reveal='left'] {
+[data-motion-ready='true'] [data-reveal='left'] {
   transform: translateX(-20px);
 }
 
-.motion-ready [data-reveal='right'] {
+[data-motion-ready='true'] [data-reveal='right'] {
   transform: translateX(20px);
 }
 
-.motion-ready [data-reveal][data-reveal-visible='true'] {
+[data-motion-ready='true'] [data-reveal][data-reveal-visible='true'] {
   opacity: 1;
   transform: translate3d(0, 0, 0);
 }
 
 @media (max-width: 900px) {
-  .motion-ready [data-reveal='left'],
-  .motion-ready [data-reveal='right'] {
+  [data-motion-ready='true'] [data-reveal='left'],
+  [data-motion-ready='true'] [data-reveal='right'] {
     transform: translateY(16px);
   }
 }
@@ -434,7 +434,7 @@ textarea.mono {
 }
 
 @media (forced-colors: active) {
-  .motion-ready [data-reveal] {
+  [data-motion-ready='true'] [data-reveal] {
     opacity: 1;
     transform: none;
   }

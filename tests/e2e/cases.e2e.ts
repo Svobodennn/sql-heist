@@ -64,6 +64,38 @@ async function fillAndSend(page: Page, inputs: Step): Promise<void> {
   await page.getByRole('button', { name: 'Send it' }).click()
 }
 
+async function enterFirstObjective(page: Page): Promise<void> {
+  await page.goto('/cases')
+  await dismissCookie(page)
+  await page.locator('[data-case-id="the-front-door"] a').click()
+  await page.getByRole('button', { name: 'Take the case' }).click()
+  await expect(page.getByRole('button', { name: 'Send it' })).toBeEnabled({ timeout: 20000 })
+}
+
+async function expectBoardRevealReady(page: Page): Promise<void> {
+  await expect(page).toHaveURL(/\/cases\/?$/)
+  const boardHeader = page.locator('header[data-reveal]').filter({ hasText: 'Pick your mark.' })
+  await expect(boardHeader).toHaveAttribute('data-reveal-visible', 'true')
+}
+
+test.describe('Case board return navigation', () => {
+  test('reveals the board after using the navbar Cases link', async ({ page }) => {
+    await enterFirstObjective(page)
+
+    await page.getByRole('link', { name: 'Cases', exact: true }).first().click()
+
+    await expectBoardRevealReady(page)
+  })
+
+  test('reveals the board after using browser back', async ({ page }) => {
+    await enterFirstObjective(page)
+
+    await page.goBack()
+
+    await expectBoardRevealReady(page)
+  })
+})
+
 for (const gameCase of CASES) {
   test.describe(`Case ${gameCase.number} — ${gameCase.title}`, () => {
     test('plays through every objective to the case-closed payoff', async ({ page }) => {
@@ -88,6 +120,13 @@ for (const gameCase of CASES) {
       }
 
       await expect(page.getByText(gameCase.headline).first()).toBeVisible({ timeout: 15000 })
+
+      await page.getByRole('link', { name: 'Back to the board', exact: true }).click()
+      await expect(page).toHaveURL(/\/cases\/?$/)
+      await expect(
+        page.getByRole('heading', { name: 'Pick your mark.', exact: true }),
+      ).toBeVisible()
+      await expect(page.locator(`[data-case-id="${gameCase.id}"]`)).toBeVisible()
     })
   })
 }

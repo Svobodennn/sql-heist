@@ -1,5 +1,6 @@
 'use client'
 
+import { usePathname } from 'next/navigation'
 import { useEffect, useRef } from 'react'
 
 interface RevealOptions {
@@ -13,8 +14,7 @@ function reveal(target: Element, observer: IntersectionObserver) {
 }
 
 export function installScrollReveal(root: HTMLElement, options: RevealOptions = {}): () => void {
-  const doc = root.ownerDocument
-  const view = doc.defaultView
+  const view = root.ownerDocument.defaultView
   const reducedMotion =
     options.reducedMotion ??
     (view && typeof view.matchMedia === 'function'
@@ -25,7 +25,7 @@ export function installScrollReveal(root: HTMLElement, options: RevealOptions = 
 
   if (reducedMotion || !Observer || targets.length === 0) return () => undefined
 
-  doc.documentElement.classList.add('motion-ready')
+  root.setAttribute('data-motion-ready', 'true')
   const observer = new Observer(
     (entries) => {
       entries
@@ -47,18 +47,19 @@ export function installScrollReveal(root: HTMLElement, options: RevealOptions = 
   return () => {
     root.removeEventListener('focusin', onFocus)
     observer.disconnect()
-    doc.documentElement.classList.remove('motion-ready')
+    root.removeAttribute('data-motion-ready')
   }
 }
 
 export function ScrollReveal() {
   const markerRef = useRef<HTMLSpanElement>(null)
+  const pathname = usePathname()
 
   useEffect(() => {
     const root = markerRef.current?.parentElement
     if (!root) return
     return installScrollReveal(root)
-  }, [])
+  }, [pathname])
 
   return <span ref={markerRef} hidden aria-hidden="true" />
 }
