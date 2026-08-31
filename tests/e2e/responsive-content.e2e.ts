@@ -14,3 +14,13 @@ test('Polish legal copy wraps without horizontal page overflow', async ({ page }
 
   expect(dimensions.content).toBeLessThanOrEqual(dimensions.viewport)
 })
+
+test('scroll reveal activates in both root layout trees', async ({ page }) => {
+  for (const path of ['/faq', '/tr/faq']) {
+    await page.goto(path)
+    const target = page.locator('[data-reveal]').last()
+    await expect(target).toBeAttached()
+    await target.scrollIntoViewIfNeeded()
+    await expect(target).toHaveAttribute('data-reveal-visible', 'true')
+  }
+})

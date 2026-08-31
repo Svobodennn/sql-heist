@@ -10,7 +10,7 @@ import { IconGlobe, IconChevronDown, IconCheck } from '../icons'
 import styles from './LanguageSwitcher.module.css'
 
 // Live locale switcher wired to the client I18nProvider (WS4). Picking a language
-// updates the app locale, persists it to localStorage, and sets <html lang>. It is
+// persists the choice and navigates to a root whose static HTML owns <html lang>. It is
 // a disclosure (button + list), deliberately NOT an ARIA menu, because we don't
 // implement roving arrow-key navigation — a disclosure keeps the a11y contract
 // honest. Escape and outside-click close it.

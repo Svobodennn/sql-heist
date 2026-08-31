@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 import type { Locale } from '@/i18n/config'
 import { getServerTranslator } from '@/i18n/server'
-import { HelpBody } from '../../help/HelpBody'
-import { pageAlternates } from '../../localeMeta'
+import { HelpBody } from '@/app/(en)/help/HelpBody'
+import { pageAlternates } from '@/app/localeMeta'
 
 export async function generateMetadata({
   params,

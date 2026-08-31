@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 import type { Locale } from '@/i18n/config'
 import { getServerTranslator } from '@/i18n/server'
-import { PrivacyBody } from '../../privacy/PrivacyBody'
-import { pageAlternates } from '../../localeMeta'
+import { PrivacyBody } from '@/app/(en)/privacy/PrivacyBody'
+import { pageAlternates } from '@/app/localeMeta'
 
 export async function generateMetadata({
   params,

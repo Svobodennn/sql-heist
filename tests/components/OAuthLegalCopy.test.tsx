@@ -1,7 +1,7 @@
 import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
-import { PrivacyBody } from '@/app/privacy/PrivacyBody'
-import { TermsBody } from '@/app/terms/TermsBody'
+import { PrivacyBody } from '@/app/(en)/privacy/PrivacyBody'
+import { TermsBody } from '@/app/(en)/terms/TermsBody'
 
 afterEach(cleanup)
 
