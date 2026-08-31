@@ -1,14 +1,21 @@
 import { describe, expect, it } from 'vitest'
 import { pageAlternates } from '@/app/localeMeta'
+import { getCase } from '@/features/game/cases'
 import { metadata as accountMetadata } from '@/app/(en)/account/page'
+import { metadata as caseBoardMetadata } from '@/app/(en)/cases/page'
+import { generateMetadata as caseMetadata } from '@/app/(en)/cases/[caseId]/page'
+import { metadata as helpMetadata } from '@/app/(en)/help/page'
 import { metadata as leaderboardMetadata } from '@/app/(en)/leaderboard/page'
 import { metadata as publicProfileMetadata } from '@/app/(en)/u/page'
 import { metadata as signInMetadata } from '@/app/(en)/auth/sign-in/page'
 import { metadata as signUpMetadata } from '@/app/(en)/auth/sign-up/page'
+import { generateMetadata as localizedAccountMetadata } from '@/app/[locale]/account/page'
+import { generateMetadata as localizedCaseMetadata } from '@/app/[locale]/cases/[caseId]/page'
+import { generateMetadata as localizedHelpMetadata } from '@/app/[locale]/help/page'
 import { generateMetadata as localizedSignInMetadata } from '@/app/[locale]/auth/sign-in/page'
 import { generateMetadata as localizedSignUpMetadata } from '@/app/[locale]/auth/sign-up/page'
 
-describe('account route metadata', () => {
+describe('route metadata', () => {
   it('gives every English account surface a self-canonical language map', () => {
     expect(accountMetadata.alternates).toEqual(pageAlternates('/account', 'en'))
     expect(leaderboardMetadata.alternates).toEqual(pageAlternates('/leaderboard', 'en'))
@@ -24,5 +31,63 @@ describe('account route metadata', () => {
     await expect(
       localizedSignUpMetadata({ params: Promise.resolve({ locale: 'pl' }) }),
     ).resolves.toMatchObject({ alternates: pageAlternates('/auth/sign-up', 'pl') })
+  })
+
+  it('keeps private account surfaces out of the index in every locale', async () => {
+    const robots = { index: false, follow: true }
+
+    expect(accountMetadata.robots).toEqual(robots)
+    expect(signInMetadata.robots).toEqual(robots)
+    expect(signUpMetadata.robots).toEqual(robots)
+    await expect(
+      localizedAccountMetadata({ params: Promise.resolve({ locale: 'tr' }) }),
+    ).resolves.toMatchObject({ robots })
+    await expect(
+      localizedSignInMetadata({ params: Promise.resolve({ locale: 'tr' }) }),
+    ).resolves.toMatchObject({ robots })
+    await expect(
+      localizedSignUpMetadata({ params: Promise.resolve({ locale: 'pl' }) }),
+    ).resolves.toMatchObject({ robots })
+  })
+
+  it('publishes page-specific social metadata for content, board, and profile routes', async () => {
+    expect(helpMetadata.openGraph).toMatchObject({ url: '/help' })
+    expect(helpMetadata.twitter).toMatchObject({ title: helpMetadata.title })
+    expect(caseBoardMetadata.openGraph).toMatchObject({ url: '/cases' })
+    expect(publicProfileMetadata.openGraph).toMatchObject({ url: '/u' })
+
+    const localizedHelp = await localizedHelpMetadata({
+      params: Promise.resolve({ locale: 'tr' }),
+    })
+    expect(localizedHelp.openGraph).toMatchObject({ url: '/tr/help' })
+    expect(localizedHelp.twitter).toMatchObject({ title: localizedHelp.title })
+  })
+
+  it('publishes matching article and Twitter metadata for case details', async () => {
+    const english = await caseMetadata({
+      params: Promise.resolve({ caseId: 'the-front-door' }),
+    })
+    const localized = await localizedCaseMetadata({
+      params: Promise.resolve({ locale: 'tr', caseId: 'the-front-door' }),
+    })
+
+    expect(english.openGraph).toMatchObject({
+      type: 'article',
+      url: '/cases/the-front-door',
+    })
+    expect(english.twitter).toMatchObject({
+      title: english.title,
+      description: english.description,
+    })
+    expect(localized.openGraph).toMatchObject({
+      type: 'article',
+      url: '/tr/cases/the-front-door',
+    })
+    expect(localized.twitter).toMatchObject({
+      title: localized.title,
+      description: localized.description,
+    })
+    expect(localized.description).toBe(getCase('the-front-door', 'tr')?.briefing.text)
+    expect(localized.description).not.toBe(getCase('the-front-door', 'en')?.briefing.text)
   })
 })

@@ -15,6 +15,7 @@ export async function generateMetadata({
   return {
     title: t('auth.signIn.title'),
     alternates: pageAlternates('/auth/sign-in', activeLocale),
+    robots: { index: false, follow: true },
   }
 }
 

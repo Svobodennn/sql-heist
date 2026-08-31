@@ -5,6 +5,7 @@ import { pageAlternates } from '@/app/localeMeta'
 export const metadata: Metadata = {
   title: 'Sign in',
   alternates: pageAlternates('/auth/sign-in', 'en'),
+  robots: { index: false, follow: true },
 }
 
 export default function SignInPage() {

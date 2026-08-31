@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { LeaderboardTable } from '@/features/leaderboard'
 import type { Locale } from '@/i18n/config'
 import { getServerTranslator } from '@/i18n/server'
-import { pageAlternates } from '../../localeMeta'
+import { pageMeta } from '../../localeMeta'
 
 export async function generateMetadata({
   params,
@@ -12,11 +12,10 @@ export async function generateMetadata({
   const { locale } = await params
   const activeLocale = locale as Locale
   const t = getServerTranslator(activeLocale)
-  return {
+  return pageMeta('/leaderboard', activeLocale, {
     title: t('leaderboard.title'),
     description: t('leaderboard.intro'),
-    alternates: pageAlternates('/leaderboard', activeLocale),
-  }
+  })
 }
 
 export default function LocaleLeaderboardPage() {

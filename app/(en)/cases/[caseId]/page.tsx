@@ -3,8 +3,8 @@ import { notFound } from 'next/navigation'
 import { CASE_IDS, getCase } from '@/features/game/cases'
 import { CasePlayer } from '@/features/game/components/CasePlayer'
 import { JsonLd } from '@/app/components/JsonLd'
-import { SITE_NAME, SITE_URL } from '@/app/siteConfig'
-import { pageAlternates } from '@/app/localeMeta'
+import { SITE_URL } from '@/app/siteConfig'
+import { pageMeta } from '@/app/localeMeta'
 
 // Per-case metadata: a unique title + description per breach. The static export
 // bakes these into each prerendered case page's <head>.
@@ -16,19 +16,13 @@ export async function generateMetadata({
   const { caseId } = await params
   const gameCase = getCase(caseId)
   if (!gameCase) return {}
-  const description = `Case ${gameCase.number} of ${SITE_NAME}: breach ${gameCase.target.appName} across ${gameCase.objectives.length} hands-on SQL-injection objectives — what to do, why it matters, and how you know it landed.`
+  const description = gameCase.briefing.text
   const title = `Case ${gameCase.number} — ${gameCase.title}`
-  return {
+  return pageMeta(`/cases/${caseId}`, 'en', {
     title,
     description,
-    alternates: pageAlternates(`/cases/${caseId}`, 'en'),
-    openGraph: {
-      type: 'article',
-      title: `${title} · ${SITE_NAME}`,
-      description,
-      url: `/cases/${caseId}`,
-    },
-  }
+    type: 'article',
+  })
 }
 
 // Case player route (Server Component). Pre-renders every case at build time; each

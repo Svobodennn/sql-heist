@@ -1,12 +1,11 @@
 import type { Metadata } from 'next'
 import { LeaderboardTable } from '@/features/leaderboard'
-import { pageAlternates } from '@/app/localeMeta'
+import { pageMeta } from '@/app/localeMeta'
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta('/leaderboard', 'en', {
   title: 'Casual leaderboard',
   description: 'Opted-in SQL Heist operatives ranked by client-submitted objectives cleared.',
-  alternates: pageAlternates('/leaderboard', 'en'),
-}
+})
 
 export default function LeaderboardPage() {
   return <LeaderboardTable />

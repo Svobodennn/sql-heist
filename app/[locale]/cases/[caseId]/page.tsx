@@ -4,8 +4,8 @@ import type { Locale } from '@/i18n/config'
 import { CASE_IDS, getCase } from '@/features/game/cases'
 import { CasePlayer } from '@/features/game/components/CasePlayer'
 import { JsonLd } from '@/app/components/JsonLd'
-import { SITE_NAME, SITE_URL } from '@/app/siteConfig'
-import { pageAlternates } from '@/app/localeMeta'
+import { SITE_URL } from '@/app/siteConfig'
+import { pageMeta } from '@/app/localeMeta'
 
 // The /tr and /pl case player. Same client <CasePlayer>; the full Case is loaded
 // server-side with the locale so its narrative (title/briefing/objectives/hints/
@@ -18,19 +18,13 @@ export async function generateMetadata({
   const { locale, caseId } = await params
   const gameCase = getCase(caseId, locale as Locale)
   if (!gameCase) return {}
-  const description = `Case ${gameCase.number} of ${SITE_NAME}: breach ${gameCase.target.appName} across ${gameCase.objectives.length} hands-on SQL-injection objectives — what to do, why it matters, and how you know it landed.`
+  const description = gameCase.briefing.text
   const title = `Case ${gameCase.number} — ${gameCase.title}`
-  return {
+  return pageMeta(`/cases/${caseId}`, locale as Locale, {
     title,
     description,
-    alternates: pageAlternates(`/cases/${caseId}`, locale as Locale),
-    openGraph: {
-      type: 'article',
-      title: `${title} · ${SITE_NAME}`,
-      description,
-      url: `/${locale}/cases/${caseId}`,
-    },
-  }
+    type: 'article',
+  })
 }
 
 // Cross-producted with the [locale] segment's params (tr, pl) → /tr/cases/<id>,

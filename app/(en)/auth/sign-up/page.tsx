@@ -5,6 +5,7 @@ import { pageAlternates } from '@/app/localeMeta'
 export const metadata: Metadata = {
   title: 'Create account',
   alternates: pageAlternates('/auth/sign-up', 'en'),
+  robots: { index: false, follow: true },
 }
 
 export default function SignUpPage() {

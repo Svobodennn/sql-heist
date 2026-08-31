@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import type { Locale } from '@/i18n/config'
 import { getServerTranslator } from '@/i18n/server'
 import { TermsBody } from '@/app/(en)/terms/TermsBody'
-import { pageAlternates } from '@/app/localeMeta'
+import { pageMeta } from '@/app/localeMeta'
 
 export async function generateMetadata({
   params,
@@ -10,8 +10,12 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>
 }): Promise<Metadata> {
   const { locale } = await params
-  const t = getServerTranslator(locale as Locale)
-  return { title: t('terms.title'), alternates: pageAlternates('/terms', locale as Locale) }
+  const activeLocale = locale as Locale
+  const t = getServerTranslator(activeLocale)
+  return pageMeta('/terms', activeLocale, {
+    title: t('terms.title'),
+    description: t('terms.lead'),
+  })
 }
 
 export default async function LocaleTerms({ params }: { params: Promise<{ locale: string }> }) {

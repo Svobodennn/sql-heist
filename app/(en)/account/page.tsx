@@ -1,10 +1,13 @@
 import type { Metadata } from 'next'
 import { AccountPanel } from '@/features/profile'
-import { pageAlternates } from '@/app/localeMeta'
+import { pageMeta } from '@/app/localeMeta'
 
 export const metadata: Metadata = {
-  title: 'Account',
-  alternates: pageAlternates('/account', 'en'),
+  ...pageMeta('/account', 'en', {
+    title: 'Account',
+    description: 'Manage the identity and synced data attached to your SQL Heist account.',
+  }),
+  robots: { index: false, follow: true },
 }
 
 export default function AccountPage() {
