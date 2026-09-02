@@ -30,6 +30,19 @@ const softwareLd = {
   offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
 }
 
+const CASE_ARTWORK_SIZES =
+  '(max-width: 520px) calc(100vw - 74px), (max-width: 800px) calc(90vw - 42px), (max-width: 1600px) calc(30vw - 42px), calc((100vw - 286px) / 3)'
+
+function responsiveCaseArtwork(artwork: string) {
+  const basePath = artwork.replace(/\.webp$/, '')
+
+  return {
+    avif: `${basePath}-640.avif 640w, ${basePath}-1280.avif 1280w`,
+    webp: `${basePath}-640.webp 640w, ${basePath}-1280.webp 1280w`,
+    fallback: `${basePath}-1280.webp`,
+  }
+}
+
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
     <p className={styles.eyebrow}>
@@ -192,6 +205,7 @@ function Ticker({ items }: { items: ReturnType<typeof buildHomeContent>['ticker'
 
 function CaseCard({ caseFile, locale }: { caseFile: HomeCase; locale: Locale }) {
   const artwork = artworkForCase(caseFile.id)
+  const responsiveArtwork = artwork ? responsiveCaseArtwork(artwork) : null
   const titleId = `home-case-${caseFile.id}`
 
   return (
@@ -203,15 +217,28 @@ function CaseCard({ caseFile, locale }: { caseFile: HomeCase; locale: Locale }) 
       data-reveal
     >
       <div className={styles.caseArt}>
-        {artwork ? (
-          <Image
-            src={artwork}
-            alt=""
-            width={1536}
-            height={1024}
-            unoptimized
-            sizes="(max-width: 800px) 100vw, 33vw"
-          />
+        {responsiveArtwork ? (
+          <picture className={styles.casePicture}>
+            <source
+              type="image/avif"
+              srcSet={responsiveArtwork.avif}
+              sizes={CASE_ARTWORK_SIZES}
+            />
+            <source
+              type="image/webp"
+              srcSet={responsiveArtwork.webp}
+              sizes={CASE_ARTWORK_SIZES}
+            />
+            <Image
+              src={responsiveArtwork.fallback}
+              alt=""
+              width={1280}
+              height={854}
+              loading="lazy"
+              unoptimized
+              sizes={CASE_ARTWORK_SIZES}
+            />
+          </picture>
         ) : null}
         <span aria-hidden="true">{caseFile.number}</span>
       </div>

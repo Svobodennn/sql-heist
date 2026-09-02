@@ -4,6 +4,11 @@ import { HomeBody } from '@/app/HomeBody'
 
 afterEach(cleanup)
 
+const caseArtworkSizes =
+  '(max-width: 520px) calc(100vw - 74px), (max-width: 800px) calc(90vw - 42px), (max-width: 1600px) calc(30vw - 42px), calc((100vw - 286px) / 3)'
+
+const caseArtworkNames = ['case-front-door', 'case-quiet-room', 'case-vault'] as const
+
 describe('<HomeBody> Cinematic Breach production composition', () => {
   it('renders the approved operation, case deck, live SQL proof, and pre-flight FAQ', () => {
     const view = render(<HomeBody locale="en" />)
@@ -38,5 +43,32 @@ describe('<HomeBody> Cinematic Breach production composition', () => {
         .getAllByRole('link')
         .map((link) => link.getAttribute('href')),
     ).toEqual(['/tr/cases/the-front-door', '/tr/cases/the-quiet-room', '/tr/cases/the-vault'])
+  })
+
+  it('serves responsive case artwork while keeping every fallback lazy', () => {
+    const view = render(<HomeBody locale="en" />)
+    const pictures = Array.from(view.container.querySelectorAll('picture'))
+
+    expect(pictures).toHaveLength(caseArtworkNames.length)
+
+    pictures.forEach((picture, index) => {
+      const artworkName = caseArtworkNames[index]
+      const avif = picture.querySelector('source[type="image/avif"]')
+      const webp = picture.querySelector('source[type="image/webp"]')
+      const fallback = picture.querySelector('img')
+
+      expect(avif?.getAttribute('srcset')).toBe(
+        `/cinematic-breach/${artworkName}-640.avif 640w, /cinematic-breach/${artworkName}-1280.avif 1280w`,
+      )
+      expect(webp?.getAttribute('srcset')).toBe(
+        `/cinematic-breach/${artworkName}-640.webp 640w, /cinematic-breach/${artworkName}-1280.webp 1280w`,
+      )
+      expect(avif?.getAttribute('sizes')).toBe(caseArtworkSizes)
+      expect(webp?.getAttribute('sizes')).toBe(caseArtworkSizes)
+      expect(fallback?.getAttribute('src')).toBe(
+        `/cinematic-breach/${artworkName}-1280.webp`,
+      )
+      expect(fallback?.getAttribute('loading')).toBe('lazy')
+    })
   })
 })

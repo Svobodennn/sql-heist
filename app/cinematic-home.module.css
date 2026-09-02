@@ -577,6 +577,12 @@
   background: linear-gradient(0deg, rgba(7, 9, 11, 0.8), transparent 65%);
 }
 
+.casePicture {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .caseArt img {
   width: 100%;
   height: 100%;
