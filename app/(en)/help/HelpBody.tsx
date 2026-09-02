@@ -20,7 +20,13 @@ const SWATCHES = [styles.swatchInj, styles.swatchKw, styles.swatchDim] as const
 export function HelpBody({ locale }: { locale: Locale }) {
   const t = getServerTranslator(locale)
   return (
-    <ContentPage eyebrow={t('help.eyebrow')} title={t('help.title')} lead={t('help.lead')}>
+    <ContentPage
+      eyebrow={t('help.eyebrow')}
+      title={t('help.title')}
+      lead={t('help.lead')}
+      locale={locale}
+      breadcrumbPath="/help"
+    >
       <Section id="before" title={t('help.sectionBefore')}>
         <p>
           {t('help.before.introPre')}

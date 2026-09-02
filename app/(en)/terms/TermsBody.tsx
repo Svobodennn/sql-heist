@@ -37,6 +37,7 @@ export function TermsBody({ locale }: { locale: Locale }) {
       updated="2026-08-26"
       locale={locale}
       lead={t('terms.lead')}
+      breadcrumbPath="/terms"
     >
       <Callout label={t('terms.shortLabel')}>
         <p>{t('terms.shortBody')}</p>

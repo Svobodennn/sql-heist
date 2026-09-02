@@ -1,7 +1,10 @@
 import type { Metadata } from 'next'
 import { getCaseMetas } from '@/features/game/cases'
 import { CaseBoard } from '@/features/game/components/CaseBoard'
+import { JsonLd } from '@/app/components/JsonLd'
 import { pageMeta } from '@/app/localeMeta'
+import { buildBreadcrumbList } from '@/app/structuredData'
+import { getServerTranslator } from '@/i18n/server'
 
 export const metadata: Metadata = pageMeta('/cases', 'en', {
   title: 'Cases',
@@ -13,7 +16,16 @@ export const metadata: Metadata = pageMeta('/cases', 'en', {
 // no engine — and hands it to the client <CaseBoard>, which derives each case's
 // progress from localStorage.
 export default function CaseBoardPage() {
+  const t = getServerTranslator('en')
+  const breadcrumbLd = buildBreadcrumbList('en', [
+    { name: t('nav.home'), path: '/' },
+    { name: t('nav.jobs'), path: '/cases' },
+  ])
+
   return (
-    <CaseBoard cases={getCaseMetas()} />
+    <>
+      <JsonLd data={breadcrumbLd} />
+      <CaseBoard cases={getCaseMetas()} />
+    </>
   )
 }

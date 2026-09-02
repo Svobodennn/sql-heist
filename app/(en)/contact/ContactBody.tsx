@@ -16,7 +16,13 @@ const EMAIL = 'melih.sarac@hotmail.com'
 export function ContactBody({ locale }: { locale: Locale }) {
   const t = getServerTranslator(locale)
   return (
-    <ContentPage eyebrow={t('contact.eyebrow')} title={t('contact.title')} lead={t('contact.lead')}>
+    <ContentPage
+      eyebrow={t('contact.eyebrow')}
+      title={t('contact.title')}
+      lead={t('contact.lead')}
+      locale={locale}
+      breadcrumbPath="/contact"
+    >
       <Section title={t('contact.leaveWord.title')}>
         <p>{t('contact.leaveWord.body')}</p>
         <div className={styles.contactCard}>

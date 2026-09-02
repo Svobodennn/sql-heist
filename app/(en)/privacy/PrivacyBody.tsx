@@ -39,6 +39,7 @@ export function PrivacyBody({ locale }: { locale: Locale }) {
       updated="2026-08-26"
       locale={locale}
       lead={t('privacy.lead')}
+      breadcrumbPath="/privacy"
     >
       <Callout label={t('privacy.glanceLabel')}>
         <p>{t('privacy.glanceBody')}</p>

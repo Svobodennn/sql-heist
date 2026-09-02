@@ -28,7 +28,13 @@ export function FaqBody({ locale }: { locale: Locale }) {
   }
 
   return (
-    <ContentPage eyebrow={t('faq.eyebrow')} title={t('faq.title')} lead={t('faq.lead')}>
+    <ContentPage
+      eyebrow={t('faq.eyebrow')}
+      title={t('faq.title')}
+      lead={t('faq.lead')}
+      locale={locale}
+      breadcrumbPath="/faq"
+    >
       <JsonLd data={faqLd} />
       <h2 className="sr-only">{t('faq.srHeading')}</h2>
       <div className={styles.faqList}>

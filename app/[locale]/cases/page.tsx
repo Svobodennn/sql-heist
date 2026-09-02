@@ -3,6 +3,8 @@ import type { Locale } from '@/i18n/config'
 import { getServerTranslator } from '@/i18n/server'
 import { getCaseMetas } from '@/features/game/cases'
 import { CaseBoard } from '@/features/game/components/CaseBoard'
+import { JsonLd } from '@/app/components/JsonLd'
+import { buildBreadcrumbList } from '@/app/structuredData'
 import { pageMeta } from '../../localeMeta'
 
 // The /tr and /pl case board. Same client <CaseBoard>; the metadata (localized case
@@ -23,7 +25,17 @@ export async function generateMetadata({
 
 export default async function LocaleCaseBoard({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
+  const activeLocale = locale as Locale
+  const t = getServerTranslator(activeLocale)
+  const breadcrumbLd = buildBreadcrumbList(activeLocale, [
+    { name: t('nav.home'), path: '/' },
+    { name: t('nav.jobs'), path: '/cases' },
+  ])
+
   return (
-    <CaseBoard cases={getCaseMetas(locale as Locale)} />
+    <>
+      <JsonLd data={breadcrumbLd} />
+      <CaseBoard cases={getCaseMetas(activeLocale)} />
+    </>
   )
 }

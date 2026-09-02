@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react'
 import type { Locale } from '@/i18n/config'
 import { getServerTranslator } from '@/i18n/server'
+import { buildBreadcrumbList } from '@/app/structuredData'
+import { JsonLd } from '../JsonLd'
 import { Logo } from '../Logo'
 import styles from './content.module.css'
 
@@ -16,6 +18,7 @@ export function ContentPage({
   lead,
   updated,
   locale = 'en',
+  breadcrumbPath,
   children,
 }: {
   eyebrow: string
@@ -26,11 +29,18 @@ export function ContentPage({
   // arrives pre-translated as props. Callers that render `updated` MUST pass their
   // locale or the label falls back to English.
   locale?: Locale
+  breadcrumbPath: string
   children: ReactNode
 }) {
   const t = getServerTranslator(locale)
+  const breadcrumbLd = buildBreadcrumbList(locale, [
+    { name: t('nav.home'), path: '/' },
+    { name: title, path: breadcrumbPath },
+  ])
+
   return (
     <main className={styles.page}>
+      <JsonLd data={breadcrumbLd} />
       <header className={styles.hero}>
         <div className="container">
           <div className={styles.heroInner} data-reveal="left">
