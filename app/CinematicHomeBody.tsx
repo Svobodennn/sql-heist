@@ -128,7 +128,7 @@ function Hero({
       <div className={styles.heroImage} aria-hidden="true" />
       <div className={styles.heroScan} aria-hidden="true" />
 
-      <div className={styles.heroContent} data-reveal="left">
+      <div className={styles.heroContent}>
         <Eyebrow>{hero.eyebrow}</Eyebrow>
         <h1 id="hero-title" className={styles.heroTitle}>
           <span className={styles.heroTitleLine}>

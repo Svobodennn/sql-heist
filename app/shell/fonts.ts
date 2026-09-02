@@ -12,6 +12,7 @@ const brand = Anton({
 const display = Space_Grotesk({
   subsets: ['latin'],
   display: 'swap',
+  preload: false,
   variable: '--font-display-src',
 })
 
