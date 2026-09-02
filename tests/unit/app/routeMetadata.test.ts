@@ -6,7 +6,7 @@ import { metadata as caseBoardMetadata } from '@/app/(en)/cases/page'
 import { generateMetadata as caseMetadata } from '@/app/(en)/cases/[caseId]/page'
 import { metadata as helpMetadata } from '@/app/(en)/help/page'
 import { metadata as leaderboardMetadata } from '@/app/(en)/leaderboard/page'
-import { metadata as publicProfileMetadata } from '@/app/(en)/u/page'
+import { metadata as publicProfileMetadata } from '@/app/(en)/user/profile-shell/page'
 import { metadata as signInMetadata } from '@/app/(en)/auth/sign-in/page'
 import { metadata as signUpMetadata } from '@/app/(en)/auth/sign-up/page'
 import { generateMetadata as localizedAccountMetadata } from '@/app/[locale]/account/page'
@@ -14,12 +14,12 @@ import { generateMetadata as localizedCaseMetadata } from '@/app/[locale]/cases/
 import { generateMetadata as localizedHelpMetadata } from '@/app/[locale]/help/page'
 import { generateMetadata as localizedSignInMetadata } from '@/app/[locale]/auth/sign-in/page'
 import { generateMetadata as localizedSignUpMetadata } from '@/app/[locale]/auth/sign-up/page'
+import { generateMetadata as localizedPublicProfileMetadata } from '@/app/[locale]/user/profile-shell/page'
 
 describe('route metadata', () => {
   it('gives every English account surface a self-canonical language map', () => {
     expect(accountMetadata.alternates).toEqual(pageAlternates('/account', 'en'))
     expect(leaderboardMetadata.alternates).toEqual(pageAlternates('/leaderboard', 'en'))
-    expect(publicProfileMetadata.alternates).toEqual(pageAlternates('/u', 'en'))
     expect(signInMetadata.alternates).toEqual(pageAlternates('/auth/sign-in', 'en'))
     expect(signUpMetadata.alternates).toEqual(pageAlternates('/auth/sign-up', 'en'))
   })
@@ -54,13 +54,23 @@ describe('route metadata', () => {
     expect(helpMetadata.openGraph).toMatchObject({ url: '/help' })
     expect(helpMetadata.twitter).toMatchObject({ title: helpMetadata.title })
     expect(caseBoardMetadata.openGraph).toMatchObject({ url: '/cases' })
-    expect(publicProfileMetadata.openGraph).toMatchObject({ url: '/u' })
 
     const localizedHelp = await localizedHelpMetadata({
       params: Promise.resolve({ locale: 'tr' }),
     })
     expect(localizedHelp.openGraph).toMatchObject({ url: '/tr/help' })
     expect(localizedHelp.twitter).toMatchObject({ title: localizedHelp.title })
+  })
+
+  it('leaves profile canonicals to the clean-path client shell', async () => {
+    expect(publicProfileMetadata.alternates).toBeUndefined()
+    expect(publicProfileMetadata.openGraph).not.toHaveProperty('url')
+
+    const localized = await localizedPublicProfileMetadata({
+      params: Promise.resolve({ locale: 'tr' }),
+    })
+    expect(localized.alternates).toBeUndefined()
+    expect(localized.openGraph).not.toHaveProperty('url')
   })
 
   it('publishes matching article and Twitter metadata for case details', async () => {

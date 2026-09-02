@@ -307,7 +307,7 @@ describe('<AccountPanel>', () => {
 
     expect(
       screen.getByRole('link', { name: 'Herkese açık profili gör' }).getAttribute('href'),
-    ).toBe('/tr/u?name=ada_l')
+    ).toBe('/tr/user/ada_l')
     expect(screen.getByRole('link', { name: 'Gizlilik bildirimi' }).getAttribute('href')).toBe(
       '/tr/privacy',
     )

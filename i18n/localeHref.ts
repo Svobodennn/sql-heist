@@ -15,7 +15,7 @@ const LOCALIZED_ROOTS = new Set([
   'cases',
   'leaderboard',
   'account',
-  'u',
+  'user',
 ])
 
 // Email confirmation must stay on the exact Supabase allow-listed callback.
@@ -38,8 +38,8 @@ export function localeHref(path: string, locale: Locale): string {
 }
 
 // Build the same logical destination when the visitor changes language. Unlike
-// usePathname(), the explicit search/hash inputs preserve state such as the
-// public-profile `?name=` lookup and the Supabase callback code. Delegating the
+// usePathname(), the explicit search/hash inputs preserve state such as a profile
+// dossier anchor and the Supabase callback code. Delegating the
 // final rewrite to localeHref also keeps non-localized routes (notably the exact
 // allow-listed /auth/callback) canonical.
 export function switchLocaleHref(

@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
 import { localeHref } from '@/i18n/localeHref'
 import { useTranslation } from '@/i18n/useTranslation'
 import { getPublicProfile, type PublicProfile } from '../lib/profileQuery'
 import styles from './ProfileView.module.css'
 
 type ViewState =
+  | { kind: 'resolving' }
   | { kind: 'empty' }
   | { kind: 'loading'; username: string }
   | { kind: 'private'; username: string }
@@ -17,49 +17,61 @@ type ViewState =
 
 const DATE_LOCALES = { en: 'en-US', tr: 'tr-TR', pl: 'pl-PL' } as const
 
-function stateForUsername(state: ViewState, username: string): ViewState {
+function initialState(username: string | null): ViewState {
+  if (username === null) return { kind: 'resolving' }
+  return username ? { kind: 'loading', username } : { kind: 'empty' }
+}
+
+function stateForUsername(state: ViewState, username: string | null): ViewState {
+  if (username === null) return state.kind === 'resolving' ? state : { kind: 'resolving' }
   if (!username) return { kind: 'empty' }
   if (state.kind === 'ready' && state.profile.username.toLowerCase() === username) {
     return state
   }
-  if (state.kind !== 'empty' && state.kind !== 'ready' && state.username === username) {
+  if (
+    (state.kind === 'loading' || state.kind === 'private' || state.kind === 'error') &&
+    state.username === username
+  ) {
     return state
   }
   return { kind: 'loading', username }
 }
 
-export function ProfileView() {
-  const params = useSearchParams()
+export function ProfileView({ username }: { readonly username: string | null }) {
   const { locale, t } = useTranslation()
-  const username = params.get('name')?.trim().toLowerCase() ?? ''
-  const [state, setState] = useState<ViewState>(() =>
-    username ? { kind: 'loading', username } : { kind: 'empty' },
-  )
+  const normalizedUsername = username === null ? null : username.trim().toLowerCase()
+  const [state, setState] = useState<ViewState>(() => initialState(normalizedUsername))
 
   useEffect(() => {
-    if (!username) {
+    if (normalizedUsername === null) {
+      setState({ kind: 'resolving' })
+      return
+    }
+    if (!normalizedUsername) {
       setState({ kind: 'empty' })
       return
     }
 
     let active = true
-    setState({ kind: 'loading', username })
-    void getPublicProfile(username)
+    setState({ kind: 'loading', username: normalizedUsername })
+    void getPublicProfile(normalizedUsername)
       .then((profile) => {
         if (!active) return
-        setState(profile ? { kind: 'ready', profile } : { kind: 'private', username })
+        setState(
+          profile ? { kind: 'ready', profile } : { kind: 'private', username: normalizedUsername },
+        )
       })
       .catch(() => {
-        if (active) setState({ kind: 'error', username })
+        if (active) setState({ kind: 'error', username: normalizedUsername })
       })
     return () => {
       active = false
     }
-  }, [username])
+  }, [normalizedUsername])
 
-  // Effects run after render. When only the query string changes, keep the
+  // Effects run after render. When the profile path changes, keep the
   // previous request's result from flashing under the new username for a frame.
-  const visibleState = stateForUsername(state, username)
+  const visibleState = stateForUsername(state, normalizedUsername)
 
   if (visibleState.kind === 'empty') {
     return (
@@ -72,7 +84,7 @@ export function ProfileView() {
     )
   }
 
-  if (visibleState.kind === 'loading') {
+  if (visibleState.kind === 'resolving' || visibleState.kind === 'loading') {
     return (
       <ProfileShell stamp={t('profile.stamp')} title={t('profile.loading')}>
         <p className={styles.copy} role="status" aria-live="polite">

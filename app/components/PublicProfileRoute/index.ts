@@ -1,0 +1,1 @@
+export { PublicProfileRoute } from './PublicProfileRoute'

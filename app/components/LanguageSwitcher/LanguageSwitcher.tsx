@@ -7,6 +7,7 @@ import { switchLocaleHref } from '@/i18n/localeHref'
 import { useTranslation } from '@/i18n/useTranslation'
 import { cx } from '@/ui/cx'
 import { IconGlobe, IconChevronDown, IconCheck } from '../icons'
+import { navigateToLocaleDestination } from './localeNavigation'
 import styles from './LanguageSwitcher.module.css'
 
 // Live locale switcher wired to the client I18nProvider (WS4). Picking a language
@@ -44,7 +45,13 @@ export function LanguageSwitcher({ className }: { className?: string }) {
 
     // Preserve query/hash state while moving between static locale variants. The
     // helper leaves non-localized routes such as /auth/callback canonical.
-    router.push(switchLocaleHref(pathname, window.location.search, window.location.hash, next))
+    const destination = switchLocaleHref(
+      pathname,
+      window.location.search,
+      window.location.hash,
+      next,
+    )
+    navigateToLocaleDestination(destination, router.push)
   }
 
   return (
