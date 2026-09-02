@@ -448,6 +448,30 @@ These are NOT launch blockers. Each is a separate scoped commit; ship any subset
 
 ### Risk: **LOW** (all optional, additive, post-launch).
 
+### Decision record — 2026-09-02
+
+- **M3 — keep the leaderboard client-fetched.** `LeaderboardTable` fetches after hydration,
+  and its query requires a configured Supabase client. A build-time seed would make the
+  exported rows stale until the next deploy and would couple env-less builds to Supabase.
+  Build-time leaderboard SSG is therefore deferred.
+- **L3 — shipped.** Commit `5096739` adds localized `BreadcrumbList` JSON-LD to the cases
+  board, every case detail, leaderboard, help, FAQ, contact, privacy, and terms in EN/TR/PL.
+- **L5 — keep the existing truthful `SoftwareApplication` schema.** There is no verified
+  rating or review source, and `app/opengraph-image.png` is a branding card rather than a
+  product screenshot. No `aggregateRating`, `review`, or misleading `screenshot` field was
+  added, and the application schema is not presented as eligible for a Google rich result.
+- **Profile option (b) — deferred.** Keep the launch baseline: `vercel.json` rewrites clean
+  `/user/{username}` paths to locale-specific client shells. Pre-rendering a top-N snapshot
+  would couple static builds to live profile data, become stale between deploys, and make
+  the env-less build depend on an external service.
+- **Verification evidence.** The emitted static HTML passed local structural validation for
+  all 30 localized public/case-detail breadcrumb trails. The full gate passed with 505/505
+  tests, 54/54 static pages, 15/15 Playwright tests, typecheck, and lint; the explicit
+  env-less build and 15/15 Playwright run also passed.
+- **External validation pending.** The Google Rich Results code-input attempt returned
+  “Log in and try again,” so no Google verdict was obtained. Re-run it against the preview
+  or production output in a signed-in session before marking that external check complete.
+
 ---
 
 ## Rejected Architectural Alternatives
@@ -541,7 +565,11 @@ files a crawler downloads.
 - [ ] **perf M2:** Space Grotesk (and optionally Geist Mono) `preload:false`; Anton + Geist Sans still preloaded.
 - [ ] **perf M1:** case cards served resized/AVIF (~344KB saved), below-fold + lazy, no visual change.
 - [ ] **perf M4 (DEPLOY-CONFIG):** `.wasm` served `br`/`gzip` on preview (`curl -I` confirmed).
-- [ ] **P6 (optional):** M3 trade-off documented; breadcrumb/SoftwareApplication schema added if shipped; option-b prerender decision recorded.
+- [x] **P6 (optional, implementation):** M3 trade-off documented; localized breadcrumb
+  schema shipped; truthful `SoftwareApplication` scope and option-b prerender decision
+  recorded.
+- [ ] **P6 external validation:** Google Rich Results Test returns a verdict for the emitted
+  JSON-LD in a signed-in session.
 - [ ] Every phase ended GREEN (`typecheck && test && build && test:e2e && lint`) with one scoped commit and user approval at the gate.
 - [ ] `lib/engine` + `lib/schema` untouched across all phases.
 
