@@ -1,6 +1,15 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+
+// The root layouts import AppShell, which pulls in next/font (a build-time macro
+// vitest can't transform). We only read their metadata exports, not the component,
+// so stub the shell to cut the font chain.
+vi.mock('@/app/shell', () => ({ AppShell: () => null }))
+
 import { pageAlternates } from '@/app/localeMeta'
+import { SITE_NAME, SITE_TAGLINE } from '@/app/siteConfig'
 import { getCase } from '@/features/game/cases'
+import { metadata as enRootMetadata } from '@/app/(en)/layout'
+import { generateMetadata as localeRootMetadata } from '@/app/[locale]/layout'
 import { metadata as accountMetadata } from '@/app/(en)/account/page'
 import { metadata as caseBoardMetadata } from '@/app/(en)/cases/page'
 import { generateMetadata as caseMetadata } from '@/app/(en)/cases/[caseId]/page'
@@ -71,6 +80,28 @@ describe('route metadata', () => {
     })
     expect(localized.alternates).toBeUndefined()
     expect(localized.openGraph).not.toHaveProperty('url')
+  })
+
+  it('pins root-layout social images to metadataBase-relative paths in every locale', async () => {
+    // Regression guard for F1: the home routes must declare explicit og/twitter
+    // images so they resolve against metadataBase (SITE_URL), not the build host.
+    const socialAlt = `${SITE_NAME} — ${SITE_TAGLINE}`
+    const expectedOg = {
+      url: '/opengraph-image.png',
+      width: 1200,
+      height: 630,
+      type: 'image/png',
+      alt: socialAlt,
+    }
+
+    expect(enRootMetadata.openGraph?.images).toEqual([expectedOg])
+    expect(enRootMetadata.twitter?.images).toEqual([{ ...expectedOg, url: '/twitter-image.png' }])
+
+    for (const locale of ['tr', 'pl'] as const) {
+      const meta = await localeRootMetadata({ params: Promise.resolve({ locale }) })
+      expect(meta.openGraph?.images).toEqual([expectedOg])
+      expect(meta.twitter?.images).toEqual([{ ...expectedOg, url: '/twitter-image.png' }])
+    }
   })
 
   it('publishes matching article and Twitter metadata for case details', async () => {
