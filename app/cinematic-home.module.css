@@ -43,13 +43,13 @@
 
 .hero {
   position: relative;
-  min-height: 1100px;
+  min-height: 980px;
   overflow: hidden;
   display: grid;
   grid-template-columns: minmax(330px, 0.76fr) minmax(560px, 1.24fr);
-  grid-template-rows: minmax(700px, auto) auto;
+  grid-template-rows: minmax(640px, auto) auto;
   gap: 0 clamp(28px, 4vw, 64px);
-  padding: clamp(70px, 8vw, 125px) clamp(20px, 6.2vw, 100px) 58px;
+  padding: clamp(40px, 4.5vw, 72px) clamp(20px, 6.2vw, 100px) 58px;
   isolation: isolate;
 }
 
@@ -72,8 +72,9 @@
   inset: 0 0 auto 34%;
   height: 810px;
   background:
-    linear-gradient(90deg, var(--home-black), transparent 30%),
-    linear-gradient(0deg, var(--home-black), transparent 25%),
+    linear-gradient(90deg, var(--home-black), transparent 46%),
+    linear-gradient(180deg, var(--home-black), transparent 24%),
+    linear-gradient(0deg, var(--home-black), transparent 40%),
     url('/hero-vault-brass.webp') 55% center / cover no-repeat;
   filter: contrast(1.12) saturate(0.86);
 }
