@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { cleanup, fireEvent, render } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { CinematicCursor } from '@/app/components/CinematicCursor'
@@ -114,6 +115,44 @@ describe('<CinematicCursor>', () => {
     fireEvent.pointerMove(target, { clientX: 45, clientY: 42 })
 
     expect(readBounds).toHaveBeenCalledTimes(2)
+  })
+
+  it('resets the active magnetic target when navigation replaces the route content', () => {
+    const pointer = media(true)
+    const reduced = media(false)
+    vi.spyOn(window, 'matchMedia').mockImplementation((query) =>
+      query.includes('prefers-reduced-motion') ? reduced : pointer,
+    )
+    vi.spyOn(window, 'requestAnimationFrame').mockReturnValue(10)
+    pathnameMock.mockReturnValue('/cases')
+
+    const view = render(
+      <>
+        <CinematicCursor />
+        <Link href="/cases/the-front-door">The Front Door</Link>
+      </>,
+    )
+    const cursor = view.container.querySelector<HTMLElement>('[aria-hidden="true"]')!
+
+    fireEvent.pointerMove(view.getByRole('link', { name: 'The Front Door' }), {
+      clientX: 20,
+      clientY: 30,
+    })
+
+    expect(cursor.className).toContain('visible')
+    expect(cursor.className).toContain('magnetic')
+
+    pathnameMock.mockReturnValue('/cases/the-front-door')
+    view.rerender(
+      <>
+        <CinematicCursor />
+        <main>Case briefing</main>
+      </>,
+    )
+
+    expect(cursor.className).not.toContain('visible')
+    expect(cursor.className).not.toContain('magnetic')
+    expect(document.documentElement.classList.contains('cursor-enhanced')).toBe(true)
   })
 })
 

@@ -1,5 +1,6 @@
 'use client'
 
+import { usePathname } from 'next/navigation'
 import { useEffect, useRef } from 'react'
 import {
   isCursorEligible,
@@ -247,6 +248,7 @@ export function CinematicCursor() {
   const cursorRef = useRef<HTMLDivElement>(null)
   const ringRef = useRef<HTMLSpanElement>(null)
   const dotRef = useRef<HTMLSpanElement>(null)
+  const pathname = usePathname()
 
   useEffect(() => {
     const cursor = cursorRef.current
@@ -255,7 +257,7 @@ export function CinematicCursor() {
     if (!cursor || !ring || !dot) return
 
     return installMagneticCursor({ cursor, ring, dot })
-  }, [])
+  }, [pathname])
 
   return (
     <div ref={cursorRef} className={styles.cursor} aria-hidden="true">
