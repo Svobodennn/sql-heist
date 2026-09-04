@@ -13,6 +13,7 @@ Yes. SQL Heist is a **teaching tool**, in the spirit of OWASP Juice Shop, PortSw
 - **100% client-side, local sandbox.** A real (tiny) SQLite database runs *inside your browser* via [`sql.js`](https://sql.js.org) (SQLite compiled to WebAssembly). Your payloads genuinely work against it, but never reach a real target or a remote execution backend. Optional account sync is separate from the practice target.
 - **Defense-first.** Every attack is paired with the exact parameterized query that neutralizes it.
 - No live-system credentials or targets. Practice payloads stay in the browser; only players who choose an account send identity and completed-objective data to Supabase for sync.
+- **Privacy-friendly measurement only.** Vercel Web Analytics counts anonymous, aggregate page views — cookieless, no cross-site tracking, no personal profiling. No advertising or marketing cookies.
 
 ## How it plays
 
@@ -38,10 +39,12 @@ Eight objectives across three cases; each objective teaches one distinct techniq
 
 - **Next.js** (App Router) + **TypeScript**
 - **sql.js** — SQLite compiled to WebAssembly: the real database engine, running in the browser
+- **Framer Motion** — the cinematic "breach" motion, magnetic cursor, and scroll reveals (all with reduced-motion fallbacks)
 - Client-only Supabase auth and progress sync — optional; anonymous local play remains the default
 - **Static export** — deployable to any static host, with no Next.js server runtime
 - **Data-driven cases**: each case is a JSON file; adding or editing a case does not touch the engine
 - **i18n** — English, Turkish, Polish, on per-locale static routes (`/` · `/tr` · `/pl`)
+- **Vercel Web Analytics** — cookieless, aggregate page views only
 
 ## Status
 
@@ -70,7 +73,8 @@ lib/schema/       Case + level JSON schema (Zod)
 lib/engine/       Game engine: composer, SQLite runner, win evaluator, case session
 content/cases/    Case data (JSON) + per-locale narrative overlays (i18n/)
 features/game/    Game domain: components + pure game logic + case registry (cases.ts)
-i18n/  ui/        Shared translation layer + UI primitives
+messages/         UI copy catalogs — en · tr · pl JSON
+i18n/  ui/        Translation runtime + shared UI primitives
 app/              Next.js routes + app chrome (English at root, /tr and /pl prefixed)
 tests/            All tests — mirrors src (unit · components · cases · e2e)
 public/           Static assets (incl. the sql.js WebAssembly binary)
@@ -83,3 +87,5 @@ This is a **learning project**. The intentionally "vulnerable" query building in
 ## Credits
 
 - The logo/favicon is a modified form of [“Cowled” by Lorc](https://game-icons.net/1x1/lorc/cowled.html), used under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/); SQL Heist changes its geometry, colour, and size and adds database tiers to the lower cowl.
+- Inspired by [SQL Noir](https://www.sqlnoir.com), a detective-themed SQL learning game (linked from the site).
+- Type: Anton & Space Grotesk ([Google Fonts](https://fonts.google.com), OFL); Geist & Geist Mono ([Vercel](https://vercel.com/font), OFL).
