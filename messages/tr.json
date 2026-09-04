@@ -512,7 +512,7 @@
   "consent": {
     "aria": "Depolama bildirimi",
     "title": "Bu oyun yerel depolama kullanır",
-    "body": "SQL Heist; dil, ilerleme, bu bildirim ve giriş yapılmış Supabase oturumu için yerel depolama kullanır. OAuth dönüş yönlendirmesi ve silme doğrulaması aynı sekmede kısa süreli oturum depolaması kullanır. Bekleyen kayıt e-postasının süresi bir saat sonra dolar; uygulama bir sonraki kez yüklediğinde veya kontrol ettiğinde kayıt silinir, site verilerini temizlemek daha erken siler. Analitik veya reklam takibi yoktur. Hesap eşitlemesi Supabase kullanır; herkese açık profiller açık katılım gerektirir.",
+    "body": "SQL Heist; dil, ilerleme, bu bildirim ve giriş yapılmış Supabase oturumu için yerel depolama kullanır. OAuth dönüş yönlendirmesi ve silme doğrulaması aynı sekmede kısa süreli oturum depolaması kullanır. Bekleyen kayıt e-postasının süresi bir saat sonra dolar; uygulama bir sonraki kez yüklediğinde veya kontrol ettiğinde kayıt silinir, site verilerini temizlemek daha erken siler. Tek analitik, Vercel'in çerezsiz, toplu sayfa görüntüleme sayacıdır; reklam veya çapraz site takibi yoktur. Hesap eşitlemesi Supabase kullanır; herkese açık profiller açık katılım gerektirir.",
     "accept": "Anladım"
   },
   "privacy": {
@@ -520,7 +520,7 @@
     "title": "Gizlilik",
     "lead": "Varsayılan anonimdir. İsteğe bağlı hesaplar yalnızca kimlik, ilerleme ve seçtiğin herkese açık görünürlük için gereken verileri eşitler.",
     "glanceLabel": "Bir bakışta",
-    "glanceBody": "Hesapsız oynayabilirsin: oyun ve ilerleme yerel depolamada kalır; siteyi sunmak için gereken normal istek ise barındırma sağlayıcısına ulaşır. İsteğe bağlı hesap, aşağıda açıklanan hesap ve ilerleme verilerini Supabase'e gönderir; Google veya GitHub ile yalnızca o giriş yöntemini seçersen iletişim kurulur. Bu sürümde analitik veya reklam takipçisi yoktur.",
+    "glanceBody": "Hesapsız oynayabilirsin: oyun ve ilerleme yerel depolamada kalır; siteyi sunmak için gereken normal istek ise barındırma sağlayıcısına ulaşır. İsteğe bağlı hesap, aşağıda açıklanan hesap ve ilerleme verilerini Supabase'e gönderir; Google veya GitHub ile yalnızca o giriş yöntemini seçersen iletişim kurulur. Vercel'in çerezsiz, toplu sayfa görüntüleme analitiği dışında bu sürümde reklam veya çapraz site takipçisi yoktur.",
     "sections": {
       "0": {
         "title": "Veri sorumlusu ve iletişim",
@@ -561,7 +561,7 @@
       },
       "8": {
         "title": "Depolama, takip ve güvenlik",
-        "body": "Bu sürüm üçüncü taraf analitiği, reklam takipçisi veya pazarlama çerezi içermez. Dil, yerel ilerleme ve bu bildirim için; yalnızca giriş yaptığında da gerekli Supabase oturumu için tarayıcı yerel depolamasını kullanır. Aynı sekmedeki OAuth dönüş kaydının süresi 10 dakika sonra dolar; başarılı silme yeniden doğrulama makbuzu tek kullanımlıktır ve 2 dakika sonra sona erer. SQL Heist, Google/GitHub sağlayıcı jetonlarını kalıcı oturum depolamasından çıkarır. Kayıt sırasında bekleyen e-posta adresi doğrulama ve yeniden gönderme için bir saat kullanılabilir; süresi dolmuş veya bozuk kayıt SQL Heist bir sonraki kez yüklediğinde ya da kontrol ettiğinde silinir, giriş, çıkış veya site verilerini temizleme daha erken siler. Supabase Satır Düzeyi Güvenlik, temel hesap satırlarını sahibine sınırlar; ancak hiçbir çevrim içi sistem mutlak güvenlik sözü veremez."
+        "body": "Bu sürümdeki tek ölçüm, Vercel'in çerezsiz, toplu analitiğidir (anonim sayfa görüntülemeleri ve kaba cihaz/yönlendiren verisi; kişisel profilleme veya çapraz site takibi yok); reklam takipçisi veya pazarlama çerezi içermez. Dil, yerel ilerleme ve bu bildirim için; yalnızca giriş yaptığında da gerekli Supabase oturumu için tarayıcı yerel depolamasını kullanır. Aynı sekmedeki OAuth dönüş kaydının süresi 10 dakika sonra dolar; başarılı silme yeniden doğrulama makbuzu tek kullanımlıktır ve 2 dakika sonra sona erer. SQL Heist, Google/GitHub sağlayıcı jetonlarını kalıcı oturum depolamasından çıkarır. Kayıt sırasında bekleyen e-posta adresi doğrulama ve yeniden gönderme için bir saat kullanılabilir; süresi dolmuş veya bozuk kayıt SQL Heist bir sonraki kez yüklediğinde ya da kontrol ettiğinde silinir, giriş, çıkış veya site verilerini temizleme daha erken siler. Supabase Satır Düzeyi Güvenlik, temel hesap satırlarını sahibine sınırlar; ancak hiçbir çevrim içi sistem mutlak güvenlik sözü veremez."
       },
       "9": {
         "title": "Çocuklar ve değişiklikler",

@@ -8,7 +8,7 @@
 > in [`../auth-plan.md`](../auth-plan.md), the public Privacy/Terms pages, the live
 > [`50-rls-gate.md`](./50-rls-gate.md), and
 > [`60-account-deletion-runbook.md`](./60-account-deletion-runbook.md). In particular,
-> the current build has no analytics, marketing cookies, `level_progress`, or server-side
+> the current build uses Vercel's cookieless aggregate analytics only, with no marketing cookies, `level_progress`, or server-side
 > score events. Browser-only Google/GitHub OAuth is implemented and configured; real sign-in
 > plus explicit username selection passed, while the remaining provider-specific smoke matrix
 > in [`../auth-plan.md`](../auth-plan.md) is still an external delivery gate.
@@ -137,7 +137,7 @@ blocker in the table above.
 
 ## 4. Browser storage notice & future consent gate
 
-The current application code sets no analytics, advertising, or marketing cookies. It uses `localStorage` for locale, local/account progress, the notice acknowledgement, an expiring pending signup address, and the necessary Supabase session after sign-in; OAuth return state uses expiring same-tab `sessionStorage`.
+The current application code uses Vercel's cookieless, aggregate analytics (anonymous page views; no personal profiling or cross-site tracking) and sets no advertising or marketing cookies. It uses `localStorage` for locale, local/account progress, the notice acknowledgement, an expiring pending signup address, and the necessary Supabase session after sign-in; OAuth return state uses expiring same-tab `sessionStorage`.
 
 - **Current build:** `CookieConsent` is an informational, dismissible storage notice, not consent for optional processing. The Privacy notice records the keys, purpose, and lifetime; no account or game feature is blocked behind acceptance.
 - **If analytics/marketing are added:** a **full consent banner** is required, meeting EDPB/KVKK expectations **[verify]**:
@@ -157,7 +157,7 @@ The current application code sets no analytics, advertising, or marketing cookie
 | **Rectification**                     | edit `display_name`; username is an immutable account identifier, with manual rights handling available through Contact     |
 | **Erasure / "right to be forgotten"** | self-serve verified soft-lock followed by the operator deletion runbook (see §6)                                            |
 | **Portability**                       | the same JSON export (structured, machine-readable)                                                                         |
-| **Objection / withdraw consent**      | toggle `leaderboard_opt_in` off; no analytics consent exists in the current build                                           |
+| **Objection / withdraw consent**      | toggle `leaderboard_opt_in` off; the only analytics is Vercel's cookieless aggregate measurement, which sets no cookies and stores no per-user identifier                                           |
 | **Restriction**                       | contact the operator to request restriction; the deletion soft-lock is not presented as a general restriction workflow      |
 
 Respond within **GDPR 1 month** (extendable) / **KVKK "en kısa sürede", ≤30 days** **[verify]**.

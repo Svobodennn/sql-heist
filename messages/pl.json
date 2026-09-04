@@ -512,7 +512,7 @@
   "consent": {
     "aria": "Informacja o pamięci lokalnej",
     "title": "Ta gra korzysta z pamięci lokalnej",
-    "body": "SQL Heist używa pamięci lokalnej dla języka, postępu, tej informacji i zalogowanej sesji Supabase. Przekierowanie powrotne OAuth i weryfikacja usunięcia używają krótkotrwałej pamięci sesji w tej samej karcie. Oczekujący e-mail rejestracyjny wygasa po godzinie i jest usuwany przy następnym uruchomieniu lub sprawdzeniu przez aplikację; wyczyszczenie danych witryny usuwa go wcześniej. Bez analityki i śledzenia reklamowego. Synchronizacja konta używa Supabase; profile publiczne wymagają wyraźnego włączenia.",
+    "body": "SQL Heist używa pamięci lokalnej dla języka, postępu, tej informacji i zalogowanej sesji Supabase. Przekierowanie powrotne OAuth i weryfikacja usunięcia używają krótkotrwałej pamięci sesji w tej samej karcie. Oczekujący e-mail rejestracyjny wygasa po godzinie i jest usuwany przy następnym uruchomieniu lub sprawdzeniu przez aplikację; wyczyszczenie danych witryny usuwa go wcześniej. Jedyna analityka to bezplikowy, zbiorczy licznik odsłon Vercel; bez reklam ani śledzenia międzywitrynowego. Synchronizacja konta używa Supabase; profile publiczne wymagają wyraźnego włączenia.",
     "accept": "Jasne"
   },
   "privacy": {
@@ -520,7 +520,7 @@
     "title": "Prywatność",
     "lead": "Domyślnie anonimowo. Opcjonalne konto synchronizuje tylko dane potrzebne do tożsamości, postępu i wybranej przez ciebie obecności publicznej.",
     "glanceLabel": "W skrócie",
-    "glanceBody": "Możesz grać bez konta: rozgrywka i postęp pozostają w pamięci lokalnej, natomiast hosting otrzymuje zwykłe żądanie niezbędne do wyświetlenia strony. Opcjonalne konto wysyła do Supabase opisane poniżej dane konta i postępu; kontakt z Google lub GitHub następuje tylko wtedy, gdy wybierzesz tę metodę logowania. Ta wersja nie zawiera analityki ani modułów śledzenia reklam.",
+    "glanceBody": "Możesz grać bez konta: rozgrywka i postęp pozostają w pamięci lokalnej, natomiast hosting otrzymuje zwykłe żądanie niezbędne do wyświetlenia strony. Opcjonalne konto wysyła do Supabase opisane poniżej dane konta i postępu; kontakt z Google lub GitHub następuje tylko wtedy, gdy wybierzesz tę metodę logowania. Poza bezplikową, zbiorczą analityką odsłon Vercel ta wersja nie zawiera modułów śledzenia reklam ani międzywitrynowych.",
     "sections": {
       "0": {
         "title": "Administrator danych i kontakt",
@@ -561,7 +561,7 @@
       },
       "8": {
         "title": "Pamięć, śledzenie i bezpieczeństwo",
-        "body": "Ta wersja nie zawiera zewnętrznej analityki, modułów śledzenia reklam ani marketingowych plików cookie. Używa pamięci lokalnej przeglądarki dla języka, lokalnego postępu i tej informacji, a tylko po zalogowaniu także dla niezbędnej sesji Supabase. Rekord powrotu OAuth w tej samej karcie wygasa po 10 minutach; potwierdzenie udanej ponownej weryfikacji usunięcia jest jednorazowe i wygasa po 2 minutach. SQL Heist usuwa tokeny dostawcy Google/GitHub z trwałej pamięci sesji. Podczas rejestracji oczekujący adres e-mail może służyć do potwierdzenia i ponownego wysłania przez godzinę; wygasły lub uszkodzony wpis jest usuwany przy następnym uruchomieniu albo sprawdzeniu przez SQL Heist, a logowanie, wylogowanie lub wyczyszczenie danych witryny usuwa go wcześniej. Row Level Security w Supabase ogranicza bazowe wiersze konta do ich właściciela, lecz żaden system online nie może zagwarantować absolutnego bezpieczeństwa."
+        "body": "Jedynym pomiarem w tej wersji jest bezplikowa, zbiorcza analityka Vercel (anonimowe odsłony oraz ogólne dane o urządzeniu/źródle wizyty, bez profilowania osobowego ani śledzenia międzywitrynowego); nie zawiera modułów śledzenia reklam ani marketingowych plików cookie. Używa pamięci lokalnej przeglądarki dla języka, lokalnego postępu i tej informacji, a tylko po zalogowaniu także dla niezbędnej sesji Supabase. Rekord powrotu OAuth w tej samej karcie wygasa po 10 minutach; potwierdzenie udanej ponownej weryfikacji usunięcia jest jednorazowe i wygasa po 2 minutach. SQL Heist usuwa tokeny dostawcy Google/GitHub z trwałej pamięci sesji. Podczas rejestracji oczekujący adres e-mail może służyć do potwierdzenia i ponownego wysłania przez godzinę; wygasły lub uszkodzony wpis jest usuwany przy następnym uruchomieniu albo sprawdzeniu przez SQL Heist, a logowanie, wylogowanie lub wyczyszczenie danych witryny usuwa go wcześniej. Row Level Security w Supabase ogranicza bazowe wiersze konta do ich właściciela, lecz żaden system online nie może zagwarantować absolutnego bezpieczeństwa."
       },
       "9": {
         "title": "Dzieci i zmiany",

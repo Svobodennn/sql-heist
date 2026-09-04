@@ -509,7 +509,7 @@
   "consent": {
     "aria": "Storage notice",
     "title": "This game uses local storage",
-    "body": "SQL Heist uses local storage for language, progress, this notice, and the signed-in Supabase session. OAuth return routing and deletion verification use short-lived session storage in the same tab. A pending signup email expires after one hour and is removed the next time the app loads or checks it; clearing site data removes it sooner. No analytics or advertising tracking. Account sync uses Supabase; public profiles require explicit opt-in.",
+    "body": "SQL Heist uses local storage for language, progress, this notice, and the signed-in Supabase session. OAuth return routing and deletion verification use short-lived session storage in the same tab. A pending signup email expires after one hour and is removed the next time the app loads or checks it; clearing site data removes it sooner. The only analytics is Vercel's cookieless, aggregate page-view counter; no advertising or cross-site tracking. Account sync uses Supabase; public profiles require explicit opt-in.",
     "accept": "Got it"
   },
   "privacy": {
@@ -517,7 +517,7 @@
     "title": "Privacy",
     "lead": "Anonymous by default. Optional accounts sync only the data needed for your identity, progress, and chosen public presence.",
     "glanceLabel": "At a glance",
-    "glanceBody": "You can play without an account: gameplay and progress stay in local storage, while the host still receives the normal request needed to serve the site. An optional account sends the account and progress data described below to Supabase; Google or GitHub is contacted only if you choose that sign-in method. No analytics or advertising trackers are included in this build.",
+    "glanceBody": "You can play without an account: gameplay and progress stay in local storage, while the host still receives the normal request needed to serve the site. An optional account sends the account and progress data described below to Supabase; Google or GitHub is contacted only if you choose that sign-in method. Aside from Vercel's cookieless, aggregate page-view analytics, no advertising or cross-site trackers are included in this build.",
     "sections": {
       "0": {
         "title": "Controller and contact",
@@ -558,7 +558,7 @@
       },
       "8": {
         "title": "Storage, tracking, and security",
-        "body": "This build includes no third-party analytics, advertising trackers, or marketing cookies. It uses browser local storage for language, local progress, this notice, and—only when you sign in—the necessary Supabase session. A same-tab OAuth return record expires after 10 minutes; a successful deletion re-verification receipt is one-time and expires after 2 minutes. SQL Heist strips Google/GitHub provider tokens from persistent session storage. During email signup, the pending address expires after one hour and is removed on the next load/check; sign-in, sign-out, or clearing site data removes it sooner. Supabase Row Level Security limits base account rows to their owner, but no online system can promise absolute security."
+        "body": "This build's only measurement is Vercel's cookieless, aggregate analytics (anonymous page views and coarse device/referrer data, no personal profiling or cross-site tracking); it includes no advertising trackers or marketing cookies. It uses browser local storage for language, local progress, this notice, and—only when you sign in—the necessary Supabase session. A same-tab OAuth return record expires after 10 minutes; a successful deletion re-verification receipt is one-time and expires after 2 minutes. SQL Heist strips Google/GitHub provider tokens from persistent session storage. During email signup, the pending address expires after one hour and is removed on the next load/check; sign-in, sign-out, or clearing site data removes it sooner. Supabase Row Level Security limits base account rows to their owner, but no online system can promise absolute security."
       },
       "9": {
         "title": "Children and changes",

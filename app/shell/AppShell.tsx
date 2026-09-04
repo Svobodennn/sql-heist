@@ -1,3 +1,4 @@
+import { Analytics } from '@vercel/analytics/next'
 import type { ReactNode } from 'react'
 import type { Locale } from '@/i18n/config'
 import { I18nProvider } from '@/i18n/I18nProvider'
@@ -37,6 +38,7 @@ export function AppShell({ locale, children }: AppShellProps) {
             <CinematicCursor />
           </AuthProvider>
         </I18nProvider>
+        <Analytics />
       </body>
     </html>
   )
