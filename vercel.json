@@ -1,5 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    { "source": "/user/:username", "destination": "/user/profile-shell" },
+    { "source": "/tr/user/:username", "destination": "/tr/user/profile-shell" },
+    { "source": "/pl/user/:username", "destination": "/pl/user/profile-shell" }
+  ],
   "headers": [
     {
       "source": "/(.*)",

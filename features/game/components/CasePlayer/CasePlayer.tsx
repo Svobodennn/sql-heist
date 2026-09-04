@@ -35,20 +35,27 @@ import { accrueDiscovered, initNotebook, recordPull } from '../../lib/reconNoteb
 import { BriefingGate } from '../BriefingGate'
 import { ObjectiveBanner } from '../ObjectiveBanner'
 import { ObjectivePayoff } from '../ObjectivePayoff'
+import { ObjectiveReviewGate } from '../ObjectiveReviewGate'
 import { ObjectivesProgress } from '../ObjectivesProgress'
 import { CaseTimer } from '../CaseTimer'
 import { ReconNotebook } from '../ReconNotebook'
+import { ReconRecap } from '../ReconRecap'
 import { Stamp } from '../Stamp'
 import { ToastStack } from '../Toast'
 import { IconArrowLeft } from '../icons'
 import { ObjectiveConsole } from './ObjectiveConsole'
 import { CaseClosed } from './CaseClosed'
+import {
+  createObjectiveReceipt,
+  retainFirstObjectiveReceipt,
+  type ObjectiveReceiptMap,
+} from './objectiveReceipt'
 import styles from './CasePlayer.module.css'
 
 // The case orchestrator (docs/cases-design.md §UI) — reworked to a GUIDED, step-by-
 // step flow (v2). Entering a case no longer dumps brief + plan + objective + recon +
 // exploit on one screen; it walks four stages, one focus at a time:
-//   briefing → playing → payoff → closed
+//   briefing → objective review → playing → payoff → closed
 // A compact objectives stepper rides the TOP (ObjectivesProgress, ex-sidebar) so the
 // exploit surface gets the full width. The recon notebook is case-spanning (accrues
 // discovered schema across objectives) so it lives here, not in the console. Owns the
@@ -60,7 +67,7 @@ import styles from './CasePlayer.module.css'
 // LazyMotion(domAnimation, strict) keeps only the DOM-animation set in this bundle
 // (every animated child uses `m.*`); no `layout` animations are used.
 
-type Stage = 'briefing' | 'playing' | 'payoff' | 'closed'
+type Stage = 'briefing' | 'review' | 'playing' | 'payoff' | 'closed'
 
 // Per-objective UI slice (inputs / last run / hints / fails). Kept per objective —
 // not global — so switching between objectives preserves each one's surface.
@@ -98,11 +105,11 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
   const { toasts, push, dismiss } = useToasts()
 
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set())
-  // The exact inputs that WON each objective this session — threaded into the case-
-  // closed debrief so its "move" shows what the player actually typed, not the canonical
-  // solution. Empty on a cold revisit (payloads aren't persisted) → CaseClosed falls back
-  // to the authored expectedSolution.
-  const [solvedInputs, setSolvedInputs] = useState<Record<string, Record<string, string>>>({})
+  // One immutable receipt from the FIRST winning run of each objective this session.
+  // The raw move, WAF-effective composed SQL, result, and signal are captured from the
+  // same run. Receipts are session-only; a cold revisit gets canonical input but no
+  // fabricated runtime evidence.
+  const [receipts, setReceipts] = useState<ObjectiveReceiptMap>({})
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [uiByObjective, setUiByObjective] = useState<Record<string, ObjectiveUi>>(() =>
     initUi(objectives),
@@ -164,6 +171,9 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
     const composed = compose(obj.query.template, inputs, obj.query.inputFilter)
     const signal = deriveSignal(objectiveAsLevel(gameCase, obj), composed, result)
     const evaluation = evaluate(obj.winCondition, toWinContext(result, inputs))
+    const winningReceipt = evaluation.won
+      ? createObjectiveReceipt(inputs, composed, result, signal)
+      : null
 
     setUiByObjective((prev) => {
       const cur = prev[obj.id]
@@ -184,6 +194,9 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
     }
 
     if (evaluation.won) {
+      if (winningReceipt) {
+        setReceipts((prev) => retainFirstObjectiveReceipt(prev, obj.id, winningReceipt))
+      }
       push('success', t('game.toast.won'))
       if (!completedIds.has(obj.id)) {
         commit(index) // Model A: this run's DB state becomes the next objective's start.
@@ -195,7 +208,6 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
         if (authStatus === 'authed') {
           void pushObjectiveWin(gameCase.id, obj.id).catch(() => {})
         }
-        setSolvedInputs((prev) => ({ ...prev, [obj.id]: inputs })) // the winning payload, for the debrief
         const next = new Set(completedIds)
         next.add(obj.id)
         setCompletedIds(next)
@@ -270,14 +282,15 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
     [objectives, selectedIndex],
   )
 
-  // Stepper click: jump to a cleared/active objective and put it in focus.
+  // Stepper click: jump to a cleared/active objective, but always review the ask
+  // before reopening its target surface.
   const handleSelect = useCallback((index: number) => {
     setSelectedIndex(index)
-    setStage('playing')
+    setStage('review')
   }, [])
 
-  // "Take the case" on the briefing gate → the first unsolved objective (or straight
-  // to the closed payoff if the player already cleared everything).
+  // "Take the case" → the first unsolved objective review (or straight to the
+  // closed payoff if the player already cleared everything).
   const handleStart = useCallback(() => {
     const active = firstIncompleteIndex(objectives, completedIds)
     if (active >= objectives.length) {
@@ -285,10 +298,14 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
       return
     }
     setSelectedIndex(active)
-    setStage('playing')
+    setStage('review')
   }, [objectives, completedIds])
 
-  // "Next" on a payoff → the next unsolved objective, or the case-closed screen once
+  const handleEnterOperation = useCallback(() => {
+    setStage('playing')
+  }, [])
+
+  // "Next" on a payoff → review the next unsolved objective, or close the case once
   // every objective is cleared.
   const handleNext = useCallback(() => {
     const active = firstIncompleteIndex(objectives, completedIds)
@@ -297,7 +314,7 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
       return
     }
     setSelectedIndex(active)
-    setStage('playing')
+    setStage('review')
   }, [objectives, completedIds])
 
   const transition: Transition = reduce
@@ -311,7 +328,9 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
         ? 'closed'
         : stage === 'payoff'
           ? `payoff:${objective.id}`
-          : `obj:${objective.id}`
+          : stage === 'review'
+            ? `review:${objective.id}`
+            : `obj:${objective.id}`
 
   const announce =
     stage === 'briefing'
@@ -325,11 +344,17 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
                 got: objective.payoff.got,
               })
             : t('game.case.announce.cleared', { index: selectedIndex + 1 })
-          : t('game.case.announce.active', {
-              index: selectedIndex + 1,
-              total: objectives.length,
-              goal: objective.goal,
-            })
+          : stage === 'review'
+            ? t('game.case.announce.review', {
+                index: selectedIndex + 1,
+                total: objectives.length,
+                goal: objective.goal,
+              })
+            : t('game.case.announce.active', {
+                index: selectedIndex + 1,
+                total: objectives.length,
+                goal: objective.goal,
+              })
 
   // Replay: rebuild the case DB from schema+seed, wipe the in-session play state, and
   // drop the player back on objective 1. Persisted mastery (localStorage) is kept —
@@ -337,19 +362,19 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
   const handleReplay = useCallback(() => {
     reset()
     setCompletedIds(new Set())
-    setSolvedInputs({})
+    setReceipts({})
     setSelectedIndex(0)
     setUiByObjective(initUi(objectives))
     setNotebook(initNotebook(gameCase.database.visibleSchema))
     setReplayCount((n) => n + 1)
-    setStage('playing')
+    setStage('review')
   }, [reset, objectives, gameCase.database.visibleSchema])
 
-  const showStepper = stage === 'playing' || stage === 'payoff'
+  const showStepper = stage === 'review' || stage === 'playing' || stage === 'payoff'
 
   return (
     <LazyMotion features={domAnimation} strict>
-      <div className={styles.shell}>
+      <div className={styles.shell} data-case-id={gameCase.id}>
         <div className={cx('container', styles.inner)}>
           <header className={styles.caseHeader}>
             <div className={styles.caseHeaderMain}>
@@ -408,11 +433,7 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
                     onStart={handleStart}
                   />
                 ) : stage === 'closed' ? (
-                  <CaseClosed
-                    gameCase={gameCase}
-                    solvedInputs={solvedInputs}
-                    onReplay={handleReplay}
-                  />
+                  <CaseClosed gameCase={gameCase} receipts={receipts} onReplay={handleReplay} />
                 ) : stage === 'payoff' ? (
                   <ObjectivePayoff
                     index={selectedIndex}
@@ -423,6 +444,13 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
                     handler={gameCase.briefing.handler}
                     isLast={allComplete}
                     onNext={handleNext}
+                  />
+                ) : stage === 'review' ? (
+                  <ObjectiveReviewGate
+                    index={selectedIndex}
+                    total={objectives.length}
+                    objective={objective}
+                    onEnter={handleEnterOperation}
                   />
                 ) : (
                   <>
@@ -436,12 +464,18 @@ export function CasePlayer({ gameCase }: { gameCase: Case }) {
                       technique={objective.technique}
                     />
 
-                    <ReconNotebook notebook={notebook} />
+                    <div className={styles.reconGrid}>
+                      <ReconNotebook notebook={notebook} />
+                      <ReconRecap
+                        appName={gameCase.target.appName}
+                        visibleSchema={gameCase.database.visibleSchema}
+                      />
+                    </div>
 
                     <ObjectiveConsole
+                      caseId={gameCase.id}
                       appName={gameCase.target.appName}
                       objective={objective}
-                      visibleSchema={gameCase.database.visibleSchema}
                       inputs={ui.inputs}
                       lastResult={ui.run?.result ?? null}
                       signal={ui.run?.signal ?? null}

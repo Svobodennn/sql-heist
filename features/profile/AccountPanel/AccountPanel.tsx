@@ -23,6 +23,7 @@ import {
   type ProfileQueryErrorCode,
   updateMyProfile,
 } from '../lib/profileQuery'
+import { publicProfileHref } from '../lib/publicProfilePath'
 import { DeleteAccountDialog, type DeleteAccountError } from '../DeleteAccountDialog'
 import styles from './AccountPanel.module.css'
 
@@ -303,12 +304,9 @@ export function AccountPanel() {
             .
           </p>
           {optIn && (
-            <Link
-              className={styles.profileLink}
-              href={localeHref(`/u?name=${encodeURIComponent(profile.username)}`, locale)}
-            >
+            <a className={styles.profileLink} href={publicProfileHref(profile.username, locale)}>
               {t('account.viewPublicProfile')}
-            </Link>
+            </a>
           )}
           <ActionFeedback value={feedback.visibility} />
         </section>

@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 import type { Locale } from '@/i18n/config'
 import { getServerTranslator } from '@/i18n/server'
-import { FaqBody } from '../../faq/FaqBody'
-import { pageAlternates } from '../../localeMeta'
+import { FaqBody } from '@/app/(en)/faq/FaqBody'
+import { pageMeta } from '@/app/localeMeta'
 
 export async function generateMetadata({
   params,
@@ -10,8 +10,12 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>
 }): Promise<Metadata> {
   const { locale } = await params
-  const t = getServerTranslator(locale as Locale)
-  return { title: t('faq.title'), alternates: pageAlternates('/faq', locale as Locale) }
+  const activeLocale = locale as Locale
+  const t = getServerTranslator(activeLocale)
+  return pageMeta('/faq', activeLocale, {
+    title: t('faq.title'),
+    description: t('faq.lead'),
+  })
 }
 
 export default async function LocaleFaq({ params }: { params: Promise<{ locale: string }> }) {

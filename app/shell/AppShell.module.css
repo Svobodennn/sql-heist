@@ -1,0 +1,33 @@
+.chrome {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.main {
+  flex: 1 1 auto;
+}
+
+.main:focus {
+  outline: none;
+}
+
+.skipLink {
+  position: absolute;
+  left: var(--space-4);
+  top: -120px;
+  z-index: var(--z-toast);
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-4);
+  background: var(--primary);
+  color: var(--noir-900);
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  transition: top var(--dur-fast) var(--ease-out);
+}
+
+.skipLink:focus {
+  top: var(--space-2);
+}

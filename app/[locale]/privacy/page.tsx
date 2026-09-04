@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 import type { Locale } from '@/i18n/config'
 import { getServerTranslator } from '@/i18n/server'
-import { PrivacyBody } from '../../privacy/PrivacyBody'
-import { pageAlternates } from '../../localeMeta'
+import { PrivacyBody } from '@/app/(en)/privacy/PrivacyBody'
+import { pageMeta } from '@/app/localeMeta'
 
 export async function generateMetadata({
   params,
@@ -10,8 +10,12 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>
 }): Promise<Metadata> {
   const { locale } = await params
-  const t = getServerTranslator(locale as Locale)
-  return { title: t('privacy.title'), alternates: pageAlternates('/privacy', locale as Locale) }
+  const activeLocale = locale as Locale
+  const t = getServerTranslator(activeLocale)
+  return pageMeta('/privacy', activeLocale, {
+    title: t('privacy.title'),
+    description: t('privacy.lead'),
+  })
 }
 
 export default async function LocalePrivacy({ params }: { params: Promise<{ locale: string }> }) {

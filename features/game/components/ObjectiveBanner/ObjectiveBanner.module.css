@@ -1,117 +1,138 @@
 .banner {
-  padding: var(--space-6);
-  border-left: 3px solid var(--primary);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
+  display: grid;
+  gap: 17px;
+  padding: clamp(22px, 3vw, 38px);
+  border: 1px solid #5d4b2a;
+  border-left: 4px solid var(--breach-gold);
+  border-radius: 0;
+  background:
+    radial-gradient(circle at 92% 12%, rgba(227, 168, 62, 0.09), transparent 20rem),
+    rgba(12, 17, 21, 0.96);
+  box-shadow: none;
 }
 
 .head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-3);
+  gap: 12px;
   flex-wrap: wrap;
 }
+
 .badge {
+  padding: 7px 10px;
+  border: 1px solid var(--breach-line);
+  color: var(--breach-muted);
+  background: var(--breach-panel-raised);
   font-size: 0.6875rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--text-secondary);
-  background: var(--surface-raised);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
-  padding: 3px 10px;
 }
 
 .goal {
+  max-width: 1080px;
   display: flex;
   align-items: flex-start;
-  gap: var(--space-2);
+  gap: 12px;
   margin: 0;
+  color: var(--breach-white);
   font-family: var(--font-display);
-  font-size: 1.5rem;
-  line-height: 1.2;
-  color: var(--text);
-}
-.goal svg {
-  flex-shrink: 0;
-  margin-top: 3px;
-  color: var(--primary);
-}
-.goal:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 4px;
-  border-radius: var(--radius-sm);
+  font-size: clamp(1.8rem, 4vw, 3.8rem);
+  font-weight: 700;
+  line-height: 1.02;
+  text-wrap: balance;
 }
 
-/* "The angle" — the always-visible, free orientation: where to look and why, in
-   plain language (no SQL). Tinted + accented so the player's eye lands on it. */
-.angle {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  margin: 0;
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--primary) 9%, transparent);
-  border: 1px solid color-mix(in srgb, var(--primary) 26%, transparent);
+.goal svg {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  margin-top: 5px;
+  color: var(--breach-gold);
 }
-.angleLabel {
+
+.goal:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 5px;
+}
+
+.angle {
+  display: grid;
+  grid-template-columns: 130px minmax(0, 1fr);
+  gap: 16px;
+  margin: 0;
+  padding: 15px 17px;
+  border: 1px solid #5a4624;
+  border-radius: 0;
+  background: rgba(58, 40, 12, 0.32);
+}
+
+.angleLabel,
+.metaLabel {
+  color: var(--breach-gold-light);
   font-family: var(--font-mono);
   font-size: 0.6875rem;
-  letter-spacing: 0.12em;
+  font-weight: 800;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
-  color: var(--primary);
 }
+
 .angleText {
-  color: var(--text);
-  line-height: 1.55;
+  color: var(--breach-white);
+  line-height: 1.6;
 }
 
 .meta {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
   margin: 0;
+  border: 1px solid var(--breach-line-soft);
+  background: var(--breach-line-soft);
 }
+
 .metaRow {
-  display: flex;
-  gap: var(--space-3);
-  align-items: baseline;
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  background: #090d10;
 }
-.metaLabel {
-  flex-shrink: 0;
-  width: 6.5rem;
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
+
 .metaValue {
   margin: 0;
-  color: var(--text-secondary);
-  line-height: 1.5;
+  color: var(--breach-muted);
+  line-height: 1.6;
 }
+
 .doneWhen {
   display: flex;
   align-items: flex-start;
-  gap: 6px;
-  color: var(--success);
-}
-.doneWhen svg {
-  flex-shrink: 0;
-  margin-top: 3px;
+  gap: 7px;
+  color: var(--breach-green);
 }
 
-/* Stack the label above its value on narrow screens so neither gets crushed. */
-@media (max-width: 520px) {
-  .metaRow {
-    flex-direction: column;
-    gap: 2px;
+.doneWhen svg {
+  flex: none;
+  margin-top: 4px;
+}
+
+@media (max-width: 700px) {
+  .angle,
+  .meta {
+    grid-template-columns: 1fr;
   }
-  .metaLabel {
-    width: auto;
+
+  .goal {
+    font-size: clamp(1.75rem, 9vw, 3rem);
+  }
+}
+
+@media (forced-colors: active) {
+  .banner,
+  .angle,
+  .meta {
+    border: 2px solid CanvasText;
+    background: Canvas;
   }
 }

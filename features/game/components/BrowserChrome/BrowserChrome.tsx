@@ -10,24 +10,40 @@ import styles from './BrowserChrome.module.css'
 // point can be the URL itself. Purely chrome — the app lives in `children`.
 export function BrowserChrome({
   url,
+  title,
   children,
   className,
 }: {
   url: string
+  title: string
   children: ReactNode
   className?: string
 }) {
   return (
     <div className={cx(styles.frame, className)}>
-      <div className={styles.bar}>
+      <div className={styles.tabs} aria-hidden="true">
         <span className={styles.dots} aria-hidden="true">
           <i />
           <i />
           <i />
         </span>
+        <span className={styles.tab}>
+          <IconLock size={11} />
+          <span>{title}</span>
+        </span>
+      </div>
+      <div className={styles.bar}>
+        <span className={styles.controls} aria-hidden="true">
+          <i>‹</i>
+          <i>›</i>
+          <i>↻</i>
+        </span>
         <span className={cx('mono', styles.address)}>
           <IconLock size={13} />
           <span className={styles.url}>{url}</span>
+        </span>
+        <span className={styles.menu} aria-hidden="true">
+          ⋮
         </span>
       </div>
       <div className={styles.viewport}>{children}</div>

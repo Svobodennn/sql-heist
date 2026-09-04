@@ -4,8 +4,9 @@ import type { Locale } from '@/i18n/config'
 import { CASE_IDS, getCase } from '@/features/game/cases'
 import { CasePlayer } from '@/features/game/components/CasePlayer'
 import { JsonLd } from '@/app/components/JsonLd'
-import { SITE_NAME, SITE_URL } from '@/app/siteConfig'
-import { pageAlternates } from '@/app/localeMeta'
+import { pageMeta } from '@/app/localeMeta'
+import { buildBreadcrumbList } from '@/app/structuredData'
+import { getServerTranslator } from '@/i18n/server'
 
 // The /tr and /pl case player. Same client <CasePlayer>; the full Case is loaded
 // server-side with the locale so its narrative (title/briefing/objectives/hints/
@@ -18,19 +19,13 @@ export async function generateMetadata({
   const { locale, caseId } = await params
   const gameCase = getCase(caseId, locale as Locale)
   if (!gameCase) return {}
-  const description = `Case ${gameCase.number} of ${SITE_NAME}: breach ${gameCase.target.appName} across ${gameCase.objectives.length} hands-on SQL-injection objectives — what to do, why it matters, and how you know it landed.`
+  const description = gameCase.briefing.text
   const title = `Case ${gameCase.number} — ${gameCase.title}`
-  return {
+  return pageMeta(`/cases/${caseId}`, locale as Locale, {
     title,
     description,
-    alternates: pageAlternates(`/cases/${caseId}`, locale as Locale),
-    openGraph: {
-      type: 'article',
-      title: `${title} · ${SITE_NAME}`,
-      description,
-      url: `/${locale}/cases/${caseId}`,
-    },
-  }
+    type: 'article',
+  })
 }
 
 // Cross-producted with the [locale] segment's params (tr, pl) → /tr/cases/<id>,
@@ -47,24 +42,19 @@ export default async function LocaleCasePage({
   params: Promise<{ locale: string; caseId: string }>
 }) {
   const { locale, caseId } = await params
-  const gameCase = getCase(caseId, locale as Locale)
+  const activeLocale = locale as Locale
+  const gameCase = getCase(caseId, activeLocale)
   if (!gameCase) notFound()
 
-  const base = `${SITE_URL}/${locale}`
-  const breadcrumbLd = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: base },
-      { '@type': 'ListItem', position: 2, name: 'Cases', item: `${base}/cases` },
-      {
-        '@type': 'ListItem',
-        position: 3,
-        name: `Case ${gameCase.number} — ${gameCase.title}`,
-        item: `${base}/cases/${caseId}`,
-      },
-    ],
-  }
+  const t = getServerTranslator(activeLocale)
+  const breadcrumbLd = buildBreadcrumbList(activeLocale, [
+    { name: t('nav.home'), path: '/' },
+    { name: t('nav.jobs'), path: '/cases' },
+    {
+      name: `${t('game.case.header.number', { number: gameCase.number })} — ${gameCase.title}`,
+      path: `/cases/${caseId}`,
+    },
+  ])
 
   return (
     <>

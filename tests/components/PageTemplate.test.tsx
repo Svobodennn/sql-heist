@@ -1,18 +1,20 @@
-import { cleanup, render, screen } from '@testing-library/react'
-import { afterEach, describe, expect, it } from 'vitest'
-import PageTemplate from '@/app/template'
+import { renderToStaticMarkup } from 'react-dom/server'
+import { describe, expect, it, vi } from 'vitest'
+import { PageTemplate } from '@/app/shell/PageTemplate'
 
-afterEach(cleanup)
+vi.mock('@/app/components/ScrollReveal', () => ({
+  ScrollReveal: () => <span data-scroll-reveal="true" />,
+}))
 
 describe('<PageTemplate>', () => {
-  it('keeps route content inside the page-transition boundary', () => {
-    render(
+  it('keeps route content and ScrollReveal inside the remount boundary', () => {
+    const markup = renderToStaticMarkup(
       <PageTemplate>
-        <main>Case files</main>
+        <article>Case files</article>
       </PageTemplate>,
     )
 
-    const content = screen.getByText('Case files')
-    expect(content.parentElement?.className).toBeTruthy()
+    expect(markup).toContain('data-page-template="true"')
+    expect(markup).toContain('<article>Case files</article><span data-scroll-reveal="true"></span>')
   })
 })

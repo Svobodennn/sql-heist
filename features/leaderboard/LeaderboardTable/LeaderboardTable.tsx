@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/features/auth/useAuth'
+import { publicProfileHref } from '@/features/profile/lib/publicProfilePath'
 import { localeHref } from '@/i18n/localeHref'
 import { useTranslation } from '@/i18n/useTranslation'
 import {
@@ -226,13 +227,10 @@ function Board({ state, locale }: { state: BoardState; locale: keyof typeof DATE
               <tr key={row.username}>
                 <td className={`mono ${styles.position}`}>#{row.rank}</td>
                 <td>
-                  <Link
-                    className={styles.operative}
-                    href={localeHref(`/u?name=${encodeURIComponent(row.username)}`, locale)}
-                  >
+                  <a className={styles.operative} href={publicProfileHref(row.username, locale)}>
                     <span>{row.displayName ?? row.username}</span>
                     <span className="mono">@{row.username}</span>
-                  </Link>
+                  </a>
                 </td>
                 <td className={`mono ${styles.objectives}`}>{row.objectivesCleared}</td>
                 <td>

@@ -1,6 +1,6 @@
 # Implementation Plan: User Accounts (Supabase, client-only)
 
-> **Status:** P0–P6 implemented. Google and GitHub sign-in/username smoke passed; the provider-specific linking, export, deletion-reauth, token-retention, and revocation checklist remains an external delivery gate.
+> **Status:** P0–P6 implemented and merged. Google and GitHub sign-in/username smoke passed; the provider-specific linking, export, deletion-reauth, token-retention, and revocation checklist remains an external delivery gate. The post-theme normal and explicit env-less static gates were revalidated on 2026-08-29.
 > **Scope:** real accounts (email/password plus Google/GitHub), cross-device progress sync, a public "casual" leaderboard, and public profiles — all while the app **stays a static export**.
 > **Supersedes for build:** the older design set in [`docs/auth/`](./auth/) (00–40) is a valuable reference but was written against a **stale "levels/jobs" model** (`useProgress.ts`, `level_progress`) that no longer exists, and it recommends an **Edge/SSR + service-role** posture. This plan deliberately overrides both — see [§ Deviations](#deviations-from-docsauth).
 
@@ -70,15 +70,24 @@ app/                         Routes (top layer). Client pages; static-export-saf
   auth/sign-in/page.tsx  auth/sign-up/page.tsx  auth/callback/page.tsx   (canonical, non-localized)
   account/page.tsx           own profile + settings + data export + delete (client, auth-gated)
   leaderboard/page.tsx       public board (client fetch)
-  u/page.tsx                 public profile by ?name= (client fetch; static-safe, see §static-export note)
+  user/profile-shell/page.tsx  public profile shell reached through the clean-path rewrite
+  components/PublicProfileRoute/ validates the pathname, fetches client-side, installs head links
   components/Navbar/         EXTENDED: real auth state (UserMenu when in, Sign in when out)
 
-app/[locale]/                P5: /tr /pl variants for leaderboard, account, u (mirrors app/[locale]/cases)
-i18n/localeHref.ts           P5: add 'leaderboard','account','u' to LOCALIZED_ROOTS
+app/[locale]/                P5: /tr /pl variants for leaderboard, account, user/profile-shell
+i18n/localeHref.ts           P5: add 'leaderboard','account','user' to LOCALIZED_ROOTS
 messages/{en,tr,pl}.json     new namespaces: auth, account, leaderboard, profile (+ nav additions)
 ```
 
-**Static-export note (load-bearing):** arbitrary usernames cannot be path segments under `output: 'export'` (a dynamic route needs `generateStaticParams` + `dynamicParams=false`; unknown users can't be prerendered). Public profiles therefore use a **query-param route** `app/u/page.tsx` read via `useSearchParams()` and fetched client-side. Leaderboard links point to `/u?name=<username>`. Trade-off: no per-profile prerendered `<meta>` (acceptable for MVP; a future edge runtime could add it — out of scope).
+**Static-export note (load-bearing):** arbitrary usernames cannot be emitted as dynamic path
+segments under `output: 'export'` without a finite `generateStaticParams` set. Public profiles
+therefore use clean `/user/{username}` paths rewritten by `vercel.json` to the EN/TR/PL
+`user/profile-shell` static pages. `PublicProfileRoute` validates and decodes the browser
+pathname, fetches the profile client-side, and installs canonical/hreflang links. Trade-off:
+the initial HTML carries generic profile-shell metadata until hydration rather than a
+per-profile title/OG image. P6's opt-in top-N prerender alternative is explicitly deferred;
+it would make env-less builds depend on live profile data and its snapshot would remain stale
+until the next deploy.
 
 **Session/env guard (keeps e2e green without secrets):** `getSupabase()` returns `null` when `NEXT_PUBLIC_SUPABASE_URL`/`NEXT_PUBLIC_SUPABASE_ANON_KEY` are absent (as in the e2e build of `out/`). Every auth surface treats `null` as "auth unavailable": UI hides, sync no-ops, `recordObjectiveWin` stays pure-local. The anonymous `tests/e2e/cases.e2e.ts` flow is untouched.
 
@@ -358,18 +367,18 @@ The public leaderboard/profile need to aggregate **across** users, but base-tabl
 
 **Agents:** frontend-dev (implement) → code-reviewer + security-reviewer + database-reviewer (QA); designer reviews.
 **Parallel:** Yes — with Phase 4 (disjoint feature dirs; coordinate `messages/*` merges).
-**Goal:** an opt-in user has a public profile at `/u?name=<username>` exposing only safe fields; the signed-in user manages their own profile at `/account` (edit display name, toggle leaderboard opt-in, export data, request deletion).
+**Goal:** an opt-in user has a public profile at `/user/{username}` exposing only safe fields; the signed-in user manages their own profile at `/account` (edit display name, toggle leaderboard opt-in, export data, request deletion).
 **Acceptance criteria:**
 
-- `/u?name=alice` shows Alice's safe public fields **only if** she opted in; otherwise a "private / not found" state (no data leak).
+- `/user/alice` shows Alice's safe public fields **only if** she opted in; otherwise a "private / not found" state (no data leak).
 - No email, no `id`, no other user's raw rows are ever fetched by the profile page (verified against RLS + view).
 - `/account` edits persist; the consent RPC controls board/profile visibility; "Download my data" yields a safe JSON export; a recently re-authenticated deletion request immediately hides and soft-locks the account, with permanent Auth deletion completed manually within 30 days.
 
 1. **Apply `public_profiles` through a versioned migration** — then run linked lint/advisor review. Risk: **High** (leak surface) — reviewed in P5 gate.
 2. **Profile query helpers** (File: `features/profile/lib/profileQuery.ts`)
    - Signatures: `getPublicProfile(username: string): Promise<PublicProfile | null>` (select from `public_profiles`); `getMyProfile()`, `updateMyProfile(patch)`, `setLeaderboardOptIn(bool)`, `exportMyData(): Promise<Blob>`, `deleteMyAccount()`. Risk: Medium.
-3. **Public profile page** (Files: `app/u/page.tsx` [client, `useSearchParams`], `features/profile/ProfileView/*`)
-   - Action: read `?name=`, fetch via `getPublicProfile`, render safe fields + objectives-cleared. Handle empty/not-found/loading. Static-export-safe (single route, query param). Risk: Medium.
+3. **Public profile page** (Files: `app/(en)/user/profile-shell/page.tsx`, `app/[locale]/user/profile-shell/page.tsx`, `app/components/PublicProfileRoute/*`, `features/profile/ProfileView/*`, `vercel.json`)
+   - Action: rewrite clean `/user/{username}` paths to the locale-specific static shell; parse and validate the browser pathname, fetch via `getPublicProfile`, render safe fields + objectives-cleared, and install clean canonical/hreflang links client-side. Handle invalid/not-found/loading states. Risk: Medium.
 4. **Account page** (Files: `app/account/page.tsx` [client, auth-gated → redirect to `/auth/sign-in` when anon], `features/profile/AccountPanel/*`)
    - Action: edit form, consent-controlled opt-in toggle, safe data export, and recent-auth deletion request. The caller-bound RPC records an idempotent soft lock; the operator deletes `auth.users` under the documented 30-day runbook because no privileged credential may enter the browser. Risk: **High** (erasure correctness) — covered by security/compliance review and the live RLS matrix.
 5. **i18n keys** (`messages/{en,tr,pl}.json`): `profile` + `account` namespaces, all three locales.
@@ -392,7 +401,7 @@ The public leaderboard/profile need to aggregate **across** users, but base-tabl
 2. **Leaderboard query helpers** (File: `features/leaderboard/lib/leaderboardQuery.ts`)
    - Signatures: `getLeaderboard(limit=50): Promise<LeaderboardRow[]>` (select from view, order client-side by `objectives_cleared desc, last_active asc`), `getMyRank(): Promise<{ rank: number; objectivesCleared: number } | null>`. Risk: Low.
 3. **Leaderboard page** (Files: `app/leaderboard/page.tsx` [client], `features/leaderboard/LeaderboardTable/*`)
-   - Action: fetch + render ranked rows; each username links to `/u?name=<username>`; render the "casual" label prominently; empty/loading states. Add a board entry point in the Navbar/`UserMenu` and optionally a CTA on the case board. Risk: Low.
+   - Action: fetch + render ranked rows; each username links to `/user/{username}`; render the "casual" label prominently; empty/loading states. Add a board entry point in the Navbar/`UserMenu` and optionally a CTA on the case board. Risk: Low.
 4. **i18n keys** (`messages/{en,tr,pl}.json`): `leaderboard` namespace, all three locales.
 
 **Order:** 1 → 2 → 3 → 4. **GREEN GATE** + advisors clean.
@@ -404,13 +413,13 @@ The public leaderboard/profile need to aggregate **across** users, but base-tabl
 **Goal:** localized routes for the new pages, provable i18n coverage, the security review gate passed, and product/legal docs aligned.
 **Acceptance criteria:**
 
-- `/tr` and `/pl` variants exist for `leaderboard`, `account`, `u` (auth chrome may stay canonical-en); `localeHref` routes stay in-language.
+- `/tr` and `/pl` variants exist for `leaderboard`, `account`, and the public-profile shell (auth chrome may stay canonical-en); `localeHref` routes stay in-language.
 - An i18n parity test proves `en`/`tr`/`pl` have identical key sets for the new namespaces.
 - **RLS GATE passes** (see below) — blocking for merge.
 - `PRODUCT.md` + privacy/terms reflect accounts (opt-in, anonymous default preserved, data controller, erasure).
 
-1. **Localized routes** (Files: `app/[locale]/leaderboard/page.tsx`, `app/[locale]/account/page.tsx`, `app/[locale]/u/page.tsx`; edit `i18n/localeHref.ts` `LOCALIZED_ROOTS` += `'leaderboard','account','u'`)
-   - Action: mirror `app/[locale]/cases/page.tsx` (re-export the same client feature; localized metadata). `/auth/*` stays canonical (stable redirect-allow-list URL). Risk: Medium — **run `npm run build` after adding routes** (static-export param generation).
+1. **Localized routes** (Files: `app/[locale]/leaderboard/page.tsx`, `app/[locale]/account/page.tsx`, `app/[locale]/user/profile-shell/page.tsx`; edit `i18n/localeHref.ts` `LOCALIZED_ROOTS` += `'leaderboard','account','user'`)
+   - Action: mirror the EN routes with localized metadata; route clean localized profile paths through the matching static shell. `/auth/callback` stays canonical (stable redirect-allow-list URL). Risk: Medium — **run `npm run build` after adding routes** (static-export param generation).
 2. **i18n parity test** (File: `tests/unit/i18n/authMessages.test.ts`)
    - Action: assert deep key-set equality across `en`/`tr`/`pl` for `auth`/`account`/`leaderboard`/`profile` (+ new `nav`). Risk: Low.
 3. **RLS SECURITY REVIEW GATE (blocking)** — security-reviewer + database-reviewer:
@@ -466,7 +475,7 @@ Follows the repo's locked test layout: **source dirs hold zero test files**; eve
 - **Full i18n coverage.** Missed keys ship raw identifiers.
   - Mitigation: parity test (P5); every phase adds keys to all three locales as part of its own gate; `translate.ts` already falls back to `en` then the key.
 - **Static-export breakage.** Route/CSS-module moves and dynamic segments silently break only at build.
-  - Mitigation: **always `npm run build`** after adding routes/CSS modules (per CLAUDE.md); public profiles use a **query param**, not a path segment (no arbitrary `dynamicParams` under `output:'export'`).
+  - Mitigation: **always `npm run build`** after adding routes/CSS modules (per CLAUDE.md); public profiles use a static shell reached through clean-path Vercel rewrites, so no arbitrary dynamic segment is pre-rendered under `output:'export'`.
 - **Layering / colocation drift.** A `features → app` import or an un-foldered component violates conventions.
   - Mitigation: Supabase client in `lib/`, auth domain in `features/auth/`, routes in `app/`; each visual component in its own folder; enforced by code-reviewer + lint.
 - **Compliance (data controller).** Accounts make us a controller (GDPR/KVKK).
@@ -474,23 +483,23 @@ Follows the repo's locked test layout: **source dirs hold zero test files**; eve
 
 ## Success Criteria
 
-- [ ] `output:'export'` unchanged; every phase passes `npm run typecheck && npm test && npm run build && npm run test:e2e`.
-- [ ] Anonymous `tests/e2e/cases.e2e.ts` + golden suite stay green throughout (no secrets needed).
-- [ ] Email sign-up → confirm → sign-in → unique username → Navbar reflects auth → sign-out works.
-- [ ] Google/GitHub sign-in → callback → explicit username choice works; same-verified-email linking is disclosed and verified; OAuth reauth can request deletion.
-- [ ] On login, local progress merges into `case_progress` with zero loss; a win syncs across devices.
-- [ ] Public leaderboard is anon-readable, opt-in only, safe columns only, labeled "casual"; "your rank" works.
-- [ ] `/u?name=` shows opt-in public profiles only; non-opt-in is invisible; no email/`id`/cross-user data ever fetched.
-- [ ] `/account` edits profile, toggles opt-in, exports data, and creates a verified deletion soft lock; the operator runbook completes and verifies the cascading Auth deletion.
-- [ ] RLS security gate passed (advisors clean/justified + adversarial cross-user matrix) — **recorded in the PR**.
-- [ ] New pages localized for `/tr` `/pl`; i18n parity test green.
-- [ ] `PRODUCT.md` + privacy/terms updated; `lib/engine`/`lib/schema` untouched.
+- [x] `output:'export'` unchanged; every phase passes `npm run typecheck && npm test && npm run build && npm run test:e2e`.
+- [x] Anonymous `tests/e2e/cases.e2e.ts` + golden suite stay green throughout (no secrets needed).
+- [x] Email sign-up → confirm → sign-in → unique username → Navbar reflects auth → sign-out works.
+- [ ] Google/GitHub sign-in → callback → explicit username choice is implemented and basic provider smoke passed; the real-account linking, export, deletion-reauth, sign-out, token-retention, Google revoke-request, and GitHub revocation-copy matrix remains an external delivery gate.
+- [x] On login, local progress merges into `case_progress` with zero loss; a win syncs across devices.
+- [x] Public leaderboard is anon-readable, opt-in only, safe columns only, labeled "casual"; "your rank" works.
+- [x] `/user/{username}` shows opt-in public profiles only; non-opt-in is invisible; no email/`id`/cross-user data is exposed.
+- [x] `/account` edits profile, toggles opt-in, exports data, and creates a verified deletion soft lock; permanent deletion is completed through [`docs/auth/60-account-deletion-runbook.md`](./auth/60-account-deletion-runbook.md).
+- [x] RLS security gate passed (advisors clean/justified + adversarial cross-user matrix) and was recorded for delivery.
+- [x] New pages are localized for `/tr` and `/pl`; i18n parity tests are green.
+- [x] `PRODUCT.md` + privacy/terms updated; `lib/engine`/`lib/schema` untouched.
 
 ## Branching & delivery
 
-- **Branch:** `git fetch origin` → branch `auth-accounts` off **current `origin/main`** → then edit. Larger feature → PR at the end (not direct-to-main).
+- **Branch:** `auth-accounts` was delivered through PR #1 and merged into `main`; the post-auth OAuth follow-up is also present in the theme branch's verified `main` base. Cinematic Breach integration is isolated on `cinematic-breach-theme`.
 - **Commits:** one scoped commit per logical phase; `type(scope): desc` (English, lowercase, single line, **no** AI trailer); get explicit approval before each commit/push.
-- **PR:** opened only after the P5 RLS gate signs off. Body = "what & why" only (no test-plan/boilerplate/AI note). Do not merge with `--delete-branch`.
+- **PR:** the auth PR completed after the P5 RLS gate. Any future theme or auth follow-up PR still requires fresh explicit approval and a concise "what & why" body (no test-plan/boilerplate/AI note).
 
 ## Open items to confirm at build (`[verify]`)
 

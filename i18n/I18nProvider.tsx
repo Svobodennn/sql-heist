@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useCallback, useEffect, useMemo, type ReactNode } from 'react'
+import { createContext, useCallback, useMemo, type ReactNode } from 'react'
 import { usePathname } from 'next/navigation'
 import { DEFAULT_LOCALE, LOCALE_STORAGE_KEY, type Locale } from './config'
 import { EN_MESSAGES, getMessages } from './messages'
@@ -35,19 +35,14 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname() ?? '/'
   const locale = urlLocaleOf(pathname)
 
-  useEffect(() => {
-    document.documentElement.lang = locale
-  }, [locale])
-
-  // The switcher navigates between locale-prefixed URLs (that's what changes locale);
-  // this just persists the choice + reflects <html lang> immediately.
+  // The switcher navigates between independently rendered locale roots. Persist the
+  // preference here; the destination document supplies its build-time <html lang>.
   const setLocale = useCallback((next: Locale) => {
     try {
       window.localStorage.setItem(LOCALE_STORAGE_KEY, next)
     } catch {
       // Private mode / storage disabled — ignore.
     }
-    document.documentElement.lang = next
   }, [])
 
   const value = useMemo<I18nContextValue>(

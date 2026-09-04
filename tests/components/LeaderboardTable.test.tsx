@@ -79,10 +79,10 @@ describe('<LeaderboardTable>', () => {
     expect(tableRegion.getAttribute('tabindex')).toBe('0')
     expect(screen.getByText('Scroll horizontally to see every column.')).toBeTruthy()
     expect(screen.getByRole('link', { name: /Ada.*@ada_l/ }).getAttribute('href')).toBe(
-      '/u?name=ada_l',
+      '/user/ada_l',
     )
     expect(screen.getByRole('link', { name: /grace_h.*@grace_h/ }).getAttribute('href')).toBe(
-      '/u?name=grace_h',
+      '/user/grace_h',
     )
     expect(screen.getByText('No synced activity')).toBeTruthy()
     expect(screen.queryByRole('columnheader', { name: 'Country' })).toBeNull()
@@ -171,7 +171,7 @@ describe('<LeaderboardTable>', () => {
     )
 
     expect((await screen.findByRole('link', { name: /Ada.*@ada_l/ })).getAttribute('href')).toBe(
-      '/tr/u?name=ada_l',
+      '/tr/user/ada_l',
     )
     expect(screen.getByRole('link', { name: 'Görünürlüğü yönet' }).getAttribute('href')).toBe(
       '/tr/account',

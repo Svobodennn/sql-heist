@@ -1,330 +1,639 @@
-/* ============================================================================
-   CasePlayer shell + layout
-   ============================================================================ */
+/* Cinematic Breach case flow. The game state and engine stay in CasePlayer;
+   this module only gives each stage one coherent visual hierarchy. */
 .shell {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-}
-.inner {
-  flex: 1;
-  padding-block: var(--space-8);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
+  background:
+    linear-gradient(90deg, transparent 0 49.95%, rgba(227, 168, 62, 0.018) 50%, transparent 50.05%),
+    var(--breach-black);
 }
 
-.caseHeader {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-4);
-  flex-wrap: wrap;
+.shell :global(.btn) {
+  min-height: 48px;
+  border-radius: 0;
+  font-weight: 750;
 }
-.caseHeaderMain {
+
+.inner {
+  width: min(var(--breach-shell), calc(100% - 48px));
+  max-width: var(--breach-shell);
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 18px;
+  padding: 26px 0 clamp(64px, 8vw, 112px);
 }
+
+/* --------------------------------------------------------------------------
+   Case identity / local navigation
+   -------------------------------------------------------------------------- */
+.caseHeader {
+  position: relative;
+  min-height: 286px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 32px;
+  align-items: end;
+  overflow: hidden;
+  isolation: isolate;
+  padding: clamp(26px, 4.5vw, 58px);
+  border: 1px solid var(--breach-line);
+  background: var(--breach-panel);
+}
+
+.caseHeader::before,
+.caseHeader::after {
+  position: absolute;
+  inset: 0;
+  content: '';
+  pointer-events: none;
+}
+
+.caseHeader::before {
+  z-index: -2;
+  background: url('/cinematic-breach/case-front-door.webp') center 56% / cover no-repeat;
+  filter: contrast(1.12) saturate(0.76);
+  transform: scale(1.015);
+}
+
+.shell[data-case-id='the-quiet-room'] .caseHeader::before {
+  background-image: url('/cinematic-breach/case-quiet-room.webp');
+}
+
+.shell[data-case-id='the-vault'] .caseHeader::before {
+  background-image: url('/cinematic-breach/case-vault.webp');
+}
+
+.caseHeader::after {
+  z-index: -1;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(6, 8, 10, 0.96) 0 28%,
+      rgba(6, 8, 10, 0.52) 63%,
+      rgba(6, 8, 10, 0.82)
+    ),
+    linear-gradient(0deg, rgba(6, 8, 10, 0.98), transparent 76%);
+}
+
+.caseHeaderMain,
+.caseHeaderAside {
+  position: relative;
+  z-index: 1;
+}
+
+.caseHeaderMain {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+}
+
 .caseTitle {
-  font-size: 1.875rem;
-  margin-block: 2px;
+  max-width: 900px;
+  margin: 4px 0 2px;
+  color: var(--breach-white);
+  font-family: var(--font-brand);
+  font-size: clamp(3.5rem, 7vw, 7.25rem);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: 0.008em;
+  text-transform: uppercase;
+  text-wrap: balance;
 }
+
 .caseTarget {
-  color: var(--text-muted);
+  color: var(--breach-muted);
   font-size: 0.875rem;
 }
-.backLink {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--text-secondary);
-  font-size: 0.875rem;
-  min-height: 44px;
+
+.caseTarget span {
+  color: var(--breach-gold-light);
 }
-.backLink:hover {
-  color: var(--primary);
-}
+
 .caseHeaderAside {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  justify-content: flex-end;
+  gap: 10px;
+  align-self: start;
+  flex-wrap: wrap;
 }
 
-/* The exploit surface now spans the full page width — the objectives moved to the
-   top stepper (ObjectivesProgress), so there's no left sidebar to narrow it. */
-.main {
+.backLink {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 13px;
+  border: 1px solid rgba(139, 148, 154, 0.38);
+  color: var(--breach-white);
+  background: rgba(6, 8, 10, 0.74);
+  font-size: 0.8125rem;
+  backdrop-filter: blur(12px);
+}
+
+.backLink:hover {
+  border-color: var(--breach-gold);
+  color: var(--breach-gold-light);
+}
+
+.main,
+.view {
   min-width: 0;
 }
+
 .view {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: 14px;
 }
 
-/* ============================================================================
-   ObjectiveConsole — the active objective's exploit surface (THE FRONT / THE WIRE)
-   ============================================================================ */
+/* --------------------------------------------------------------------------
+   Live objective — shared-schema recap, victim surface, and real SQL wire
+   -------------------------------------------------------------------------- */
 .console {
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: 14px;
 }
 
-.recap {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
+.reconGrid {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 14px;
 }
-.recapSummary {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-4);
-  min-height: 44px;
-  cursor: pointer;
-  font-size: 0.8125rem;
-  color: var(--text-secondary);
-  list-style: none;
+
+.reconGrid > * {
+  min-width: 0;
 }
-.recapSummary::-webkit-details-marker {
-  display: none;
-}
-.recapChevron {
-  flex-shrink: 0;
-  color: var(--text-muted);
-  transition: transform var(--dur-fast) var(--ease-out);
-}
-.recap[open] .recapChevron {
-  transform: rotate(180deg);
-}
-.recapBody {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding: 0 var(--space-4) var(--space-4);
-}
-.recapHead {
-  font-size: 0.75rem;
+
+.sqlLabel,
+.moveLabel {
+  margin: 0;
+  color: var(--breach-dim);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--info);
-}
-.recapTables {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-.recapTable {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2);
-}
-.recapTableName {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--info);
-}
-.recapCols {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-.recapCol {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-  padding: 1px 8px;
-  border-radius: var(--radius-full);
-  background: var(--surface-raised);
 }
 
 .split {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-4);
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
 }
-@media (min-width: 1280px) {
-  .split {
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-6);
-    align-items: start;
-  }
-}
+
 .front,
 .wire {
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
-  min-width: 0;
+  gap: 12px;
+  padding: clamp(16px, 2vw, 24px);
+  border: 1px solid var(--breach-line);
+  background: rgba(12, 17, 21, 0.92);
 }
+
+.front {
+  border-top-color: #705629;
+}
+
+.wire {
+  border-top-color: #315a74;
+}
+
 .side {
+  min-height: 26px;
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: 9px;
+  color: var(--breach-white);
 }
+
 .live {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  color: var(--success);
-  letter-spacing: 0.1em;
+  gap: 6px;
+  color: var(--breach-green);
+  letter-spacing: 0.08em;
 }
+
 .liveDot {
   width: 7px;
   height: 7px;
-  border-radius: var(--radius-full);
-  background: var(--success);
+  flex: none;
+  border-radius: 50%;
+  background: currentColor;
   animation: caret-blink 1.4s ease-in-out infinite;
 }
-.sqlBox {
+
+.sqlBox,
+.resultBox {
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: 8px;
 }
-.sqlLabel {
-  font-size: 0.75rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
+
 .controls {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
   flex-wrap: wrap;
+  gap: 10px;
+  padding-block: 2px 4px;
 }
+
 .kbdHint {
   display: inline-flex;
   align-items: center;
   gap: 4px;
 }
-@media (max-width: 400px) {
-  .kbdHint {
-    display: none;
-  }
-}
-.resultBox {
+
+/* --------------------------------------------------------------------------
+   Case closed — actual winning evidence followed by the per-objective defense
+   -------------------------------------------------------------------------- */
+.closed {
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: 16px;
 }
 
-/* ============================================================================
-   CaseClosed — payoff + per-objective defense debriefs
-   ============================================================================ */
-.closed {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-8);
-}
 .closedHead {
+  position: relative;
+  min-height: 330px;
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-  border-left: 3px solid var(--success);
-  padding-left: var(--space-4);
+  justify-content: flex-end;
+  gap: 14px;
+  overflow: hidden;
+  padding: clamp(28px, 5vw, 68px);
+  border: 1px solid #315d43;
+  background:
+    radial-gradient(circle at 86% 12%, rgba(69, 199, 118, 0.13), transparent 25rem),
+    linear-gradient(145deg, rgba(15, 23, 21, 0.98), rgba(8, 11, 13, 0.98));
 }
-.closedHeadline {
+
+.closedHead::after {
+  position: absolute;
+  right: clamp(28px, 5vw, 68px);
+  top: clamp(28px, 5vw, 56px);
+  content: '✓';
+  color: rgba(69, 199, 118, 0.22);
   font-family: var(--font-display);
-  font-size: 2rem;
-  margin: 0;
-  color: var(--text);
+  font-size: clamp(5rem, 12vw, 10rem);
+  font-weight: 900;
+  line-height: 0.72;
+  pointer-events: none;
 }
+
+.closedHeadline {
+  position: relative;
+  z-index: 1;
+  max-width: 980px;
+  margin: 0;
+  color: var(--breach-green);
+  font-family: var(--font-brand);
+  font-size: clamp(4.5rem, 10vw, 9.5rem);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: 0.008em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
 .closedHeadline:focus-visible {
   outline: 2px solid var(--focus-ring);
-  outline-offset: 4px;
-  border-radius: var(--radius-sm);
+  outline-offset: 6px;
 }
+
 .fixer {
-  color: var(--text-secondary);
-  line-height: 1.6;
-  max-width: 65ch;
+  position: relative;
+  z-index: 1;
+  max-width: 780px;
+  margin: 0;
+  color: #c7d0ca;
+  font-size: clamp(1rem, 1.45vw, 1.2rem);
+  line-height: 1.7;
 }
+
 .fixerTag {
   display: inline-block;
-  margin-right: var(--space-2);
+  margin-right: 10px;
+  color: var(--breach-green);
   font-family: var(--font-mono);
   font-size: 0.6875rem;
+  font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--success);
 }
 
 .defenseIntro {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  display: grid;
+  gap: 4px;
+  padding: 26px 4px 8px;
 }
+
 .defenseSub {
-  color: var(--text-secondary);
+  max-width: 760px;
+  color: var(--breach-muted);
+  font-size: 1rem;
+  line-height: 1.6;
 }
 
 .defenseList {
-  list-style: none;
+  display: grid;
+  gap: 14px;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
+  list-style: none;
 }
+
 .defense {
-  padding: var(--space-6);
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: 20px;
+  padding: clamp(22px, 3vw, 38px);
+  overflow: hidden;
+  border: 1px solid #3b4b44;
+  border-left: 4px solid var(--breach-green);
+  border-radius: 0;
+  background: rgba(12, 17, 21, 0.96);
+  box-shadow: none;
 }
+
 .defenseHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-3);
+  gap: 14px;
   flex-wrap: wrap;
 }
+
 .defenseBadge {
+  padding: 7px 10px;
+  border: 1px solid var(--breach-line);
+  color: var(--breach-muted);
+  background: var(--breach-panel-raised);
   font-size: 0.6875rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--text-secondary);
-  background: var(--surface-raised);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
-  padding: 3px 10px;
 }
+
 .defenseGoal {
-  font-size: 1.25rem;
+  max-width: 1000px;
+  margin: 0;
+  color: var(--breach-white);
+  font-family: var(--font-display);
+  font-size: clamp(1.55rem, 3vw, 2.55rem);
+  line-height: 1.08;
+  text-wrap: balance;
+}
+
+.moveReceipt {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(250px, 0.38fr) minmax(0, 1fr);
+  border: 1px solid var(--breach-line);
+  background: #080b0d;
+}
+
+.receiptMove,
+.receiptSql,
+.receiptResult {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  padding: 18px;
+}
+
+.receiptMove {
+  border-right: 1px solid var(--breach-line);
+}
+
+.receiptResult {
+  grid-column: 1 / -1;
+  border-top: 1px solid var(--breach-line);
+}
+
+.receiptInputs {
+  display: grid;
+  gap: 8px;
   margin: 0;
 }
-.moveLabel {
-  font-size: 0.75rem;
-  letter-spacing: 0.12em;
+
+.receiptInputs > div {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(76px, 0.32fr) minmax(0, 1fr);
+  align-items: baseline;
+  gap: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--breach-line-soft);
+}
+
+.receiptInputs > div:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.receiptInputs dt {
+  color: var(--breach-dim);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--text-muted);
 }
-.explanation {
+
+.receiptInputs dd {
+  min-width: 0;
   margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--breach-red);
+  font-size: 0.8125rem;
+  line-height: 1.65;
 }
+
+.receiptEmpty {
+  margin: 0;
+  padding: 18px;
+  border: 1px dashed var(--breach-line);
+  color: var(--breach-muted);
+  background: rgba(17, 23, 27, 0.56);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.explanation {
+  max-width: 78ch;
+  margin: 0;
+  color: var(--breach-muted);
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
 .takeaway {
   display: flex;
   align-items: flex-start;
-  gap: var(--space-2);
-  padding: var(--space-4);
-  border-radius: var(--radius-sm);
-  background: var(--success-subtle);
-  color: var(--text);
-  line-height: 1.5;
+  gap: 12px;
+  margin: 0;
+  padding: 18px 20px;
+  border: 1px solid #23573b;
+  border-radius: 0;
+  color: #cdd8d1;
+  background: rgba(11, 43, 26, 0.56);
+  line-height: 1.6;
 }
+
 .takeaway svg {
-  flex-shrink: 0;
-  margin-top: 2px;
-  color: var(--success);
+  flex: none;
+  margin-top: 3px;
+  color: var(--breach-green);
 }
+
 .closedActions {
   display: flex;
   justify-content: flex-start;
-  gap: var(--space-3);
   flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 12px;
+}
+
+@media (min-width: 1180px) {
+  .split {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .caseHeader {
+    min-height: 340px;
+    grid-template-columns: 1fr;
+    align-items: end;
+  }
+
+  .caseHeaderAside {
+    grid-row: 1;
+    justify-content: flex-start;
+  }
+
+  .caseHeaderMain {
+    grid-row: 2;
+  }
+
+  .moveReceipt {
+    grid-template-columns: 1fr;
+  }
+
+  .receiptMove {
+    border-right: 0;
+    border-bottom: 1px solid var(--breach-line);
+  }
+
+  .receiptResult {
+    grid-column: 1;
+  }
+
+  .reconGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .inner {
+    width: min(100% - 28px, var(--breach-shell));
+    padding-top: 14px;
+  }
+
+  .caseHeader {
+    min-height: 360px;
+    padding: 20px;
+  }
+
+  .caseHeader::after {
+    background:
+      linear-gradient(90deg, rgba(6, 8, 10, 0.84), rgba(6, 8, 10, 0.48)),
+      linear-gradient(0deg, rgba(6, 8, 10, 0.99), transparent 78%);
+  }
+
+  .caseTitle {
+    font-size: clamp(3.3rem, 18vw, 5.5rem);
+  }
+
+  .front,
+  .wire,
+  .defense {
+    padding: 16px;
+  }
+
+  .closedHead {
+    min-height: 310px;
+    padding: 26px 22px;
+  }
+
+  .closedHeadline {
+    font-size: clamp(4.2rem, 23vw, 7rem);
+  }
+
+  .closedHead::after {
+    right: 22px;
+    top: 26px;
+  }
+
+  .receiptInputs > div {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
+
+@media (max-width: 430px) {
+  .caseHeaderAside {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .backLink {
+    width: max-content;
+  }
+
+  .kbdHint {
+    display: none;
+  }
+
+  .controls > :global(.btn) {
+    flex: 1 1 auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caseHeader::before {
+    transform: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .caseHeader,
+  .front,
+  .wire,
+  .closedHead,
+  .defense,
+  .moveReceipt {
+    border: 2px solid CanvasText;
+    background: Canvas;
+  }
+
+  .caseHeader::before,
+  .caseHeader::after,
+  .closedHead::after {
+    display: none;
+  }
 }

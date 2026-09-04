@@ -1,0 +1,9 @@
+.wrap {
+  width: 100%;
+  max-width: none;
+  min-height: 70dvh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0;
+}

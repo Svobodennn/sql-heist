@@ -43,5 +43,14 @@ next-env.d.ts
 # impeccable (local design tooling: detector config, DESIGN sidecar, hook cache)
 .impeccable/
 
+# local design exploration (plugin state, static previews, and preview-only tests)
+/.superdesign/
+/design-previews/
+/tests/components/sitePreviewPrototype.test.ts
+/tests/unit/app/cinematicCursor.test.ts
+/tests/unit/app/homePreviewVariants.test.ts
+/tests/unit/app/sitePreviewPrototype.test.ts
+/thoughts/
+
 # generated hero source art (only the optimized /public webp ships)
 hero-images/

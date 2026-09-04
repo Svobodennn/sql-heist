@@ -5,13 +5,13 @@ describe('localeHref', () => {
   it('keeps English routes unprefixed', () => {
     expect(localeHref('/leaderboard', 'en')).toBe('/leaderboard')
     expect(localeHref('/account', 'en')).toBe('/account')
-    expect(localeHref('/u?name=ada_l', 'en')).toBe('/u?name=ada_l')
+    expect(localeHref('/user/ada_l', 'en')).toBe('/user/ada_l')
   })
 
-  it('localizes account, leaderboard, and query-param profile routes', () => {
+  it('localizes account, leaderboard, and clean-path profile routes', () => {
     expect(localeHref('/leaderboard', 'tr')).toBe('/tr/leaderboard')
     expect(localeHref('/account', 'pl')).toBe('/pl/account')
-    expect(localeHref('/u?name=ada_l', 'tr')).toBe('/tr/u?name=ada_l')
+    expect(localeHref('/user/ada_l', 'tr')).toBe('/tr/user/ada_l')
   })
 
   it('localizes interactive auth pages but keeps the callback canonical', () => {
@@ -25,12 +25,10 @@ describe('localeHref', () => {
     expect(localeHref('https://example.com', 'tr')).toBe('https://example.com')
   })
 
-  it('switches locale prefixes without dropping query or hash state', () => {
-    expect(switchLocaleHref('/u', '?name=ada_l', '#dossier', 'tr')).toBe(
-      '/tr/u?name=ada_l#dossier',
-    )
-    expect(switchLocaleHref('/tr/u', '?name=ada_l', '', 'pl')).toBe('/pl/u?name=ada_l')
-    expect(switchLocaleHref('/pl/u', '?name=ada_l', '', 'en')).toBe('/u?name=ada_l')
+  it('switches clean profile locale prefixes without dropping hash state', () => {
+    expect(switchLocaleHref('/user/ada_l', '', '#dossier', 'tr')).toBe('/tr/user/ada_l#dossier')
+    expect(switchLocaleHref('/tr/user/ada_l', '', '', 'pl')).toBe('/pl/user/ada_l')
+    expect(switchLocaleHref('/pl/user/ada_l', '', '', 'en')).toBe('/user/ada_l')
   })
 
   it('keeps non-localized callback routes canonical while switching language', () => {

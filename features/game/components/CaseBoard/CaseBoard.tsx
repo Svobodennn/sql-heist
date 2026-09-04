@@ -27,8 +27,8 @@ export function CaseBoard({ cases }: { cases: CaseMeta[] }) {
 
   return (
     <section className={styles.wrap}>
-      <header className={styles.header}>
-        <div>
+      <header className={styles.header} data-reveal>
+        <div className={styles.headerCopy}>
           <Stamp>{t('game.case.board.stamp')}</Stamp>
           <h1 className={styles.title}>{t('game.case.board.title')}</h1>
           <p className={styles.sub}>
@@ -49,7 +49,9 @@ export function CaseBoard({ cases }: { cases: CaseMeta[] }) {
         )}
       </header>
 
-      <CaseBadgeStrip cases={cases} records={records} />
+      <div data-reveal>
+        <CaseBadgeStrip cases={cases} records={records} />
+      </div>
 
       <ul className={styles.grid}>
         {cases.map((meta) => (

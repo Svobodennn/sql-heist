@@ -89,6 +89,9 @@
   margin-inline: auto;
   margin-top: var(--space-12);
   counter-reset: legal;
+  /* Localized legal copy contains literal attribution URLs. Let those long,
+     unbroken tokens wrap instead of widening the 320 px reading column. */
+  overflow-wrap: anywhere;
 }
 :where(.main) h2 {
   font-family: var(--font-display);
@@ -557,4 +560,312 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-3);
+}
+
+/* --------------------------------------------------------------------------
+   Cinematic Breach utility routes
+   -------------------------------------------------------------------------- */
+.page {
+  padding-bottom: clamp(64px, 8vw, 112px);
+  background: var(--breach-black);
+}
+
+.hero {
+  min-height: 360px;
+  display: flex;
+  align-items: flex-end;
+  padding-block: clamp(54px, 8vw, 96px);
+  overflow: hidden;
+  isolation: isolate;
+  border-bottom: 1px solid var(--breach-line);
+  background:
+    radial-gradient(circle at 84% 8%, rgba(227, 168, 62, 0.1), transparent 28rem),
+    linear-gradient(135deg, rgba(17, 23, 27, 0.98), rgba(6, 8, 10, 0.98));
+}
+
+.hero::before {
+  inset: auto -8% -48% 50%;
+  width: 58%;
+  height: 150%;
+  border-left: 1px solid rgba(227, 168, 62, 0.13);
+  background:
+    repeating-linear-gradient(90deg, transparent 0 52px, rgba(227, 168, 62, 0.026) 52px 53px),
+    repeating-linear-gradient(0deg, transparent 0 52px, rgba(227, 168, 62, 0.026) 52px 53px);
+  transform: rotate(-8deg);
+}
+
+.hero :global(.container) {
+  width: min(var(--breach-shell), calc(100% - 48px));
+  max-width: var(--breach-shell);
+  padding: 0;
+}
+
+.heroInner {
+  max-width: 980px;
+  margin: 0;
+  align-items: flex-start;
+  gap: 13px;
+  text-align: left;
+}
+
+.heroMark {
+  color: var(--breach-gold-light);
+}
+
+.title {
+  max-width: 980px;
+  color: var(--breach-white);
+  font-family: var(--font-brand);
+  font-size: clamp(4rem, 9vw, 8.8rem);
+  font-weight: 400;
+  line-height: 0.85;
+  letter-spacing: 0.008em;
+  text-transform: uppercase;
+}
+
+.lead {
+  max-width: 66ch;
+  color: var(--breach-muted);
+  font-size: clamp(1rem, 1.6vw, 1.2rem);
+  line-height: 1.68;
+}
+
+.updated {
+  color: var(--breach-dim);
+}
+
+.updated::before {
+  border-radius: 0;
+  background: var(--breach-gold);
+}
+
+.updated time {
+  color: var(--breach-muted);
+}
+
+.page > :global(.container) {
+  width: min(100%, calc(var(--breach-shell) + 48px));
+  max-width: calc(var(--breach-shell) + 48px);
+}
+
+.main {
+  max-width: 960px;
+  margin-top: clamp(42px, 7vw, 82px);
+}
+
+:where(.main) h2,
+:where(.main) h3 {
+  color: var(--breach-white);
+}
+
+:where(.main) h2 {
+  font-size: clamp(1.55rem, 3.2vw, 2.35rem);
+}
+
+:where(.main) p,
+:where(.main) ul,
+:where(.main) ol {
+  max-width: 74ch;
+  color: var(--breach-muted);
+}
+
+:where(.main) a {
+  color: var(--breach-gold-light);
+}
+
+:where(.main) code {
+  border-color: var(--breach-line);
+  border-radius: 0;
+  color: var(--breach-white);
+  background: #090d10;
+}
+
+.section,
+.legalSection {
+  padding-top: 4px;
+}
+
+.callout,
+.miniCard,
+.contactCard {
+  border: 1px solid var(--breach-line);
+  border-left: 3px solid var(--breach-gold);
+  border-radius: 0;
+  background: rgba(12, 17, 21, 0.96);
+  box-shadow: none;
+}
+
+.calloutLabel,
+.legalNum,
+.contactLabel {
+  color: var(--breach-gold-light);
+}
+
+.step {
+  grid-template-columns: 46px minmax(0, 1fr);
+}
+
+.stepNum {
+  width: 42px;
+  height: 42px;
+  border-color: #665535;
+  border-radius: 0;
+  color: var(--breach-gold-light);
+  background: #090d10;
+  box-shadow: none;
+}
+
+.stepLine {
+  background: linear-gradient(var(--breach-gold), var(--breach-line));
+}
+
+.swatch {
+  border-radius: 0;
+}
+
+.legalH2 {
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--breach-line-soft);
+}
+
+.anchor {
+  color: var(--breach-dim);
+}
+
+.faqList {
+  gap: 8px;
+}
+
+.faq {
+  overflow: hidden;
+  border: 1px solid var(--breach-line);
+  border-radius: 0;
+  background: rgba(12, 17, 21, 0.96);
+  box-shadow: none;
+}
+
+.faq:hover,
+.faq[open] {
+  border-color: #665535;
+}
+
+.faq[open] {
+  box-shadow: inset 3px 0 0 var(--breach-gold);
+}
+
+.faqSummary {
+  min-height: 72px;
+  padding: 18px 20px;
+  border-radius: 0;
+  color: var(--breach-white);
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  font-weight: 700;
+}
+
+.faqSummary:hover,
+.faq[open] .faqSummary {
+  color: var(--breach-gold-light);
+  background: rgba(227, 168, 62, 0.035);
+}
+
+.faqIcon {
+  width: 16px;
+  height: 16px;
+}
+
+.faqIcon::before {
+  top: 7px;
+  width: 16px;
+}
+
+.faqIcon::after {
+  left: 7px;
+  height: 16px;
+}
+
+.faqAnswer {
+  padding: 0 20px 22px;
+  border-top: 1px solid var(--breach-line-soft);
+}
+
+.faqAnswer p {
+  max-width: 70ch;
+  padding-top: 18px;
+  color: var(--breach-muted);
+  font-size: 0.9375rem;
+}
+
+.contactCard {
+  background:
+    radial-gradient(circle at 8% 8%, rgba(227, 168, 62, 0.07), transparent 18rem),
+    var(--breach-panel);
+}
+
+.contactIcon {
+  border-color: #665535;
+  border-radius: 0;
+  color: var(--breach-gold-light);
+  background: #090d10;
+}
+
+.contactEmail {
+  color: var(--breach-gold-light);
+}
+
+.miniCard h2 {
+  color: var(--breach-white);
+}
+
+.ctaRow :global(.btn) {
+  border-radius: 0;
+}
+
+@media (max-width: 700px) {
+  .hero :global(.container) {
+    width: min(100% - 28px, var(--breach-shell));
+  }
+
+  .hero {
+    min-height: 390px;
+    padding-block: 54px;
+  }
+
+  .title {
+    font-size: clamp(3.8rem, 19vw, 6.4rem);
+  }
+
+  .main {
+    margin-top: 42px;
+  }
+
+  .contactCard {
+    flex-direction: column;
+    padding: 22px 18px;
+  }
+
+  .faqSummary {
+    min-height: 66px;
+    padding: 16px;
+  }
+
+  .faqAnswer {
+    padding-inline: 16px;
+  }
+}
+
+@media (forced-colors: active) {
+  .hero,
+  .callout,
+  .miniCard,
+  .contactCard,
+  .faq,
+  .stepNum {
+    border: 2px solid CanvasText;
+    background: Canvas;
+  }
+
+  .hero::before {
+    display: none;
+  }
 }

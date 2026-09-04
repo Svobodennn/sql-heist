@@ -5,7 +5,8 @@ import { I18nContext } from '@/i18n/I18nProvider'
 import { createTranslator } from '@/i18n/translate'
 import en from '@/messages/en.json'
 
-const { pathnameMock, pushMock, setLocaleMock } = vi.hoisted(() => ({
+const { navigateMock, pathnameMock, pushMock, setLocaleMock } = vi.hoisted(() => ({
+  navigateMock: vi.fn(),
   pathnameMock: vi.fn(),
   pushMock: vi.fn(),
   setLocaleMock: vi.fn(),
@@ -14,6 +15,10 @@ const { pathnameMock, pushMock, setLocaleMock } = vi.hoisted(() => ({
 vi.mock('next/navigation', () => ({
   usePathname: pathnameMock,
   useRouter: () => ({ push: pushMock }),
+}))
+
+vi.mock('@/app/components/LanguageSwitcher/localeNavigation', () => ({
+  navigateToLocaleDestination: navigateMock,
 }))
 
 function renderSwitcher() {
@@ -34,6 +39,7 @@ function choose(language: 'Türkçe' | 'Polski') {
 describe('<LanguageSwitcher>', () => {
   beforeEach(() => {
     pathnameMock.mockReturnValue('/')
+    navigateMock.mockReset()
     pushMock.mockReset()
     setLocaleMock.mockReset()
     window.history.replaceState({}, '', '/')
@@ -41,15 +47,15 @@ describe('<LanguageSwitcher>', () => {
 
   afterEach(cleanup)
 
-  it('preserves a public profile query while switching to a localized route', () => {
-    pathnameMock.mockReturnValue('/u')
-    window.history.replaceState({}, '', '/u?name=ada_l')
+  it('preserves a clean public-profile path while switching locale', () => {
+    pathnameMock.mockReturnValue('/user/ada_l')
+    window.history.replaceState({}, '', '/user/ada_l')
     renderSwitcher()
 
     choose('Türkçe')
 
     expect(setLocaleMock).toHaveBeenCalledWith('tr')
-    expect(pushMock).toHaveBeenCalledWith('/tr/u?name=ada_l')
+    expect(navigateMock).toHaveBeenCalledWith('/tr/user/ada_l', pushMock)
   })
 
   it('keeps the Supabase callback canonical and preserves its query and hash', () => {
@@ -60,6 +66,6 @@ describe('<LanguageSwitcher>', () => {
     choose('Polski')
 
     expect(setLocaleMock).toHaveBeenCalledWith('pl')
-    expect(pushMock).toHaveBeenCalledWith('/auth/callback?code=secret#complete')
+    expect(navigateMock).toHaveBeenCalledWith('/auth/callback?code=secret#complete', pushMock)
   })
 })

@@ -2,6 +2,14 @@ import { describe, expect, it } from 'vitest'
 import vercelConfig from '@/vercel.json'
 
 describe('deployment security headers', () => {
+  it('maps every locale-aware public-profile URL to its emitted static shell', () => {
+    expect(vercelConfig.rewrites).toEqual([
+      { source: '/user/:username', destination: '/user/profile-shell' },
+      { source: '/tr/user/:username', destination: '/tr/user/profile-shell' },
+      { source: '/pl/user/:username', destination: '/pl/user/profile-shell' },
+    ])
+  })
+
   it('blocks framing and applies the static-site hardening baseline to every route', () => {
     const route = vercelConfig.headers.find((entry) => entry.source === '/(.*)')
     const headers = Object.fromEntries(

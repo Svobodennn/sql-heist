@@ -242,34 +242,75 @@
       "secondaryCta": "How it works"
     },
     "what": {
-      "eyebrow": "Case File · 001",
-      "stamp": "Classified",
-      "title": "Learn the break-in to learn the lock",
-      "lede": "SQL Heist is an educational SQL-injection game. You pull the attack against a real database, then study the code that should have stopped you — offence teaches defence better than any lecture.",
+      "eyebrow": "Real database · safe playground",
+      "stamp": "Safe by design",
+      "title": "Practice on live SQL.",
+      "titleAccent": "Break it. Fix it. Understand it.",
+      "lede": "Every case runs against SQLite in your browser. The target is isolated, seeded fresh, and resettable at any time.",
       "facts": {
         "0": {
-          "k": "Where",
-          "v": "The practice database and every payload run in your browser; account sync is separate and optional."
+          "k": "Isolated target",
+          "v": "Your practice database stays on this device."
         },
         "1": {
-          "k": "Against",
-          "v": "A real SQLite engine, seeded fresh for every single run."
+          "k": "Reset anytime",
+          "v": "Return the case to its initial state."
         },
         "2": {
-          "k": "Risk",
-          "v": "No real target — the only thing you can break is the sandbox."
+          "k": "Real, not toy",
+          "v": "Actual SQL engine. Observable results."
         }
       },
-      "safe": "Safe by design — no account needed, no downloads, no setup."
+      "safe": "Safe by design",
+      "safeDetail": "No real target. No external system receives your payload."
     },
     "how": {
-      "eyebrow": "The Job",
+      "eyebrow": "The five-move heist",
       "title": "Five moves, every time",
       "lede": "Every job runs the same arc, so you always know exactly where you are in it."
     },
+    "cases": {
+      "eyebrow": "Three cases · one path",
+      "title": "Choose the next door.",
+      "lede": "{objectives} objectives across three escalating cases. Each run gets a freshly seeded local database.",
+      "objectiveLabel": "objectives",
+      "cta": "Enter case",
+      "cards": {
+        "frontDoor": {
+          "difficulty": "Starter",
+          "description": "A noisy storefront, an authentication path, and a live query that gives away the flaw."
+        },
+        "quietRoom": {
+          "difficulty": "Intermediate",
+          "description": "The result disappears. Timing, error behavior, and careful questions reveal what remains."
+        },
+        "vault": {
+          "difficulty": "Advanced",
+          "description": "Filters guard the obvious route. Learn why keyword blocking never replaces a real boundary."
+        }
+      }
+    },
+    "proof": {
+      "vulnerableTitle": "VULNERABLE: CONCATENATION",
+      "vulnerableRisk": "INJECTION RISK",
+      "secureTitle": "SECURE: PARAMETERIZED QUERY",
+      "secureSafe": "SAFE",
+      "userInput": "USER INPUT",
+      "boundInput": "PARAMETER BOUND, NOT EXECUTED",
+      "vulnerableNote": "The value escapes the string and rewrites the logic.",
+      "secureNote": "The input remains data. Query structure cannot change.",
+      "steps": {
+        "0": { "title": "Run the attack", "blurb": "Submit the injected value." },
+        "1": { "title": "Observe the result", "blurb": "See rows the user should not get." },
+        "2": { "title": "Switch to the fix", "blurb": "Use the parameterized query." },
+        "3": { "title": "Run it again", "blurb": "Submit the same exact input." },
+        "4": { "title": "Confirm it is safe", "blurb": "Only intended data is returned." }
+      }
+    },
     "faq": {
-      "eyebrow": "Straight Answers",
-      "title": "Before your first job",
+      "eyebrow": "Operator support",
+      "title": "Pre-flight check.",
+      "lede": "Everything is isolated, resettable, and made for learning. Clear the questions before your first operation.",
       "more": "Read every answer Neo gives"
     },
     "closer": {
@@ -680,7 +721,16 @@
       "signIn": "Sign in",
       "search": "Search",
       "submit": "Submit",
-      "reconNote": "This form talks to a query behind the counter. What happens if your input isn't treated as just a name?"
+      "reconNote": "This form talks to a query behind the counter. What happens if your input isn't treated as just a name?",
+      "staffAccess": "Staff access",
+      "recordsSearch": "Records search",
+      "badgeLookup": "Badge lookup",
+      "requestVerification": "Request verification",
+      "privateNetwork": "Private network",
+      "navOverview": "Overview",
+      "navDirectory": "Directory",
+      "navSupport": "Support",
+      "encrypted": "Encrypted connection"
     },
     "recon": {
       "stamp": "Recon",
@@ -827,6 +877,10 @@
         "defenseSub": "Every move you pulled, and the one line of code that would have shut it.",
         "objective": "Objective {index}",
         "move": "The move",
+        "yourMove": "Your move",
+        "composedSql": "Composed SQL",
+        "observedResult": "Observed result",
+        "sessionEvidenceMissing": "No runtime result in this revisit. Replay the case to capture one.",
         "replay": "Play this case again",
         "back": "Back to the board"
       },
@@ -836,8 +890,15 @@
         "meta": "{count} objectives — one at a time. Each one tells you what to do, why, and how you’ll know it landed.",
         "take": "Take the case"
       },
+      "review": {
+        "aria": "Objective review",
+        "stamp": "Step 02 / objective",
+        "instruction": "Read the angle and success condition before touching the target.",
+        "enter": "Enter operation"
+      },
       "announce": {
         "briefing": "Case briefing: {title}",
+        "review": "Review objective {index} of {total}: {goal}",
         "closed": "Case closed",
         "cleared": "Objective {index} cleared",
         "clearedGot": "Objective {index} cleared: {got}",

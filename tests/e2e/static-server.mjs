@@ -1,6 +1,7 @@
 // Zero-dependency static file server for the Next.js `out/` export.
-// Serves the REAL production export (no rewrites, no app changes) so Playwright
-// exercises exactly what ships. Correct MIME types matter: `.wasm` must be
+// Serves the REAL production export and mirrors the simple path-segment rewrites
+// declared in vercel.json. This validates shell/file coupling locally; it does NOT
+// prove Vercel applied the deploy config. Correct MIME types matter: `.wasm` must be
 // `application/wasm` for sql.js to instantiate the SQLite engine.
 //
 // Next static export writes a route as `<route>.html` (e.g. `jobs.html`,
@@ -13,7 +14,10 @@ import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 
 const ROOT = fileURLToPath(new URL('../../out', import.meta.url))
+const PROJECT_ROOT = fileURLToPath(new URL('../../', import.meta.url))
 const PORT = Number(process.env.PORT ?? 5055)
+const VERCEL_CONFIG = JSON.parse(await readFile(path.join(PROJECT_ROOT, 'vercel.json'), 'utf8'))
+const REWRITES = VERCEL_CONFIG.rewrites ?? []
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -44,8 +48,25 @@ async function isDir(p) {
   }
 }
 
+function rewritePath(urlPath) {
+  const pathname = urlPath.split('?')[0]
+  const pathSegments = pathname.split('/').filter(Boolean)
+
+  for (const rewrite of REWRITES) {
+    const sourceSegments = rewrite.source.split('/').filter(Boolean)
+    if (sourceSegments.length !== pathSegments.length) continue
+
+    const matches = sourceSegments.every(
+      (segment, index) => segment.startsWith(':') || segment === pathSegments[index],
+    )
+    if (matches) return rewrite.destination
+  }
+
+  return pathname
+}
+
 async function resolveFile(urlPath) {
-  const clean = decodeURIComponent(urlPath.split('?')[0])
+  const clean = decodeURIComponent(rewritePath(urlPath))
   // Normalize, drop path-traversal, strip a trailing slash.
   let rel = path.normalize(clean).replace(/^(\.\.[/\\])+/, '')
   rel = rel.replace(/[/\\]+$/, '')

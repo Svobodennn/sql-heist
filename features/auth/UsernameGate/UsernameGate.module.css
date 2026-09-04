@@ -137,3 +137,67 @@
 .escape:hover {
   color: var(--text-secondary);
 }
+
+/* Cinematic Breach fallback dossier. The gate's trigger conditions remain in
+   UsernameGate.tsx; this is presentation only. */
+.overlay {
+  background: rgba(3, 5, 6, 0.84);
+  backdrop-filter: blur(7px);
+}
+
+.card {
+  max-width: 30rem;
+  padding: clamp(24px, 4vw, 36px);
+  border: 1px solid #665535;
+  border-left: 4px solid var(--breach-gold);
+  border-radius: 0;
+  background: var(--breach-panel);
+}
+
+.title {
+  color: var(--breach-white);
+  font-family: var(--font-brand);
+  font-size: clamp(2.8rem, 8vw, 4.5rem);
+  font-weight: 400;
+  line-height: 0.9;
+  letter-spacing: 0.008em;
+  text-transform: uppercase;
+}
+
+.desc,
+.label {
+  color: var(--breach-muted);
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.input {
+  min-height: 50px;
+  padding: 12px 13px;
+  border-color: var(--breach-line);
+  border-radius: 0;
+  color: var(--breach-white);
+  background: #070a0c;
+}
+
+.input:focus-visible {
+  border-color: var(--breach-gold);
+}
+
+.card :global(.btn) {
+  border-radius: 0;
+}
+
+@media (forced-colors: active) {
+  .card,
+  .input {
+    border: 2px solid CanvasText;
+    background: Canvas;
+  }
+}

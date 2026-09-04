@@ -1,11 +1,13 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import type { CaseMeta } from '../../cases'
 import { cx } from '@/ui/cx'
 import { useTranslation } from '@/i18n/useTranslation'
 import { localeHref } from '@/i18n/localeHref'
 import { IconArrowRight, IconCheck } from '../icons'
+import { artworkForCase } from './caseArtwork'
 import styles from './CaseCard.module.css'
 
 export type CaseCardState = 'cleared' | 'in-progress' | 'new'
@@ -32,9 +34,15 @@ export function CaseCard({ meta, done }: { meta: CaseMeta; done: number }) {
         ? t('game.case.card.ctaProgress')
         : t('game.case.card.ctaNew')
   const pct = total > 0 ? Math.round((done / total) * 100) : 0
+  const artwork = artworkForCase(meta.id)
 
   return (
-    <li className={cx('panel', styles.card, state === 'cleared' && styles.clearedCard)}>
+    <li
+      className={cx(styles.card, state === 'cleared' && styles.clearedCard)}
+      data-case-id={meta.id}
+      data-case-state={state}
+      data-reveal
+    >
       <Link
         href={localeHref(`/cases/${meta.id}`, locale)}
         className={styles.link}
@@ -45,29 +53,48 @@ export function CaseCard({ meta, done }: { meta: CaseMeta; done: number }) {
           done,
           total,
         })}
+        data-magnetic
       >
-        <div className={styles.top}>
+        <div className={styles.artwork} aria-hidden="true">
+          {artwork && (
+            <Image
+              src={artwork}
+              alt=""
+              width={1536}
+              height={1024}
+              unoptimized
+              sizes="(max-width: 720px) 100vw, (max-width: 1180px) 220px, 250px"
+            />
+          )}
           <span className={cx('mono', styles.index)}>
             {t('game.case.header.number', { number: meta.number })}
           </span>
-          <span className={cx(styles.statusTag, styles[`tag--${state}`])}>
-            {state === 'cleared' && <IconCheck size={13} />}
-            {statusLabel}
-          </span>
         </div>
 
-        <div>
+        <div className={styles.copy}>
+          <div className={styles.top}>
+            <span className={cx(styles.statusTag, styles[`tag--${state}`])}>
+              {state === 'cleared' && <IconCheck size={13} />}
+              {statusLabel}
+            </span>
+            <span className={cx('mono', styles.objectiveCount)}>
+              {done}/{total}
+            </span>
+          </div>
           <h2 className={styles.title}>{meta.title}</h2>
           <p className={cx('mono', styles.app)}>{meta.appName}</p>
         </div>
 
-        <ul className={styles.techniques} aria-label={t('game.case.card.techniquesAria')}>
-          {meta.objectives.map((objective) => (
-            <li key={objective.id} className={cx('mono', styles.chip)}>
-              {t(`game.technique.${objective.technique}`)}
-            </li>
-          ))}
-        </ul>
+        <div className={styles.tradecraft}>
+          <span className={styles.tradecraftLabel}>{t('game.case.card.techniquesAria')}</span>
+          <ul className={styles.techniques} aria-label={t('game.case.card.techniquesAria')}>
+            {meta.objectives.map((objective) => (
+              <li key={objective.id} className={cx('mono', styles.chip)}>
+                {t(`game.technique.${objective.technique}`)}
+              </li>
+            ))}
+          </ul>
+        </div>
 
         <div className={styles.foot}>
           <div

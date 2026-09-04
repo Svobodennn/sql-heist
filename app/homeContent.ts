@@ -9,16 +9,31 @@
 // they are SQL (code), never localized.
 import type { Locale } from '@/i18n/config'
 import { getMessages } from '@/i18n/messages'
+import { getCaseMetas } from '@/features/game/cases'
 import type en from '@/messages/en.json'
 
 export type TickerKind = 'payload' | 'line'
 export type TickerItem = { text: string; kind: TickerKind }
 export type HeistStep = { title: string; blurb: string }
 export type FaqTeaser = { q: string; a: string }
+export type HomeCase = {
+  id: string
+  number: string
+  title: string
+  difficulty: string
+  objectiveCount: number
+  objectiveLabel: string
+  description: string
+  techniques: readonly string[]
+  cta: string
+}
+export type VerificationStep = { title: string; blurb: string }
 
 export interface HomeContent {
   ticker: readonly TickerItem[]
   loop: readonly HeistStep[]
+  cases: readonly HomeCase[]
+  verification: readonly VerificationStep[]
   faqTeasers: readonly FaqTeaser[]
   copy: {
     hero: { eyebrow: string; title: string; tagline: string; lede: string; primaryCta: string; secondaryCta: string }
@@ -26,19 +41,32 @@ export interface HomeContent {
       eyebrow: string
       stamp: string
       title: string
+      titleAccent: string
       lede: string
       facts: readonly { k: string; v: string }[]
       safe: string
+      safeDetail: string
     }
     how: { eyebrow: string; title: string; lede: string }
-    faq: { eyebrow: string; title: string; more: string }
+    cases: { eyebrow: string; title: string; lede: string }
+    proof: {
+      vulnerableTitle: string
+      vulnerableRisk: string
+      secureTitle: string
+      secureSafe: string
+      userInput: string
+      boundInput: string
+      vulnerableNote: string
+      secureNote: string
+    }
+    faq: { eyebrow: string; title: string; lede: string; more: string }
     closer: { fixerName: string; fixerLine: string; title: string; cta: string }
   }
 }
 
 // A seamless CSS marquee renders the track twice and animates exactly -50%, so the
 // loop point is invisible. This helper guarantees the doubling the animation math
-// depends on (see .tickerTrack in page.module.css).
+// depends on (see .tickerTrack in cinematic-home.module.css).
 export function buildTickerTrack<T>(items: readonly T[]): T[] {
   return [...items, ...items]
 }
@@ -46,7 +74,16 @@ export function buildTickerTrack<T>(items: readonly T[]): T[] {
 export function buildHomeContent(locale: Locale): HomeContent {
   // The catalog is structurally identical across locales (verified in the i18n
   // pass); cast to the en shape for typed access to the `home` subtree.
-  const H = (getMessages(locale) as typeof en).home
+  const messages = getMessages(locale) as typeof en
+  const H = messages.home
+  const metas = getCaseMetas(locale)
+  const totalObjectives = metas.reduce((total, meta) => total + meta.objectiveCount, 0)
+  const techniqueLabels: Readonly<Record<string, string>> = messages.game.technique
+  const cardCopy = {
+    'the-front-door': H.cases.cards.frontDoor,
+    'the-quiet-room': H.cases.cards.quietRoom,
+    'the-vault': H.cases.cards.vault,
+  } as const
 
   return {
     // The wire never stops talking. Real payloads (crimson = ATTACK) interleave with
@@ -72,6 +109,35 @@ export function buildHomeContent(locale: Locale): HomeContent {
       { title: H.loop['3'].title, blurb: H.loop['3'].blurb },
       { title: H.loop['4'].title, blurb: H.loop['4'].blurb },
     ],
+    cases: metas.map((meta) => {
+      const card = cardCopy[meta.id as keyof typeof cardCopy]
+      if (!card) throw new Error(`Missing homepage copy for case: ${meta.id}`)
+
+      return {
+        id: meta.id,
+        number: meta.number.slice(-2),
+        title: meta.title,
+        difficulty: card.difficulty,
+        objectiveCount: meta.objectiveCount,
+        objectiveLabel: H.cases.objectiveLabel,
+        description: card.description,
+        techniques: Array.from(
+          new Set(
+            meta.objectives.map(
+              (objective) => techniqueLabels[objective.technique] ?? objective.technique,
+            ),
+          ),
+        ),
+        cta: H.cases.cta,
+      }
+    }),
+    verification: [
+      { title: H.proof.steps['0'].title, blurb: H.proof.steps['0'].blurb },
+      { title: H.proof.steps['1'].title, blurb: H.proof.steps['1'].blurb },
+      { title: H.proof.steps['2'].title, blurb: H.proof.steps['2'].blurb },
+      { title: H.proof.steps['3'].title, blurb: H.proof.steps['3'].blurb },
+      { title: H.proof.steps['4'].title, blurb: H.proof.steps['4'].blurb },
+    ],
     faqTeasers: [
       { q: H.faqTeasers['0'].q, a: H.faqTeasers['0'].a },
       { q: H.faqTeasers['1'].q, a: H.faqTeasers['1'].a },
@@ -91,6 +157,7 @@ export function buildHomeContent(locale: Locale): HomeContent {
         eyebrow: H.what.eyebrow,
         stamp: H.what.stamp,
         title: H.what.title,
+        titleAccent: H.what.titleAccent,
         lede: H.what.lede,
         facts: [
           { k: H.what.facts['0'].k, v: H.what.facts['0'].v },
@@ -98,9 +165,25 @@ export function buildHomeContent(locale: Locale): HomeContent {
           { k: H.what.facts['2'].k, v: H.what.facts['2'].v },
         ],
         safe: H.what.safe,
+        safeDetail: H.what.safeDetail,
       },
       how: { eyebrow: H.how.eyebrow, title: H.how.title, lede: H.how.lede },
-      faq: { eyebrow: H.faq.eyebrow, title: H.faq.title, more: H.faq.more },
+      cases: {
+        eyebrow: H.cases.eyebrow,
+        title: H.cases.title,
+        lede: H.cases.lede.replace('{objectives}', String(totalObjectives)),
+      },
+      proof: {
+        vulnerableTitle: H.proof.vulnerableTitle,
+        vulnerableRisk: H.proof.vulnerableRisk,
+        secureTitle: H.proof.secureTitle,
+        secureSafe: H.proof.secureSafe,
+        userInput: H.proof.userInput,
+        boundInput: H.proof.boundInput,
+        vulnerableNote: H.proof.vulnerableNote,
+        secureNote: H.proof.secureNote,
+      },
+      faq: { eyebrow: H.faq.eyebrow, title: H.faq.title, lede: H.faq.lede, more: H.faq.more },
       closer: {
         fixerName: H.closer.fixerName,
         fixerLine: H.closer.fixerLine,

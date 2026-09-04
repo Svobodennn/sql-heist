@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react'
 import { nextTabIndex, optionCount, snippetAt, type LanguageGroup } from '../../lib/secureCode'
 import { cx } from '@/ui/cx'
 import { useTranslation } from '@/i18n/useTranslation'
+import { highlightCode, type CodeTokenKind } from '../../lib/codeHighlight'
 import { IconLock, IconLockBroken } from '../icons'
 import { LangIcon } from '../langIcons'
 import styles from './CodeCompare.module.css'
@@ -24,22 +25,46 @@ import styles from './CodeCompare.module.css'
 // count mismatch. Both levels are ARIA tablists with roving tabindex + arrow-key
 // navigation and jointly control the two code panels (aria-controls lists both).
 // Each panel is labeled by icon + word + color, never color alone (§11). Code is
-// read-only, monospace, plain TEXT (React-escaped, K7/XSS). A pair of lone legacy
-// snippets renders as two plain panels (no tabs).
+// read-only, monospace, syntax-colored React TEXT (never HTML, K7/XSS). A pair of
+// lone legacy snippets renders as two plain panels (no tabs).
 
 const NAV_KEYS = ['ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown', 'Home', 'End']
 
-function CodeBlock({ code }: { code: string }) {
-  const lines = code.split('\n')
+const TOKEN_CLASSES: Readonly<Record<CodeTokenKind, string>> = {
+  keyword: styles.tokenKeyword,
+  string: styles.tokenString,
+  number: styles.tokenNumber,
+  comment: styles.tokenComment,
+  operator: styles.tokenOperator,
+  type: styles.tokenType,
+  function: styles.tokenFunction,
+  variable: styles.tokenVariable,
+  plain: styles.tokenPlain,
+}
+
+function CodeBlock({ code, language }: { code: string; language: string }) {
+  const lines = highlightCode(code, language)
   return (
     <pre className={cx('mono', styles.code)}>
-      <code>
+      <code data-code-language={language}>
         {lines.map((line, i) => (
           <span key={i} className={styles.line}>
             <span className={styles.ln} aria-hidden="true">
               {i + 1}
             </span>
-            <span className={styles.src}>{line.length ? line : ' '}</span>
+            <span className={styles.src}>
+              {line.length
+                ? line.map((token, tokenIndex) => (
+                    <span
+                      key={`${i}-${tokenIndex}`}
+                      className={TOKEN_CLASSES[token.kind]}
+                      data-code-token={token.kind}
+                    >
+                      {token.text}
+                    </span>
+                  ))
+                : ' '}
+            </span>
           </span>
         ))}
       </code>
@@ -225,7 +250,7 @@ export function CodeCompare({
               aria-labelledby={activeLeafId}
               tabIndex={activeLeafId ? 0 : undefined}
             >
-              <CodeBlock code={vulnSnippet.code} />
+              <CodeBlock code={vulnSnippet.code} language={vulnSnippet.language} />
             </div>
           )}
           <p className={styles.caption}>{t('game.compare.vulnCaption')}</p>
@@ -244,7 +269,7 @@ export function CodeCompare({
               aria-labelledby={activeLeafId}
               tabIndex={activeLeafId ? 0 : undefined}
             >
-              <CodeBlock code={secureSnippet.code} />
+              <CodeBlock code={secureSnippet.code} language={secureSnippet.language} />
             </div>
           )}
           <p className={styles.caption}>{t('game.compare.secureCaption')}</p>
